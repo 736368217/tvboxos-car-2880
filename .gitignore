@@ -101,3 +101,6 @@ lint/tmp/
 .temp/
 output-metadata.json
 .py/
+# Car edition delivery docs (the upstream '*.md' rule must not hide these).
+!car/*.md
+
