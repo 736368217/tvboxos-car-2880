@@ -996,4 +996,30 @@ public class HomeActivity extends BaseActivity {
         blinkAnimation.setRepeatCount(Animation.INFINITE);
         tvName.startAnimation(blinkAnimation);
     }
+
+    /**
+     * Car edition: one tap of the in-app Back button returns a category page to the home
+     * category. The app's own sort-selection path is reused so the sort list, the pager and
+     * the top area stay in sync.
+     */
+    @Override
+    public boolean onBackButtonStepUp() {
+        if (mViewPager == null || sortAdapter == null) return false;
+        if (mViewPager.getCurrentItem() <= 0 && currentSelected <= 0) return false;
+        try {
+            mGridView.setSelectedPosition(0);
+        } catch (Throwable ignored) {
+        }
+        sortFocused = 0;
+        sortChange = true;
+        mHandler.removeCallbacks(mDataRunnable);
+        mHandler.postDelayed(mDataRunnable, 100);
+        return true;
+    }
+
+    /** The home page is the app root: the button only hints here and never exits the app. */
+    @Override
+    public boolean onBackButtonAtRoot() {
+        return true;
+    }
 }

@@ -22,6 +22,7 @@ import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.api.DanmakuApi;
 import com.github.tvbox.osc.base.BaseActivity;
 import com.github.tvbox.osc.base.BaseLazyFragment;
+import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.bean.IJKCode;
 import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.event.RefreshEvent;
@@ -102,6 +103,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private boolean selectLocalLive;
     private TextView tvDanmuOpenText;
     private TextView tvDanmuApiText;
+    private TextView tvCarBack;
+    private TextView tvCarBackHide;
 
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
@@ -160,6 +163,10 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvHomeRec.setText(getHomeRecName(Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC)));
         tvHistoryNum.setText(HistoryHelper.getHistoryNumName(Hawk.get(HawkConfig.HISTORY_NUM, 0)));
         tvHistoryMerge.setText(Hawk.get(HawkConfig.HISTORY_MERGE, false) ? "开启" : "关闭");
+        tvCarBack = findViewById(R.id.tvCarBack);
+        tvCarBack.setText(Hawk.get(HawkConfig.IN_APP_BACK, true) ? "开启" : "关闭");
+        tvCarBackHide = findViewById(R.id.tvCarBackHide);
+        tvCarBackHide.setText(carBackHideName(Hawk.get(HawkConfig.BACK_HIDE_SECONDS, 4)));
         tvSearchView.setText(getSearchView(Hawk.get(HawkConfig.SEARCH_VIEW, 0)));
         tvHomeApi.setText(ApiConfig.get().getHomeSourceBean().getName());
         tvScale.setText(PlayerHelper.getScaleName(Hawk.get(HawkConfig.PLAY_SCALE, 0)));
@@ -798,6 +805,36 @@ public class ModelSettingFragment extends BaseLazyFragment {
             }
         });
 
+        // Car edition: in-app floating Back button (no accessibility, no system permission).
+        findViewById(R.id.llCarBack).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                boolean show = !Hawk.get(HawkConfig.IN_APP_BACK, true);
+                Hawk.put(HawkConfig.IN_APP_BACK, show);
+                tvCarBack.setText(show ? "开启" : "关闭");
+                if (getActivity() != null) {
+                    if (show) {
+                        InAppBackButton.attach(getActivity());
+                    } else {
+                        InAppBackButton.release(getActivity());
+                    }
+                }
+            }
+        });
+
+        findViewById(R.id.llCarBackHide).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int seconds = Hawk.get(HawkConfig.BACK_HIDE_SECONDS, 4);
+                int next = seconds == 4 ? 6 : seconds == 6 ? 8 : seconds == 8 ? 0 : 4;
+                Hawk.put(HawkConfig.BACK_HIDE_SECONDS, next);
+                tvCarBackHide.setText(carBackHideName(next));
+                if (getActivity() != null) InAppBackButton.attach(getActivity());
+            }
+        });
+
         //下次进入
         findViewById(R.id.tvHomeLive).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1107,5 +1144,13 @@ public class ModelSettingFragment extends BaseLazyFragment {
         } else {
             return "缩略图";
         }
+    }
+
+    /** Car edition: name of the configured in-app Back button hide delay. */
+    static String carBackHideName(int seconds) {
+        if (seconds == 6) return "6 秒";
+        if (seconds == 8) return "8 秒";
+        if (seconds == 0) return "常显";
+        return "4 秒";
     }
 }

@@ -10,6 +10,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -19,6 +21,7 @@ import androidx.core.content.PermissionChecker;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.callback.EmptyCallback;
 import com.github.tvbox.osc.callback.LoadingCallback;
+import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.util.AppManager;
 import com.kingja.loadsir.callback.Callback;
 import com.kingja.loadsir.core.LoadService;
@@ -88,6 +91,40 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
             refreshAutoSize();
             scheduleRefreshAutoSize();
         }
+        InAppBackButton.attach(this);
+    }
+    /** Any touch of the current page wakes the in-app Back button again. */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event != null && event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            InAppBackButton.wake(this);
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
+    /** A remote/gamepad key also wakes the button, so it stays reachable on every input. */
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event != null && event.getAction() == KeyEvent.ACTION_DOWN) {
+            InAppBackButton.wake(this);
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
+    /**
+     * Car pages can consume "up one level" themselves (for example a category page returns to
+     * the home category). Return true when the level was handled inside this activity.
+     */
+    public boolean onBackButtonStepUp() {
+        return false;
+    }
+
+    /**
+     * Return true when this activity is the app root: the in-app button then only hints and
+     * must never exit the app by itself.
+     */
+    public boolean onBackButtonAtRoot() {
+        return false;
     }
 
     public void hideSysBar() {
@@ -233,6 +270,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
 
     @Override
     protected void onDestroy() {
+        InAppBackButton.release(this);
         super.onDestroy();
         AppManager.getInstance().finishActivity(this);
     }

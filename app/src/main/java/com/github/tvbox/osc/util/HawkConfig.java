@@ -66,5 +66,8 @@ public class HawkConfig {
     public static final String DANMU_SIZE_SCALE = "danmu_size_scale";
     public static final String DANMU_RANDOM_COLOR = "danmu_random_color";
     public static final String DANMU_API = "danmu_api";
+    // Car edition: in-app floating Back button (shown on every page, no accessibility needed).
+    public static final String IN_APP_BACK = "inapp_back"; // default true
+    public static final String BACK_HIDE_SECONDS = "hide_seconds"; // 4/6/8, 0 = 常显
     public static boolean hotVodDelete;
 }
