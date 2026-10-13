@@ -30,8 +30,8 @@
 
 		<ProgressBar
 			style="?android:attr/progressBarStyleSmall"
-			android:layout_width="45dp"
-			android:layout_height="45dp"
+			android:layout_width="@dimen/vs_20"
+			android:layout_height="@dimen/vs_20"
 			android:layout_gravity="center"
 			android:scaleX="0.75"
 			android:scaleY="0.75"
@@ -44,7 +44,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="top|end"
-		android:layout_margin="20dp"
+		android:layout_margin="9mm"
 		android:background="@android:color/transparent"
 		android:clickable="false"
 		android:focusable="false"
@@ -53,7 +53,7 @@
 		android:shadowDy="2"
 		android:shadowRadius="1"
 		android:textColor="@android:color/white"
-		android:textSize="96sp"
+		android:textSize="42mm"
 		android:textStyle="bold"
 		android:visibility="invisible" />
 
@@ -62,19 +62,20 @@
 		android:layout_width="wrap_content"
 		android:layout_height="match_parent"
 		android:layout_gravity="left|center_vertical"
-		android:layout_margin="0dp"
+		android:layout_margin="0mm"
 		android:baselineAligned="false"
 		android:orientation="horizontal"
-		android:padding="0dp">
+		android:paddingTop="@dimen/car_top_padding"
+		android:paddingBottom="@dimen/car_bottom_padding">
 
 		<LinearLayout
 			android:id="@+id/ll_typeSelect"
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
-			android:layout_margin="0dp"
+			android:layout_margin="0mm"
 			android:background="@drawable/bg_channel_list_left"
 			android:baselineAligned="false"
-			android:padding="0dp">
+			android:padding="0mm">
 
 			<LinearLayout
 				android:layout_width="wrap_content"
@@ -89,7 +90,7 @@
 					android:divider="@null"
 					android:fadeScrollbars="false"
 					android:listSelector="@drawable/item_bg_selector_left"
-					android:padding="10dp"
+					android:padding="@dimen/vs_5"
 					android:scrollbars="none" />
 
 			</LinearLayout>
@@ -110,11 +111,12 @@
 
 				<TextView
 					android:id="@+id/tv_arrow0"
-					android:layout_width="20dp"
+					android:focusable="true"
+					android:layout_width="@dimen/vs_40"
 					android:layout_height="match_parent"
 					android:gravity="center"
 					android:onClick="divLoadEpgLeft"
-					android:paddingBottom="5dp"
+					android:paddingBottom="@dimen/vs_2"
 					android:shadowColor="#CC000000"
 					android:shadowDx="5.0"
 					android:shadowRadius="5.0"
@@ -125,22 +127,24 @@
 
 				<ImageView
 					android:id="@+id/iv_arrow2"
-					android:layout_width="20dp"
-					android:layout_height="20dp"
+					android:focusable="true"
+					android:layout_width="@dimen/vs_40"
+					android:layout_height="@dimen/vs_40"
 					android:gravity="center|left"
 					android:onClick="divLoadEpgLeft"
-					android:paddingLeft="-5dp"
-					android:paddingTop="5dp"
+					android:paddingLeft="-2mm"
+					android:paddingTop="@dimen/vs_2"
 					android:src="@drawable/scrollviewleft"
 					tools:ignore="RtlHardcoded,RtlSymmetry,UsingOnClickInXml" />
 
 				<TextView
 					android:id="@+id/tv_arrow3"
-					android:layout_width="20dp"
+					android:focusable="true"
+					android:layout_width="@dimen/vs_40"
 					android:layout_height="match_parent"
 					android:gravity="center"
 					android:onClick="divLoadEpgLeft"
-					android:paddingTop="5dp"
+					android:paddingTop="@dimen/vs_2"
 					android:shadowColor="#CC000000"
 					android:shadowDx="5.0"
 					android:shadowRadius="5.0"
@@ -150,9 +154,9 @@
 			</LinearLayout>
 
 			<LinearLayout
-				android:layout_width="1dp"
+				android:layout_width="0.5mm"
 				android:layout_height="match_parent"
-				android:layout_margin="1dp"
+				android:layout_margin="0.5mm"
 				android:background="#FF333333" />
 
 			<com.owen.tvrecyclerview.widget.TvRecyclerView
@@ -163,14 +167,14 @@
 				android:fadeScrollbars="false"
 				android:focusable="true"
 				android:listSelector="@drawable/item_bg_selector_right"
-				android:padding="5dp"
+				android:padding="@dimen/vs_2"
 				android:scrollbars="none" />
 
 			<LinearLayout
 				android:id="@+id/divLoadEpgDivider"
-				android:layout_width="1dp"
+				android:layout_width="0.5mm"
 				android:layout_height="match_parent"
-				android:layout_margin="2dp"
+				android:layout_margin="@dimen/vs_1"
 				android:background="#FF333333"
 				android:orientation="horizontal" />
 
@@ -187,11 +191,12 @@
 
 				<TextView
 					android:id="@+id/tv_arrow"
-					android:layout_width="20dp"
+					android:focusable="true"
+					android:layout_width="@dimen/vs_40"
 					android:layout_height="match_parent"
 					android:gravity="center"
 					android:onClick="divLoadEpgRight"
-					android:paddingBottom="5dp"
+					android:paddingBottom="@dimen/vs_2"
 					android:shadowColor="#CC000000"
 					android:shadowDx="5.0"
 					android:shadowRadius="5.0"
@@ -201,22 +206,24 @@
 
 				<ImageView
 					android:id="@+id/iv_arrow"
-					android:layout_width="20dp"
-					android:layout_height="20dp"
+					android:focusable="true"
+					android:layout_width="@dimen/vs_40"
+					android:layout_height="@dimen/vs_40"
 					android:layout_gravity="center"
-					android:layout_marginLeft="1dp"
+					android:layout_marginLeft="0.5mm"
 					android:gravity="center|left"
 					android:onClick="divLoadEpgRight"
-					android:paddingTop="5dp"
+					android:paddingTop="@dimen/vs_2"
 					android:src="@drawable/scrollview" />
 
 				<TextView
 					android:id="@+id/tv_arrow2"
-					android:layout_width="20dp"
+					android:focusable="true"
+					android:layout_width="@dimen/vs_40"
 					android:layout_height="match_parent"
 					android:gravity="center"
 					android:onClick="divLoadEpgRight"
-					android:paddingTop="5dp"
+					android:paddingTop="@dimen/vs_2"
 					android:shadowColor="#CC000000"
 					android:shadowDx="5.0"
 					android:shadowRadius="5.0"
@@ -264,7 +271,7 @@
 					android:layout_gravity="center"
 					android:layout_marginTop="50px"
 					android:gravity="center"
-					android:paddingLeft="5dp"
+					android:paddingLeft="@dimen/vs_2"
 					android:text="暂无节目信息…"
 					android:textColor="@color/color_FF0057"
 					android:visibility="gone" />
@@ -279,7 +286,7 @@
         android:id="@+id/tvRightSettingLayout"
         android:layout_width="@dimen/vs_640"
         android:layout_height="match_parent"
-        android:layout_margin="0dp"
+        android:layout_margin="0mm"
         android:layout_gravity="right"
 		android:background="@drawable/bg_channel_list_right"
 		android:gravity="center_vertical"
@@ -294,16 +301,16 @@
             android:fadeScrollbars="false"
             android:gravity= "center"
             android:listSelector="@drawable/item_bg_selector_left"
-            android:padding="5dp"
+            android:padding="@dimen/vs_2"
             android:scrollbars="none"
             android:visibility="visible"
             app:tv_selectedItemIsCentered="true"
             app:tv_verticalSpacingWithMargins="4mm" />
 
         <View
-            android:layout_width="1dp"
+            android:layout_width="0.5mm"
             android:layout_height="match_parent"
-            android:layout_margin="1dp"
+            android:layout_margin="0.5mm"
             android:layout_gravity="center_horizontal"
             android:background="#FF333333" />
 
@@ -315,7 +322,7 @@
             android:fadeScrollbars="false"
             android:gravity= "center"
             android:listSelector="@drawable/item_bg_selector_right"
-            android:padding="10dp"
+            android:padding="@dimen/vs_5"
             android:scrollbars="none"
             android:visibility="visible"
             app:tv_selectedItemIsCentered="true"
@@ -384,9 +391,10 @@
 		android:layout_gravity="bottom|center"
 		android:gravity="center_vertical"
 		android:id="@+id/ll_epg"
-		android:paddingBottom="5dp"
+		android:paddingBottom="@dimen/vs_2"
 		android:layout_width="match_parent"
-		android:layout_height="@dimen/vs_140">
+		android:layout_height="@dimen/vs_140"
+		android:layout_marginBottom="@dimen/car_bottom_padding">
 		<View
 			android:id="@+id/view_bg"
 			android:background="@drawable/shape_user_focus"
@@ -415,7 +423,7 @@
 			android:layout_gravity="center"
 			android:layout_marginLeft="20mm"
 			android:layout_marginTop="5mm"
-			android:layout_marginBottom="-14dp"
+			android:layout_marginBottom="-6mm"
 			android:ellipsize="marquee"
 			android:gravity="center"
 			android:marqueeRepeatLimit="marquee_forever"
@@ -476,14 +484,14 @@
 
 			android:layout_alignParentBottom="true"
 			android:layout_gravity="center|bottom"
-			android:layout_marginStart="5dp"
-			android:layout_marginLeft="5dp"
-			android:layout_marginEnd="5dp"
-			android:layout_marginRight="5dp"
+			android:layout_marginStart="@dimen/vs_2"
+			android:layout_marginLeft="@dimen/vs_2"
+			android:layout_marginEnd="@dimen/vs_2"
+			android:layout_marginRight="@dimen/vs_2"
 			android:layout_marginTop="@dimen/vs_0"
 			android:ellipsize="marquee"
 			android:gravity="center"
-			android:paddingTop="0dp"
+			android:paddingTop="0mm"
 			android:singleLine="true"
 			android:text="CCTV 高清"
 			android:textColor="@color/color_FFFFFF"
@@ -610,10 +618,10 @@
 			android:background="@drawable/shape_live_resolution_badge"
 			android:gravity="center"
 			android:includeFontPadding="false"
-			android:paddingLeft="8dp"
-			android:paddingTop="3dp"
-			android:paddingRight="8dp"
-			android:paddingBottom="3dp"
+			android:paddingLeft="@dimen/vs_4"
+			android:paddingTop="@dimen/vs_1"
+			android:paddingRight="@dimen/vs_4"
+			android:paddingBottom="@dimen/vs_1"
 			android:textColor="#CCFFFFFF"
 			android:textSize="@dimen/ts_20" />
 		<TextView
@@ -627,10 +635,10 @@
 			android:background="@drawable/shape_live_resolution_badge"
 			android:gravity="center"
 			android:includeFontPadding="false"
-			android:paddingLeft="8dp"
-			android:paddingTop="3dp"
-			android:paddingRight="8dp"
-			android:paddingBottom="3dp"
+			android:paddingLeft="@dimen/vs_4"
+			android:paddingTop="@dimen/vs_1"
+			android:paddingRight="@dimen/vs_4"
+			android:paddingBottom="@dimen/vs_1"
 			android:textColor="#CCFFFFFF"
 			android:textSize="@dimen/ts_20"
 			android:visibility="gone"
@@ -644,8 +652,8 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="end|top"
-		android:layout_margin="20dp"
-		android:paddingTop="8dp"/>
+		android:layout_margin="9mm"
+		android:paddingTop="@dimen/vs_4"/>
 	<!--时间显示-->
 
 	<TextView
@@ -653,8 +661,8 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="end|top"
-		android:layout_margin="20dp"
-		android:paddingTop="8dp"/>
+		android:layout_margin="9mm"
+		android:paddingTop="@dimen/vs_4"/>
 	<!--右上角加载动画-->
 
 	<LinearLayout
@@ -691,9 +699,9 @@
 			android:layout_width="170px"
 			android:layout_height="wrap_content"
 			android:layout_alignParentTop="true"
-			android:layout_marginStart="0dp"
-			android:layout_marginLeft="0dp"
-			android:layout_marginRight="10dp"
+			android:layout_marginStart="0mm"
+			android:layout_marginLeft="0mm"
+			android:layout_marginRight="@dimen/vs_5"
 			android:layout_toEndOf="@+id/iv_back_bg"
 			android:layout_toRightOf="@+id/iv_back_bg"
 			android:ellipsize="marquee"
@@ -719,10 +727,10 @@
 			android:ellipsize="marquee"
 			android:marqueeRepeatLimit="marquee_forever"
 			android:layout_gravity="center"
-			android:layout_marginStart="0dp"
-			android:layout_marginLeft="0dp"
-			android:layout_marginRight="10dp"
-			android:layout_marginEnd="0dp"
+			android:layout_marginStart="0mm"
+			android:layout_marginLeft="0mm"
+			android:layout_marginRight="@dimen/vs_5"
+			android:layout_marginEnd="0mm"
 			android:gravity="center"
 			android:paddingStart="20px"
 			android:paddingBottom="10px"
@@ -763,7 +771,7 @@
 			android:textSize="@dimen/vs_28"
 			android:layout_toLeftOf="@id/iv_circle_bg"
 			android:layout_centerVertical="true"
-			android:layout_marginRight="10dp" />
+			android:layout_marginRight="@dimen/vs_5" />
 	</RelativeLayout>
 
 	<RelativeLayout
@@ -771,9 +779,10 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_alignParentBottom="true"
-		android:layout_marginBottom="10mm"
+		android:layout_marginBottom="@dimen/vs_60"
+		android:layout_gravity="bottom"
 		android:visibility="visible"
-		android:elevation="10dp"
+		android:elevation="@dimen/vs_5"
 		android:background="@android:color/transparent">
 
 		<!-- 可选：上面区域 ll_play，默认隐藏 -->
@@ -787,8 +796,8 @@
 			android:layout_alignParentTop="true">
 			<ImageView
 				android:id="@+id/iv_play"
-				android:layout_width="120sp"
-				android:layout_height="120sp"
+				android:layout_width="53mm"
+				android:layout_height="53mm"
 				android:visibility="gone"
 				android:background="@drawable/vod_pause" />
 		</LinearLayout>
@@ -802,24 +811,25 @@
 			android:layout_alignParentBottom="true"
 			android:layout_marginLeft="@dimen/vs_70"
 			android:layout_marginRight="@dimen/vs_70"
-			android:layout_marginBottom="@dimen/vs_60"
-			android:paddingLeft="10dp"
-			android:paddingRight="10dp"
-			android:paddingTop="5dp"
-			android:paddingBottom="5dp"
+			android:layout_marginBottom="@dimen/vs_0"
+			android:paddingLeft="@dimen/vs_5"
+			android:paddingRight="@dimen/vs_5"
+			android:paddingTop="@dimen/vs_2"
+			android:paddingBottom="@dimen/vs_2"
 			android:gravity="center"
 			android:background="@drawable/shape_dialog_filter_bg"
 			android:orientation="horizontal">
 
 			<ImageView
 				android:id="@+id/iv_playpause"
-				android:layout_width="30dp"
-				android:layout_height="30dp"
+				android:focusable="true"
+				android:layout_width="@dimen/vs_40"
+				android:layout_height="@dimen/vs_40"
 				android:background="@drawable/vod_pause" />
 
 			<TextView
 				android:id="@+id/tv_currentpos"
-				android:layout_width="50dp"
+				android:layout_width="@dimen/vs_22"
 				android:layout_height="wrap_content"
 				android:paddingEnd="@dimen/vs_10"
 				android:paddingRight="@dimen/vs_10"
@@ -835,16 +845,17 @@
 			<!-- 为了在 RelativeLayout 内部使用 weight，需要将该区域改为 LinearLayout，
                  或者使用固定宽度，这里继续采用 LinearLayout 的权重分配 -->
 			<LinearLayout
-				android:layout_width="0dp"
+				android:layout_width="0mm"
 				android:layout_height="wrap_content"
 				android:layout_weight="1">
 				<SeekBar
 					android:id="@+id/pb_progressbar"
+					android:focusable="true"
 					android:layout_width="match_parent"
-					android:layout_height="30dp"
-					android:padding="2dp"
-					android:maxHeight="3dp"
-					android:minHeight="3dp"
+					android:layout_height="@dimen/vs_45"
+					android:padding="@dimen/vs_1"
+					android:maxHeight="@dimen/vs_8"
+					android:minHeight="@dimen/vs_8"
 					android:max="100"
 					android:progress="30"
 					android:progressDrawable="@drawable/shape_player_control_vod_seek"

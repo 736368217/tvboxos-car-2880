@@ -95,4 +95,9 @@
     <dimen name="vs_640">640mm</dimen>
     <dimen name="vs_720">720mm</dimen>
     <dimen name="vs_960">960mm</dimen>
+    <!-- CAR-UI safe zones (2880x1620) + player aliases (appended) -->
+    <dimen name="car_top_padding">40mm</dimen>
+    <dimen name="car_bottom_padding">55mm</dimen>
+    <dimen name="car_side_padding">35mm</dimen>
+    <dimen name="vs_22">22mm</dimen>
 </resources>

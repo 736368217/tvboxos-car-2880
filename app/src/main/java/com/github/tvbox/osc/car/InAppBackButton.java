@@ -173,29 +173,36 @@ public final class InAppBackButton {
         return null;
     }
 
-    /** Proportional geometry so the button keeps the same physical size on any panel width. */
+    /**
+     * Car-spec geometry (CAR-UI-SPEC-TVBOX-2880x1620 §2/§4/§5.2):
+     * left safe margin 35mm, button 50mm x 50mm (>= the 40mm minimum touch target), kept clear of
+     * the top 40mm and bottom 55mm exclusion strips, focusable with a bright focus state.
+     */
     private static Entry create(Activity activity, View decor) {
-        int screenWidth = activity.getResources().getDisplayMetrics().widthPixels;
-        int screenHeight = activity.getResources().getDisplayMetrics().heightPixels;
+        android.util.DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
+        int screenWidth = metrics.widthPixels;
+        int screenHeight = metrics.heightPixels;
         if (decor.getHeight() > 100) screenHeight = decor.getHeight();
-        int size = Math.max(96, Math.min(240, Math.round(screenWidth * 0.05f)));
-        int margin = Math.round(screenWidth * 0.012f);
+        int size = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 50f, metrics));
+        int margin = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 35f, metrics));
+        int stroke = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 2f, metrics));
+        if (size < 90) size = Math.max(90, Math.min(240, Math.round(screenWidth * 0.05f)));
+        if (margin < 40) margin = Math.max(40, Math.round(screenWidth * 0.012f));
+        if (stroke < 2) stroke = 2;
         int top = Math.round(screenHeight * 0.30f);
 
         TextView view = new TextView(activity);
-        view.setText("←");
+        view.setText("\u2190");
         view.setTextColor(Color.WHITE);
         view.setTextSize(TypedValue.COMPLEX_UNIT_PX, size * 0.42f);
         view.setGravity(Gravity.CENTER);
         view.setContentDescription("应用内返回");
         view.setAlpha(0.9f);
         view.setClickable(true);
-        view.setFocusable(false);
+        view.setFocusable(true);
+        view.setFocusableInTouchMode(false);
         view.setElevation(Math.round(size * 0.06f));
-        GradientDrawable shape = new GradientDrawable();
-        shape.setShape(GradientDrawable.OVAL);
-        shape.setColor(0xA6000000);
-        view.setBackground(shape);
+        view.setBackground(focusAwareBackground(stroke));
         FrameLayout.LayoutParams parameters = new FrameLayout.LayoutParams(
                 size, size, Gravity.LEFT | Gravity.TOP);
         parameters.leftMargin = margin;
@@ -208,5 +215,21 @@ public final class InAppBackButton {
         Entry entry = new Entry(activity, decor, view);
         view.setOnClickListener(entry);
         return entry;
+    }
+
+    /** Normal: translucent black circle. Focused: lighter fill with the car accent ring (2mm). */
+    private static android.graphics.drawable.Drawable focusAwareBackground(int stroke) {
+        android.graphics.drawable.StateListDrawable states =
+                new android.graphics.drawable.StateListDrawable();
+        GradientDrawable focused = new GradientDrawable();
+        focused.setShape(GradientDrawable.OVAL);
+        focused.setColor(0xE6242A36);
+        focused.setStroke(stroke, 0xFF2979FF);
+        states.addState(new int[]{android.R.attr.state_focused}, focused);
+        GradientDrawable normal = new GradientDrawable();
+        normal.setShape(GradientDrawable.OVAL);
+        normal.setColor(0xA6000000);
+        states.addState(new int[]{}, normal);
+        return states;
     }
 }

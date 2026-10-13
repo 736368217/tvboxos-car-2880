@@ -22,6 +22,8 @@ import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.api.DanmakuApi;
 import com.github.tvbox.osc.base.BaseActivity;
 import com.github.tvbox.osc.base.BaseLazyFragment;
+import com.github.tvbox.osc.car.AudioEffectController;
+import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.bean.IJKCode;
 import com.github.tvbox.osc.bean.SourceBean;
@@ -105,6 +107,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvDanmuApiText;
     private TextView tvCarBack;
     private TextView tvCarBackHide;
+    private TextView tvCarAudio;
+    private TextView tvCarVideoEnhance;
 
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
@@ -167,6 +171,10 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvCarBack.setText(Hawk.get(HawkConfig.IN_APP_BACK, true) ? "开启" : "关闭");
         tvCarBackHide = findViewById(R.id.tvCarBackHide);
         tvCarBackHide.setText(carBackHideName(Hawk.get(HawkConfig.BACK_HIDE_SECONDS, 4)));
+        tvCarAudio = findViewById(R.id.tvCarAudio);
+        tvCarAudio.setText(AudioEffectController.name(CarEnhance.audioMode()));
+        tvCarVideoEnhance = findViewById(R.id.tvCarVideoEnhance);
+        tvCarVideoEnhance.setText(CarEnhance.videoEnhanceEnabled() ? "开启" : "关闭");
         tvSearchView.setText(getSearchView(Hawk.get(HawkConfig.SEARCH_VIEW, 0)));
         tvHomeApi.setText(ApiConfig.get().getHomeSourceBean().getName());
         tvScale.setText(PlayerHelper.getScaleName(Hawk.get(HawkConfig.PLAY_SCALE, 0)));
@@ -832,6 +840,40 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 Hawk.put(HawkConfig.BACK_HIDE_SECONDS, next);
                 tvCarBackHide.setText(carBackHideName(next));
                 if (getActivity() != null) InAppBackButton.attach(getActivity());
+            }
+        });
+
+        // Car edition: 音效 — cycle the six presets; applies to the running playback immediately.
+        findViewById(R.id.llCarAudio).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int next = (CarEnhance.audioMode() + 1) % 6;
+                CarEnhance.setAudioMode(next);
+                tvCarAudio.setText(AudioEffectController.name(next));
+                CarEnhance.toast(getContext(), AudioEffectController.label(next));
+                if (getActivity() != null && getActivity() instanceof BaseActivity) {
+                    android.view.View play = null;
+                    try {
+                        play = getActivity().findViewById(R.id.mVideoView);
+                    } catch (Throwable ignored) {
+                    }
+                    if (play instanceof com.github.tvbox.osc.player.MyVideoView) {
+                        CarEnhance.applyAudio((com.github.tvbox.osc.player.MyVideoView) play);
+                    }
+                }
+            }
+        });
+
+        // Car edition: 臻彩 — GPU colour grading; takes effect on the next playback (HDR is skipped).
+        findViewById(R.id.llCarVideoEnhance).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                boolean enable = !CarEnhance.videoEnhanceEnabled();
+                CarEnhance.setVideoEnhanceEnabled(enable);
+                tvCarVideoEnhance.setText(enable ? "开启" : "关闭");
+                CarEnhance.toast(getContext(), enable ? "画质增强：臻彩（下次播放生效）" : "画质增强：关闭");
             }
         });
 

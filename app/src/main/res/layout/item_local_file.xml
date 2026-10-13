@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/vs_60"
-    android:layout_marginBottom="@dimen/vs_8"
+    android:layout_marginBottom="@dimen/vs_15"
     android:background="@drawable/shape_setting_model_focus"
     android:clickable="true"
     android:focusable="true"

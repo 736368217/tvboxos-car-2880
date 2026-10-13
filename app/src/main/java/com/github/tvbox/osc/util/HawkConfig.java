@@ -69,5 +69,9 @@ public class HawkConfig {
     // Car edition: in-app floating Back button (shown on every page, no accessibility needed).
     public static final String IN_APP_BACK = "inapp_back"; // default true
     public static final String BACK_HIDE_SECONDS = "hide_seconds"; // 4/6/8, 0 = 常显
+    // Car edition: audio effect preset (0 off / 1 cinema / 2 bass / 3 surround / 4 hifi / 5 vocal)
+    // and GPU colour grading ("臻彩") switch, ported from the reference car build.
+    public static final String HIFI_AUDIO = "hifi_audio"; // default 0
+    public static final String VIDEO_ENHANCE = "video_enhance"; // 0 off, 1 on (legacy 1..4 normalise to on)
     public static boolean hotVodDelete;
 }

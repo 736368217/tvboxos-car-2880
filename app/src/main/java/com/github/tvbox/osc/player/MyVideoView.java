@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.util.ImgUtil;
 
 import master.flame.danmaku.controller.DrawHandler;
@@ -42,6 +43,36 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
 
     public AbstractPlayer getMediaPlayer() {
         return mMediaPlayer;
+    }
+
+    /**
+     * Car edition: audio session id of the current engine (EXO or IJK), 0 when the engine is not
+     * running or does not expose one (the system player is intentionally unsupported).
+     */
+    public int getAudioSessionId() {
+        AbstractPlayer player = mMediaPlayer;
+        if (player instanceof ExoPlayer) {
+            return ((ExoPlayer) player).getAudioSessionId();
+        }
+        if (player instanceof IjkMediaPlayer) {
+            return ((IjkMediaPlayer) player).getAudioSessionId();
+        }
+        return 0;
+    }
+
+    /**
+     * Car edition: true when the current video track is HDR/Dolby Vision, in which case the GPU
+     * colour grading must stay off (EXO reads real colour metadata, IJK only the codec name).
+     */
+    public boolean isHdrVideo() {
+        AbstractPlayer player = mMediaPlayer;
+        if (player instanceof ExoPlayer) {
+            return ((ExoPlayer) player).isHdrVideo();
+        }
+        if (player instanceof IjkMediaPlayer) {
+            return ((IjkMediaPlayer) player).isDolbyVision();
+        }
+        return false;
     }
 
     public void setArtwork(String url) {
@@ -109,6 +140,8 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
     public void release() {
         super.release();
         if (haveDanmu()) danmuView.release();
+        // Car edition: the audio-effect chain is bound to this engine's session, so it dies with it.
+        CarEnhance.releaseAudio();
     }
 
     private boolean haveDanmu() {
@@ -136,6 +169,25 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
                 danmuView.start(getCurrentPosition());
             }
         });
+        // Car edition: the render view was picked before the tracks were known, so the 臻彩 grading
+        // decision is finalised here: never grade HDR/Dolby Vision, otherwise follow the switch.
+        if (isHdrVideo()) {
+            setVideoEnhanceMode(0);
+            CarEnhance.toast(getContext(), "HDR 视频已自动关闭臻彩");
+        } else if (CarEnhance.videoEnhanceEnabled()) {
+            setVideoEnhanceMode(1);
+        }
+        CarEnhance.applyAudio(this);
+    }
+
+    /**
+     * Car edition: turn the GPU colour grading on/off on the active render view. Texture and surface
+     * render views do not implement it, so this is a safe no-op unless 臻彩 is in use.
+     */
+    public void setVideoEnhanceMode(int mode) {
+        if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
+            ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).setVideoEnhanceMode(mode);
+        }
     }
 
     @Override

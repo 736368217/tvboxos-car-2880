@@ -4,7 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="@dimen/vs_40"
     android:layout_gravity="center_vertical"
-    android:layout_margin="@dimen/vs_5"
+    android:layout_margin="@dimen/vs_15"
     android:background="@drawable/bg_fast_search_word"
     android:ellipsize="end"
     android:focusable="true"

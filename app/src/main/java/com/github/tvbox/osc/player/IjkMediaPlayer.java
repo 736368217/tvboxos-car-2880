@@ -42,6 +42,39 @@ public class IjkMediaPlayer extends IjkPlayer {
         memory = AudioTrackMemory.getInstance(context);
     }
 
+    /**
+     * Car edition: audio session id of the running IJK engine (native), or 0 before playback
+     * configured its AudioTrack. IJK has no Java setter for the session, so the audio-effect
+     * chain is built from this value after playback starts.
+     */
+    public int getAudioSessionId() {
+        try {
+            return mMediaPlayer == null ? 0 : mMediaPlayer.getAudioSessionId();
+        } catch (Throwable error) {
+            return 0;
+        }
+    }
+
+    /**
+     * Car edition: coarse Dolby Vision detection for IJK. This fork exposes no colour metadata in
+     * Java (no color_transfer/color_trc keys), so only the codec name can be inspected; HLG/PQ
+     * HDR10 videos cannot be detected here and keep the enhancement enabled.
+     */
+    public boolean isDolbyVision() {
+        try {
+            if (mMediaPlayer == null) return false;
+            tv.danmaku.ijk.media.player.MediaInfo info = mMediaPlayer.getMediaInfo();
+            if (info == null || info.mMeta == null) return false;
+            String codec = info.mVideoDecoder;
+            if (codec == null) codec = "";
+            codec = codec.toLowerCase();
+            return codec.contains("dvhe") || codec.contains("dvh1")
+                    || codec.contains("dovi") || codec.contains("dolby");
+        } catch (Throwable error) {
+            return false;
+        }
+    }
+
     @Override
     public void setOptions() {
         super.setOptions();

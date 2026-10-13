@@ -1,10 +1,10 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/color_6200EE</item>
-        <item name="colorPrimaryDark">@color/color_3700B3</item>
-        <item name="colorAccent">@color/color_03DAC5</item>
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <!-- Car edition (CAR-UI-SPEC-TVBOX-2880x1620 §5.3): dark immersive palette. -->
+        <item name="colorPrimary">@color/car_card</item>
+        <item name="colorPrimaryDark">@color/car_bg</item>
+        <item name="colorAccent">@color/car_accent</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">
@@ -16,7 +16,7 @@
         <item name="windowNoTitle">true</item>
         <item name="android:keepScreenOn">true</item>
         <!--        <item name="android:windowBackground">@drawable/main_bg</item>-->
-        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/car_bg</item>
     </style>
     <!-- 自定义dialog样式 -->
     <style name="CustomDialogStyle" parent="@android:style/Theme.Dialog">
@@ -43,12 +43,12 @@
     <style name="epg_window_btn">
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/item_bg_selector_right</item>
-        <item name="android:paddingLeft">0dip</item>
-        <item name="android:paddingRight">0dip</item>
+        <item name="android:paddingLeft">0mm</item>
+        <item name="android:paddingRight">0mm</item>
         <item name="android:focusable">false</item>
         <item name="android:focusableInTouchMode">false</item>
         <item name="android:clickable">true</item>
-        <item name="android:drawablePadding">10.0dip</item>
-        <item name="android:radius">10dp</item>
+        <item name="android:drawablePadding">5mm</item>
+        <item name="android:radius">5mm</item>
     </style>
 </resources>

@@ -65,7 +65,7 @@ android:layout_height="wrap_content">
             android:id="@+id/wqddg_AudioWaveView"
             android:layout_width="@dimen/vs_80"
             android:layout_height="@dimen/ts_26"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/vs_1"
             android:layout_marginRight="0px" />
     </LinearLayout>
 

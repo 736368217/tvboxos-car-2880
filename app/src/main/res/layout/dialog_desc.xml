@@ -3,7 +3,7 @@
     android:layout_width="@dimen/vs_600"
     android:layout_height="match_parent"
     android:background="@drawable/bg_dialog_rounded"
-    android:elevation="5dp"
+    android:elevation="@dimen/vs_2"
     android:padding="@dimen/vs_10">
 
     <androidx.core.widget.NestedScrollView
@@ -19,7 +19,7 @@
             android:id="@+id/describe"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:lineSpacingExtra="4dp"
+            android:lineSpacingExtra="@dimen/vs_2"
             android:padding="@dimen/vs_20"
             android:textColor="@color/color_text_primary"
             android:textSize="@dimen/ts_24"

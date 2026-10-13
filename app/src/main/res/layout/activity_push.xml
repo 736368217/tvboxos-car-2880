@@ -4,6 +4,10 @@
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    android:paddingTop="@dimen/car_top_padding"
+    android:paddingBottom="@dimen/car_bottom_padding"
+    android:paddingLeft="@dimen/car_side_padding"
+    android:paddingRight="@dimen/car_side_padding"
 
     <LinearLayout
         android:layout_width="match_parent"

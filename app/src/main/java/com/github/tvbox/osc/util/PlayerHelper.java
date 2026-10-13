@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.bean.IJKCode;
+import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.player.ExoMediaPlayerFactory;
 import com.github.tvbox.osc.player.IjkMediaPlayer;
 import com.github.tvbox.osc.player.render.SurfaceRenderViewFactory;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import tv.danmaku.ijk.media.player.IjkLibLoader;
 import xyz.doikki.videoplayer.player.PlayerFactory;
 import xyz.doikki.videoplayer.player.VideoView;
+import xyz.doikki.videoplayer.render.GlEnhanceRenderViewFactory;
 import xyz.doikki.videoplayer.render.RenderViewFactory;
 import xyz.doikki.videoplayer.render.TextureRenderViewFactory;
 
@@ -84,6 +86,10 @@ public class PlayerHelper {
                 renderViewFactory = SurfaceRenderViewFactory.create();
                 break;
         }
+        // Car edition: 臻彩 replaces the render view with the GPU colour-grading one (never for HDR).
+        if (CarEnhance.useEnhanceRenderView(videoView)) {
+            renderViewFactory = GlEnhanceRenderViewFactory.create();
+        }
         if(videoView!=null){
             videoView.setPlayerFactory(playerFactory);
             videoView.setRenderViewFactory(renderViewFactory);
@@ -130,6 +136,10 @@ public class PlayerHelper {
             case 1:
                 renderViewFactory = SurfaceRenderViewFactory.create();
                 break;
+        }
+        // Car edition: 臻彩 replaces the render view with the GPU colour-grading one (never for HDR).
+        if (CarEnhance.useEnhanceRenderView(videoView)) {
+            renderViewFactory = GlEnhanceRenderViewFactory.create();
         }
         videoView.setPlayerFactory(playerFactory);
         videoView.setRenderViewFactory(renderViewFactory);

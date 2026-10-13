@@ -38,7 +38,7 @@
     <color name="color_000000_60">#99000000</color>
     <color name="color_dialog_bg">#88000000</color>
     <color name="color_scrollview_bg">#44000000</color>
-    <color name="color_text_primary">#FFFFFAE0</color>
+    <color name="color_text_primary">#FFEDEDED</color>
 
     <!-- Unified dialog palette. Change these to update dialog surfaces globally. -->
     <color name="dialog_panel_bg">#D91D202A</color>
@@ -51,6 +51,14 @@
     <color name="dialog_text_primary">#FFFFFFFF</color>
     <color name="dialog_text_hint">#80FFFFFF</color>
 
-
+    <!-- Car edition palette (CAR-UI-SPEC-TVBOX-2880x1620 §5.3): dark immersive theme.
+         Root background #101318, cards #1E222B, body text #EDEDED, accent #2979FF. -->
+    <color name="car_bg">#FF101318</color>
+    <color name="car_card">#FF1E222B</color>
+    <color name="car_card_translucent">#E61E222B</color>
+    <color name="car_text">#FFEDEDED</color>
+    <color name="car_text_muted">#FF93AABE</color>
+    <color name="car_accent">#FF2979FF</color>
+    <color name="car_accent_alt">#FFFF9100</color>
 
 </resources>
