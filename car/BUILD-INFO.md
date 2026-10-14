@@ -1,25 +1,70 @@
-# BUILD-INFO — TVBoxOS 车机版 1.0.0-car.3
+# BUILD-INFO — TVBoxOS 车机版 1.0.0-car.4
 
-## 交付身份（car.3，当前版本）
+## 交付身份（car.4，当前版本）
 
-- APK：`TVBox-1.0.0-car.3-signed.apk`
+- APK：`TVBox-1.0.0-car.4-signed.apk`
 - 包名（Application ID）：**`com.github.tvbox.osc.jun`（白名单第 41 项，未改名）**
 - 应用名：`TVBox`（白名单第 13 项，未改名）
-- VersionCode / VersionName：`4` / `1.0.0-car.3`
+- VersionCode / VersionName：`5` / `1.0.0-car.4`
 - 大小：`33,302,029` 字节
-- SHA-256：`5074478347ADC8870DA35BD0F8806728D215EAB2F942B8BEC6637282C9857557`
-- MD5：`06ad9d3555959538ac94c6f618dade89`
+- SHA-256：`21C9FC004CCB2CF405E47E8F9536360A52012EB847F35BD96A8C3F41D872495D`
 - 签名：v1/v2/v3 通过；测试证书 `C=US, O=Android, CN=Android Debug`，证书 SHA-256 `2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c`
 - zipalign 4 字节对齐：通过
 - 启动 Activity：`com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.HomeActivity`
 - flavor：`java` release（R8）；native ABI：`arm64-v8a` + `armeabi-v7a`
 - 构建时间：2026-10-14
 
-> 与 car.2 的签名相同（同一 debug 证书），可直接覆盖安装 car.2；若设备上装的是**上游官方白壳**（`20260914-1520`，另一套签名），需先卸载再安装。
+历史版本（同目录保留）：`TVBox-1.0.0-car.3-signed.apk` versionCode 4 / SHA-256 `50744783…57557`；`TVBox-1.0.0-car.2-signed.apk` versionCode 3 / SHA-256 `4FE471C3…C8567`。
 
-## car.3 改动（本次交付核心）：修复 `ProtectedInitJar` 误判导致订阅站点全废
+> 各版本签名相同（同一 debug 证书），可直接覆盖升级；若设备上装的是**上游官方白壳**（`20260914-1520`，另一套签名），需先卸载再安装。
+
+## car.4 改动：修复臻彩 GL 渲染（开臻彩时画面全黑）
 
 ### 问题
+
+开启 `臻彩增强` 后播放视频，视频区域**全黑**（只剩声音）；关闭臻彩则正常。真机/模拟器像素实测（同一段静态测试片，OFF 为正常画面）：
+
+| 区域 | 臻彩 ON | 臻彩 OFF |
+|---|---|---|
+| 视频区 饱和度/亮度 | 0.05–0.17 / 0.02–0.11 | 0.71 / 0.69 |
+| UI 区 饱和度/亮度 | 0.33 / 0.09 | 0.33 / 0.09（完全一致） |
+
+### 根因（设备日志实证）
+
+```text
+I GlEnhance: frame-available listener bound to main looper
+I GlEnhance: onSurfaceCreated error: java.lang.IllegalStateException: Player is accessed on the wrong thread.
+I GlEnhance: Current thread: 'GLThread 85'
+I GlEnhance: Expected thread: 'main'
+I GlEnhance: skip draw: program=3 texture=1 frameAvailable=false
+```
+
+`GlEnhanceRenderView.createSurfaceTexture()` 运行在 **GL 线程**，其中 `player.setSurface(mPlayerSurface)` 被 EXO 的线程校验拒绝（异常被 `catch (Throwable)` 吞掉）→ 异常导致 `createSurfaceTexture()` 中断，解码器始终拿不到本视图的渲染 Surface → 画面永远黑。
+
+### 修法
+
+| 文件 | 改动 |
+|---|---|
+| `player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java` | ① 新增 `bindSurfaceToPlayer()`：统一切回**主线程**（`new Handler(Looper.getMainLooper())`）再调用 `player.setSurface()`；`attachToPlayer()` 与 `createSurfaceTexture()` 都走它。② 新增 `applySurfaceTextureBufferSize()`：自建 SurfaceTexture 显式 `setDefaultBufferSize(videoW, videoH)`（默认只有 1×1）。③ 补 `GlEnhance` 取证日志：帧回调绑定、GL surface 就绪、`setVideoSize`、每帧 `drawFrame #n sat/con/bri viewport`、shader 编译/链接失败原因；异常不再静默。 |
+| `app/build.gradle` | `versionCode 5` / `versionName '1.0.0-car.4'` |
+
+### 修复后设备日志
+
+```text
+I GlEnhance: frame-available listener bound to main looper
+I GlEnhance: GL surface ready, view=1057x675, program=3, texture=1
+I GlEnhance: player surface bound (main thread)
+I GlEnhance: surfaceTexture buffer size -> 640x360
+I GlEnhance: setVideoSize 640x360
+I GlEnhance: drawFrame #0  sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+I GlEnhance: drawFrame #100 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+```
+
+像素实测（低饱和静态测试片 `cartest-lowsat.mp4`，sat 真值 0.41）：视频区分块 **ON 相对 OFF 饱和度 +10%~20%、亮度 +10% 左右**，UI 区完全一致（见 `TEST-REPORT.md` §1.5）。
+
+## car.3 改动：修复 `ProtectedInitJar` 误判导致订阅站点全废
+
+### 问题（car.3）
 
 订阅 `…/tvbox/123/xiaosa/api.json?v=3` 含 **106 个 `csp_*` 站点**，JAR 下载与 md5 均正常，但页面只显示“主页”，其它全失败。设备日志：
 
@@ -81,6 +126,7 @@ git clone https://github.com/q215613905/TVBoxOS.git tvbox-os-src
 cd tvbox-os-src
 git apply ..\tvbox-os-car\GIT-DIFF-car.2.patch    # 增强 + 规范整改（相对上游 main）
 git apply ..\tvbox-os-car\GIT-DIFF-car.3.patch    # JAR 装载修复（相对 car.2）
+git apply ..\tvbox-os-car\GIT-DIFF-car.4.patch    # 臻彩 GL 渲染修复（相对 car.3）
 "sdk.dir=$env:LOCALAPPDATA\Android\Sdk" | Set-Content local.properties -Encoding ASCII
 $env:JAVA_HOME='C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot'
 $env:GRADLE_USER_HOME='D:\gradle-cache'
@@ -88,7 +134,7 @@ $env:GRADLE_USER_HOME='D:\gradle-cache'
 # 对齐 + 签名（测试证书）
 & "$env:LOCALAPPDATA\Android\Sdk\build-tools\34.0.0\zipalign.exe" -f -p 4 TVBox_release-java.apk aligned.apk
 & "$env:LOCALAPPDATA\Android\Sdk\build-tools\34.0.0\apksigner.bat" sign --ks "$env:USERPROFILE\.android\debug.keystore" `
-    --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out TVBox-1.0.0-car.3-signed.apk aligned.apk
+    --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out TVBox-1.0.0-car.4-signed.apk aligned.apk
 ```
 
 离线复核 JAR 误判修复（无需设备，JDK 11+ 直接跑单文件）：
@@ -96,6 +142,19 @@ $env:GRADLE_USER_HOME='D:\gradle-cache'
 ```powershell
 java tools\WhitelistScanTest.java spider.jar com.github.tvbox.osc.jun   # 期望: OLD=true, NEW=false
 java tools\WhitelistScanTest.java spider.jar cn.kuwo.kwmusiccar         # 负控: OLD=true, NEW=true
+```
+
+播放链路（音效 / 臻彩）复测提示：车机版内置 HTTP 服务（默认 `:9978`），可把本地测试片直接推进播放器，无需依赖站点：
+
+```powershell
+adb push cartest-lowsat.mp4 /sdcard/Movies/
+adb forward tcp:19978 tcp:9978
+# 用 b64 形式推送 URL（避免转义问题），播放器会打开 DetailActivity 并起播
+$u = 'http://127.0.0.1:9978/file/Movies/cartest-lowsat.mp4'
+$b = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($u)).Replace('+','-').Replace('/','_')
+Invoke-WebRequest "http://127.0.0.1:19978/push/b64:$b" -UseBasicParsing
+adb shell dumpsys media.audio_flinger | Select-String 'effects for session'   # 期望: 4 effects
+adb logcat -d | Select-String 'GlEnhance'                                    # 期望: drawFrame #n sat=1.35 ...
 ```
 
 环境备注：Gradle wrapper 分发包改用腾讯镜像（本机 `services.gradle.org` 不可达）；JDK 17；compileSdk 33。

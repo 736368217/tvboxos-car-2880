@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -33,6 +36,8 @@ import xyz.doikki.videoplayer.player.AbstractPlayer;
 @SuppressLint("ViewConstructor")
 public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, GLSurfaceView.Renderer,
         SurfaceTexture.OnFrameAvailableListener {
+
+    private static final String TAG = "GlEnhance";
 
     private static final String VERTEX_SHADER =
             "attribute vec4 aPosition;\n" +
@@ -90,6 +95,13 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private volatile boolean mFrameAvailable;
     private volatile boolean mReleased;
 
+    /** 视频尺寸，主线程写入、GL 线程读取，用于设置 SurfaceTexture 的缓冲区大小 */
+    private volatile int mVideoWidth;
+    private volatile int mVideoHeight;
+
+    /** GL 线程内绘制计数，仅用于取证日志 */
+    private int mFramesDrawn;
+
     /** 调色参数，主线程写入，GL 线程读取 */
     private volatile int mEnhanceMode;
     private volatile float mSat = 1.0f;
@@ -127,17 +139,58 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     @Override
     public void attachToPlayer(@NonNull AbstractPlayer player) {
         mMediaPlayer = player;
-        Surface surface = mPlayerSurface;
-        if (surface != null) {
-            player.setSurface(surface);
+        bindSurfaceToPlayer();
+    }
+
+    /**
+     * 把渲染 Surface 交给播放器。
+     * 注意：EXO 会校验调用线程（IllegalStateException: Player is accessed on the wrong thread），
+     * 而 SurfaceTexture 是在 GL 线程创建的，因此这里必须切回主线程再绑定。
+     */
+    private void bindSurfaceToPlayer() {
+        final AbstractPlayer player = mMediaPlayer;
+        final Surface surface = mPlayerSurface;
+        if (player == null || surface == null) return;
+        try {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        player.setSurface(surface);
+                        Log.i(TAG, "player surface bound (main thread)");
+                    } catch (Throwable e) {
+                        Log.i(TAG, "player.setSurface failed: " + e);
+                    }
+                }
+            });
+        } catch (Throwable e) {
+            Log.i(TAG, "bindSurfaceToPlayer failed: " + e);
         }
     }
 
-    @Override
     public void setVideoSize(int videoWidth, int videoHeight) {
         if (videoWidth > 0 && videoHeight > 0) {
+            mVideoWidth = videoWidth;
+            mVideoHeight = videoHeight;
             mMeasureHelper.setVideoSize(videoWidth, videoHeight);
+            applySurfaceTextureBufferSize();
             requestLayout();
+            Log.i(TAG, "setVideoSize " + videoWidth + "x" + videoHeight);
+        }
+    }
+
+    /** 自建 SurfaceTexture 必须显式设定缓冲区大小，否则解码器输出会落到默认(1x1)缓冲上 */
+    private void applySurfaceTextureBufferSize() {
+        SurfaceTexture surfaceTexture = mSurfaceTexture;
+        int width = mVideoWidth;
+        int height = mVideoHeight;
+        if (surfaceTexture == null) return;
+        if (width <= 0 || height <= 0) return;
+        try {
+            surfaceTexture.setDefaultBufferSize(width, height);
+            Log.i(TAG, "surfaceTexture buffer size -> " + width + "x" + height);
+        } catch (Throwable e) {
+            Log.i(TAG, "setDefaultBufferSize failed: " + e);
         }
     }
 
@@ -243,9 +296,14 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             releaseGlResources();
             if (createProgram()) {
                 createSurfaceTexture();
+                Log.i(TAG, "GL surface ready, view=" + getWidth() + "x" + getHeight()
+                        + ", program=" + mProgram + ", texture=" + mTextureId);
+            } else {
+                Log.i(TAG, "GL program creation failed");
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
             // 车机环境下宁可黑屏也不能崩溃，保持 View 可用
+            Log.i(TAG, "onSurfaceCreated error: " + e);
         }
     }
 
@@ -270,6 +328,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
             if (mProgram == 0 || mTextureId == 0 || !mFrameAvailable) {
+                if (mFramesDrawn < 3) {
+                    Log.i(TAG, "skip draw: program=" + mProgram + " texture=" + mTextureId
+                            + " frameAvailable=" + mFrameAvailable);
+                }
                 return;
             }
             mFrameAvailable = false;
@@ -295,12 +357,18 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             GLES20.glVertexAttribPointer(aTexCoord, 2, GLES20.GL_FLOAT, false, 0, QUAD_TEX_COORD);
 
             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+            if (mFramesDrawn < 3 || mFramesDrawn % 100 == 0) {
+                Log.i(TAG, "drawFrame #" + mFramesDrawn + " sat=" + mSat + " con=" + mCon
+                        + " bri=" + mBri + " viewport=" + width + "x" + height);
+            }
+            mFramesDrawn++;
 
             GLES20.glDisableVertexAttribArray(aPosition);
             GLES20.glDisableVertexAttribArray(aTexCoord);
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
             // 绘制异常不能影响后续帧
+            Log.i(TAG, "onDrawFrame error: " + e);
         }
     }
 
@@ -335,16 +403,27 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 
         SurfaceTexture surfaceTexture = new SurfaceTexture(mTextureId);
-        surfaceTexture.setOnFrameAvailableListener(this);
+        try {
+            // GL 线程没有 Looper：必须显式指定主线程 Handler，否则帧到达回调不会触发
+            surfaceTexture.setOnFrameAvailableListener(this, new Handler(Looper.getMainLooper()));
+            Log.i(TAG, "frame-available listener bound to main looper");
+        } catch (Throwable e) {
+            Log.i(TAG, "setOnFrameAvailableListener(main looper) failed: " + e);
+            try {
+                surfaceTexture.setOnFrameAvailableListener(this);
+                Log.i(TAG, "frame-available listener bound to current thread");
+            } catch (Throwable e2) {
+                Log.i(TAG, "setOnFrameAvailableListener failed: " + e2);
+            }
+        }
         mFrameAvailable = false;
         mSurfaceTexture = surfaceTexture;
+        applySurfaceTextureBufferSize();
 
         // 播放器渲染到这个 Surface，而不是屏幕 Surface
         mPlayerSurface = new Surface(surfaceTexture);
-        AbstractPlayer player = mMediaPlayer;
-        if (player != null) {
-            player.setSurface(mPlayerSurface);
-        }
+        // 切回主线程再交给播放器（EXO 校验调用线程）
+        bindSurfaceToPlayer();
     }
 
     private boolean createProgram() {
@@ -367,6 +446,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         GLES20.glDeleteShader(vertexShader);
         GLES20.glDeleteShader(fragmentShader);
         if (linkStatus[0] == 0) {
+            Log.i(TAG, "program link failed: " + GLES20.glGetProgramInfoLog(program));
             GLES20.glDeleteProgram(program);
             return false;
         }
@@ -411,6 +491,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         int[] status = new int[1];
         GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0);
         if (status[0] == 0) {
+            Log.i(TAG, "shader compile failed: " + GLES20.glGetShaderInfoLog(shader));
             GLES20.glDeleteShader(shader);
             return 0;
         }

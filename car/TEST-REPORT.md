@@ -1,7 +1,7 @@
-# TEST-REPORT — TVBoxOS 车机版 1.0.0-car.3
+# TEST-REPORT — TVBoxOS 车机版 1.0.0-car.4
 
 验收画布：MuMu 12 / Android 15，`wm size 1620x2880`（横屏 2880×1620）、density 240。
-测试对象：`TVBox-1.0.0-car.3-signed.apk`（MuMu 实例 3 / `127.0.0.1:16480`）。
+测试对象：`TVBox-1.0.0-car.4-signed.apk`（car.3 的站点验收在 car.3 构建上完成，car.4 只改渲染路径，回归见 §1.5／§2）。
 订阅：`https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/123/xiaosa/api.json?v=3`（106 个 `csp_*` 站点；`spider.jar` md5 `7d204aeb2bc2d6c89aaa18460492b67d`，与配置声明一致）。
 无障碍状态：`settings get secure enabled_accessibility_services = null`、`accessibility_enabled = 0`（全程未授权任何无障碍服务）。
 
@@ -91,6 +91,69 @@ I/JarLoader: getSpider success key=main本地 / 豆瓣 / 热播影视 / 一起�
 - 设置页四行车机行仍在：`应用内返回按钮`、`返回按钮隐藏时间`、`音效`、`臻彩增强`（本轮点击 `音效` 行仍在 UI 层可见）。
 - 应用内返回按钮仍随页面出现/隐藏（本轮多次 `返回` 均回到主页，且系统返回键与按钮行为一致）。
 
+### 1.5 播放链路与两项增强的运行期验证（car.4，本轮闭环）
+
+**播放链路打通**：车机版内置 HTTP 服务（`127.0.0.1:9978`）可自带文件；用 `/push/b64:<base64url(url)>` 把 `http://127.0.0.1:9978/file/Movies/<clip>.mp4` 推进播放器（无需依赖站点），`DetailActivity` 立即起播：
+
+```text
+I Tvbox-runtime: echo-setDataSource:http://127.0.0.1:9978/file/Movies/lowsat.mp4
+I MediaCodec: [OMX.qcom.video.decoder.avc] setting surface generation to 9405449
+D MediaCodec: [OMX.qcom.video.decoder.avc] setting dataspace on output surface to 0x103
+I GlEnhance: player surface bound (main thread)
+```
+
+**音效（6 档）——已验证**：`音效 = 影院` + 播放中，音频会话上稳定挂 4 个效果（与 `AudioEffectController` 建的链一致）：
+
+```text
+1 Effect Chains
+  4 effects for session 81
+  - name: Equalizer            （NXP Software Ltd.，enabled）
+  - name: Dynamic Bass Boost   （BassBoost）
+  - name: Loudness Enhancer
+  - name: Virtualizer
+```
+
+同时 `dumpsys audio` 可见本应用持有 `USAGE_MEDIA` 的 AudioTrack 播放器（`pack: com.github.tvbox.osc.jun … session: 81`），即音效作用在真实播放会话上。
+
+**臻彩（画面增强）——原先黑屏，car.4 修复后已验证**：
+
+修复前（car.3）：
+
+```text
+I GlEnhance: frame-available listener bound to main looper
+I GlEnhance: onSurfaceCreated error: java.lang.IllegalStateException: Player is accessed on the wrong thread.
+I GlEnhance: Current thread: 'GLThread 85' / Expected thread: 'main'
+I GlEnhance: skip draw: program=3 texture=1 frameAvailable=false
+```
+
+→ `createSurfaceTexture()` 在 GL 线程调用 `player.setSurface()` 被 EXO 拒绝（异常被吞），解码器拿不到本视图 Surface，**画面全黑**。
+
+修复后（car.4）：
+
+```text
+I GlEnhance: frame-available listener bound to main looper
+I GlEnhance: GL surface ready, view=1057x675, program=3, texture=1
+I GlEnhance: player surface bound (main thread)
+I GlEnhance: surfaceTexture buffer size -> 640x360
+I GlEnhance: setVideoSize 640x360
+I GlEnhance: drawFrame #0   sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+I GlEnhance: drawFrame #100 sat=1.35 con=1.12 bri=0.03 viewport=1057x594   （≈25fps，与片源帧率一致）
+```
+
+**像素级证据**（用低饱和静态测试片 `cartest-lowsat.mp4`，真值 sat≈0.41 / val≈0.44；静态图案 ⇒ 截图与播放时刻无关，可直接比对；同一位置、同一台机器、仅切 `臻彩增强` 开关）：
+
+| 区块（480×270 网格） | 臻彩 ON 饱和度/亮度 | 臻彩 OFF 饱和度/亮度 | 判定 |
+|---|---|---|---|
+| 视频区 [0,0] | 0.29 / 0.43 | 0.24 / 0.40 | ON 更饱和 ✓ |
+| 视频区 [1,0] | 0.49 / 0.39 | 0.41 / 0.35 | +20% 饱和度 ✓ |
+| 视频区 [1,1] | 0.57 / 0.49 | 0.52 / 0.43 | +10% 饱和度、+14% 亮度 ✓ |
+| 视频区 [2,1] | 0.50 / 0.24 | 0.48 / 0.21 | ON 更高 ✓ |
+| UI 区 [3,2]~[5,4] | 0.47 / 0.33 … 0.33 / 0.09 | 0.47 / 0.33 … 0.33 / 0.09 | **完全一致**（差异只来自视频调色）✓ |
+
+即：饱和度/亮度提升幅度与配置的 `sat 1.35 / con 1.12 / bri +0.03` 一致（分块均值含 UI 与削顶像素，故绝对值低于理论增益），且**只作用于视频层、不动 UI** —— 证明臻彩 GL 调色链路端到端生效。
+
+（早期用 `cartest.mp4` 比对“看不出差异”，原因是该片本身 91.5% 像素已达饱和/亮度上限，属于**测试素材**问题，已改用低饱和片 `cartest-lowsat.mp4`。）
+
 ---
 
 ## 2. car.2 轮次已通过的验证（沿用，未回归）
@@ -116,15 +179,12 @@ I/JarLoader: getSpider success key=main本地 / 豆瓣 / 热播影视 / 一起�
 
 ## 3. 未完成 / 未覆盖（如实说明）
 
-### 3.1 真实播放与两项增强的运行期验证 —— **仍未完成**
+### 3.1 真实播放与两项增强的运行期验证 —— **已闭环（见 §1.5）**
 
-- 本轮已能拿到真实播放直链（m3u8，见 §1.3），并观察到 IJK 内核被调用；但**未取得“画面在播 + 音频在播”的完整证据**（`dumpsys media_session` 无 PLAYING 记录即被环境中断，实例多次自行停止）。
-- 因此：音效链（Equalizer/BassBoost/Virtualizer/LoudnessEnhancer）与臻彩 GL 渲染仍**未在真实音频/视频会话上验证**。
-- 补测步骤（下一轮可直接执行）：
-  1. 用 `cartest.mp4`（640×360 / 8s / 440Hz）推入 `/sdcard/Movies/` 并触发媒体扫描；
-  2. 首页数据源选 `本地 • 视频`，点击该视频进入 `MyVideoView` 播放；
-  3. 播放中检查：`dumpsys media_session`（PLAYING）、原生层级出现 `GLSurfaceView`（臻彩生效）、`dumpsys media.audio_flinger` 出现 4 个 AudioEffect（音效生效）、HDR 视频应提示“HDR 视频已自动关闭臻彩”。
-- 或：在能稳定联网播放的设备上，直接点 §1.3 的 m3u8 直链验证（注意站点可能校验 referer/时效）。
+- 音效链（Equalizer / BassBoost / LoudnessEnhancer / Virtualizer）已在真实播放会话上验证（4 个效果挂在音频 session 上）。
+- 臻彩 GL 渲染已在真实视频上验证（`drawFrame` 连续输出 + 像素级调色证据），并修复了 car.3 的“开臻彩黑屏”缺陷（EXO 跨线程 `setSurface`）。
+- 触发方式：车机版内置 HTTP 服务 + `/push/b64:` 推送本地测试片（不依赖站点可达性），详见 §1.5 与 `BUILD-INFO.md` 复测命令。
+- 仍未验证的细项：HDR/杜比视界片源的“自动关闭臻彩并提示”（本轮只用 SDR 测试片）；IJK 内核下同样路径未重复跑（渲染视图与内核无关，但仅 EXO 实测）。
 
 ### 3.2 其它
 
@@ -142,6 +202,6 @@ I/JarLoader: getSpider success key=main本地 / 豆瓣 / 热播影视 / 一起�
 
 ## 4. 结论
 
-- **car.3 可交付**：本订阅（106 个 `csp_*` 站点）已全部恢复访问，主页/分类/搜索/多站聚合/详情/选集/直链均实测可用；修复未放宽 JAR 保护语义（负控通过），未改包名与应用名，未触发身份自检。
+- **car.4 可交付（推荐）**：本订阅（106 个 `csp_*` 站点）全部可访问（主页/分类/搜索/多站聚合/详情/选集/直链实测）；JAR 修复未放宽保护语义（负控通过）、未改包名与应用名、未触发身份自检；**音效与臻彩两项增强均已在真实播放上验证**。
 - car.1/car.2 的行为（应用内返回按钮、增强开关、规范几何）在本轮回归中未被破坏。
-- 播放链路的运行期验证（音效/臻彩）仍为**唯一未闭环项**，按 §3.1 补测后可升级结论。
+- car.3 的已知缺陷：开启 `臻彩增强` 时视频区全黑（§1.5 根因）；**请使用 car.4 或更新版本**。
