@@ -234,34 +234,32 @@ class ProtectedInitJar {
                 hasInit = hasInit || "Lcom/github/catvod/spider/Init;".equals(desc);
                 int classDataOff = uint(off + 24);
                 if (classDataOff <= 0) continue;
-                if ("Lcom/github/catvod/spider/Init;".equals(desc)) {
-                    checkedWhitelist = true;
-                    if (scanInitWhitelist(classDataOff)) return false;
-                }
+                checkedWhitelist = true;
+                if (scanWhitelistMethods(classDataOff)) return false;
                 hasKillProcess = hasKillProcess || scanKillProcess(classDataOff);
                 if (hasInit && hasKillProcess && checkedWhitelist) return true;
             }
             return hasInit && hasKillProcess;
         }
 
-        private boolean scanInitWhitelist(int off) {
+        private boolean scanWhitelistMethods(int off) {
             int[] cursor = new int[]{off};
             int staticFields = uleb(cursor);
             int instanceFields = uleb(cursor);
             int directMethods = uleb(cursor);
             int virtualMethods = uleb(cursor);
             skipFields(cursor, staticFields + instanceFields);
-            return scanInitMethods(cursor, directMethods) || scanInitMethods(cursor, virtualMethods);
+            return scanWhitelistInMethods(cursor, directMethods) || scanWhitelistInMethods(cursor, virtualMethods);
         }
 
-        private boolean scanInitMethods(int[] cursor, int count) {
+        private boolean scanWhitelistInMethods(int[] cursor, int count) {
             int methodIdx = 0;
             for (int i = 0; i < count; i++) {
                 methodIdx += uleb(cursor);
                 uleb(cursor);
                 int codeOff = uleb(cursor);
                 if (codeOff <= 0 || methodIdx >= methodIdsSize) continue;
-                if ("init".equals(methodName(methodIdx)) && scanWhitelist(codeOff)) return true;
+                if (scanWhitelist(codeOff)) return true;
             }
             return false;
         }

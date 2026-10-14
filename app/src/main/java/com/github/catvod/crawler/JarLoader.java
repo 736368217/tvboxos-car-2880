@@ -111,15 +111,28 @@ public class JarLoader {
             protectedJar = protectedInitJar.check(jar);
             if (protectedJar) {
                 Log.i(TAG, "echo-load initProtectedJar file=" + jar);
-                return protectedInitJar.init(clz);
-            } else {
-                Method method = clz.getMethod("init", Context.class);
-                method.invoke(null, App.getInstance());
+                if (protectedInitJar.init(clz)) return true;
+                Log.i(TAG, "protected jar loader not bound, fallback to Init.init file=" + jar);
+                return invokeInitMethod(clz);
             }
+            invokeInitMethod(clz);
         } catch (Throwable e) {
             e.printStackTrace();
         }
         return !protectedJar;
+    }
+
+    private boolean invokeInitMethod(Class<?> clz) {
+        try {
+            Method method = clz.getMethod("init", Context.class);
+            method.invoke(null, App.getInstance());
+            Log.i(TAG, "echo-load Init.init success");
+            return true;
+        } catch (Throwable e) {
+            Log.i(TAG, "echo-load Init.init error, msg=" + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void invokeProxy(String key, DexClassLoader loader) {

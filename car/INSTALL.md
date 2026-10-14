@@ -1,4 +1,4 @@
-# INSTALL — TVBoxOS 车机版 1.0.0-car.2
+# INSTALL — TVBoxOS 车机版 1.0.0-car.3
 
 ## 环境要求
 
@@ -9,14 +9,14 @@
 ## 安装
 
 ```powershell
-adb install -r .\TVBox-1.0.0-car.2-signed.apk
+adb install -r .\TVBox-1.0.0-car.3-signed.apk
 ```
 
 本 APK 使用**测试签名**（Android Debug 证书）。若设备上已有其它签名的同包名版本（`com.github.tvbox.osc.jun`），先卸载：
 
 ```powershell
 adb uninstall com.github.tvbox.osc.jun
-adb install .\TVBox-1.0.0-car.2-signed.apk
+adb install .\TVBox-1.0.0-car.3-signed.apk
 ```
 
 ## 使用
@@ -33,4 +33,5 @@ adb install .\TVBox-1.0.0-car.2-signed.apk
 
 - 应用内弹窗（配置地址、选择数据源）是独立窗口，悬浮钮位于其下层：用弹窗自带按钮或系统返回键关闭。
 - 上游只提供 ARM 原生库：x86 车机/模拟器只能运行 Java 部分（界面可用，原生解码器/JS 引擎不可用）。
-- 播放链路（含音效与臻彩的运行期表现）尚未在真实订阅源上完成端到端验收，详见 `TEST-REPORT.md` §2.1（含补测步骤与合成测试片）。
+- 播放链路（含音效与臻彩的运行期表现）尚未在真实订阅源上完成端到端验收，详见 `TEST-REPORT.md` §3.1（含补测步骤与合成测试片）。
+- 订阅站点需依赖 `spider.jar`：本版本已修复上游白壳的 JAR 误判（详见 `BUILD-INFO.md` “car.3 改动”），若看到“只有主页”，请确认安装的是 **car.3 或更新**版本。
