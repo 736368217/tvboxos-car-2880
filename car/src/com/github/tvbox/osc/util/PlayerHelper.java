@@ -86,9 +86,10 @@ public class PlayerHelper {
                 renderViewFactory = SurfaceRenderViewFactory.create();
                 break;
         }
-        // Car edition: 臻彩 replaces the render view with the GPU colour-grading one (never for HDR).
+        // Any enabled colour/spatial/temporal feature uses the same renderer for EXO and IJK.
         if (CarEnhance.useEnhanceRenderView(videoView)) {
-            renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode());
+            renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode(),
+                    CarEnhance.videoSrEnabled(), CarEnhance.videoInterpEnabled());
         }
         if(videoView!=null){
             videoView.setPlayerFactory(playerFactory);
@@ -137,9 +138,10 @@ public class PlayerHelper {
                 renderViewFactory = SurfaceRenderViewFactory.create();
                 break;
         }
-        // Car edition: 臻彩 replaces the render view with the GPU colour-grading one (never for HDR).
+        // Any enabled colour/spatial/temporal feature uses the same renderer for EXO and IJK.
         if (CarEnhance.useEnhanceRenderView(videoView)) {
-            renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode());
+            renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode(),
+                    CarEnhance.videoSrEnabled(), CarEnhance.videoInterpEnabled());
         }
         videoView.setPlayerFactory(playerFactory);
         videoView.setRenderViewFactory(renderViewFactory);

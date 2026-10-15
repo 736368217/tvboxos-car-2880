@@ -1,53 +1,53 @@
-# TVBoxOS 车机版 1.0.0-car.5 — Python 通用包与 8 档画面预设
+# TVBoxOS 车机版 1.0.0-car.6
 
-基于 [q215613905/TVBoxOS](https://github.com/q215613905/TVBoxOS) 源码构建。源码与交付文档位于私有仓库 [736368217/tvboxos-car-2880](https://github.com/736368217/tvboxos-car-2880)。
+基于 [q215613905/TVBoxOS](https://github.com/q215613905/TVBoxOS) 源码扩展，保留 Python ARM32＋ARM64 通用 flavor、Java/JAR、QuickJS、车机布局和应用内返回按钮。
 
-car.4 交付的是 **Java flavor**；car.5 改为 **Python flavor，ARM32＋ARM64 通用 APK**，加入 Python 3.8.13 运行时，继续保留 Java/JAR 和 QuickJS。Android 界面及播放器仍使用原工程的 Java 代码；这里的“Python 版”指支持 Python Spider 的构建版本。
+car.6 在 car.5 上新增 **3 档动漫音效、3 档动漫画面、SGSR1 超分与可独立关闭的时域平滑补帧**。既有音效 0–5 和画面 0–7 的编号、参数不变；新增音效为 6–8，新增画面为 8–10。
 
-## 下载与文件
+## 下载与安装
 
-- [v1.0.0-car.5 Release](https://github.com/736368217/tvboxos-car-2880/releases/tag/v1.0.0-car.5)：`TVBox-1.0.0-car.5-python-signed.apk`，52,627,205 字节。
-- SHA-256：`6F43817EB9C4E2A97C8E30C190826244A2333E14CD46D064964F91AE45DF0C3B`。
-- 包名 `com.github.tvbox.osc.jun`、应用名 `TVBox`，versionCode `6`，versionName `1.0.0-car.5`；沿用 car.2–car.4 的测试签名，可覆盖升级同签名版本。
-- APK 通过 Release 附件交付，仓库不存 APK、下载的 Spider JAR 或签名私钥。
+- [v1.0.0-car.6 Release](https://github.com/736368217/tvboxos-car-2880/releases/tag/v1.0.0-car.6)
+- APK：`TVBox-1.0.0-car.6-python-signed.apk`
+- 包名 `com.github.tvbox.osc.jun` / 应用名 `TVBox` / versionCode `7`。
+- 大小及 SHA-256 以 [`MANIFEST-car.6.json`](MANIFEST-car.6.json) 和 [`SHA256SUMS-car.6.txt`](SHA256SUMS-car.6.txt) 为准。
+- 沿用既有测试证书，同签名的 car.2–car.5 可覆盖升级；APK、keystore 和下载的 Spider JAR 不放入源码仓库。
 
-| 材料 | 用途 |
-|---|---|
-| `BUILD-INFO.md` | 构建环境、Python flavor、依赖版本、签名与校验步骤 |
-| `INSTALL.md` | 安装、Python 源使用、画面预设选择与升级说明 |
-| `TEST-REPORT.md` | 本轮实际验证结果及边界 |
-| `AUDIO-VIDEO-ENHANCE.md` | 6 档音效与 8 档画面的参数和代码入口 |
-| `tests/` | 预设/迁移 host 测试与独立 Python、QuickJS 验收源 |
-| `evidence/car.5/` | 原生节点、截图、渲染日志摘要、音效会话和像素比较数据 |
-| `GIT-DIFF-car.5.patch` | 相对 car.4 源码提交 `febc8fa` 的 UTF-8 代码增量，包含新增源码 |
-| `src/` | 新增类和关键修改类、布局的源码副本；完整工程以仓库根目录为准 |
+## 使用
 
-## 画面预设
+设置 → **音效**：关闭、影院、重低音、3D环绕、HiFi、人声、动漫·标准、动漫·剧场、动漫·对白，共 9 档。
 
-设置 → **画面预设** → 选择档位，**下次播放生效**。列表可上下滑动，当前项高亮；重复点击当前项保持弹窗，可点“取消”退出。
+设置 → **画面预设**：原画、臻彩、自然、影院、鲜艳、柔和、明亮、暖色、动漫·暗光、动漫·日间、动漫·清透，共 11 档。列表可滚动，当前项高亮。
 
-| ID | 名称 | 用途 |
+设置 → **SGSR1 超分**、**60Hz 时域平滑补帧**：两个独立开关，默认开启，均持久化，**下次播放生效**。画面为原画时仍可单独使用超分或补帧；原画且两项关闭时使用原普通渲染器。画面预设只调整视频，应用 UI 不参与处理。
+
+| SR | 补帧 | 视频处理 |
 |---|---|---|
-| 0 | 原画 | 保留原始画面 |
-| 1 | 臻彩 | 增强色彩与层次，保留旧版开启时的参数 |
-| 2 | 自然 | 轻调色，接近原片 |
-| 3 | 影院 | 温润色调，强化明暗 |
-| 4 | 鲜艳 | 浓郁色彩，突出画面 |
-| 5 | 柔和 | 降低反差，柔化色彩 |
-| 6 | 明亮 | 提亮偏暗片源 |
-| 7 | 暖色 | 暖色温，减少蓝色 |
+| 关 | 关 | 保留所选调色；原画时回普通渲染器 |
+| 开 | 关 | SGSR1，按源帧更新 |
+| 关 | 开 | 时域混合输出，不执行 SGSR |
+| 开 | 开 | 调色 → 时域混合 → SGSR1 |
 
-旧 `video_enhance=false/0` 读取为原画，`true/1` 读取为臻彩；异常值回退原画。HDR/杜比视界保留自动关闭 SDR 调色的策略；本轮 HDR 自动处理未实测。
+源宽度达到 2560，或输出窗口无需放大时，自动旁路 SGSR。补帧为轻量时域混合，没有运动矢量估计；快速运动的观感和功耗需在车机上选择开关评估。
 
-## 沿用的车机能力
+## 验收与边界
 
-- 每个 Activity 窗口内的返回按钮，无需无障碍、系统悬浮窗权限或 ADB；闲置 4 秒隐藏、触摸唤醒，可设 4/6/8 秒或常显，首页根级只提示。
-- 6 档音效：关闭、影院、重低音、3D环绕、HiFi、人声。四个 Android AudioEffect 绑定内部播放器音频会话。
-- 17.3″ / 2880×1620 的安全边距、触控热区、mm 单位与暗色主题；沿用 car.2 布局整改。
-- car.3 的 JAR 保护型误判修复和初始化回退，以及 car.4 的主线程绑定 Surface 修复。本轮再次确认原订阅 `Init.init success`、分类和多站搜索。
+Java 8 精确参数/迁移/时序测试、生产 GLSL 的 EGL 像素探针，以及 MuMu 中 EXO/IJK 实际播放、四种开关组合、1080p/4K、设置持久化、Python/QuickJS/JAR 回归的证据见 [`TEST-REPORT.md`](TEST-REPORT.md)。
 
-## 本轮验证范围
+模拟器中的 24fps 测试片在常见窗口输出提交约 47–58 次/秒，不能据此声称显示器稳定呈现 60fps，更不能代替 SA8295P 单帧耗时、真实车机全屏或 HDR10 精度验收。RGBA8 处理不构成端到端 10-bit HDR 保证；ARM32 仅完成打包核验。
 
-MuMu 6.8.4.0 / Android 15 / 横屏 2880×1620：Python 3.8.13 实际执行 8 项依赖和本地 HTTP 断言；Python 与 QuickJS 均返回分类、卡片、详情并播放合成片。8 档设置均走真实播放路径，7 个增强档均有第 100 帧参数日志；截图比较证明视频变化且抽样 UI 区域逐像素一致。设置在应用重启后保留，影院音效四效果器挂于 session 89。
+## 交付材料
 
-原订阅本轮“潜伏6”搜索 **21 结果、78/78 完成、3 超时**。部分外部站点返回验证页或解析错误；不保证每个外部源持续可用。真实车机、ARM32 运行、HDR/杜比视界和 IJK 全路径仍待验证。完整证据与范围见 `TEST-REPORT.md`。
+| 文件 | 用途 |
+|---|---|
+| [INSTALL.md](INSTALL.md) | 安装、设置与日常操作 |
+| [BUILD-INFO.md](BUILD-INFO.md) | 构建、签名及复现测试命令 |
+| [AUDIO-VIDEO-ENHANCE.md](AUDIO-VIDEO-ENHANCE.md) | 完整音画参数、SGSR 与时域策略 |
+| [DESIGN-car.6.md](DESIGN-car.6.md) | 规格衔接与实施设计 |
+| [evidence/car.6/](evidence/car.6/) | 原生节点、截图、GPU 像素、音效会话和日志摘要 |
+| [tests/](tests/) | Java host/GPU 探针、独立本地验收源与媒体生成脚本 |
+| [GIT-DIFF-car.6.patch](GIT-DIFF-car.6.patch) | 相对 car.5 提交 `1038379` 的 UTF-8 生产源码及测试增量 |
+| [src/](src/) | 关键类/布局副本；完整工程以仓库根目录为准 |
+| [licenses/snapdragon-gsr.txt](licenses/snapdragon-gsr.txt) | SGSR 上游 BSD-3-Clause 许可证 |
+| [history/car.5/](history/car.5/) | car.5 原交付说明，历史证据仍在 `evidence/car.5/` |
+
+包名与 TVBox 标签保持订阅 JAR 白名单身份。原订阅可用性受外部网络和各站解析影响，主页与部分分类成功不代表所有站点都能播放。

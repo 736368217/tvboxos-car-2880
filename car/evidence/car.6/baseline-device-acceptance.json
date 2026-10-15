@@ -1,0 +1,84 @@
+{
+  "apk": "TVBox-1.0.0-car.6-python-signed.apk",
+  "sha256": "E3B83211B34E4261AD72731DFC1F5D1D1DA4CCFC792162072ACB5380331426F8",
+  "bytes": 52635477,
+  "emulator": "MuMu 6.8.4.0 Android 15",
+  "instance": 2,
+  "canvas": [
+    2880,
+    1620
+  ],
+  "app_pids": [
+    3079,
+    23666
+  ],
+  "explicit_restart": true,
+  "settings": {
+    "combo10-selected": {
+      "tvCarAudio": "动漫·对白",
+      "tvCarVideoEnhance": "动漫·清透",
+      "tvCarVideoSr": "开启",
+      "tvCarVideoInterp": "关闭"
+    },
+    "combo01-selected": {
+      "tvCarAudio": "动漫·对白",
+      "tvCarVideoEnhance": "动漫·清透",
+      "tvCarVideoSr": "关闭",
+      "tvCarVideoInterp": "开启"
+    },
+    "combo00-selected": {
+      "tvCarAudio": "动漫·对白",
+      "tvCarVideoEnhance": "动漫·清透",
+      "tvCarVideoSr": "关闭",
+      "tvCarVideoInterp": "关闭"
+    },
+    "original11-selected": {
+      "tvCarAudio": "动漫·对白",
+      "tvCarVideoEnhance": "原画",
+      "tvCarVideoSr": "开启",
+      "tvCarVideoInterp": "开启"
+    },
+    "restart-settings": {
+      "tvCarAudio": "动漫·对白",
+      "tvCarVideoEnhance": "原画",
+      "tvCarVideoSr": "关闭",
+      "tvCarVideoInterp": "关闭"
+    }
+  },
+  "back_node_counts": {
+    "final-back-idle": 0,
+    "final-back-awake": 1
+  },
+  "accessibility_enabled": "0",
+  "muted_settings": [
+    "0",
+    "0"
+  ],
+  "app_errors_found": [],
+  "gpu_assertions": "PASS",
+  "gpu_process_shutdown_exit": 139,
+  "original_subscription_restored": true,
+  "subscription_category": "热播剧集: actual cards returned; 猜你喜欢: no data",
+  "media": {
+    "motion": {
+      "bytes": 28616522,
+      "sha256": "6cfde9957df0cd8db0de7877c9f67d4e58cbdfc222bfb3cac4498f8242ab12df"
+    },
+    "1080": {
+      "bytes": 93265914,
+      "sha256": "ba2981ac4bec624a6598434c5264b9fba43cd50d0d2497bf931e2db87021b90b"
+    },
+    "4k": {
+      "bytes": 137639902,
+      "sha256": "9f1d6d2f7a8f071146ae0bfcc3bb94bc8f4b61950da7cea9b2be4f0334248982"
+    }
+  },
+  "limitations": [
+    "real SA8295P performance unmeasured",
+    "no stable 60fps presentation proof",
+    "no motion-vector interpolation",
+    "ARM32 runtime untested",
+    "HDR/DoVi untested",
+    "not every external site tested"
+  ]
+}

@@ -1,0 +1,764 @@
+10-15 15:51:33.884  3079  3217 I JarLoader: echo-load Init.init success
+10-15 15:51:33.885  3079  3217 I JarLoader: load success key=main, file=/data/user/0/com.github.tvbox.osc.jun/files/csp/1b083ab4277cd89f8b9f081c112edbea.jar
+10-15 15:51:33.959  3079  3197 I JarLoader: getSpider success key=main本地
+10-15 15:51:33.960  3079  3229 I JarLoader: getSpider success key=main豆瓣
+10-15 15:51:33.960  3079  3197 I JarLoader: getSpider success key=main热播影视
+10-15 15:51:33.961  3079  3197 I JarLoader: getSpider success key=main一起影视
+10-15 15:51:33.963  3079  3197 I JarLoader: getSpider success key=main咕噜
+10-15 15:51:33.965  3079  3197 I JarLoader: getSpider success key=main布布
+10-15 15:51:33.966  3079  3197 I JarLoader: getSpider success key=main马猴影视
+10-15 15:51:33.971  3079  3197 I JarLoader: getSpider success key=main韩圈
+10-15 15:51:34.046  3079  3197 I JarLoader: getSpider success key=main哔哩视频
+10-15 15:51:34.047  3079  3197 I JarLoader: getSpider success key=main三六零
+10-15 15:51:34.768  3079  3197 I JarLoader: getSpider success key=main玩偶
+10-15 15:53:28.478  3079  3197 I JSLoader: echo-getSpider load
+10-15 15:53:32.606  3079  3757 I python.stdout: CAR5_PY_RUNTIME version=3.8.13 dependencies=8 network=OK
+10-15 15:55:16.210  3079  4031 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4
+10-15 15:55:16.693  3079  3079 I GlEnhance: player surface bound (main thread)
+10-15 15:55:16.694  3079  4039 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 15:55:16.694  3079  4039 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 15:55:17.013  3079  3079 I GlEnhance: setVideoSize 640x360
+10-15 15:55:17.018  3079  4039 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-15 15:55:17.018  3079  4039 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x675
+10-15 15:55:17.018  3079  4039 I GlEnhance: drawFrame #1 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1057x675
+10-15 15:55:17.023  3079  4039 I GlEnhance: drawFrame #2 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1057x675
+10-15 15:55:17.126  3079  4039 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x594
+10-15 15:55:17.126  3079  4039 I GlEnhance: drawFrame #3 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1057x594
+10-15 15:55:17.235  3079  3079 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 15:55:17.373  3079  3079 I CarAudio: applied mode=4 name=HiFi session=81 bass=250 virtualizer=300 loudness=400
+10-15 15:55:17.373  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 15:55:17.373  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 15:55:17.389  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 15:55:17.389  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 15:55:17.406  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 15:55:17.408  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 15:55:19.023  3079  4039 I GlEnhance: frame_stats seconds=2.009673 sourceFps=16.918175 outputFps=47.27137 blended=36 intervalNs=40502511 active=true
+10-15 15:55:19.133  3079  4039 I GlEnhance: drawFrame #100 preset=8:动漫·暗光 source=35 fbo=true sr=true interp=true viewport=1057x594
+10-15 15:55:21.033  3079  4039 I GlEnhance: frame_stats seconds=2.0112667 sourceFps=21.37956 outputFps=49.22271 blended=55 intervalNs=60512970 active=true
+10-15 15:55:21.267  3079  4039 I GlEnhance: drawFrame #200 preset=8:动漫·暗光 source=80 fbo=true sr=true interp=true viewport=1057x594
+10-15 15:55:23.048  3079  4039 I GlEnhance: frame_stats seconds=2.013313 sourceFps=21.357832 outputFps=46.689213 blended=55 intervalNs=40418194 active=true
+10-15 15:55:23.265  3079  4039 I GlEnhance: drawFrame #300 preset=8:动漫·暗光 source=126 fbo=true sr=true interp=true viewport=1057x594
+10-15 15:55:25.047  3079  4039 I GlEnhance: frame_stats seconds=2.0012982 sourceFps=23.484756 outputFps=52.965622 blended=56 intervalNs=40476338 active=true
+10-15 15:55:25.158  3079  4039 I GlEnhance: drawFrame #400 preset=8:动漫·暗光 source=170 fbo=true sr=true interp=true viewport=1057x594
+10-15 15:55:26.920  3079  4039 I GlEnhance: drawFrame #500 preset=8:动漫·暗光 source=212 fbo=true sr=true interp=true viewport=1057x594
+10-15 15:55:27.064  3079  4039 I GlEnhance: frame_stats seconds=2.0164752 sourceFps=23.803913 outputFps=56.534294 blended=49 intervalNs=40476186 active=true
+10-15 16:05:26.026  3079  3079 I GlEnhance: release requested source=950 outputs=2270
+10-15 16:09:11.488  3079  6806 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4
+10-15 16:09:11.672  3079  3079 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:09:11.702  3079  6809 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:09:11.702  3079  6809 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:09:11.729  3079  3079 I CarAudio: applied mode=6 name=动漫·标准 session=89 bass=150 virtualizer=180 loudness=450
+10-15 16:09:11.729  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:09:11.729  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:09:11.733  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:09:11.733  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:09:11.737  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:09:11.737  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:09:11.741  3079  3079 I GlEnhance: player surface bound (main thread)
+10-15 16:09:11.853  3079  3079 I GlEnhance: setVideoSize 640x360
+10-15 16:09:11.855  3079  6809 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-15 16:09:11.855  3079  6809 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x675
+10-15 16:09:11.855  3079  6809 I GlEnhance: drawFrame #1 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1057x675
+10-15 16:09:11.871  3079  6809 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x594
+10-15 16:09:11.871  3079  6809 I GlEnhance: drawFrame #2 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:11.888  3079  6809 I GlEnhance: drawFrame #3 preset=8:动漫·暗光 source=2 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:13.576  3079  6809 I GlEnhance: drawFrame #100 preset=8:动漫·暗光 source=36 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:13.857  3079  6809 I GlEnhance: frame_stats seconds=2.0035226 sourceFps=21.462198 outputFps=57.89802 blended=40 intervalNs=40477096 active=true
+10-15 16:09:15.323  3079  6809 I GlEnhance: drawFrame #200 preset=8:动漫·暗光 source=78 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:15.865  3079  6809 I GlEnhance: frame_stats seconds=2.0083692 sourceFps=23.899988 outputFps=57.260387 blended=49 intervalNs=42857143 active=true
+10-15 16:09:17.073  3079  6809 I GlEnhance: drawFrame #300 preset=8:动漫·暗光 source=120 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:17.880  3079  6809 I GlEnhance: frame_stats seconds=2.014372 sourceFps=24.325197 outputFps=57.08975 blended=50 intervalNs=40476186 active=true
+10-15 16:09:18.836  3079  6809 I GlEnhance: drawFrame #400 preset=8:动漫·暗光 source=163 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:19.896  3079  6809 I GlEnhance: frame_stats seconds=2.0164404 sourceFps=23.804323 outputFps=57.031193 blended=48 intervalNs=40476186 active=true
+10-15 16:09:20.576  3079  6809 I GlEnhance: drawFrame #500 preset=8:动漫·暗光 source=204 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:21.906  3079  6809 I GlEnhance: frame_stats seconds=2.0099132 sourceFps=23.881628 outputFps=57.2164 blended=48 intervalNs=40476186 active=true
+10-15 16:09:22.329  3079  6809 I GlEnhance: drawFrame #600 preset=8:动漫·暗光 source=239 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:23.914  3079  6809 I GlEnhance: frame_stats seconds=2.0082014 sourceFps=20.416279 outputFps=57.76313 blended=42 intervalNs=42857127 active=true
+10-15 16:09:24.054  3079  6809 I GlEnhance: drawFrame #700 preset=8:动漫·暗光 source=281 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:25.800  3079  6809 I GlEnhance: drawFrame #800 preset=8:动漫·暗光 source=323 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:25.920  3079  6809 I GlEnhance: frame_stats seconds=2.005454 sourceFps=23.934729 outputFps=57.34362 blended=49 intervalNs=42857139 active=true
+10-15 16:09:27.539  3079  6809 I GlEnhance: drawFrame #900 preset=8:动漫·暗光 source=364 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:27.923  3079  6809 I GlEnhance: frame_stats seconds=2.0033193 sourceFps=24.459406 outputFps=57.404728 blended=49 intervalNs=40476187 active=true
+10-15 16:09:29.292  3079  6809 I GlEnhance: drawFrame #1000 preset=8:动漫·暗光 source=406 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:29.939  3079  6809 I GlEnhance: frame_stats seconds=2.0164156 sourceFps=23.804617 outputFps=57.031895 blended=48 intervalNs=40476189 active=true
+10-15 16:09:31.037  3079  6809 I GlEnhance: drawFrame #1100 preset=8:动漫·暗光 source=448 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:31.939  3079  6809 I GlEnhance: frame_stats seconds=2.0000203 sourceFps=23.999758 outputFps=57.499416 blended=48 intervalNs=40476189 active=true
+10-15 16:09:32.769  3079  6809 I GlEnhance: drawFrame #1200 preset=8:动漫·暗光 source=490 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:33.940  3079  6809 I GlEnhance: frame_stats seconds=2.000231 sourceFps=23.997229 outputFps=57.49336 blended=48 intervalNs=40476193 active=true
+10-15 16:09:34.518  3079  6809 I GlEnhance: drawFrame #1300 preset=8:动漫·暗光 source=532 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:35.952  3079  6809 I GlEnhance: frame_stats seconds=2.011868 sourceFps=23.858423 outputFps=57.16081 blended=48 intervalNs=40476186 active=true
+10-15 16:09:36.265  3079  6809 I GlEnhance: drawFrame #1400 preset=8:动漫·暗光 source=574 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:37.955  3079  6809 I GlEnhance: frame_stats seconds=2.003757 sourceFps=23.955 outputFps=56.893127 blended=48 intervalNs=40476186 active=true
+10-15 16:09:38.024  3079  6809 I GlEnhance: drawFrame #1500 preset=8:动漫·暗光 source=616 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:39.776  3079  6809 I GlEnhance: drawFrame #1600 preset=8:动漫·暗光 source=658 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:09:39.972  3079  6809 I GlEnhance: frame_stats seconds=2.0161107 sourceFps=24.304222 outputFps=57.04052 blended=51 intervalNs=42857138 active=true
+10-15 16:09:40.845  3079  6809 I GlEnhance: output srRequested=true srActive=true interp=true viewport=2880x1620
+10-15 16:09:41.525  3079  6809 I GlEnhance: drawFrame #1700 preset=8:动漫·暗光 source=700 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:09:41.990  3079  6809 I GlEnhance: frame_stats seconds=2.0188622 sourceFps=23.775768 outputFps=56.962776 blended=48 intervalNs=42857138 active=true
+10-15 16:09:43.299  3079  6809 I GlEnhance: drawFrame #1800 preset=8:动漫·暗光 source=742 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:09:43.998  3079  6809 I GlEnhance: frame_stats seconds=2.0079358 sourceFps=24.403172 outputFps=56.2767 blended=48 intervalNs=40474650 active=true
+10-15 16:09:45.069  3079  6809 I GlEnhance: drawFrame #1900 preset=8:动漫·暗光 source=785 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:09:46.014  3079  6809 I GlEnhance: frame_stats seconds=2.0160077 sourceFps=23.809433 outputFps=57.043434 blended=49 intervalNs=40476187 active=true
+10-15 16:09:46.823  3079  6809 I GlEnhance: drawFrame #2000 preset=8:动漫·暗光 source=827 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:09:48.032  3079  6809 I GlEnhance: frame_stats seconds=2.018187 sourceFps=23.783722 outputFps=56.981834 blended=48 intervalNs=40476189 active=true
+10-15 16:09:48.574  3079  6809 I GlEnhance: drawFrame #2100 preset=8:动漫·暗光 source=869 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:09:50.046  3079  6809 I GlEnhance: frame_stats seconds=2.01355 sourceFps=23.838493 outputFps=57.113056 blended=48 intervalNs=40476189 active=true
+10-15 16:09:50.324  3079  6809 I GlEnhance: drawFrame #2200 preset=8:动漫·暗光 source=911 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:09:52.061  3079  6809 I GlEnhance: frame_stats seconds=2.0147812 sourceFps=23.823927 outputFps=57.078156 blended=50 intervalNs=43991816 active=true
+10-15 16:09:52.078  3079  6809 I GlEnhance: drawFrame #2300 preset=8:动漫·暗光 source=952 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:09:52.413  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:09:52.413  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:11:59.586  3079  6809 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x594
+10-15 16:11:59.587  3079  6809 I GlEnhance: frame_stats seconds=127.52568 sourceFps=0.047049347 outputFps=0.18035583 blended=6 intervalNs=41708333 active=false
+10-15 16:12:29.972  3079  9105 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 16:12:30.378  3079  3079 I GlEnhance: release requested source=958 outputs=2323
+10-15 16:12:30.638  3079  3079 I GlEnhance: player surface bound (main thread)
+10-15 16:12:30.638  3079  9108 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:12:30.638  3079  9108 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:12:30.760  3079  3079 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:12:30.794  3079  3079 I CarAudio: applied mode=6 name=动漫·标准 session=97 bass=150 virtualizer=180 loudness=450
+10-15 16:12:30.795  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:12:30.795  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:12:30.837  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:12:30.837  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:12:30.854  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:12:30.854  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:12:30.940  3079  3079 I GlEnhance: setVideoSize 640x360
+10-15 16:12:30.945  3079  9108 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-15 16:12:30.945  3079  9108 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x675
+10-15 16:12:30.945  3079  9108 I GlEnhance: drawFrame #1 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1057x675
+10-15 16:12:30.969  3079  9108 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x594
+10-15 16:12:30.969  3079  9108 I GlEnhance: drawFrame #2 preset=8:动漫·暗光 source=2 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:30.984  3079  9108 I GlEnhance: drawFrame #3 preset=8:动漫·暗光 source=2 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:32.835  3079  9108 I GlEnhance: drawFrame #100 preset=8:动漫·暗光 source=37 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:32.952  3079  9108 I GlEnhance: frame_stats seconds=2.0091465 sourceFps=19.908953 outputFps=52.758724 blended=52 intervalNs=38301935 active=true
+10-15 16:12:34.720  3079  9108 I GlEnhance: drawFrame #200 preset=8:动漫·暗光 source=84 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:34.975  3079  9108 I GlEnhance: frame_stats seconds=2.0234342 sourceFps=24.710466 outputFps=53.374607 blended=52 intervalNs=41103078 active=true
+10-15 16:12:36.620  3079  9108 I GlEnhance: drawFrame #300 preset=8:动漫·暗光 source=130 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:36.993  3079  9108 I GlEnhance: frame_stats seconds=2.0179265 sourceFps=24.77791 outputFps=52.52917 blended=55 intervalNs=39096218 active=true
+10-15 16:12:38.621  3079  9108 I GlEnhance: drawFrame #400 preset=8:动漫·暗光 source=177 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:38.998  3079  9108 I GlEnhance: frame_stats seconds=2.004823 sourceFps=23.443466 outputFps=50.378513 blended=64 intervalNs=33277515 active=true
+10-15 16:12:40.660  3079  9108 I GlEnhance: drawFrame #500 preset=8:动漫·暗光 source=224 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:41.009  3079  9108 I GlEnhance: frame_stats seconds=2.0109973 sourceFps=21.879692 outputFps=48.73204 blended=57 intervalNs=39676583 active=true
+10-15 16:12:42.452  3079  9108 I GlEnhance: drawFrame #600 preset=8:动漫·暗光 source=261 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:43.027  3079  9108 I GlEnhance: frame_stats seconds=2.0169444 sourceFps=22.310976 outputFps=56.52114 blended=49 intervalNs=39159192 active=true
+10-15 16:12:44.242  3079  9108 I GlEnhance: drawFrame #700 preset=8:动漫·暗光 source=306 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:45.028  3079  9108 I GlEnhance: frame_stats seconds=2.0015886 sourceFps=24.980158 outputFps=55.955555 blended=53 intervalNs=39159193 active=true
+10-15 16:12:45.995  3079  9108 I GlEnhance: drawFrame #800 preset=8:动漫·暗光 source=350 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:47.036  3079  9108 I GlEnhance: frame_stats seconds=2.0084267 sourceFps=24.89511 outputFps=55.765045 blended=55 intervalNs=39159194 active=true
+10-15 16:12:47.811  3079  9108 I GlEnhance: drawFrame #900 preset=8:动漫·暗光 source=395 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:49.056  3079  9108 I GlEnhance: frame_stats seconds=2.0182328 sourceFps=24.774149 outputFps=54.503128 blended=56 intervalNs=41869935 active=true
+10-15 16:12:49.644  3079  9108 I GlEnhance: drawFrame #1000 preset=8:动漫·暗光 source=440 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:51.054  3079  9108 I GlEnhance: frame_stats seconds=2.0001488 sourceFps=24.498178 outputFps=56.495796 blended=54 intervalNs=39159198 active=true
+10-15 16:12:51.418  3079  9108 I GlEnhance: drawFrame #1100 preset=8:动漫·暗光 source=485 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:53.057  3079  9108 I GlEnhance: frame_stats seconds=2.0018933 sourceFps=25.475883 outputFps=54.448456 blended=54 intervalNs=41869398 active=true
+10-15 16:12:53.246  3079  9108 I GlEnhance: drawFrame #1200 preset=8:动漫·暗光 source=530 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:55.042  3079  9108 I GlEnhance: drawFrame #1300 preset=8:动漫·暗光 source=575 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:55.060  3079  9108 I GlEnhance: frame_stats seconds=2.0022757 sourceFps=24.971586 outputFps=55.93635 blended=50 intervalNs=41869863 active=true
+10-15 16:12:56.870  3079  9108 I GlEnhance: drawFrame #1400 preset=8:动漫·暗光 source=621 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:57.060  3079  9108 I GlEnhance: frame_stats seconds=2.0017858 sourceFps=24.478144 outputFps=54.950935 blended=49 intervalNs=39159819 active=true
+10-15 16:12:58.666  3079  9108 I GlEnhance: drawFrame #1500 preset=8:动漫·暗光 source=666 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:12:59.072  3079  9108 I GlEnhance: frame_stats seconds=2.010556 sourceFps=25.366117 outputFps=55.705986 blended=57 intervalNs=41869393 active=true
+10-15 16:13:00.423  3079  9108 I GlEnhance: drawFrame #1600 preset=8:动漫·暗光 source=710 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:13:01.126  3079  9108 I GlEnhance: frame_stats seconds=2.0083096 sourceFps=24.89656 outputFps=55.768295 blended=52 intervalNs=41869394 active=true
+10-15 16:13:02.354  3079  9108 I GlEnhance: drawFrame #1700 preset=8:动漫·暗光 source=756 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:13:03.096  3079  9108 I GlEnhance: frame_stats seconds=2.0168583 sourceFps=23.79939 outputFps=52.06117 blended=58 intervalNs=41872077 active=true
+10-15 16:13:03.936  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:13:03.941  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:13:13.367  3079  3079 I GlEnhance: release requested source=791 outputs=1787
+10-15 16:16:55.623  3079 11255 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/1080.mp4
+10-15 16:16:55.784  3079  3079 I GlEnhance: player surface bound (main thread)
+10-15 16:16:55.785  3079 11258 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:16:55.785  3079 11258 I GlEnhance: mode=9(动漫·日间) sat=1.14 con=1.03 bri=0.015 rgb=1.0,0.99,0.96 sr=true sharp=1.3 interp=true maxAlpha=0.28
+10-15 16:16:55.956  3079  3079 I GlEnhance: setVideoSize 1920x1080
+10-15 16:16:55.958  3079 11258 I GlEnhance: FBO ping-pong allocated 2x 1920x1080 RGBA8 bytes=16588800
+10-15 16:16:55.958  3079 11258 I GlEnhance: output srRequested=true srActive=false interp=true viewport=1057x675
+10-15 16:16:55.958  3079 11258 I GlEnhance: drawFrame #1 preset=9:动漫·日间 source=1 fbo=true sr=false interp=true viewport=1057x675
+10-15 16:16:55.987  3079 11258 I GlEnhance: output srRequested=true srActive=false interp=true viewport=1057x594
+10-15 16:16:55.987  3079 11258 I GlEnhance: drawFrame #2 preset=9:动漫·日间 source=1 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:16:55.993  3079 11258 I GlEnhance: drawFrame #3 preset=9:动漫·日间 source=1 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:16:55.996  3079  3079 I GlEnhance: mode=9(动漫·日间) sat=1.14 con=1.03 bri=0.015 rgb=1.0,0.99,0.96 sr=true sharp=1.3 interp=true maxAlpha=0.28
+10-15 16:16:56.020  3079  3079 I CarAudio: applied mode=7 name=动漫·剧场 session=105 bass=280 virtualizer=320 loudness=550
+10-15 16:16:56.020  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:16:56.020  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:16:56.022  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:16:56.022  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:16:56.026  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:16:56.026  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:16:56.405 11321 11321 I Car6Test: PLAY1080
+10-15 16:16:57.674  3079 11258 I GlEnhance: drawFrame #100 preset=9:动漫·日间 source=41 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:16:57.967  3079 11258 I GlEnhance: frame_stats seconds=2.0154846 sourceFps=23.815613 outputFps=58.050556 blended=51 intervalNs=42857259 active=true
+10-15 16:16:59.409  3079 11258 I GlEnhance: drawFrame #200 preset=9:动漫·日间 source=83 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:16:59.984  3079 11258 I GlEnhance: frame_stats seconds=2.0165923 sourceFps=23.80253 outputFps=57.522785 blended=50 intervalNs=42857138 active=true
+10-15 16:17:01.171  3079 11258 I GlEnhance: drawFrame #300 preset=9:动漫·日间 source=125 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:02.000  3079 11258 I GlEnhance: frame_stats seconds=2.0147362 sourceFps=24.320803 outputFps=56.58309 blended=53 intervalNs=40476186 active=true
+10-15 16:17:02.921  3079 11258 I GlEnhance: drawFrame #400 preset=9:动漫·日间 source=167 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:04.015  3079 11258 I GlEnhance: frame_stats seconds=2.0163982 sourceFps=23.804823 outputFps=57.52832 blended=49 intervalNs=40476186 active=true
+10-15 16:17:04.661  3079 11258 I GlEnhance: drawFrame #500 preset=9:动漫·日间 source=209 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:06.029  3079 11258 I GlEnhance: frame_stats seconds=2.0139623 sourceFps=23.833614 outputFps=57.101368 blended=48 intervalNs=40476187 active=true
+10-15 16:17:06.413  3079 11258 I GlEnhance: drawFrame #600 preset=9:动漫·日间 source=244 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:08.036  3079 11258 I GlEnhance: frame_stats seconds=2.0069776 sourceFps=20.428728 outputFps=57.30009 blended=41 intervalNs=40476210 active=true
+10-15 16:17:08.157  3079 11258 I GlEnhance: drawFrame #700 preset=9:动漫·日间 source=286 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:09.910  3079 11258 I GlEnhance: drawFrame #800 preset=9:动漫·日间 source=328 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:10.049  3079 11258 I GlEnhance: frame_stats seconds=2.0126207 sourceFps=24.346367 outputFps=57.13943 blended=50 intervalNs=42857142 active=true
+10-15 16:17:11.655  3079 11258 I GlEnhance: drawFrame #900 preset=9:动漫·日间 source=370 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:12.055  3079 11258 I GlEnhance: frame_stats seconds=2.0069094 sourceFps=23.917374 outputFps=57.30204 blended=50 intervalNs=42857146 active=true
+10-15 16:17:13.402  3079 11258 I GlEnhance: drawFrame #1000 preset=9:动漫·日间 source=412 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:14.061  3079 11258 I GlEnhance: frame_stats seconds=2.0054705 sourceFps=23.934532 outputFps=57.34315 blended=49 intervalNs=42857138 active=true
+10-15 16:17:15.144  3079 11258 I GlEnhance: drawFrame #1100 preset=9:动漫·日间 source=453 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:16.065  3079 11258 I GlEnhance: frame_stats seconds=2.0041158 sourceFps=23.950712 outputFps=56.88294 blended=48 intervalNs=42857138 active=true
+10-15 16:17:16.905  3079 11258 I GlEnhance: drawFrame #1200 preset=9:动漫·日间 source=495 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:18.077  3079 11258 I GlEnhance: frame_stats seconds=2.0117476 sourceFps=23.859852 outputFps=57.66131 blended=48 intervalNs=40476222 active=true
+10-15 16:17:18.632  3079 11258 I GlEnhance: drawFrame #1300 preset=9:动漫·日间 source=537 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:20.081  3079 11258 I GlEnhance: frame_stats seconds=2.0046961 sourceFps=23.943779 outputFps=57.365303 blended=48 intervalNs=40476186 active=true
+10-15 16:17:20.374  3079 11258 I GlEnhance: drawFrame #1400 preset=9:动漫·日间 source=578 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:22.091  3079 11258 I GlEnhance: frame_stats seconds=2.0099049 sourceFps=23.881727 outputFps=57.216637 blended=51 intervalNs=40476187 active=true
+10-15 16:17:22.126  3079 11258 I GlEnhance: drawFrame #1500 preset=9:动漫·日间 source=620 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:23.863  3079 11258 I GlEnhance: drawFrame #1600 preset=9:动漫·日间 source=662 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:24.108  3079 11258 I GlEnhance: frame_stats seconds=2.015606 sourceFps=24.310308 outputFps=57.550934 blended=49 intervalNs=42857139 active=true
+10-15 16:17:25.608  3079 11258 I GlEnhance: drawFrame #1700 preset=9:动漫·日间 source=704 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:26.110  3079 11258 I GlEnhance: frame_stats seconds=2.002408 sourceFps=23.971138 outputFps=57.43085 blended=53 intervalNs=42857140 active=true
+10-15 16:17:27.337  3079 11258 I GlEnhance: drawFrame #1800 preset=9:动漫·日间 source=745 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:28.122  3079 11258 I GlEnhance: frame_stats seconds=2.012762 sourceFps=23.847826 outputFps=57.632248 blended=49 intervalNs=42857142 active=true
+10-15 16:17:29.077  3079 11258 I GlEnhance: drawFrame #1900 preset=9:动漫·日间 source=787 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:30.135  3079 11258 I GlEnhance: frame_stats seconds=2.012271 sourceFps=24.350597 outputFps=57.646313 blended=51 intervalNs=40476192 active=true
+10-15 16:17:30.882  3079 11258 I GlEnhance: drawFrame #2000 preset=9:动漫·日间 source=829 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:32.151  3079 11258 I GlEnhance: frame_stats seconds=2.015952 sourceFps=23.314045 outputFps=55.556877 blended=54 intervalNs=40476526 active=true
+10-15 16:17:32.623  3079 11258 I GlEnhance: drawFrame #2100 preset=9:动漫·日间 source=871 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:34.153  3079 11258 I GlEnhance: frame_stats seconds=2.0022583 sourceFps=23.97293 outputFps=57.435146 blended=49 intervalNs=40476186 active=true
+10-15 16:17:34.363  3079 11258 I GlEnhance: drawFrame #2200 preset=9:动漫·日间 source=913 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:36.106  3079 11258 I GlEnhance: drawFrame #2300 preset=9:动漫·日间 source=954 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:36.157  3079 11258 I GlEnhance: frame_stats seconds=2.0049317 sourceFps=23.940966 outputFps=57.358562 blended=50 intervalNs=40476186 active=true
+10-15 16:17:37.848  3079 11258 I GlEnhance: drawFrame #2400 preset=9:动漫·日间 source=996 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:38.165  3079 11258 I GlEnhance: frame_stats seconds=2.0068765 sourceFps=23.917765 outputFps=57.30298 blended=50 intervalNs=42857157 active=true
+10-15 16:17:39.594  3079 11258 I GlEnhance: drawFrame #2500 preset=9:动漫·日间 source=1038 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:17:39.870  3079 11258 I GlEnhance: output srRequested=true srActive=true interp=true viewport=2880x1620
+10-15 16:17:40.166  3079 11258 I GlEnhance: frame_stats seconds=2.0018141 sourceFps=23.478703 outputFps=57.44789 blended=50 intervalNs=40476187 active=true
+10-15 16:17:41.339  3079 11258 I GlEnhance: drawFrame #2600 preset=9:动漫·日间 source=1080 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:42.179  3079 11258 I GlEnhance: frame_stats seconds=2.0110948 sourceFps=24.364838 outputFps=57.182785 blended=53 intervalNs=42857140 active=true
+10-15 16:17:43.082  3079 11258 I GlEnhance: drawFrame #2700 preset=9:动漫·日间 source=1121 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:44.192  3079 11258 I GlEnhance: frame_stats seconds=2.0144627 sourceFps=23.827694 outputFps=57.58359 blended=49 intervalNs=42857142 active=true
+10-15 16:17:44.823  3079 11258 I GlEnhance: drawFrame #2800 preset=9:动漫·日间 source=1163 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:46.204  3079 11258 I GlEnhance: frame_stats seconds=2.0093596 sourceFps=23.888208 outputFps=56.734493 blended=48 intervalNs=42857146 active=true
+10-15 16:17:46.589  3079 11258 I GlEnhance: drawFrame #2900 preset=9:动漫·日间 source=1206 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:48.206  3079 11258 I GlEnhance: frame_stats seconds=2.0042207 sourceFps=24.448404 outputFps=57.37891 blended=51 intervalNs=40476186 active=true
+10-15 16:17:48.326  3079 11258 I GlEnhance: drawFrame #3000 preset=9:动漫·日间 source=1247 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:50.089  3079 11258 I GlEnhance: drawFrame #3100 preset=9:动漫·日间 source=1290 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:50.207  3079 11258 I GlEnhance: frame_stats seconds=2.0011923 sourceFps=23.9857 outputFps=56.966038 blended=51 intervalNs=40476186 active=true
+10-15 16:17:51.832  3079 11258 I GlEnhance: drawFrame #3200 preset=9:动漫·日间 source=1331 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:52.216  3079 11258 I GlEnhance: frame_stats seconds=2.0096889 sourceFps=23.884295 outputFps=57.22279 blended=50 intervalNs=40476186 active=true
+10-15 16:17:53.591  3079 11258 I GlEnhance: drawFrame #3300 preset=9:动漫·日间 source=1373 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:54.223  3079 11258 I GlEnhance: frame_stats seconds=2.0072982 sourceFps=23.912739 outputFps=56.792755 blended=54 intervalNs=40476186 active=true
+10-15 16:17:55.345  3079 11258 I GlEnhance: drawFrame #3400 preset=9:动漫·日间 source=1416 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:56.229  3079 11258 I GlEnhance: frame_stats seconds=2.0056894 sourceFps=23.931921 outputFps=57.336895 blended=48 intervalNs=40476187 active=true
+10-15 16:17:57.089  3079 11258 I GlEnhance: drawFrame #3500 preset=9:动漫·日间 source=1457 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:17:58.240  3079 11258 I GlEnhance: frame_stats seconds=2.0107596 sourceFps=23.871576 outputFps=57.192318 blended=52 intervalNs=40476198 active=true
+10-15 16:17:58.834  3079 11258 I GlEnhance: drawFrame #3600 preset=9:动漫·日间 source=1499 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:18:00.255  3079 11258 I GlEnhance: frame_stats seconds=2.0150397 sourceFps=23.820871 outputFps=57.070835 blended=48 intervalNs=40476189 active=true
+10-15 16:18:00.586  3079 11258 I GlEnhance: drawFrame #3700 preset=9:动漫·日间 source=1541 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:18:02.135  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:18:02.136  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:18:02.149 14589 14589 I Car6Test: PAUSE
+10-15 16:18:04.188  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:18:04.188  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:18:04.190  3079 11258 I GlEnhance: frame_stats seconds=3.934718 sourceFps=11.436652 outputFps=28.21041 blended=47 intervalNs=41708333 active=true
+10-15 16:18:04.204 14599 14599 I Car6Test: RESUME
+10-15 16:18:04.325  3079 11258 I GlEnhance: drawFrame #3800 preset=9:动漫·日间 source=1582 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:18:06.061  3079 11258 I GlEnhance: drawFrame #3900 preset=9:动漫·日间 source=1624 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:18:06.201  3079 11258 I GlEnhance: frame_stats seconds=2.010685 sourceFps=24.867147 outputFps=57.691784 blended=50 intervalNs=42855056 active=true
+10-15 16:18:06.232  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:18:06.232  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:18:07.018  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:18:07.018  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:18:08.205  3079 11258 I GlEnhance: frame_stats seconds=2.0047681 sourceFps=14.465513 outputFps=35.91438 blended=30 intervalNs=40482757 active=true
+10-15 16:18:08.246 15141 15141 I Car6Test: SEEK
+10-15 16:18:08.554  3079 11258 I GlEnhance: drawFrame #4000 preset=9:动漫·日间 source=1665 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:18:09.314  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:18:09.314  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:19:06.160  3079 11258 I GlEnhance: output srRequested=true srActive=false interp=true viewport=1057x594
+10-15 16:19:06.160  3079 11258 I GlEnhance: frame_stats seconds=57.954803 sourceFps=0.396861 outputFps=1.1388185 blended=23 intervalNs=41708333 active=false
+10-15 16:19:08.207  3079  3079 I GlEnhance: release requested source=1680 outputs=4047
+10-15 16:19:59.609  3079 15487 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/4k.mp4
+10-15 16:19:59.759  3079 15490 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:19:59.759  3079 15490 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=true sharp=1.45 interp=true maxAlpha=0.28
+10-15 16:19:59.760  3079  3079 I GlEnhance: player surface bound (main thread)
+10-15 16:20:00.315  3079 15490 I GlEnhance: FBO ping-pong allocated 2x 1057x675 RGBA8 bytes=5707800
+10-15 16:20:00.315  3079 15490 I GlEnhance: output srRequested=true srActive=false interp=true viewport=1057x675
+10-15 16:20:00.315  3079 15490 I GlEnhance: drawFrame #1 preset=10:动漫·清透 source=1 fbo=true sr=false interp=true viewport=1057x675
+10-15 16:20:00.318  3079  3079 I GlEnhance: setVideoSize 3840x2160
+10-15 16:20:00.330  3079 15490 I GlEnhance: FBO ping-pong released
+10-15 16:20:00.334  3079 15490 I GlEnhance: FBO ping-pong allocated 2x 3840x2160 RGBA8 bytes=66355200
+10-15 16:20:00.334  3079 15490 I GlEnhance: drawFrame #2 preset=10:动漫·清透 source=1 fbo=true sr=false interp=true viewport=1057x675
+10-15 16:20:00.428  3079 15490 I GlEnhance: output srRequested=true srActive=false interp=true viewport=1057x594
+10-15 16:20:00.428  3079 15490 I GlEnhance: drawFrame #3 preset=10:动漫·清透 source=1 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:20:00.466  3079  3079 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=true sharp=1.45 interp=true maxAlpha=0.28
+10-15 16:20:00.603  3079  3079 I CarAudio: applied mode=8 name=动漫·对白 session=113 bass=0 virtualizer=80 loudness=650
+10-15 16:20:00.603  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:20:00.603  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:20:00.643  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:20:00.643  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:20:00.692  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:20:00.692  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:20:02.340  3079 15490 I GlEnhance: frame_stats seconds=2.0115826 sourceFps=16.902115 outputFps=44.74089 blended=42 intervalNs=42949653 active=true
+10-15 16:20:02.531  3079 15490 I GlEnhance: drawFrame #100 preset=10:动漫·清透 source=39 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:20:04.332  3079 15490 I GlEnhance: frame_stats seconds=2.0041049 sourceFps=23.451866 outputFps=51.893494 blended=73 intervalNs=40476187 active=true
+10-15 16:20:04.438  3079 15490 I GlEnhance: drawFrame #200 preset=10:动漫·清透 source=84 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:20:06.340  3079 15490 I GlEnhance: frame_stats seconds=2.0087988 sourceFps=20.410208 outputFps=45.300705 blended=45 intervalNs=42949655 active=true
+10-15 16:20:06.673  3079 15490 I GlEnhance: drawFrame #300 preset=10:动漫·清透 source=127 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:20:08.351  3079 15490 I GlEnhance: frame_stats seconds=2.010888 sourceFps=22.378172 outputFps=52.215736 blended=65 intervalNs=40158376 active=true
+10-15 16:20:08.551  3079 15490 I GlEnhance: drawFrame #400 preset=10:动漫·清透 source=172 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:20:10.329  3079 15490 I GlEnhance: drawFrame #500 preset=10:动漫·清透 source=214 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:20:10.362  3079 15490 I GlEnhance: frame_stats seconds=2.0139039 sourceFps=23.834305 outputFps=55.61338 blended=67 intervalNs=40486020 active=true
+10-15 16:20:12.271  3079 15490 I GlEnhance: drawFrame #600 preset=10:动漫·清透 source=253 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:20:12.379  3079 15490 I GlEnhance: frame_stats seconds=2.0162234 sourceFps=19.839071 outputFps=51.581585 blended=54 intervalNs=42886417 active=true
+10-15 16:20:12.943  3079 15490 I GlEnhance: output srRequested=true srActive=false interp=true viewport=2880x1620
+10-15 16:20:14.239  3079 15490 I GlEnhance: drawFrame #700 preset=10:动漫·清透 source=295 fbo=true sr=false interp=true viewport=2880x1620
+10-15 16:20:14.384  3079 15490 I GlEnhance: frame_stats seconds=2.0055585 sourceFps=21.440413 outputFps=50.85865 blended=55 intervalNs=43172139 active=true
+10-15 16:20:16.079  3079 15490 I GlEnhance: drawFrame #800 preset=10:动漫·清透 source=339 fbo=true sr=false interp=true viewport=2880x1620
+10-15 16:20:16.387  3079 15490 I GlEnhance: frame_stats seconds=2.0028298 sourceFps=23.966091 outputFps=53.923702 blended=70 intervalNs=36407178 active=true
+10-15 16:20:18.241  3079 15490 I GlEnhance: drawFrame #900 preset=10:动漫·清透 source=378 fbo=true sr=false interp=true viewport=2880x1620
+10-15 16:20:18.392  3079 15490 I GlEnhance: frame_stats seconds=2.0048318 sourceFps=16.959028 outputFps=44.392754 blended=46 intervalNs=57334553 active=true
+10-15 16:20:18.518 16367 16367 I Car6Test: BACKGROUND
+10-15 16:20:18.935  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:20:18.937  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:20:32.669  3079  3079 I GlEnhance: setVideoSize 3840x2160
+10-15 16:20:32.684  3079 15490 I GlEnhance: output srRequested=true srActive=false interp=true viewport=2880x1620
+10-15 16:20:32.684  3079 15490 I GlEnhance: frame_stats seconds=14.291801 sourceFps=0.4897913 outputFps=2.1690757 blended=12 intervalNs=41708333 active=false
+10-15 16:20:32.706  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:20:32.706  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:20:32.717  3079 15490 I GlEnhance: output srRequested=true srActive=false interp=true viewport=2880x1620
+10-15 16:20:32.799  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:20:32.799  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:21:15.331  3079 15490 I GlEnhance: output srRequested=true srActive=false interp=true viewport=1057x594
+10-15 16:21:15.331  3079 15490 I GlEnhance: frame_stats seconds=42.64739 sourceFps=0.0 outputFps=0.16413666 blended=0 intervalNs=41708333 active=false
+10-15 16:21:17.341  3079  3079 I GlEnhance: release requested source=387 outputs=944
+10-15 16:21:32.369  3079 16666 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4
+10-15 16:21:32.493  3079 16669 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:21:32.493  3079 16669 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=true sharp=1.45 interp=false maxAlpha=0.28
+10-15 16:21:32.496  3079  3079 I GlEnhance: player surface bound (main thread)
+10-15 16:21:32.634  3079 16669 I GlEnhance: FBO ping-pong allocated 2x 1057x675 RGBA8 bytes=5707800
+10-15 16:21:32.634  3079 16669 I GlEnhance: output srRequested=true srActive=false interp=false viewport=1057x675
+10-15 16:21:32.635  3079 16669 I GlEnhance: drawFrame #1 preset=10:动漫·清透 source=1 fbo=true sr=false interp=false viewport=1057x675
+10-15 16:21:32.636  3079  3079 I GlEnhance: setVideoSize 640x360
+10-15 16:21:32.638  3079 16669 I GlEnhance: FBO ping-pong released
+10-15 16:21:32.638  3079 16669 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-15 16:21:32.638  3079 16669 I GlEnhance: output srRequested=true srActive=true interp=false viewport=1057x675
+10-15 16:21:32.638  3079 16669 I GlEnhance: drawFrame #2 preset=10:动漫·清透 source=1 fbo=true sr=true interp=false viewport=1057x675
+10-15 16:21:32.646  3079 16669 I GlEnhance: output srRequested=true srActive=true interp=false viewport=1057x594
+10-15 16:21:32.646  3079 16669 I GlEnhance: drawFrame #3 preset=10:动漫·清透 source=1 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:21:32.684  3079  3079 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=true sharp=1.45 interp=false maxAlpha=0.28
+10-15 16:21:32.737  3079  3079 I CarAudio: applied mode=8 name=动漫·对白 session=121 bass=0 virtualizer=80 loudness=650
+10-15 16:21:32.737  3079  3079 I GlEnhance: playback active=true interp=false
+10-15 16:21:32.743  3079  3079 I GlEnhance: playback active=false interp=false
+10-15 16:21:32.755  3079  3079 I GlEnhance: playback active=true interp=false
+10-15 16:21:33.143 16732 16732 I Car6Test: COMBO10
+10-15 16:21:34.652  3079 16669 I GlEnhance: frame_stats seconds=2.0205884 sourceFps=20.291119 outputFps=23.260551 blended=0 intervalNs=40478810 active=true
+10-15 16:21:36.652  3079 16669 I GlEnhance: frame_stats seconds=2.0001266 sourceFps=23.998482 outputFps=23.998482 blended=0 intervalNs=40476186 active=true
+10-15 16:21:36.866  3079 16669 I GlEnhance: drawFrame #100 preset=10:动漫·清透 source=94 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:21:38.654  3079 16669 I GlEnhance: frame_stats seconds=2.0017738 sourceFps=23.978733 outputFps=23.978733 blended=0 intervalNs=40476186 active=true
+10-15 16:21:40.697  3079 16669 I GlEnhance: frame_stats seconds=2.0410078 sourceFps=24.007748 outputFps=24.007748 blended=0 intervalNs=42857139 active=true
+10-15 16:21:41.028  3079 16669 I GlEnhance: drawFrame #200 preset=10:动漫·清透 source=194 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:21:42.737  3079 16669 I GlEnhance: frame_stats seconds=2.0417058 sourceFps=23.99954 outputFps=23.99954 blended=0 intervalNs=40476187 active=true
+10-15 16:21:44.754  3079 16669 I GlEnhance: frame_stats seconds=2.0169253 sourceFps=20.32797 outputFps=20.32797 blended=0 intervalNs=42857128 active=true
+10-15 16:21:45.508  3079 16669 I GlEnhance: drawFrame #300 preset=10:动漫·清透 source=294 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:21:46.787  3079 16669 I GlEnhance: frame_stats seconds=2.030617 sourceFps=24.130596 outputFps=24.130596 blended=0 intervalNs=40476189 active=true
+10-15 16:21:48.785  3079 16669 I GlEnhance: frame_stats seconds=2.0005424 sourceFps=23.993492 outputFps=23.993492 blended=0 intervalNs=40476189 active=true
+10-15 16:21:49.664  3079 16669 I GlEnhance: drawFrame #400 preset=10:动漫·清透 source=394 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:21:50.836  3079 16669 I GlEnhance: frame_stats seconds=2.0505412 sourceFps=23.896132 outputFps=23.896132 blended=0 intervalNs=42857143 active=true
+10-15 16:21:52.867  3079 16669 I GlEnhance: frame_stats seconds=2.0307722 sourceFps=24.128752 outputFps=24.128752 blended=0 intervalNs=40476192 active=true
+10-15 16:21:53.830  3079 16669 I GlEnhance: drawFrame #500 preset=10:动漫·清透 source=494 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:21:54.918  3079 16669 I GlEnhance: frame_stats seconds=2.0515995 sourceFps=23.883804 outputFps=23.883804 blended=0 intervalNs=42857146 active=true
+10-15 16:21:56.945  3079 16669 I GlEnhance: frame_stats seconds=2.0274284 sourceFps=24.168549 outputFps=24.168549 blended=0 intervalNs=40476186 active=true
+10-15 16:21:57.994  3079 16669 I GlEnhance: drawFrame #600 preset=10:动漫·清透 source=594 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:21:58.951  3079 16669 I GlEnhance: frame_stats seconds=2.0050094 sourceFps=23.940037 outputFps=23.940037 blended=0 intervalNs=40476186 active=true
+10-15 16:22:00.994  3079 16669 I GlEnhance: frame_stats seconds=2.0441818 sourceFps=23.97047 outputFps=23.97047 blended=0 intervalNs=42857138 active=true
+10-15 16:22:02.161  3079 16669 I GlEnhance: drawFrame #700 preset=10:动漫·清透 source=694 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:22:03.006  3079 16669 I GlEnhance: frame_stats seconds=2.0114148 sourceFps=23.8638 outputFps=23.8638 blended=0 intervalNs=42857138 active=true
+10-15 16:22:05.039  3079 16669 I GlEnhance: frame_stats seconds=2.0326366 sourceFps=24.10662 outputFps=24.10662 blended=0 intervalNs=40476186 active=true
+10-15 16:22:06.329  3079 16669 I GlEnhance: drawFrame #800 preset=10:动漫·清透 source=794 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:22:07.088  3079 16669 I GlEnhance: frame_stats seconds=2.048676 sourceFps=23.917887 outputFps=23.917887 blended=0 intervalNs=42857138 active=true
+10-15 16:22:09.118  3079 16669 I GlEnhance: frame_stats seconds=2.0306358 sourceFps=24.130373 outputFps=24.130373 blended=0 intervalNs=40476186 active=true
+10-15 16:22:10.501  3079 16669 I GlEnhance: drawFrame #900 preset=10:动漫·清透 source=894 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:22:11.170  3079 16669 I GlEnhance: frame_stats seconds=2.0522695 sourceFps=23.876007 outputFps=23.876007 blended=0 intervalNs=42857139 active=true
+10-15 16:22:13.217  3079 16669 I GlEnhance: frame_stats seconds=2.046933 sourceFps=23.449718 outputFps=23.449718 blended=0 intervalNs=43795698 active=true
+10-15 16:22:14.736  3079 16669 I GlEnhance: drawFrame #1000 preset=10:动漫·清透 source=994 fbo=true sr=true interp=false viewport=1057x594
+10-15 16:22:15.239  3079 16669 I GlEnhance: frame_stats seconds=2.0217657 sourceFps=23.741623 outputFps=23.741623 blended=0 intervalNs=40476200 active=true
+10-15 16:22:17.280  3079 16669 I GlEnhance: frame_stats seconds=2.0411372 sourceFps=24.006226 outputFps=24.006226 blended=0 intervalNs=42857140 active=true
+10-15 16:22:17.560  3079  3079 I GlEnhance: release requested source=1060 outputs=1066
+10-15 16:22:35.678  3079 19070 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4
+10-15 16:22:35.788  3079 19073 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:22:35.788  3079 19073 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=false sharp=1.45 interp=true maxAlpha=0.28
+10-15 16:22:35.790  3079  3079 I GlEnhance: player surface bound (main thread)
+10-15 16:22:36.126  3079  3079 I GlEnhance: setVideoSize 640x360
+10-15 16:22:36.130  3079 19073 I GlEnhance: FBO ping-pong allocated 2x 1057x675 RGBA8 bytes=5707800
+10-15 16:22:36.130  3079 19073 I GlEnhance: output srRequested=false srActive=false interp=true viewport=1057x675
+10-15 16:22:36.130  3079 19073 I GlEnhance: drawFrame #1 preset=10:动漫·清透 source=1 fbo=true sr=false interp=true viewport=1057x675
+10-15 16:22:36.134  3079 19073 I GlEnhance: FBO ping-pong released
+10-15 16:22:36.135  3079 19073 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-15 16:22:36.135  3079 19073 I GlEnhance: drawFrame #2 preset=10:动漫·清透 source=1 fbo=true sr=false interp=true viewport=1057x675
+10-15 16:22:36.162  3079 19073 I GlEnhance: output srRequested=false srActive=false interp=true viewport=1057x594
+10-15 16:22:36.162  3079 19073 I GlEnhance: drawFrame #3 preset=10:动漫·清透 source=1 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:36.165  3079  3079 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=false sharp=1.45 interp=true maxAlpha=0.28
+10-15 16:22:36.176  3079  3079 I CarAudio: applied mode=8 name=动漫·对白 session=129 bass=0 virtualizer=80 loudness=650
+10-15 16:22:36.176  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:22:36.176  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:22:36.178  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:22:36.178  3079  3079 I GlEnhance: playback active=false interp=true
+10-15 16:22:36.182  3079  3079 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:22:36.182  3079  3079 I GlEnhance: playback active=true interp=true
+10-15 16:22:36.458 19318 19318 I Car6Test: COMBO01
+10-15 16:22:37.824  3079 19073 I GlEnhance: drawFrame #100 preset=10:动漫·清透 source=40 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:38.136  3079 19073 I GlEnhance: frame_stats seconds=2.0119328 sourceFps=23.857655 outputFps=58.65007 blended=49 intervalNs=40476223 active=true
+10-15 16:22:39.567  3079 19073 I GlEnhance: drawFrame #200 preset=10:动漫·清透 source=82 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:40.144  3079 19073 I GlEnhance: frame_stats seconds=2.0079544 sourceFps=23.904926 outputFps=57.272217 blended=48 intervalNs=40476186 active=true
+10-15 16:22:41.325  3079 19073 I GlEnhance: drawFrame #300 preset=10:动漫·清透 source=124 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:42.156  3079 19073 I GlEnhance: frame_stats seconds=2.0114381 sourceFps=23.863523 outputFps=57.173023 blended=48 intervalNs=40476186 active=true
+10-15 16:22:43.054  3079 19073 I GlEnhance: drawFrame #400 preset=10:动漫·清透 source=166 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:44.170  3079 19073 I GlEnhance: frame_stats seconds=2.0143218 sourceFps=24.325806 outputFps=57.58762 blended=49 intervalNs=42857139 active=true
+10-15 16:22:44.793  3079 19073 I GlEnhance: drawFrame #500 preset=10:动漫·清透 source=208 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:46.175  3079 19073 I GlEnhance: frame_stats seconds=2.004765 sourceFps=23.942955 outputFps=57.36333 blended=48 intervalNs=42857140 active=true
+10-15 16:22:46.545  3079 19073 I GlEnhance: drawFrame #600 preset=10:动漫·清透 source=249 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:48.180  3079 19073 I GlEnhance: frame_stats seconds=2.005255 sourceFps=23.438416 outputFps=57.349316 blended=49 intervalNs=42857172 active=true
+10-15 16:22:48.285  3079 19073 I GlEnhance: drawFrame #700 preset=10:动漫·清透 source=291 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:50.053  3079 19073 I GlEnhance: drawFrame #800 preset=10:动漫·清透 source=333 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:50.191  3079 19073 I GlEnhance: frame_stats seconds=2.0113468 sourceFps=23.864607 outputFps=56.67844 blended=49 intervalNs=42857143 active=true
+10-15 16:22:51.804  3079 19073 I GlEnhance: drawFrame #900 preset=10:动漫·清透 source=375 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:52.199  3079 19073 I GlEnhance: frame_stats seconds=2.006874 sourceFps=24.41608 outputFps=57.303047 blended=49 intervalNs=40476192 active=true
+10-15 16:22:53.540  3079 19073 I GlEnhance: drawFrame #1000 preset=10:动漫·清透 source=417 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:54.202  3079 19073 I GlEnhance: frame_stats seconds=2.003045 sourceFps=23.963514 outputFps=57.412586 blended=49 intervalNs=40476186 active=true
+10-15 16:22:55.282  3079 19073 I GlEnhance: drawFrame #1100 preset=10:动漫·清透 source=458 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:56.208  3079 19073 I GlEnhance: frame_stats seconds=2.00601 sourceFps=23.928095 outputFps=57.32773 blended=48 intervalNs=40476186 active=true
+10-15 16:22:57.033  3079 19073 I GlEnhance: drawFrame #1200 preset=10:动漫·清透 source=501 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:22:58.218  3079 19073 I GlEnhance: frame_stats seconds=2.0106175 sourceFps=23.873262 outputFps=57.196358 blended=48 intervalNs=40476186 active=true
+10-15 16:22:58.771  3079 19073 I GlEnhance: drawFrame #1300 preset=10:动漫·清透 source=542 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:00.223  3079 19073 I GlEnhance: frame_stats seconds=2.004653 sourceFps=23.944294 outputFps=57.36654 blended=48 intervalNs=40476186 active=true
+10-15 16:23:00.524  3079 19073 I GlEnhance: drawFrame #1400 preset=10:动漫·清透 source=584 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:02.238  3079 19073 I GlEnhance: frame_stats seconds=2.0149684 sourceFps=23.821714 outputFps=57.072857 blended=48 intervalNs=40476187 active=true
+10-15 16:23:02.273  3079 19073 I GlEnhance: drawFrame #1500 preset=10:动漫·清透 source=626 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:04.017  3079 19073 I GlEnhance: drawFrame #1600 preset=10:动漫·清透 source=668 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:04.242  3079 19073 I GlEnhance: frame_stats seconds=2.0047908 sourceFps=23.942648 outputFps=57.362595 blended=48 intervalNs=40476189 active=true
+10-15 16:23:05.764  3079 19073 I GlEnhance: drawFrame #1700 preset=10:动漫·清透 source=710 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:06.257  3079 19073 I GlEnhance: frame_stats seconds=2.0140905 sourceFps=24.328598 outputFps=57.097733 blended=49 intervalNs=42857140 active=true
+10-15 16:23:07.532  3079 19073 I GlEnhance: drawFrame #1800 preset=10:动漫·清透 source=752 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:08.258  3079 19073 I GlEnhance: frame_stats seconds=2.0008636 sourceFps=23.989641 outputFps=56.475616 blended=48 intervalNs=42857143 active=true
+10-15 16:23:09.294  3079 19073 I GlEnhance: drawFrame #1900 preset=10:动漫·清透 source=795 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:10.260  3079 19073 I GlEnhance: frame_stats seconds=2.0025485 sourceFps=23.969458 outputFps=57.426826 blended=48 intervalNs=42857146 active=true
+10-15 16:23:11.029  3079 19073 I GlEnhance: drawFrame #2000 preset=10:动漫·清透 source=836 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:12.270  3079 19073 I GlEnhance: frame_stats seconds=2.0094562 sourceFps=23.389414 outputFps=56.73177 blended=47 intervalNs=48809518 active=true
+10-15 16:23:12.791  3079 19073 I GlEnhance: drawFrame #2100 preset=10:动漫·清透 source=878 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:14.281  3079 19073 I GlEnhance: frame_stats seconds=2.0114908 sourceFps=24.36004 outputFps=57.171528 blended=49 intervalNs=40476190 active=true
+10-15 16:23:14.546  3079 19073 I GlEnhance: drawFrame #2200 preset=10:动漫·清透 source=920 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:16.289  3079 19073 I GlEnhance: drawFrame #2300 preset=10:动漫·清透 source=962 fbo=true sr=false interp=true viewport=1057x594
+10-15 16:23:16.289  3079 19073 I GlEnhance: frame_stats seconds=2.007737 sourceFps=23.907515 outputFps=57.27842 blended=49 intervalNs=40476186 active=true
+10-15 16:23:16.877  3079  3079 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:23:16.934  3079  3079 I GlEnhance: release requested source=975 outputs=2333
+10-15 16:23:33.800  3079 21482 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4
+10-15 16:23:33.900  3079 21485 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:23:33.901  3079 21485 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=false sharp=1.45 interp=false maxAlpha=0.28
+10-15 16:23:33.906  3079  3079 I GlEnhance: player surface bound (main thread)
+10-15 16:23:34.174  3079  3079 I GlEnhance: setVideoSize 640x360
+10-15 16:23:34.174  3079 21485 I GlEnhance: drawFrame #1 preset=10:动漫·清透 source=1 fbo=false sr=false interp=false viewport=1057x675
+10-15 16:23:34.175  3079  3079 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=false sharp=1.45 interp=false maxAlpha=0.28
+10-15 16:23:34.176  3079 21485 I GlEnhance: drawFrame #2 preset=10:动漫·清透 source=1 fbo=false sr=false interp=false viewport=1057x675
+10-15 16:23:34.183  3079  3079 I CarAudio: applied mode=8 name=动漫·对白 session=137 bass=0 virtualizer=80 loudness=650
+10-15 16:23:34.183  3079  3079 I GlEnhance: playback active=true interp=false
+10-15 16:23:34.184  3079  3079 I GlEnhance: playback active=false interp=false
+10-15 16:23:34.186  3079  3079 I GlEnhance: playback active=true interp=false
+10-15 16:23:34.194  3079 21485 I GlEnhance: drawFrame #3 preset=10:动漫·清透 source=1 fbo=false sr=false interp=false viewport=1057x675
+10-15 16:23:34.556 21730 21730 I Car6Test: COMBO00
+10-15 16:23:36.177  3079 21485 I GlEnhance: frame_stats seconds=2.002836 sourceFps=24.46531 outputFps=26.462477 blended=0 intervalNs=40476184 active=true
+10-15 16:23:38.148  3079 21485 I GlEnhance: drawFrame #100 preset=10:动漫·清透 source=96 fbo=false sr=false interp=false viewport=1057x594
+10-15 16:23:38.181  3079 21485 I GlEnhance: frame_stats seconds=2.0036027 sourceFps=23.956844 outputFps=23.956844 blended=0 intervalNs=40476186 active=true
+10-15 16:23:40.182  3079 21485 I GlEnhance: frame_stats seconds=2.0021236 sourceFps=23.974545 outputFps=23.974545 blended=0 intervalNs=40476186 active=true
+10-15 16:23:42.236  3079 21485 I GlEnhance: frame_stats seconds=2.0537956 sourceFps=23.858265 outputFps=23.858265 blended=0 intervalNs=42857138 active=true
+10-15 16:23:42.314  3079 21485 I GlEnhance: drawFrame #200 preset=10:动漫·清透 source=196 fbo=false sr=false interp=false viewport=1057x594
+10-15 16:23:44.382  3079 21485 I GlEnhance: frame_stats seconds=2.1457787 sourceFps=22.835533 outputFps=22.835533 blended=0 intervalNs=69642850 active=true
+10-15 16:23:46.432  3079 21485 I GlEnhance: frame_stats seconds=2.0499027 sourceFps=23.903574 outputFps=23.903574 blended=0 intervalNs=42857160 active=true
+10-15 16:23:46.603  3079 21485 I GlEnhance: drawFrame #300 preset=10:动漫·清透 source=296 fbo=false sr=false interp=false viewport=1057x594
+10-15 16:23:48.433  3079 21485 I GlEnhance: frame_stats seconds=2.0014706 sourceFps=23.982367 outputFps=23.982367 blended=0 intervalNs=42857138 active=true
+10-15 16:23:50.460  3079 21485 I GlEnhance: frame_stats seconds=2.0266027 sourceFps=24.178394 outputFps=24.178394 blended=0 intervalNs=40476186 active=true
+10-15 16:23:50.769  3079 21485 I GlEnhance: drawFrame #400 preset=10:动漫·清透 source=396 fbo=false sr=false interp=false viewport=1057x594
+10-15 16:23:52.518  3079 21485 I GlEnhance: frame_stats seconds=2.0582788 sourceFps=23.8063 outputFps=23.8063 blended=0 intervalNs=42857139 active=true
+10-15 16:23:54.518  3079 21485 I GlEnhance: frame_stats seconds=2.0002294 sourceFps=23.997248 outputFps=23.997248 blended=0 intervalNs=42857140 active=true
+10-15 16:23:54.933  3079 21485 I GlEnhance: drawFrame #500 preset=10:动漫·清透 source=496 fbo=false sr=false interp=false viewport=1057x594
+10-15 16:23:56.551  3079 21485 I GlEnhance: frame_stats seconds=2.0327222 sourceFps=24.105606 outputFps=24.105606 blended=0 intervalNs=40476187 active=true
+10-15 16:23:58.596  3079 21485 I GlEnhance: frame_stats seconds=2.0436068 sourceFps=23.977215 outputFps=23.977215 blended=0 intervalNs=42857140 active=true
+10-15 16:23:59.102  3079 21485 I GlEnhance: drawFrame #600 preset=10:动漫·清透 source=596 fbo=false sr=false interp=false viewport=1057x594
+10-15 16:24:00.603  3079 21485 I GlEnhance: frame_stats seconds=2.007849 sourceFps=23.906181 outputFps=23.906181 blended=0 intervalNs=42857142 active=true
+10-15 16:24:02.631  3079 21485 I GlEnhance: frame_stats seconds=2.0280166 sourceFps=24.16154 outputFps=24.16154 blended=0 intervalNs=40476192 active=true
+10-15 16:24:03.262  3079 21485 I GlEnhance: drawFrame #700 preset=10:动漫·清透 source=696 fbo=false sr=false interp=false viewport=1057x594
+10-15 16:24:04.638  3079 21485 I GlEnhance: frame_stats seconds=2.0071044 sourceFps=23.915049 outputFps=23.915049 blended=0 intervalNs=40476186 active=true
+10-15 16:24:06.680  3079 21485 I GlEnhance: frame_stats seconds=2.0420446 sourceFps=23.995558 outputFps=23.995558 blended=0 intervalNs=42857138 active=true
+10-15 16:24:07.428  3079 21485 I GlEnhance: drawFrame #800 preset=10:动漫·清透 source=796 fbo=false sr=false interp=false viewport=1057x594
+10-15 16:24:08.688  3079 21485 I GlEnhance: frame_stats seconds=2.0075586 sourceFps=23.90964 outputFps=23.90964 blended=0 intervalNs=42857138 active=true
+10-15 16:24:09.466  3079  3079 I GlEnhance: release requested source=842 outputs=846
+10-15 16:24:58.062 23666 23784 I JSLoader: echo-getSpider load
+10-15 16:24:59.403 23666 23802 I python.stdout: CAR5_PY_RUNTIME version=3.8.13 dependencies=8 network=OK
+10-15 16:25:31.393 23666 23957 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4
+10-15 16:25:32.135 24382 24382 I Car6Test: ORIGINAL_00
+10-15 16:25:32.144 23666 23666 I CarAudio: applied mode=8 name=动漫·对白 session=145 bass=0 virtualizer=80 loudness=650
+10-15 16:26:39.504 23666 27004 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4
+10-15 16:26:39.584 23666 27007 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:26:39.584 23666 27007 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:26:39.590 23666 23666 I GlEnhance: player surface bound (main thread)
+10-15 16:26:39.967 23666 27007 I GlEnhance: FBO ping-pong allocated 2x 1057x675 RGBA8 bytes=5707800
+10-15 16:26:39.967 23666 27007 I GlEnhance: output srRequested=true srActive=false interp=true viewport=1057x675
+10-15 16:26:39.967 23666 27007 I GlEnhance: drawFrame #1 preset=0:原画 source=1 fbo=true sr=false interp=true viewport=1057x675
+10-15 16:26:39.968 23666 23666 I GlEnhance: setVideoSize 640x360
+10-15 16:26:39.969 23666 27007 I GlEnhance: FBO ping-pong released
+10-15 16:26:39.969 23666 27007 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-15 16:26:39.969 23666 27007 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x675
+10-15 16:26:39.969 23666 27007 I GlEnhance: drawFrame #2 preset=0:原画 source=1 fbo=true sr=true interp=true viewport=1057x675
+10-15 16:26:40.013 23666 23666 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:26:40.019 23666 27007 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x594
+10-15 16:26:40.019 23666 27007 I GlEnhance: drawFrame #3 preset=0:原画 source=1 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:26:40.029 23666 23666 I CarAudio: applied mode=8 name=动漫·对白 session=153 bass=0 virtualizer=80 loudness=650
+10-15 16:26:40.029 23666 23666 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:26:40.029 23666 23666 I GlEnhance: playback active=true interp=true
+10-15 16:26:40.031 23666 23666 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:26:40.032 23666 23666 I GlEnhance: playback active=false interp=true
+10-15 16:26:40.035 23666 23666 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:26:40.035 23666 23666 I GlEnhance: playback active=true interp=true
+10-15 16:26:41.699 23666 27007 I GlEnhance: drawFrame #100 preset=0:原画 source=42 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:26:41.970 23666 27007 I GlEnhance: frame_stats seconds=2.0039797 sourceFps=23.95234 outputFps=57.38581 blended=46 intervalNs=40476188 active=true
+10-15 16:26:43.456 23666 27007 I GlEnhance: drawFrame #200 preset=0:原画 source=84 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:26:43.974 23666 27007 I GlEnhance: frame_stats seconds=2.0035138 sourceFps=23.957909 outputFps=57.399155 blended=48 intervalNs=40476186 active=true
+10-15 16:26:45.195 23666 27007 I GlEnhance: drawFrame #300 preset=0:原画 source=126 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:26:45.986 23666 27007 I GlEnhance: frame_stats seconds=2.0123205 sourceFps=24.349998 outputFps=57.147953 blended=49 intervalNs=42857138 active=true
+10-15 16:26:46.941 23666 27007 I GlEnhance: drawFrame #400 preset=0:原画 source=168 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:26:48.003 23666 27007 I GlEnhance: frame_stats seconds=2.0163174 sourceFps=23.805777 outputFps=57.530624 blended=48 intervalNs=42857139 active=true
+10-15 16:26:48.690 23666 27007 I GlEnhance: drawFrame #500 preset=0:原画 source=210 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:26:49.086 23666 27007 I GlEnhance: output srRequested=true srActive=true interp=true viewport=2880x1620
+10-15 16:26:50.018 23666 27007 I GlEnhance: frame_stats seconds=2.0150392 sourceFps=23.820877 outputFps=57.07085 blended=52 intervalNs=40495299 active=true
+10-15 16:26:50.436 23666 27007 I GlEnhance: drawFrame #600 preset=0:原画 source=244 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:26:52.026 23666 27007 I GlEnhance: frame_stats seconds=2.0085685 sourceFps=20.412548 outputFps=56.75684 blended=40 intervalNs=40476201 active=true
+10-15 16:26:52.203 23666 27007 I GlEnhance: drawFrame #700 preset=0:原画 source=286 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:26:53.991 23666 27007 I GlEnhance: drawFrame #800 preset=0:原画 source=329 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:26:54.042 23666 27007 I GlEnhance: frame_stats seconds=2.015912 sourceFps=23.810562 outputFps=56.05403 blended=48 intervalNs=40476192 active=true
+10-15 16:26:55.727 23666 27007 I GlEnhance: drawFrame #900 preset=0:原画 source=371 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:26:56.058 23666 27007 I GlEnhance: frame_stats seconds=2.0146253 sourceFps=24.32214 outputFps=57.578945 blended=49 intervalNs=42857146 active=true
+10-15 16:26:57.469 23666 27007 I GlEnhance: drawFrame #1000 preset=0:原画 source=413 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:26:58.065 23666 27007 I GlEnhance: frame_stats seconds=2.008844 sourceFps=23.89434 outputFps=57.246857 blended=48 intervalNs=42857138 active=true
+10-15 16:26:59.213 23666 27007 I GlEnhance: drawFrame #1100 preset=0:原画 source=454 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:00.069 23666 27007 I GlEnhance: frame_stats seconds=2.00368 sourceFps=23.955921 outputFps=57.394394 blended=49 intervalNs=42857138 active=true
+10-15 16:27:00.960 23666 27007 I GlEnhance: drawFrame #1200 preset=0:原画 source=496 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:02.072 23666 27007 I GlEnhance: frame_stats seconds=2.003366 sourceFps=23.959677 outputFps=56.904232 blended=48 intervalNs=42857138 active=true
+10-15 16:27:02.720 23666 27007 I GlEnhance: drawFrame #1300 preset=0:原画 source=539 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:04.081 23666 27007 I GlEnhance: frame_stats seconds=2.0083115 sourceFps=23.900675 outputFps=56.764103 blended=48 intervalNs=42857139 active=true
+10-15 16:27:04.482 23666 27007 I GlEnhance: drawFrame #1400 preset=0:原画 source=581 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:06.087 23666 27007 I GlEnhance: frame_stats seconds=2.006558 sourceFps=24.419928 outputFps=56.81371 blended=49 intervalNs=40476186 active=true
+10-15 16:27:06.245 23666 27007 I GlEnhance: drawFrame #1500 preset=0:原画 source=623 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:08.014 23666 27007 I GlEnhance: drawFrame #1600 preset=0:原画 source=666 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:08.100 23666 27007 I GlEnhance: frame_stats seconds=2.0130918 sourceFps=23.84392 outputFps=56.62931 blended=48 intervalNs=40476187 active=true
+10-15 16:27:09.763 23666 27007 I GlEnhance: drawFrame #1700 preset=0:原画 source=708 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:10.110 23666 27007 I GlEnhance: frame_stats seconds=2.0102034 sourceFps=23.878181 outputFps=57.20814 blended=48 intervalNs=40476189 active=true
+10-15 16:27:11.508 23666 27007 I GlEnhance: drawFrame #1800 preset=0:原画 source=749 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:12.121 23666 27007 I GlEnhance: frame_stats seconds=2.01074 sourceFps=23.871807 outputFps=57.192875 blended=48 intervalNs=40476201 active=true
+10-15 16:27:12.410 23666 23666 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:27:12.410 23666 23666 I GlEnhance: playback active=false interp=true
+10-15 16:27:22.336 23666 23666 I GlEnhance: release requested source=768 outputs=1853
+10-15 16:27:22.418 23666 29056 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:27:22.418 23666 29056 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:27:22.425 23666 23666 I GlEnhance: player surface bound (main thread)
+10-15 16:27:22.564 23666 23666 I GlEnhance: setVideoSize 640x360
+10-15 16:27:22.576 23666 23666 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:27:22.583 23666 23666 I CarAudio: applied mode=8 name=动漫·对白 session=161 bass=0 virtualizer=80 loudness=650
+10-15 16:27:22.584 23666 23666 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:27:22.584 23666 23666 I GlEnhance: playback active=true interp=true
+10-15 16:27:22.586 23666 23666 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:27:22.586 23666 23666 I GlEnhance: playback active=false interp=true
+10-15 16:27:22.675 23666 23666 I GlEnhance: setVideoSize 640x360
+10-15 16:27:22.699 23666 23666 I GlEnhance: setVideoSize 640x360
+10-15 16:27:22.737 23666 29056 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-15 16:27:22.737 23666 29056 I GlEnhance: output srRequested=true srActive=true interp=true viewport=2880x1620
+10-15 16:27:22.737 23666 29056 I GlEnhance: drawFrame #1 preset=0:原画 source=1 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:22.747 23666 23666 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:27:22.747 23666 23666 I GlEnhance: playback active=true interp=true
+10-15 16:27:22.751 23666 29056 I GlEnhance: drawFrame #2 preset=0:原画 source=1 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:22.769 23666 29056 I GlEnhance: drawFrame #3 preset=0:原画 source=2 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:24.464 23666 29056 I GlEnhance: drawFrame #100 preset=0:原画 source=37 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:24.744 23666 29056 I GlEnhance: frame_stats seconds=2.010117 sourceFps=21.889273 outputFps=57.70808 blended=42 intervalNs=41666756 active=true
+10-15 16:27:26.228 23666 29056 I GlEnhance: drawFrame #200 preset=0:原画 source=80 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:26.752 23666 29056 I GlEnhance: frame_stats seconds=2.0079381 sourceFps=23.905119 outputFps=56.77466 blended=49 intervalNs=41666756 active=true
+10-15 16:27:27.979 23666 29056 I GlEnhance: drawFrame #300 preset=0:原画 source=122 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:28.770 23666 29056 I GlEnhance: frame_stats seconds=2.016801 sourceFps=24.2959 outputFps=57.020992 blended=51 intervalNs=41666567 active=true
+10-15 16:27:29.741 23666 29056 I GlEnhance: drawFrame #400 preset=0:原画 source=164 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:30.787 23666 29056 I GlEnhance: frame_stats seconds=2.0177379 sourceFps=23.789017 outputFps=56.498917 blended=48 intervalNs=41666567 active=true
+10-15 16:27:31.506 23666 29056 I GlEnhance: drawFrame #500 preset=0:原画 source=206 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:32.790 23666 29056 I GlEnhance: frame_stats seconds=2.0025198 sourceFps=23.969799 outputFps=56.928276 blended=48 intervalNs=41666567 active=true
+10-15 16:27:33.262 23666 29056 I GlEnhance: drawFrame #600 preset=0:原画 source=248 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:34.802 23666 29056 I GlEnhance: frame_stats seconds=2.0128717 sourceFps=23.846527 outputFps=56.6355 blended=48 intervalNs=41666567 active=true
+10-15 16:27:35.030 23666 29056 I GlEnhance: drawFrame #700 preset=0:原画 source=291 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:36.791 23666 29056 I GlEnhance: drawFrame #800 preset=0:原画 source=333 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:36.808 23666 29056 I GlEnhance: frame_stats seconds=2.0059333 sourceFps=24.427532 outputFps=56.8314 blended=49 intervalNs=41666675 active=true
+10-15 16:27:38.544 23666 29056 I GlEnhance: drawFrame #900 preset=0:原画 source=375 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:38.824 23666 29056 I GlEnhance: frame_stats seconds=2.0162456 sourceFps=23.806623 outputFps=57.0367 blended=48 intervalNs=41666675 active=true
+10-15 16:27:40.309 23666 29056 I GlEnhance: drawFrame #1000 preset=0:原画 source=418 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:40.839 23666 29056 I GlEnhance: frame_stats seconds=2.0148234 sourceFps=23.823427 outputFps=56.58064 blended=48 intervalNs=41666675 active=true
+10-15 16:27:42.067 23666 29056 I GlEnhance: drawFrame #1100 preset=0:原画 source=460 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:42.840 23666 29056 I GlEnhance: frame_stats seconds=2.001111 sourceFps=23.986675 outputFps=56.968353 blended=48 intervalNs=41666675 active=true
+10-15 16:27:43.840 23666 29056 I GlEnhance: drawFrame #1200 preset=0:原画 source=502 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:44.844 23666 29056 I GlEnhance: frame_stats seconds=2.003813 sourceFps=23.95433 outputFps=56.392487 blended=49 intervalNs=41666675 active=true
+10-15 16:27:45.593 23666 29056 I GlEnhance: drawFrame #1300 preset=0:原画 source=544 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:46.851 23666 29056 I GlEnhance: frame_stats seconds=2.0061436 sourceFps=24.424973 outputFps=56.326977 blended=49 intervalNs=41666756 active=true
+10-15 16:27:47.380 23666 29056 I GlEnhance: drawFrame #1400 preset=0:原画 source=587 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:48.858 23666 29056 I GlEnhance: frame_stats seconds=2.0079145 sourceFps=23.9054 outputFps=56.775326 blended=48 intervalNs=41666756 active=true
+10-15 16:27:49.132 23666 29056 I GlEnhance: drawFrame #1500 preset=0:原画 source=629 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:50.867 23666 29056 I GlEnhance: frame_stats seconds=2.0090609 sourceFps=23.89176 outputFps=57.240677 blended=49 intervalNs=41666756 active=true
+10-15 16:27:50.884 23666 29056 I GlEnhance: drawFrame #1600 preset=0:原画 source=671 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:52.642 23666 29056 I GlEnhance: drawFrame #1700 preset=0:原画 source=714 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:52.872 23666 29056 I GlEnhance: frame_stats seconds=2.0051324 sourceFps=23.938568 outputFps=56.8541 blended=48 intervalNs=41666756 active=true
+10-15 16:27:54.405 23666 29056 I GlEnhance: drawFrame #1800 preset=0:原画 source=756 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:54.874 23666 29056 I GlEnhance: frame_stats seconds=2.0020747 sourceFps=23.97513 outputFps=56.940933 blended=48 intervalNs=41666756 active=true
+10-15 16:27:56.154 23666 29056 I GlEnhance: drawFrame #1900 preset=0:原画 source=798 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:56.883 23666 29056 I GlEnhance: frame_stats seconds=2.0087335 sourceFps=23.895653 outputFps=57.250004 blended=48 intervalNs=41666756 active=true
+10-15 16:27:57.907 23666 29056 I GlEnhance: drawFrame #2000 preset=0:原画 source=840 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:27:58.887 23666 29056 I GlEnhance: frame_stats seconds=2.0042853 sourceFps=23.948687 outputFps=56.878128 blended=48 intervalNs=41666756 active=true
+10-15 16:27:59.658 23666 29056 I GlEnhance: drawFrame #2100 preset=0:原画 source=882 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:00.890 23666 29056 I GlEnhance: frame_stats seconds=2.0022175 sourceFps=23.97342 outputFps=56.93687 blended=48 intervalNs=41666756 active=true
+10-15 16:28:01.425 23666 29056 I GlEnhance: drawFrame #2200 preset=0:原画 source=924 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:02.892 23666 29056 I GlEnhance: frame_stats seconds=2.0015972 sourceFps=24.48045 outputFps=56.954517 blended=49 intervalNs=41666567 active=true
+10-15 16:28:03.174 23666 29056 I GlEnhance: drawFrame #2300 preset=0:原画 source=966 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:04.930 23666 29056 I GlEnhance: frame_stats seconds=2.0280907 sourceFps=23.174505 outputFps=55.71743 blended=50 intervalNs=41666685 active=true
+10-15 16:28:04.985 23666 29056 I GlEnhance: drawFrame #2400 preset=0:原画 source=1009 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:06.753 23666 29056 I GlEnhance: drawFrame #2500 preset=0:原画 source=1052 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:06.925 23666 29056 I GlEnhance: frame_stats seconds=2.0054407 sourceFps=24.433533 outputFps=56.346718 blended=50 intervalNs=41666756 active=true
+10-15 16:28:08.507 23666 29056 I GlEnhance: drawFrame #2600 preset=0:原画 source=1094 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:08.940 23666 29056 I GlEnhance: frame_stats seconds=2.0148861 sourceFps=23.822685 outputFps=57.075184 blended=49 intervalNs=41666756 active=true
+10-15 16:28:10.253 23666 29056 I GlEnhance: drawFrame #2700 preset=0:原画 source=1136 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:10.942 23666 29056 I GlEnhance: frame_stats seconds=2.002361 sourceFps=23.9717 outputFps=56.93279 blended=48 intervalNs=41666756 active=true
+10-15 16:28:12.010 23666 29056 I GlEnhance: drawFrame #2800 preset=0:原画 source=1178 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:12.956 23666 29056 I GlEnhance: frame_stats seconds=2.0139403 sourceFps=24.330414 outputFps=57.10199 blended=50 intervalNs=41666567 active=true
+10-15 16:28:13.761 23666 29056 I GlEnhance: drawFrame #2900 preset=0:原画 source=1220 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:14.960 23666 29056 I GlEnhance: frame_stats seconds=2.003263 sourceFps=23.960907 outputFps=56.907158 blended=48 intervalNs=41666567 active=true
+10-15 16:28:15.512 23666 29056 I GlEnhance: drawFrame #3000 preset=0:原画 source=1262 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:16.970 23666 29056 I GlEnhance: frame_stats seconds=2.0106022 sourceFps=23.873444 outputFps=57.196793 blended=48 intervalNs=41666567 active=true
+10-15 16:28:17.268 23666 29056 I GlEnhance: drawFrame #3100 preset=0:原画 source=1304 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:18.988 23666 29056 I GlEnhance: frame_stats seconds=2.0179527 sourceFps=23.786484 outputFps=56.988453 blended=48 intervalNs=41666567 active=true
+10-15 16:28:19.022 23666 29056 I GlEnhance: drawFrame #3200 preset=0:原画 source=1346 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:20.790 23666 29056 I GlEnhance: drawFrame #3300 preset=0:原画 source=1389 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:21.000 23666 29056 I GlEnhance: frame_stats seconds=2.0114336 sourceFps=24.360735 outputFps=56.675995 blended=49 intervalNs=41666675 active=true
+10-15 16:28:22.533 23666 29056 I GlEnhance: drawFrame #3400 preset=0:原画 source=1430 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:23.001 23666 29056 I GlEnhance: frame_stats seconds=2.0017672 sourceFps=23.978813 outputFps=57.449238 blended=48 intervalNs=41666675 active=true
+10-15 16:28:24.285 23666 29056 I GlEnhance: drawFrame #3500 preset=0:原画 source=1472 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:24.667 23666 23666 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:28:24.669 23666 23666 I GlEnhance: release requested source=1481 outputs=3522
+10-15 16:28:24.706 23666 32177 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4
+10-15 16:28:24.747 23666 32183 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:28:24.748 23666 32183 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:28:24.771 23666 23666 I GlEnhance: player surface bound (main thread)
+10-15 16:28:24.806 23666 23666 I GlEnhance: setVideoSize 640x360
+10-15 16:28:24.812 23666 23666 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:28:24.866 23666 23666 I CarAudio: applied mode=8 name=动漫·对白 session=169 bass=0 virtualizer=80 loudness=650
+10-15 16:28:24.866 23666 23666 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:28:24.866 23666 23666 I GlEnhance: playback active=true interp=true
+10-15 16:28:24.871 23666 23666 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:28:24.871 23666 23666 I GlEnhance: playback active=false interp=true
+10-15 16:28:24.876 23666 23666 I GlEnhance: setVideoSize 640x360
+10-15 16:28:24.879 23666 23666 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:28:24.879 23666 23666 I GlEnhance: playback active=true interp=true
+10-15 16:28:24.879 23666 23666 I GlEnhance: setVideoSize 640x360
+10-15 16:28:24.892 23666 32183 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-15 16:28:24.892 23666 32183 I GlEnhance: output srRequested=true srActive=true interp=true viewport=2880x1620
+10-15 16:28:24.892 23666 32183 I GlEnhance: drawFrame #1 preset=0:原画 source=1 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:24.909 23666 32183 I GlEnhance: drawFrame #2 preset=0:原画 source=2 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:24.926 23666 32183 I GlEnhance: drawFrame #3 preset=0:原画 source=2 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:26.640 23666 32183 I GlEnhance: drawFrame #100 preset=0:原画 source=39 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:26.906 23666 32183 I GlEnhance: frame_stats seconds=2.0148435 sourceFps=22.830557 outputFps=57.076393 blended=44 intervalNs=41666675 active=true
+10-15 16:28:28.394 23666 32183 I GlEnhance: drawFrame #200 preset=0:原画 source=81 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:28.920 23666 32183 I GlEnhance: frame_stats seconds=2.0144224 sourceFps=23.82817 outputFps=57.088326 blended=48 intervalNs=41666675 active=true
+10-15 16:28:30.147 23666 32183 I GlEnhance: drawFrame #300 preset=0:原画 source=124 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:30.929 23666 32183 I GlEnhance: frame_stats seconds=2.0089297 sourceFps=23.89332 outputFps=57.24441 blended=48 intervalNs=41666675 active=true
+10-15 16:28:31.900 23666 32183 I GlEnhance: drawFrame #400 preset=0:原画 source=165 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:32.941 23666 32183 I GlEnhance: frame_stats seconds=2.0118985 sourceFps=24.355104 outputFps=56.6629 blended=49 intervalNs=41666756 active=true
+10-15 16:28:33.661 23666 32183 I GlEnhance: drawFrame #500 preset=0:原画 source=208 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:34.956 23666 32183 I GlEnhance: frame_stats seconds=2.0142953 sourceFps=23.829674 outputFps=57.091927 blended=49 intervalNs=41666756 active=true
+10-15 16:28:35.416 23666 32183 I GlEnhance: drawFrame #600 preset=0:原画 source=250 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:36.962 23666 32183 I GlEnhance: frame_stats seconds=2.0066812 sourceFps=23.920092 outputFps=55.81355 blended=49 intervalNs=41666756 active=true
+10-15 16:28:37.207 23666 32183 I GlEnhance: drawFrame #700 preset=0:原画 source=293 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:38.962 23666 32183 I GlEnhance: frame_stats seconds=2.000074 sourceFps=23.499132 outputFps=55.997932 blended=49 intervalNs=41666941 active=true
+10-15 16:28:39.000 23666 32183 I GlEnhance: drawFrame #800 preset=0:原画 source=335 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:40.745 23666 32183 I GlEnhance: drawFrame #900 preset=0:原画 source=377 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:40.974 23666 32183 I GlEnhance: frame_stats seconds=2.0116096 sourceFps=23.86149 outputFps=57.16815 blended=48 intervalNs=41666756 active=true
+10-15 16:28:42.498 23666 32183 I GlEnhance: drawFrame #1000 preset=0:原画 source=419 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:42.985 23666 32183 I GlEnhance: frame_stats seconds=2.0111144 sourceFps=24.364601 outputFps=57.182228 blended=50 intervalNs=41666567 active=true
+10-15 16:28:44.241 23666 32183 I GlEnhance: drawFrame #1100 preset=0:原画 source=461 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:44.994 23666 32183 I GlEnhance: frame_stats seconds=2.0088527 sourceFps=23.894236 outputFps=57.246605 blended=48 intervalNs=41666567 active=true
+10-15 16:28:46.000 23666 32183 I GlEnhance: drawFrame #1200 preset=0:原画 source=503 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:46.997 23666 32183 I GlEnhance: frame_stats seconds=2.0034628 sourceFps=23.958519 outputFps=56.90148 blended=48 intervalNs=41666567 active=true
+10-15 16:28:47.756 23666 32183 I GlEnhance: drawFrame #1300 preset=0:原画 source=545 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:49.008 23666 32183 I GlEnhance: frame_stats seconds=2.0109313 sourceFps=23.869537 outputFps=56.69015 blended=48 intervalNs=41666567 active=true
+10-15 16:28:49.524 23666 32183 I GlEnhance: drawFrame #1400 preset=0:原画 source=588 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:51.025 23666 32183 I GlEnhance: frame_stats seconds=2.0161996 sourceFps=24.30315 outputFps=57.038002 blended=49 intervalNs=41666675 active=true
+10-15 16:28:51.272 23666 32183 I GlEnhance: drawFrame #1500 preset=0:原画 source=629 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:53.017 23666 32183 I GlEnhance: drawFrame #1600 preset=0:原画 source=671 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:53.035 23666 32183 I GlEnhance: frame_stats seconds=2.0100355 sourceFps=23.880175 outputFps=57.21292 blended=49 intervalNs=41666675 active=true
+10-15 16:28:54.759 23666 32183 I GlEnhance: drawFrame #1700 preset=0:原画 source=713 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:55.040 23666 32183 I GlEnhance: frame_stats seconds=2.0060081 sourceFps=23.928118 outputFps=57.32778 blended=48 intervalNs=41666675 active=true
+10-15 16:28:56.524 23666 32183 I GlEnhance: drawFrame #1800 preset=0:原画 source=756 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:57.056 23666 32183 I GlEnhance: frame_stats seconds=2.0153913 sourceFps=23.816715 outputFps=56.564697 blended=48 intervalNs=41666675 active=true
+10-15 16:28:58.282 23666 32183 I GlEnhance: drawFrame #1900 preset=0:原画 source=798 fbo=true sr=true interp=true viewport=2880x1620
+10-15 16:28:58.953 23666 32183 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x594
+10-15 16:28:59.057 23666 32183 I GlEnhance: frame_stats seconds=2.0010073 sourceFps=23.987919 outputFps=57.471054 blended=49 intervalNs=41666675 active=true
+10-15 16:29:00.024 23666 32183 I GlEnhance: drawFrame #2000 preset=0:原画 source=840 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:29:00.962 23666 23666 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:29:01.030 23666 23666 I GlEnhance: release requested source=861 outputs=2052
+10-15 16:29:38.078 23666 34180 I JSLoader: echo-getSpider cached car5_js
+10-15 16:29:38.084 23666 34181 I JSLoader: echo-getSpider cached car5_js
+10-15 16:30:15.590 23666 34238 I JSLoader: echo-getSpider cached car5_js
+10-15 16:30:16.371 23666 34243 I JSLoader: echo-getSpider cached car5_js
+10-15 16:30:20.483 23666 34282 I JSLoader: echo-getSpider cached car5_js
+10-15 16:30:20.606 23666 34283 I JSLoader: echo-getSpider cached car5_js
+10-15 16:30:20.952 23666 23666 I GlEnhance: player surface bound (main thread)
+10-15 16:30:20.959 23666 34286 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-15 16:30:20.960 23666 34286 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:30:21.047 23666 23666 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-15 16:30:21.122 23666 23666 I CarAudio: applied mode=8 name=动漫·对白 session=177 bass=0 virtualizer=80 loudness=650
+10-15 16:30:21.123 23666 23666 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:30:21.123 23666 23666 I GlEnhance: playback active=true interp=true
+10-15 16:30:21.130 23666 23666 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:30:21.130 23666 23666 I GlEnhance: playback active=false interp=true
+10-15 16:30:21.138 23666 23666 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-15 16:30:21.138 23666 23666 I GlEnhance: playback active=true interp=true
+10-15 16:30:21.221 23666 23666 I GlEnhance: setVideoSize 640x360
+10-15 16:30:21.224 23666 34286 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-15 16:30:21.224 23666 34286 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x675
+10-15 16:30:21.224 23666 34286 I GlEnhance: drawFrame #1 preset=0:原画 source=1 fbo=true sr=true interp=true viewport=1057x675
+10-15 16:30:21.273 23666 34286 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1057x594
+10-15 16:30:21.273 23666 34286 I GlEnhance: drawFrame #2 preset=0:原画 source=1 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:30:21.275 34336 34336 I Car6Test: QUICKJS_PLAY
+10-15 16:30:21.291 23666 34286 I GlEnhance: drawFrame #3 preset=0:原画 source=2 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:30:22.992 23666 34286 I GlEnhance: drawFrame #100 preset=0:原画 source=44 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:30:23.238 23666 34286 I GlEnhance: frame_stats seconds=2.0159261 sourceFps=24.802496 outputFps=56.053642 blended=51 intervalNs=39159213 active=true
+10-15 16:30:24.822 23666 34286 I GlEnhance: drawFrame #200 preset=0:原画 source=90 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:30:25.241 23666 34286 I GlEnhance: frame_stats seconds=2.0032833 sourceFps=24.959026 outputFps=55.40904 blended=56 intervalNs=39159200 active=true
+10-15 16:30:26.580 23666 34286 I GlEnhance: drawFrame #300 preset=0:原画 source=134 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:30:27.258 23666 34286 I GlEnhance: frame_stats seconds=2.0167506 sourceFps=24.792356 outputFps=57.02242 blended=50 intervalNs=39159193 active=true
+10-15 16:30:28.324 23666 34286 I GlEnhance: drawFrame #400 preset=0:原画 source=177 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:30:29.267 23666 34286 I GlEnhance: frame_stats seconds=2.0096638 sourceFps=24.879784 outputFps=57.2235 blended=50 intervalNs=42674817 active=true
+10-15 16:30:30.060 23666 34286 I GlEnhance: drawFrame #500 preset=0:原画 source=220 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:30:31.273 23666 34286 I GlEnhance: frame_stats seconds=2.005475 sourceFps=24.93175 outputFps=57.841656 blended=50 intervalNs=39159196 active=true
+10-15 16:30:31.792 23666 34286 I GlEnhance: drawFrame #600 preset=0:原画 source=261 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:30:33.286 23666 34286 I GlEnhance: frame_stats seconds=2.0108414 sourceFps=23.870605 outputFps=57.687294 blended=52 intervalNs=39735418 active=true
+10-15 16:30:33.555 23666 34286 I GlEnhance: drawFrame #700 preset=0:原画 source=304 fbo=true sr=true interp=true viewport=1057x594
+10-15 16:30:34.275 23666 23666 I GlEnhance: renderMode=WHEN_DIRTY
+10-15 16:30:34.338 23666 23666 I GlEnhance: release requested source=321 outputs=741
+10-15 16:31:05.087 23666 35185 I JarLoader: echo-load Init.init success
+10-15 16:31:05.087 23666 35185 I JarLoader: load success key=main, file=/data/user/0/com.github.tvbox.osc.jun/files/csp/1b083ab4277cd89f8b9f081c112edbea.jar
+10-15 16:31:05.160 23666 35198 I JarLoader: getSpider success key=main豆瓣
+10-15 16:31:05.161 23666 23784 I JarLoader: getSpider success key=main本地
+10-15 16:31:05.161 23666 23784 I JarLoader: getSpider success key=main热播影视
+10-15 16:31:05.162 23666 23784 I JarLoader: getSpider success key=main一起影视
+10-15 16:31:05.164 23666 23784 I JarLoader: getSpider success key=main咕噜
+10-15 16:31:05.166 23666 23784 I JarLoader: getSpider success key=main布布
+10-15 16:31:05.166 23666 23784 I JarLoader: getSpider success key=main马猴影视
+10-15 16:31:05.169 23666 23784 I JarLoader: getSpider success key=main韩圈
+10-15 16:31:05.258 23666 23784 I JarLoader: getSpider success key=main哔哩视频
+10-15 16:31:05.258 23666 23784 I JarLoader: getSpider success key=main三六零
+10-15 16:31:05.979 23666 23784 I JarLoader: getSpider success key=main玩偶
+10-15 16:32:05.027 23666 35340 I JarLoader: getSpider cached key=main豆瓣
+10-15 16:32:06.050 23666 35347 I JarLoader: getSpider cached key=main豆瓣
+10-15 16:33:41.395 23666 35548 I JarLoader: getSpider cached key=main豆瓣
+10-15 16:33:41.946 23666 35554 I JarLoader: getSpider cached key=main豆瓣
+10-15 16:33:42.434 23666 35560 I JarLoader: getSpider cached key=main豆瓣
+10-15 16:33:43.267 23666 35604 I JarLoader: getSpider cached key=main豆瓣

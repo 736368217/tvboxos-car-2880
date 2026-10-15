@@ -9,12 +9,13 @@ import com.orhanobut.hawk.Hawk;
 
 import xyz.doikki.videoplayer.player.VideoView;
 import xyz.doikki.videoplayer.render.VideoEnhancePreset;
+import xyz.doikki.videoplayer.render.VideoPostProcessPolicy;
 
 /**
  * Car edition glue for the two audio/video enhancement features ported from the reference car build:
  *
  * <ul>
- *     <li><b>音效 (audio effects)</b>: the 6-preset Equalizer/BassBoost/Virtualizer/LoudnessEnhancer
+ *     <li><b>音效 (audio effects)</b>: the 9-preset Equalizer/BassBoost/Virtualizer/LoudnessEnhancer
  *     chain of {@link AudioEffectController}, attached to the running playback engine's audio
  *     session id. Only the EXO and IJK engines expose one; the system player is skipped.</li>
  *     <li><b>臻彩 (GPU colour grading)</b>: the GL render view {@code GlEnhanceRenderView} that
@@ -81,17 +82,25 @@ public final class CarEnhance {
         setVideoMode(enabled ? VideoEnhancePreset.VIVID_COLOR : VideoEnhancePreset.ORIGINAL);
     }
 
-    /**
-     * Whether the GL colour-grading render view may be used for the next playback of this view:
-     * the switch must be on and the current video track must not be HDR/Dolby Vision (the reference
-     * build force-disables 臻彩 for HDR to avoid grading an already HDR-mapped picture).
-     */
+    public static boolean videoSrEnabled() {
+        return VideoPostProcessPolicy.enabledFromPreference(Hawk.get(HawkConfig.VIDEO_SR), true);
+    }
+
+    public static boolean videoInterpEnabled() {
+        return VideoPostProcessPolicy.enabledFromPreference(Hawk.get(HawkConfig.VIDEO_INTERP), true);
+    }
+
+    public static void setVideoSrEnabled(boolean enabled) {
+        Hawk.put(HawkConfig.VIDEO_SR, enabled ? 1 : 0);
+    }
+
+    public static void setVideoInterpEnabled(boolean enabled) {
+        Hawk.put(HawkConfig.VIDEO_INTERP, enabled ? 1 : 0);
+    }
+
+    /** HDR colour grading is disabled in prepared(); spatial/temporal switches remain independent. */
     public static boolean useEnhanceRenderView(VideoView view) {
-        if (!videoEnhanceEnabled()) return false;
-        if (view instanceof MyVideoView && ((MyVideoView) view).isHdrVideo()) {
-            return false;
-        }
-        return true;
+        return videoEnhanceEnabled() || videoSrEnabled() || videoInterpEnabled();
     }
 
     public static void toast(Context context, String text) {

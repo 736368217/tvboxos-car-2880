@@ -1,0 +1,54 @@
+WARNING: MULTIPLE_ARTIFACTS_SAME_PACKAGE com.ifeng.fhdt yamby-mod/Yamby-v2.1.0.11-com.ifeng.fhdt-mod-baseline-rcB.apk, 
+yamby-mod/Yamby-v2.1.0.11-com.ifeng.fhdt-mod-baseline.apk, yamby-mod/Yamby-v2.1.0.11-com.ifeng.fhdt-mod.apk
+WARNING: MULTIPLE_ARTIFACTS_SAME_PACKAGE cn.kuwo.player yamby-mod/Yamby-mod-aligned.apk, yamby-mod/Yamby-mod-final.apk,
+ yamby-mod/Yamby-mod-unsigned.apk, yamby-mod/Yamby-v2.1.0.11-cn.kuwo.player-mod.apk
+WARNING: MULTIPLE_ARTIFACTS_SAME_PACKAGE cn.kuwo.kwmusiccar 
+tvbox-car-2880/TVBox-Car-3.3.7-car.1-cn.kuwo.kwmusiccar-signed.apk, 
+tvbox-car-2880/TVBox-Car-3.3.7-car.2-cn.kuwo.kwmusiccar-signed.apk, 
+tvbox-car-2880/TVBox-Car-3.3.7-car.3-cn.kuwo.kwmusiccar-signed.apk, 
+tvbox-car-2880/TVBox-Car-3.3.7-car.4-cn.kuwo.kwmusiccar-signed.apk
+WARNING: MULTIPLE_ARTIFACTS_SAME_PACKAGE cmccwm.mobilemusic 
+cmccwm-mobilemusic/cmccwm.mobilemusic-spider-fixed-signed.apk, 
+cmccwm-mobilemusic-update-guard/cmccwm.mobilemusic-spider-update-guard-signed.apk, 
+yamby-mod/Yamby-v2.1.0.11-cmccwm.mobilemusic-mod.apk
+WARNING: MULTIPLE_ARTIFACTS_SAME_PACKAGE mark.via1 via-car-2880/build/aligned.apk, via-car-2880/build/unsigned.apk, 
+via-car-2880/dist/Via-7.3.3-car.1-mark.via1-signed.apk, via-car-2880/dist/Via-7.3.3-car.2-mark.via1-signed.apk
+WARNING: MULTIPLE_ARTIFACTS_SAME_PACKAGE com.follow.clash flclash-carhd/build/apktool_rebuilt.apk, 
+flclash-carhd/build/link_out.apk, flclash-carhd/dist/FlClash-0.8.99-carhd-arm64-v8a-signed.apk, 
+flclash-carhd/dist/FlClash-0.8.99-carhd-arm64-v8a.apk, flclash-carhd/dist/FlClash-0.8.99-carhd-x86_64-signed.apk, 
+flclash-carhd/dist/FlClash-0.8.99-carhd-x86_64.apk, flclash-carhd/dist/FlClash-0.9.0-carhd-arm64-v8a-signed.apk, 
+flclash-carhd/dist/FlClash-0.9.0-carhd-arm64-v8a.apk, flclash-carhd/dist/FlClash-0.9.0-carhd-x86_64-signed.apk, 
+flclash-carhd/dist/FlClash-0.9.0-carhd-x86_64.apk, flclash-carhd/ref/FlClash-0.9.0-android-arm64-v8a.apk, 
+flclash-carhd/ref/FlClash-0.9.0-android-x86_64.apk
+WARNING: MULTIPLE_ARTIFACTS_SAME_PACKAGE com.github.tvbox.osc.jun tvbox-os-car/TVBox-1.0.0-car.2-signed.apk, 
+tvbox-os-car/TVBox-1.0.0-car.3-signed.apk, tvbox-os-car/TVBox-1.0.0-car.4-signed.apk, 
+tvbox-os-car/TVBox-1.0.0-car.5-python-signed.apk, tvbox-os-car/TVBox-1.0.0-car.6-python-signed.apk, 
+tvbox-os-src/app/build/outputs/apk/java/debug/TVBox_debug-java.apk, 
+tvbox-os-src/app/build/outputs/apk/java/release/TVBox_release-java.apk, 
+tvbox-os-src/app/build/outputs/apk/python/release/TVBox_release-python.apk
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT invalid com.hush.yamby
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT pending cn.com.radio.cloudpcr
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT retired cn.kuwo.kwmusiccar
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT invalid com.ifeng.fhdt
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT occupied cmccwm.mobilemusic
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT pending cn.kuwo.player
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT occupied com.follow.clash
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT invalid mark.via
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT occupied mark.via1
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT occupied com.github.tvbox.osc.jun
+WARNING: BLOCKED_PACKAGE_PRESENT_AS_ARTIFACT occupied com.hlyt.gamehlythz.yscsp
+Registry: C:\Users\WIN10\Downloads\pi\apk\package-registry.json
+APK files scanned: 42
+Packages observed: 11
+Errors: 0 Warnings: 18
+PACKAGE	cmccwm.mobilemusic	occupied	cmccwm-mobilemusic/cmccwm.mobilemusic-spider-fixed-signed.apk, cmccwm-mobilemusic-update-guard/cmccwm.mobilemusic-spider-update-guard-signed.apk, yamby-mod/Yamby-v2.1.0.11-cmccwm.mobilemusic-mod.apk
+PACKAGE	cn.com.radio.cloudpcr	pending	yamby-mod/Yamby-v2.1.0.11-cn.com.radio.cloudpcr-mod.apk
+PACKAGE	cn.kuwo.kwmusiccar	retired	tvbox-car-2880/TVBox-Car-3.3.7-car.1-cn.kuwo.kwmusiccar-signed.apk, tvbox-car-2880/TVBox-Car-3.3.7-car.2-cn.kuwo.kwmusiccar-signed.apk, tvbox-car-2880/TVBox-Car-3.3.7-car.3-cn.kuwo.kwmusiccar-signed.apk, tvbox-car-2880/TVBox-Car-3.3.7-car.4-cn.kuwo.kwmusiccar-signed.apk
+PACKAGE	cn.kuwo.player	pending	yamby-mod/Yamby-mod-aligned.apk, yamby-mod/Yamby-mod-final.apk, yamby-mod/Yamby-mod-unsigned.apk, yamby-mod/Yamby-v2.1.0.11-cn.kuwo.player-mod.apk
+PACKAGE	com.follow.clash	occupied	flclash-carhd/build/apktool_rebuilt.apk, flclash-carhd/build/link_out.apk, flclash-carhd/dist/FlClash-0.8.99-carhd-arm64-v8a-signed.apk, flclash-carhd/dist/FlClash-0.8.99-carhd-arm64-v8a.apk, flclash-carhd/dist/FlClash-0.8.99-carhd-x86_64-signed.apk, flclash-carhd/dist/FlClash-0.8.99-carhd-x86_64.apk, flclash-carhd/dist/FlClash-0.9.0-carhd-arm64-v8a-signed.apk, flclash-carhd/dist/FlClash-0.9.0-carhd-arm64-v8a.apk, flclash-carhd/dist/FlClash-0.9.0-carhd-x86_64-signed.apk, flclash-carhd/dist/FlClash-0.9.0-carhd-x86_64.apk, flclash-carhd/ref/FlClash-0.9.0-android-arm64-v8a.apk, flclash-carhd/ref/FlClash-0.9.0-android-x86_64.apk
+PACKAGE	com.github.tvbox.osc.jun	occupied	tvbox-os-car/TVBox-1.0.0-car.2-signed.apk, tvbox-os-car/TVBox-1.0.0-car.3-signed.apk, tvbox-os-car/TVBox-1.0.0-car.4-signed.apk, tvbox-os-car/TVBox-1.0.0-car.5-python-signed.apk, tvbox-os-car/TVBox-1.0.0-car.6-python-signed.apk, tvbox-os-src/app/build/outputs/apk/java/debug/TVBox_debug-java.apk, tvbox-os-src/app/build/outputs/apk/java/release/TVBox_release-java.apk, tvbox-os-src/app/build/outputs/apk/python/release/TVBox_release-python.apk
+PACKAGE	com.hlyt.gamehlythz.yscsp	occupied	tvbox-car-2880/TVBox-Car-3.3.7-car.5-com.hlyt.gamehlythz.yscsp-signed.apk
+PACKAGE	com.hush.yamby	invalid	yamby-mod/Yamby-orig.apk
+PACKAGE	com.ifeng.fhdt	invalid	yamby-mod/Yamby-v2.1.0.11-com.ifeng.fhdt-mod-baseline-rcB.apk, yamby-mod/Yamby-v2.1.0.11-com.ifeng.fhdt-mod-baseline.apk, yamby-mod/Yamby-v2.1.0.11-com.ifeng.fhdt-mod.apk
+PACKAGE	mark.via	invalid	via-car-2880/orig/via-release-cn.apk
+PACKAGE	mark.via1	occupied	via-car-2880/build/aligned.apk, via-car-2880/build/unsigned.apk, via-car-2880/dist/Via-7.3.3-car.1-mark.via1-signed.apk, via-car-2880/dist/Via-7.3.3-car.2-mark.via1-signed.apk

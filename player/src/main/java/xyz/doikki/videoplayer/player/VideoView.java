@@ -34,6 +34,7 @@ import java.util.Map;
 import xyz.doikki.videoplayer.controller.BaseVideoController;
 import xyz.doikki.videoplayer.controller.MediaPlayerControl;
 import xyz.doikki.videoplayer.render.IRenderView;
+import xyz.doikki.videoplayer.render.GlEnhanceRenderView;
 import xyz.doikki.videoplayer.render.RenderViewFactory;
 import xyz.doikki.videoplayer.util.L;
 import xyz.doikki.videoplayer.util.PlayerUtils;
@@ -273,6 +274,9 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     protected void addDisplay() {
         if (mRenderView != null) {
+            if (mRenderView instanceof GlEnhanceRenderView) {
+                ((GlEnhanceRenderView) mRenderView).detachFromPlayer();
+            }
             mPlayerContainer.removeView(mRenderView.getView());
             mRenderView.release();
         }
@@ -360,7 +364,12 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
         if (isInPlaybackState() && !mMediaPlayer.isPlaying()) {
             assert mRenderView != null;
             View renderView = mRenderView.getView();
-            if (renderView instanceof SurfaceView) {
+            if (renderView instanceof GlEnhanceRenderView) {
+                // GLSurfaceView owns the EGL window; the decoder must keep using its OES producer.
+                mRenderView.attachToPlayer(mMediaPlayer);
+                android.util.Log.i("GlEnhance", "resume uses SurfaceTexture producer");
+                resumePlay();
+            } else if (renderView instanceof SurfaceView) {
                 final SurfaceView surfaceView = (SurfaceView) renderView;
                 final SurfaceHolder holder = surfaceView.getHolder();
                 if (holder.getSurface() != null && holder.getSurface().isValid()) {
@@ -408,6 +417,10 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     public void release() {
         if (!isInIdleState()) {
+            if (mRenderView instanceof GlEnhanceRenderView) {
+                // IJK releases asynchronously: detach its producer before releasing the engine.
+                ((GlEnhanceRenderView) mRenderView).detachFromPlayer();
+            }
             //释放播放器
             if (mMediaPlayer != null) {
                 mMediaPlayer.release();

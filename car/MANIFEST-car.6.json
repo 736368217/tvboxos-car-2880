@@ -1,0 +1,753 @@
+{
+  "version": "1.0.0-car.6",
+  "versionCode": 7,
+  "package": "com.github.tvbox.osc.jun",
+  "label": "TVBox",
+  "flavor": "python",
+  "sourceBaseCommit": "1038379eb0997a61b932595a54578070f7f133f3",
+  "tag": "v1.0.0-car.6",
+  "apk": {
+    "name": "TVBox-1.0.0-car.6-python-signed.apk",
+    "bytes": 52635477,
+    "sha256": "02C7CF892C49BA5D286A325C6FC46B69B861070582FB552A2868B75352808D08",
+    "abi": [
+      "armeabi-v7a",
+      "arm64-v8a"
+    ]
+  },
+  "features": {
+    "audioPresets": 9,
+    "videoPresets": 11,
+    "sgsr1": true,
+    "temporalInterpolation": "adaptive blend; no motion vectors",
+    "independentSwitches": true
+  },
+  "validation": "See TEST-REPORT.md and evidence/car.6/device-acceptance.json for baseline vs final retest and hardware limits",
+  "files": [
+    {
+      "path": "AUDIO-VIDEO-ENHANCE.md",
+      "bytes": 7219,
+      "sha256": "5F30E893BB3AE67ED553DC356C6108FCEC5606FBBCDEE1EE7DC27195EB637CD3"
+    },
+    {
+      "path": "AUDIT-CAR-UI-SPEC.md",
+      "bytes": 6690,
+      "sha256": "7DBF7D3525DC05952BE750301584DAE1586653EFCF6D7F167746E2D38D827EFD"
+    },
+    {
+      "path": "BUILD-INFO.md",
+      "bytes": 5217,
+      "sha256": "88D693A04C23E5BDED6D4E78F131E2A5FD32C01215942E0ECB29CA9B7F6FB8A6"
+    },
+    {
+      "path": "CAR-UI-SPEC-TVBOX-2880x1620.md",
+      "bytes": 18029,
+      "sha256": "9E412DCE44A4C2A472B135E3C0682CECF2F03ED32F7BBCC4B9BD4D05C537630F"
+    },
+    {
+      "path": "DESIGN-car.6.md",
+      "bytes": 4088,
+      "sha256": "D14CD10FE9D301D0F883465DAC8829A7ECEB6F905A8F3850D2736463C41B1C0E"
+    },
+    {
+      "path": "evidence/car.6/anime6-play-1440.jpg",
+      "bytes": 90652,
+      "sha256": "2E3253D6BC0ACFE736903B86A2DF373DB2F4C50126203E52A2E0B8DA8D03CEA7"
+    },
+    {
+      "path": "evidence/car.6/anime6-play.xml",
+      "bytes": 14577,
+      "sha256": "32575598B1401F773D45380178C7982420E1CC3BAB91460ABD971B27E89AB3C2"
+    },
+    {
+      "path": "evidence/car.6/anime8-10-selected-1440.jpg",
+      "bytes": 103386,
+      "sha256": "C172561B959F384517F043D5BBFDAD160109BBD4A7E4B100EE3B4E6A1EFDC06D"
+    },
+    {
+      "path": "evidence/car.6/anime8-10-selected.xml",
+      "bytes": 27283,
+      "sha256": "3B7D168FFEDD2B83772D977B3BC24099FD32E76DCCE184F9A95CD53FDA50BA75"
+    },
+    {
+      "path": "evidence/car.6/apk-signature.txt",
+      "bytes": 10513,
+      "sha256": "60EC3BE568856350513E673B1F5941B2ACE4E82801EA2C38D9E8A4D052CCC283"
+    },
+    {
+      "path": "evidence/car.6/audio-0.xml",
+      "bytes": 27316,
+      "sha256": "C59989504A2DADFA7217201CF293B8C79F4535B569749612E34EB10784AEB722"
+    },
+    {
+      "path": "evidence/car.6/audio-1.xml",
+      "bytes": 27316,
+      "sha256": "44A9750028D4D8C3D54CCCBDE924A6B486CEE8F7A4A51ADA69FE9178D34CFB06"
+    },
+    {
+      "path": "evidence/car.6/audio-2.xml",
+      "bytes": 27319,
+      "sha256": "4A388C368F6E16AA6E933509C4252048EE182CD4E5F80E9937990FDCA7AB521E"
+    },
+    {
+      "path": "evidence/car.6/audio-3.xml",
+      "bytes": 27318,
+      "sha256": "4ABA906753736C8425A67122D6C0D441A2F34AB1BCE29BAD9C544E9C7CDBD4FF"
+    },
+    {
+      "path": "evidence/car.6/audio-4.xml",
+      "bytes": 27314,
+      "sha256": "3534EA3CA2BEA3C355A3D60F87A9ED18449418A53DC0164F329D5041CC6D5932"
+    },
+    {
+      "path": "evidence/car.6/audio-5.xml",
+      "bytes": 27316,
+      "sha256": "DB1DD14D00512ADE79F5A8AD450C30D4BC58259949BAE6B3F63A8F480BDA1BD2"
+    },
+    {
+      "path": "evidence/car.6/audio-6.xml",
+      "bytes": 27324,
+      "sha256": "CA6106488852F368E8B8DC22E0E90EF78304CEAD7F94F4122090FEAE725BE889"
+    },
+    {
+      "path": "evidence/car.6/audio-7.xml",
+      "bytes": 27324,
+      "sha256": "4A85B9D173AB1B3FD9C985D8DA57D38E9BC704F64436566754A9357326B5796C"
+    },
+    {
+      "path": "evidence/car.6/audio-8.xml",
+      "bytes": 27324,
+      "sha256": "706DB935740627A95F1F1876BA3E48B5D394B594049845AFBA724B415865E8F3"
+    },
+    {
+      "path": "evidence/car.6/audio-session-113.txt",
+      "bytes": 16595,
+      "sha256": "835398ED483BCEA22F18CBEB0D5841F04C4CF38966DC00F6BB8D1336C06AE609"
+    },
+    {
+      "path": "evidence/car.6/audio-session-89.txt",
+      "bytes": 11506,
+      "sha256": "8C6895ACFDBBFFAF80BA4FFA50812EE39668DD34293B8CA70AF3607D88E02F13"
+    },
+    {
+      "path": "evidence/car.6/audio6-selected.xml",
+      "bytes": 27653,
+      "sha256": "FF832F57BDC97D3C36E24FBBD8E80EFD6CB25FE919785C635BDF041105BC5F99"
+    },
+    {
+      "path": "evidence/car.6/baseline-device-acceptance.json",
+      "bytes": 2345,
+      "sha256": "64B53AAE0DC34B940D131063A40619AB31A4BD151BA4E4085C499C4F1BBE293A"
+    },
+    {
+      "path": "evidence/car.6/build-result.json",
+      "bytes": 42,
+      "sha256": "B606B0AB8DF148ED6C131A96ED393B9B2AA3A82298C788127E433CC5DECB08CA"
+    },
+    {
+      "path": "evidence/car.6/combo00-play-1440.jpg",
+      "bytes": 90174,
+      "sha256": "494A27E1B1B6BCF150A803D072BA66350ECD801B21D6177CC0B7C90D4B3C40FD"
+    },
+    {
+      "path": "evidence/car.6/combo00-play.xml",
+      "bytes": 14577,
+      "sha256": "32575598B1401F773D45380178C7982420E1CC3BAB91460ABD971B27E89AB3C2"
+    },
+    {
+      "path": "evidence/car.6/combo00-selected.xml",
+      "bytes": 27653,
+      "sha256": "F90D6430CDE6099C47A3FB571840774FEA09070766B18C817A322E40D5E08440"
+    },
+    {
+      "path": "evidence/car.6/combo01-play-1440.jpg",
+      "bytes": 90544,
+      "sha256": "65CE39514A789BB98EC55FF5E3957EBD1879D46229ED876CD9128FB0F043B9C8"
+    },
+    {
+      "path": "evidence/car.6/combo01-play.xml",
+      "bytes": 14577,
+      "sha256": "32575598B1401F773D45380178C7982420E1CC3BAB91460ABD971B27E89AB3C2"
+    },
+    {
+      "path": "evidence/car.6/combo01-selected.xml",
+      "bytes": 27653,
+      "sha256": "82ADAE963296F5716E6C36711C24750776C40DDB862129CA9D45DF0DE0388D2A"
+    },
+    {
+      "path": "evidence/car.6/combo10-play-1440.jpg",
+      "bytes": 91411,
+      "sha256": "B275BC9BED5B8AF352C06622707BC282954DC75A82CC2474B2F2D66C37381E6A"
+    },
+    {
+      "path": "evidence/car.6/combo10-play.xml",
+      "bytes": 14577,
+      "sha256": "32575598B1401F773D45380178C7982420E1CC3BAB91460ABD971B27E89AB3C2"
+    },
+    {
+      "path": "evidence/car.6/combo10-selected.xml",
+      "bytes": 27653,
+      "sha256": "3AE67EB61DB5CD1423510C619A8A9DEBE1CF37281026EEF857D6968F3E1E0CFF"
+    },
+    {
+      "path": "evidence/car.6/device-acceptance.json",
+      "bytes": 1154,
+      "sha256": "C6B1BAD02B339811C91ECBB4302E3FB71F01DEB7092B1C63E22CE2727BD32677"
+    },
+    {
+      "path": "evidence/car.6/final-apk-signature.txt",
+      "bytes": 10568,
+      "sha256": "3778705F4BCF845BDF0486E8D61CE045B8088C8BB74B8BA0C95A1379D19E28BA"
+    },
+    {
+      "path": "evidence/car.6/final-back-awake-1440.jpg",
+      "bytes": 164911,
+      "sha256": "05510422E70C8528B01B5AADBF7C9AFECF96073A29C4B8719C5FC1E46A2A0861"
+    },
+    {
+      "path": "evidence/car.6/final-back-awake.xml",
+      "bytes": 35394,
+      "sha256": "A1691E2CB738D6AFCD281A2A7C86FC52D2B287D9935702716587EEDF038FD85D"
+    },
+    {
+      "path": "evidence/car.6/final-back-home.xml",
+      "bytes": 35024,
+      "sha256": "802D1AD74C04EED111A305627DDE8FF2FFC9AE19CB73C03F6C83B42ED8C8722A"
+    },
+    {
+      "path": "evidence/car.6/final-back-idle.xml",
+      "bytes": 35024,
+      "sha256": "802D1AD74C04EED111A305627DDE8FF2FFC9AE19CB73C03F6C83B42ED8C8722A"
+    },
+    {
+      "path": "evidence/car.6/final-build-result.json",
+      "bytes": 42,
+      "sha256": "D1116202863D4A50FA78B6CEDABBB8ABF9E8AF1B0627DA93B02F187DEFF49A36"
+    },
+    {
+      "path": "evidence/car.6/final-category.xml",
+      "bytes": 12221,
+      "sha256": "F146F7A951BBE1BFE62F07D1255CACFE39848EEE873D2A2777B2C14052D94318"
+    },
+    {
+      "path": "evidence/car.6/final-home-1440.jpg",
+      "bytes": 163550,
+      "sha256": "C7A976B5469CD5C7FEDC22B524DCB049919D42927342F4F36F27A1B0B3C7E715"
+    },
+    {
+      "path": "evidence/car.6/final-home.xml",
+      "bytes": 35024,
+      "sha256": "75F9345031FE4618C6BF5767756F4359604016B2CC564321D95978E6E7FDC00A"
+    },
+    {
+      "path": "evidence/car.6/final-movies-1440.jpg",
+      "bytes": 249341,
+      "sha256": "84B7A9E0B858ACEA936EEE6FA8518BB0F6334F8913B6706D5F11D5E14A074586"
+    },
+    {
+      "path": "evidence/car.6/final-movies.xml",
+      "bytes": 34507,
+      "sha256": "C233FE8D011CDF5C60E00F9439D0B1B9A301EE0CD9F0DAF210197E8E20EDC80F"
+    },
+    {
+      "path": "evidence/car.6/fourk-background.xml",
+      "bytes": 29954,
+      "sha256": "DFF65AFE7934D73CB71DC3469E83776A4D08547ACE7D74CE28D77E65102D3876"
+    },
+    {
+      "path": "evidence/car.6/fourk-full-1440.jpg",
+      "bytes": 74202,
+      "sha256": "36E979BDE93C72B4DE8411083C91DD0B0F28901D9EE0FE90DC2BA8173422FD07"
+    },
+    {
+      "path": "evidence/car.6/fourk-preview.xml",
+      "bytes": 14573,
+      "sha256": "F0F25BEC75697F73C4F589BA674852805CFD0C79AA8772C49E2F275D596052F8"
+    },
+    {
+      "path": "evidence/car.6/full1080-1440.jpg",
+      "bytes": 76993,
+      "sha256": "F437F2A41824389E328EB888D787FF5A8049C29EF1E2DA9F039440FB997327BC"
+    },
+    {
+      "path": "evidence/car.6/full1080.xml",
+      "bytes": 11773,
+      "sha256": "A62422054C120BACFE0653DB1404741340EF9A88CDD4924808A09BA6AE4162DE"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-0.png",
+      "bytes": 296,
+      "sha256": "6FC74B4A4B5A5918B83886F10F118429F85E489D8D726A50021A6F927330900A"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-1.png",
+      "bytes": 296,
+      "sha256": "CB09BDC52450B82419F4C77800589F462BBBC9FAB35D15214876FB80FB374C05"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-10.png",
+      "bytes": 296,
+      "sha256": "0BDBA5BF04FA5D194E9F788F5A150D9512EDD084D679977D69143F89AF0800F6"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-2.png",
+      "bytes": 296,
+      "sha256": "E7417DBAF53C04646C103E56050935D16D2C98FAEADD6EACB8DB7D43DB53B9DF"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-3.png",
+      "bytes": 296,
+      "sha256": "CA6DD7D291F7E71D241ADDDB6DF6B17026491BE8EE0234E56EB3F02CA457EEA2"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-4.png",
+      "bytes": 296,
+      "sha256": "984713FBE90AE4A9EE87FFBC6F295C4A9878151D544E110D691331E4562A413B"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-5.png",
+      "bytes": 296,
+      "sha256": "FD3A4FB09741CC4E6AAA5951FD44C6DB06E757D978A42E760C2C5004FE8FD8CC"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-6.png",
+      "bytes": 296,
+      "sha256": "20FE4DC2B784D22D4885B5DC2196480F6269E35FD48795E326BE3366FBB4A9D6"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-7.png",
+      "bytes": 296,
+      "sha256": "3C6E46C8E8F4B13368307F35CEEEE293E2E49AB8D1217816720CF1498567F881"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-8.png",
+      "bytes": 296,
+      "sha256": "330B3242F4E7A00D5DA87DD962CC8361492A067C7327EC9BE9E66797C54DE6A6"
+    },
+    {
+      "path": "evidence/car.6/gpu-colour-9.png",
+      "bytes": 296,
+      "sha256": "90B0D1D7A871A847C722F744647CC7ADD01C2563CDE389A79CD2910EE45F1DF7"
+    },
+    {
+      "path": "evidence/car.6/gpu-cut-off.png",
+      "bytes": 294,
+      "sha256": "65D6DBDDE614E4C037D6403E77B893322189B4EEFAEBD3050FCEDB2989E10A0D"
+    },
+    {
+      "path": "evidence/car.6/gpu-cut-on.png",
+      "bytes": 294,
+      "sha256": "65D6DBDDE614E4C037D6403E77B893322189B4EEFAEBD3050FCEDB2989E10A0D"
+    },
+    {
+      "path": "evidence/car.6/gpu-edge-all-on-static.png",
+      "bytes": 791,
+      "sha256": "93A7CB099D94390403ABF683E6B48190CDC666ABB3E02262DC73414E552B6986"
+    },
+    {
+      "path": "evidence/car.6/gpu-edge-bilinear.png",
+      "bytes": 741,
+      "sha256": "31E150CFA25BD0E812F4965AE9E7B3A14D22F2E868931B2E36D5F11D4BCAAA19"
+    },
+    {
+      "path": "evidence/car.6/gpu-edge-sgsr.png",
+      "bytes": 791,
+      "sha256": "93A7CB099D94390403ABF683E6B48190CDC666ABB3E02262DC73414E552B6986"
+    },
+    {
+      "path": "evidence/car.6/gpu-flat-all-on.png",
+      "bytes": 294,
+      "sha256": "BBC901060D49E63CB9E533AA03FB3CDB2B7AD3A6D2E45E0AAEC3F1E7002BFAA4"
+    },
+    {
+      "path": "evidence/car.6/gpu-flat-off.png",
+      "bytes": 294,
+      "sha256": "BBC901060D49E63CB9E533AA03FB3CDB2B7AD3A6D2E45E0AAEC3F1E7002BFAA4"
+    },
+    {
+      "path": "evidence/car.6/gpu-off.png",
+      "bytes": 292,
+      "sha256": "38FC16ED10A2E7EC7D2853EDC83839B4A71857DE4E031AC7C48856496D61F17B"
+    },
+    {
+      "path": "evidence/car.6/gpu-result.txt",
+      "bytes": 2142,
+      "sha256": "170B03B27F9D7B79C68042EE4DBC9584950D1E642744DB9A7FACFB6BC12263BB"
+    },
+    {
+      "path": "evidence/car.6/gpu-smooth-low.png",
+      "bytes": 292,
+      "sha256": "9FFF4EF53B0EB822D308951E1042EB740349A3FFF51CEDDA02FF2BCA8A784D57"
+    },
+    {
+      "path": "evidence/car.6/ijk-audio-flinger.txt",
+      "bytes": 24642,
+      "sha256": "6D51F9272C933897929FE8D2A19EB22483E4CDA1AE53FB8A3FCCA30E7C96F57C"
+    },
+    {
+      "path": "evidence/car.6/ijk-controller.xml",
+      "bytes": 25060,
+      "sha256": "3ED698ABDEDC1C564C164B7E59B01D23AC4125D13B64FD62E3CDC42DC06EC0D8"
+    },
+    {
+      "path": "evidence/car.6/ijk-replay-1440.jpg",
+      "bytes": 73070,
+      "sha256": "8FB9F68883C1FFE5FADC47D73E665B8922D586D3880DABE6A12CBA842A37B84B"
+    },
+    {
+      "path": "evidence/car.6/ijk-replay.xml",
+      "bytes": 12580,
+      "sha256": "3C6F8A820A0D9648A1E67D94836CED5FCFED6EE99C750DE93E7A71E0AE786C9E"
+    },
+    {
+      "path": "evidence/car.6/lifecycle-runtime-excerpts.txt",
+      "bytes": 45733,
+      "sha256": "99234CBB21BCA7D5F9E6C68C1DDF40EFAD941F8538C64C7169AD3A40D36A26A1"
+    },
+    {
+      "path": "evidence/car.6/lifecycle1080-1440.jpg",
+      "bytes": 78285,
+      "sha256": "5638417915BEDBE1F19BEEBA60DCB4E6B9F601669CC18C6C4B396D884C7F1884"
+    },
+    {
+      "path": "evidence/car.6/lifecycle1080.xml",
+      "bytes": 11402,
+      "sha256": "A64B2689FCD3B4B56E47D77CFFF32EFDC621AC6DBAB84660287B717EEBC9F2EE"
+    },
+    {
+      "path": "evidence/car.6/ordinary-play-1440.jpg",
+      "bytes": 90567,
+      "sha256": "CF94F35A4445AD869E8A4C2882BCF1A2F3A5C06C1A96E99D069DF6D927A8FD9D"
+    },
+    {
+      "path": "evidence/car.6/ordinary-play.xml",
+      "bytes": 14577,
+      "sha256": "32575598B1401F773D45380178C7982420E1CC3BAB91460ABD971B27E89AB3C2"
+    },
+    {
+      "path": "evidence/car.6/ordinary-render-view.txt",
+      "bytes": 117,
+      "sha256": "9548A893D2F2F62022CD9C67AE67D2E26A6563213E8CAC619982654DE3D6A8AB"
+    },
+    {
+      "path": "evidence/car.6/original11-selected.xml",
+      "bytes": 27645,
+      "sha256": "0B417482E3DFB92AFC8D712B56FD6117B34BE5738533CA34FC4E27F6AD79A8DB"
+    },
+    {
+      "path": "evidence/car.6/package-registry-check.txt",
+      "bytes": 6094,
+      "sha256": "6567963FF7B791616DF4A61C60F0C42458FBC6A592D345B9E3DBFA274E2C3B3F"
+    },
+    {
+      "path": "evidence/car.6/postprocess-result.txt",
+      "bytes": 133,
+      "sha256": "D322E2716E3A35DE826F5DE523705F6E2AE31BDA250C1890F52FB892E300CE77"
+    },
+    {
+      "path": "evidence/car.6/presets-result.txt",
+      "bytes": 105,
+      "sha256": "858CAAB1DD8B300A7C4B9E1545AD94BDE873100D4C8B16440065F525E8312B71"
+    },
+    {
+      "path": "evidence/car.6/preview1080.xml",
+      "bytes": 14575,
+      "sha256": "DC3BE76985D1E9C24A0994929CE66DAD1EDAB82E7FBDC02F3AE42D9143A6C604"
+    },
+    {
+      "path": "evidence/car.6/quickjs-category.xml",
+      "bytes": 9216,
+      "sha256": "92D3559F5BB09FB45772905BB92D43E0BBA1CCFFCF35B4584DB801C47712202F"
+    },
+    {
+      "path": "evidence/car.6/quickjs-play-1440.jpg",
+      "bytes": 70029,
+      "sha256": "2CB5AEC0B286E9F33F07C3C47626068295BE86BE3B99D0B70267F0EFE5C1F0FC"
+    },
+    {
+      "path": "evidence/car.6/quickjs-play.xml",
+      "bytes": 14508,
+      "sha256": "37EECDA67381ED7FE1A9DC9326F4A365561EB3014074C10EE8EF6DD5157826A1"
+    },
+    {
+      "path": "evidence/car.6/repair-controls.xml",
+      "bytes": 24996,
+      "sha256": "F9B7EAAD168A65D895F7FFAC8A4AAAEDFF86D05572A5D094E6A9B07B83313E44"
+    },
+    {
+      "path": "evidence/car.6/repair-exit.xml",
+      "bytes": 18047,
+      "sha256": "95FF9EAA081076F364064E291CAB7C8C786E42543EE3A8A0196F1FD41B94FF89"
+    },
+    {
+      "path": "evidence/car.6/repair-exo-resumed-1440.jpg",
+      "bytes": 74795,
+      "sha256": "8987DE2870338D0346DE68757FDC1B2D6E3749C39F74F5F27959C97D9D7335B4"
+    },
+    {
+      "path": "evidence/car.6/repair-home.xml",
+      "bytes": 35024,
+      "sha256": "9995A376967D193F1E7C02348FC3CF9F5884D29A5E969FC9B91A1AEC506A562D"
+    },
+    {
+      "path": "evidence/car.6/repair-ijk-resumed-1440.jpg",
+      "bytes": 70420,
+      "sha256": "C145089A5E83906ED67EFAFA41C37AEED9D5728828BF9E037AFF62D77C69B914"
+    },
+    {
+      "path": "evidence/car.6/repair-live.xml",
+      "bytes": 14583,
+      "sha256": "BF2F5D6ACAE354F0C27C76CFD6B655C251F2CA564C0589E0A5138DB4ECD4454A"
+    },
+    {
+      "path": "evidence/car.6/repair-presets-selected.xml",
+      "bytes": 27299,
+      "sha256": "3B1DD8765E15083B83B84830465F91C901B2AB8927AC6EDFB02E645D5893F1E6"
+    },
+    {
+      "path": "evidence/car.6/repair-reentry-1440.jpg",
+      "bytes": 79042,
+      "sha256": "E2D976FDD4346FE2D91A7EF767A76A31F90F97C46AD3F75EA23D580A1A8C807A"
+    },
+    {
+      "path": "evidence/car.6/repair-reentry-category.xml",
+      "bytes": 16129,
+      "sha256": "6E806F72C6ECA767CD4E9C455DA365E37EC1A98C93D7182B9F33B3A8D4DE6659"
+    },
+    {
+      "path": "evidence/car.6/repair-restore-settings.xml",
+      "bytes": 27669,
+      "sha256": "B31A80C752FE742DB093334615C2BB761757BB89D0B86280F5413FF8A3771A04"
+    },
+    {
+      "path": "evidence/car.6/repair-restored-1440.jpg",
+      "bytes": 163531,
+      "sha256": "4907A5509CC923A905ED9B4F14BA96DC194E7DE1144F76D89016404ABEBDA77E"
+    },
+    {
+      "path": "evidence/car.6/repair-restored.xml",
+      "bytes": 35024,
+      "sha256": "480812D1EC9EE5B795201B6CDAC5533DFB8FEAE56373F6878A5E8FD5E03C5C20"
+    },
+    {
+      "path": "evidence/car.6/repair-settings.xml",
+      "bytes": 27328,
+      "sha256": "09791068194CB505232A512E47A7787A9255CA57F965FB07BA1565F353E48A7D"
+    },
+    {
+      "path": "evidence/car.6/restart-settings.xml",
+      "bytes": 27645,
+      "sha256": "7A52133DD3B599C1DE8D4246AEF0805A7D5C4DE5949C52047A6F2E6B1517670C"
+    },
+    {
+      "path": "evidence/car.6/restored-subscription.xml",
+      "bytes": 35024,
+      "sha256": "9F7FE9A448D9DC2DFC6271AB3ED9E163F631A60F111F5CB889CC506E4FD35750"
+    },
+    {
+      "path": "evidence/car.6/runtime-excerpts.txt",
+      "bytes": 96599,
+      "sha256": "8A4DE2E45DAF98C51307D1EBBB6C5B9E357B14D05230E741E13779520DA9DC9A"
+    },
+    {
+      "path": "evidence/car.6/settings7-assert.xml",
+      "bytes": 27283,
+      "sha256": "1E82ED8F771CAED7608A9F4EF79417F0129CC46910DE1B7E129EE128188C0709"
+    },
+    {
+      "path": "GIT-DIFF-car.6.patch",
+      "bytes": 117301,
+      "sha256": "0D187EAB70BC35E3C50DCD4BD6CE55B0484A101076A81DE91381610C5BEB6C92"
+    },
+    {
+      "path": "INSTALL.md",
+      "bytes": 3548,
+      "sha256": "B8851334880B5AD811D7A3EE3BAA5A3620599F0D8150405291826AD4FDBD11CA"
+    },
+    {
+      "path": "licenses/snapdragon-gsr.txt",
+      "bytes": 1556,
+      "sha256": "BC496633D3DB8C6CA1362216EC382D361B69C7D5518ACD6BBFD91503FEBFB3EF"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3763,
+      "sha256": "7BF3E73EBD3889BB79634B52924B765E1E547D609C0B539D17FFA2C1D008210D"
+    },
+    {
+      "path": "src/assets/licenses/snapdragon-gsr.txt",
+      "bytes": 1556,
+      "sha256": "BC496633D3DB8C6CA1362216EC382D361B69C7D5518ACD6BBFD91503FEBFB3EF"
+    },
+    {
+      "path": "src/com/github/catvod/crawler/JarLoader.java",
+      "bytes": 17633,
+      "sha256": "0E7439CA5D7EB77310F981BDADB169A2DDDBEAF677021CDC581720B2525B6880"
+    },
+    {
+      "path": "src/com/github/catvod/crawler/ProtectedInitJar.java",
+      "bytes": 16457,
+      "sha256": "E77A40E1AB53147935B0A89AC83BCCA29EC3E231805E0F6945A2B2199C1DD8A0"
+    },
+    {
+      "path": "src/com/github/tvbox/osc/car/AudioEffectController.java",
+      "bytes": 11366,
+      "sha256": "22668A8DA7CAB90D73935BB7A4581A51FC166B9417BC646B01A6B95FBCA935C1"
+    },
+    {
+      "path": "src/com/github/tvbox/osc/car/AudioEffectPreset.java",
+      "bytes": 2279,
+      "sha256": "D1995C924F3B088EFB0005BA985458DEBFA6C31B3036F976E6430C9CFA632184"
+    },
+    {
+      "path": "src/com/github/tvbox/osc/car/CarEnhance.java",
+      "bytes": 4142,
+      "sha256": "FB481945A2C8D40D12C1FB7E2C3688B00ADD17BCD0EB7ABF3FC89367F5D7C0E5"
+    },
+    {
+      "path": "src/com/github/tvbox/osc/car/InAppBackButton.java",
+      "bytes": 8840,
+      "sha256": "C690D5987FDB1B7D6887E141E40CDA81FD0114ED0C018E74AA47E8CDF754AB56"
+    },
+    {
+      "path": "src/com/github/tvbox/osc/player/MyVideoView.java",
+      "bytes": 7300,
+      "sha256": "C407984225AE6BEA8DCE3AD469440BAA2369B1145444D5B334FCD05AF83796E2"
+    },
+    {
+      "path": "src/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java",
+      "bytes": 57044,
+      "sha256": "7EE956A71F27F3F51273AE70C4D2540E4FCF8333CC1D92511218F5A3F7E0B56F"
+    },
+    {
+      "path": "src/com/github/tvbox/osc/util/HawkConfig.java",
+      "bytes": 5034,
+      "sha256": "F5A4110EFACB3BE2C7E9B24347022B5D6EBC9C568675284D66E1DAB34D07E635"
+    },
+    {
+      "path": "src/com/github/tvbox/osc/util/PlayerHelper.java",
+      "bytes": 12691,
+      "sha256": "FBB8F595840BBA98563C057B745C16FD77FD45E7E758B2B88A6877955E4DE2CC"
+    },
+    {
+      "path": "src/res/layout/dialog_video_presets.xml",
+      "bytes": 2632,
+      "sha256": "7F7DFEC221EEF5B807723E6943B22759829E0EF3A40C5998CE03C8018BE1D242"
+    },
+    {
+      "path": "src/res/layout/fragment_model.xml",
+      "bytes": 82618,
+      "sha256": "916BD0CBDA78BCAFFA89DB5BC3083F5B4108B844928411EB3BBF84E4322C74B7"
+    },
+    {
+      "path": "src/xyz/doikki/videoplayer/player/VideoView.java",
+      "bytes": 36026,
+      "sha256": "1A7349405E9C60F65CD06E6D441602E8FFEFB8D970FE3D30C5A3A623C617C205"
+    },
+    {
+      "path": "src/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java",
+      "bytes": 26068,
+      "sha256": "26EF8575E7979E65546527E86E9656ACF5241CDED9A26B63F1354B36ADA0C17E"
+    },
+    {
+      "path": "src/xyz/doikki/videoplayer/render/GlEnhanceRenderViewFactory.java",
+      "bytes": 1198,
+      "sha256": "B1DC04F0DE75EB45C185B22A5C6BC6528AD76AAA2805BC59D2C159A45BE92878"
+    },
+    {
+      "path": "src/xyz/doikki/videoplayer/render/VideoEnhancePreset.java",
+      "bytes": 3874,
+      "sha256": "683173E4F15B2A21C4A3C7950D8E628FFDBAC72ED1AD10A179625F495A852AF2"
+    },
+    {
+      "path": "src/xyz/doikki/videoplayer/render/VideoPostProcessPolicy.java",
+      "bytes": 3437,
+      "sha256": "F496E6A4683B2E478EDF83D450C13FD67EDF62D44150E75CE45A317E14F645CF"
+    },
+    {
+      "path": "src/xyz/doikki/videoplayer/render/VideoShaders.java",
+      "bytes": 6510,
+      "sha256": "E60A3B0E7C7F00CABCE3C27596A167DB976FBCCD63C3CD4DAFF66A71CC3D7D2C"
+    },
+    {
+      "path": "TEST-REPORT.md",
+      "bytes": 8709,
+      "sha256": "5C99775F3C4F90D110D28FD5E9B2526BACB2ACDCED058537FD249A806F5FA486"
+    },
+    {
+      "path": "tests/Car6PostProcessTest.java",
+      "bytes": 4664,
+      "sha256": "D5EA8F0EA8952D1834ACAAAA9735E2C02AD161C9D768975147C2519DD09BA8DF"
+    },
+    {
+      "path": "tests/compare_presets.py",
+      "bytes": 2406,
+      "sha256": "18E8FCAD9FF7E23273B3A126B660C0B8BAEFF3FB116DE53A8037206AEE9B843B"
+    },
+    {
+      "path": "tests/fixtures/api.json",
+      "bytes": 348,
+      "sha256": "164C9B812E7B3AE247CF332C257762D0AAAF6327405448BBDDB5B41792A2AC94"
+    },
+    {
+      "path": "tests/fixtures/car5_js_probe.js",
+      "bytes": 1233,
+      "sha256": "14CC6608A69959726FD398CBBF987F073DECC1D8FE497E0BBFD59A9C2763DF22"
+    },
+    {
+      "path": "tests/fixtures/car5_python_probe.py",
+      "bytes": 2865,
+      "sha256": "8A3742EECAF0E5BF318A6981496250C2E56AB0858D3CAA8C5D024F765BCA204A"
+    },
+    {
+      "path": "tests/fixtures/car6/api.json",
+      "bytes": 348,
+      "sha256": "164C9B812E7B3AE247CF332C257762D0AAAF6327405448BBDDB5B41792A2AC94"
+    },
+    {
+      "path": "tests/fixtures/car6/car5_js_probe.js",
+      "bytes": 1233,
+      "sha256": "14CC6608A69959726FD398CBBF987F073DECC1D8FE497E0BBFD59A9C2763DF22"
+    },
+    {
+      "path": "tests/fixtures/car6/car5_python_probe.py",
+      "bytes": 3137,
+      "sha256": "CA70958114FDDE5303B1CD1D777AEACF088BC6CE044C48DEFE815390A72352A0"
+    },
+    {
+      "path": "tests/fixtures/car6/check.json",
+      "bytes": 19,
+      "sha256": "0AC7EFB6593C011CE0BC61C7F2C40AEC81CBBF2A244CACD289C715035B335406"
+    },
+    {
+      "path": "tests/fixtures/check.json",
+      "bytes": 19,
+      "sha256": "0AC7EFB6593C011CE0BC61C7F2C40AEC81CBBF2A244CACD289C715035B335406"
+    },
+    {
+      "path": "tests/prepare_car6_fixtures.py",
+      "bytes": 2779,
+      "sha256": "E14839199E2EEF35921429F34C0583D166554012450D0D355E01E8FFD33CC9EA"
+    },
+    {
+      "path": "tests/prepare_fixtures.py",
+      "bytes": 1318,
+      "sha256": "0A272638C61A26A9AEF2BAEAAD7FC2F1FF7EF8E6C97CD9ACF7228FEEC5468F89"
+    },
+    {
+      "path": "tests/VideoEnhancePresetTest.java",
+      "bytes": 2692,
+      "sha256": "918F9DC5C1D9FABFD430EAA462E6124CC62CE1CA4264F0606F05132C0A63F7EC"
+    },
+    {
+      "path": "tests/VideoGpuProbe.java",
+      "bytes": 9640,
+      "sha256": "E878FAFA604600672721A70AAE41FB924D186A7B7FFC5321D9BBD27C66BDB599"
+    },
+    {
+      "path": "tools/WhitelistScanTest.java",
+      "bytes": 11364,
+      "sha256": "59D8F2FD9328CB6B0A8F2B9C0AA4ACF1769A0ABE07187074142E5271861E44D8"
+    }
+  ]
+}

@@ -1,0 +1,285 @@
+Start begin: 10-15 15:35:33.249
+Start end:   10-15 15:35:40.816
+Now:         10-15 16:28:26.679
+Notification Clients:
+   pid    uid  name
+   677   1041  audioserver
+   848   1000  android.uid.system
+ 23666  10052  com.github.tvbox.osc.jun
+Global session refs:
+  session  cnt     pid    uid  name
+      169    5   23666  10052  com.github.tvbox.osc.jun
+Hardware status: 0
+Vibrator infos(size=1):
+  - AudioVibratorInfo{id: 0, resonantFrequency: nan, qFactor: nan, maxAmplitude: nan}
+Bluetooth latency modes are enabled
+
+ ## BEGIN thread dump 
+
+Output thread 0x70064ef87760, name AudioOut_D, tid 817, type 0 (MIXER):
+  I/O handle: 13
+  Standby: no
+  Sample rate: 48000 Hz
+  HAL frame count: 512
+  HAL format: 0x1 (AUDIO_FORMAT_PCM_16_BIT)
+  HAL buffer size: 2048 bytes
+  Channel count: 2
+  Channel mask: 0x00000003 (front-left, front-right)
+  Processing format: 0x5 (AUDIO_FORMAT_PCM_FLOAT)
+  Processing frame size: 8 bytes
+  Pending config events: none
+  Output devices: 0x2 (AUDIO_DEVICE_OUT_SPEAKER)
+  Input device: 0 (AUDIO_DEVICE_NONE)
+  Audio source: 0 (AUDIO_SOURCE_DEFAULT)
+  Timestamp stats: n=0 disc=0 cold=0 nRdy=20190 err=4866 jitterMs(unavail) localSR(-nan, -nan) correctedJitterMs(unavail)
+  Timestamp corrected: no
+  Last write occurred (msecs): 44
+  Process time ms stats: ave=0.443018 std=0.279458 min=0.279082 max=2.87984
+  Hal write jitter ms stats: ave=-0.0283488 std=2.41534 min=-9.59577 max=5.19031
+  Monopipe write pipe depth stats: ave=1433.2 std=439.141 min=512 max=2048
+  Master volume: 1.000000
+  Master mute: off
+  Mixer channel Mask: 0x3 (front-left, front-right)
+  Normal frame count: 1024
+  Total writes: 23405
+  Delayed writes: 4
+  Blocked in write: yes
+  Suspend count: 0
+  Fast track availMask=0xfe
+  Standby delay ns=3000000000
+  AudioStreamOut: 0x7005a84a0fe0 flags 0x2 (AUDIO_OUTPUT_FLAG_PRIMARY)
+  Frames written: 23966720
+  Suspended frames: 0
+  PipeSink frames written: 23966720
+  Hal stream dump:
+      Signal power history: (none)
+      Signal power history: (none)
+  Thread throttle time (msecs): 228
+  AudioMixer tracks: 67 
+  Master mono: off
+  Master balance: 0.000000 (0.000000)
+  FastMixer thread 0x70064ef343c0 tid=816  FastMixer command=MIX_WRITE writeSequence=93873 framesWritten=24031232
+            numTracks=1 writeErrors=0 underruns=9863 overruns=10190
+            sampleRate=48000 frameCount=512 measuredWarmup=0.451 ms, warmupCycles=10
+            mixPeriod=10.67 ms latency=0.00 ms
+  FastMixer Timestamp stats: n=0 disc=0 cold=0 nRdy=0 err=46826 jitterMs(unavail) localSR(-nan, -nan) correctedJitterMs(unavail)
+  Simple moving statistics over last 64.1 seconds:
+    wall clock time in ms per mix cycle:
+      mean=10.68 min=0.04 max=128.59 stddev=12.14
+    raw CPU load in us per mix cycle:
+      mean=77 min=0 max=1534 stddev=67
+  Distribution of mix cycle times in ms for the tails (> ~3 stddev outliers):
+    left tail: mean=0.04 min=0.04 max=0.04 stddev=0.00
+    right tail: mean=63.54 min=44.83 max=128.59 stddev=33.07
+  Fast tracks: sMaxFastTracks=8 activeMask=0x1
+  Index Active Full Partial Empty  Recent Ready    Written
+      0    yes  728       0    19    full  1536   23965184
+      1     no    0       0     0    full     0          0
+      2     no    0       0     0    full     0          0
+      3     no    0       0     0    full     0          0
+      4     no    0       0     0    full     0          0
+      5     no    0       0     0    full     0          0
+      6     no    0       0     0    full     0          0
+      7     no    0       0     0    full     0          0
+Bluetooth latency modes are not enabled
+HAL does not support Bluetooth latency modes
+Supported latency modes: { }
+  Stream volumes in dB: 0:-inf, 1:-inf, 2:-inf, 3:-inf, 4:-inf, 5:-inf, 6:-inf, 7:-inf, 8:-inf, 9:0, 10:-inf, 11:-inf, 12:0, 13:0, 14:0
+  Normal mixer raw underrun counters: partial=0 empty=19
+  1 Tracks of which 1 are active
+    Type     Id Active Client(pid/uid) Session Port Id S  Flags   Format Chn mask  SRate ST Usg CT  G db  L dB  R dB  VS dB  PortVol dB  PortMuted   Server FrmCnt  FrmRdy F Underruns  Flushed BitPerfect InternalMute   Latency
+             67    yes   23666/  10052     169      20 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00014366   5664    5664 A         0        0      false        false   unavail
+  1 Effect Chains
+    4 effects for session 169
+	In buffer     Out buffer                         Active tracks:
+	0x70064f4cb000   0x70064f5f1000 -> 0x7004f8493640   1
+	Effect ID 363:
+		Session State Registered Internal Enabled Suspended:
+		00169   003   y          n        y       n
+		Descriptor:
+		- UUID: ce772f20-847d-11df-bb17-0002a5d5c51b
+		- TYPE: 0bed4300-ddd6-11db-8f34-0002a5d5c51b
+		- apiVersion: 00000000
+		- flags: 00000048 (conn. mode: insert, insert pref: first, volume mgmt: implements control, input mode: not set, output mode: not set)
+		- name: Equalizer
+		- implementor: NXP Software Ltd.
+		1 Clients:
+			  Pid Priority Ctrl Locked client server
+			23666        0  yes    yes      0      0
+		Status Engine:
+		000    0x700548494550
+		- data: float
+		- Input configuration:
+			Buffer     Frames  Smp rate Channels Format
+			0x70064f4cb000 01024   48000    00000003      5 (AUDIO_FORMAT_PCM_FLOAT)
+		- Output configuration:
+			Buffer     Frames  Smp rate Channels Format
+			0x70064f4cb000 01024   48000    00000003      5 (AUDIO_FORMAT_PCM_FLOAT)
+		- HAL buffers:
+			In(0x70064f4cb000) InConversion(nullptr) Out(0x70064f4cb000) OutConversion(nullptr)
+	Effect ID 363 HAL dump:
+EffectHal::threadLoop n=84 ave=0.00515089 std=0.00258382 min=0.000976 max=0.023482
+	Effect ID 371:
+		Session State Registered Internal Enabled Suspended:
+		00169   000   y          n        n       n
+		Descriptor:
+		- UUID: 8631f300-72e2-11df-b57e-0002a5d5c51b
+		- TYPE: 0634f220-ddd4-11db-a0fc-0002a5d5c51b
+		- apiVersion: 00000000
+		- flags: 00000248 (conn. mode: insert, insert pref: first, volume mgmt: implements control, device indication: requires updates, input mode: not set, output mode: not set)
+		- name: Dynamic Bass Boost
+		- implementor: NXP Software Ltd.
+		1 Clients:
+			  Pid Priority Ctrl Locked client server
+			23666        0  yes    yes      0      0
+		Status Engine:
+		000    0x700548490cf0
+		- data: float
+		- Input configuration:
+			Buffer     Frames  Smp rate Channels Format
+			0x70064f4cb000 01024   48000    00000003      5 (AUDIO_FORMAT_PCM_FLOAT)
+		- Output configuration:
+			Buffer     Frames  Smp rate Channels Format
+			0x70064f4cb000 01024   48000    00000003      5 (AUDIO_FORMAT_PCM_FLOAT)
+		- HAL buffers:
+			In(0x70064f4cb000) InConversion(nullptr) Out(0x70064f4cb000) OutConversion(nullptr)
+	Effect ID 371 HAL dump:
+	Effect ID 387:
+		Session State Registered Internal Enabled Suspended:
+		00169   003   y          n        y       n
+		Descriptor:
+		- UUID: fa415329-2034-4bea-b5dc-5b381c8d1e2c
+		- TYPE: fe3199be-aed0-413f-87bb-11260eb63cf1
+		- apiVersion: 00000000
+		- flags: 00000008 (conn. mode: insert, insert pref: first, volume mgmt: none, input mode: not set, output mode: not set)
+		- name: Loudness Enhancer
+		- implementor: The Android Open Source Project
+		1 Clients:
+			  Pid Priority Ctrl Locked client server
+			23666        0  yes    yes      0      0
+		Status Engine:
+		000    0x700548490140
+		- data: float
+		- Input configuration:
+			Buffer     Frames  Smp rate Channels Format
+			0x70064f4cb000 01024   48000    00000003      5 (AUDIO_FORMAT_PCM_FLOAT)
+		- Output configuration:
+			Buffer     Frames  Smp rate Channels Format
+			0x70064f4cb000 01024   48000    00000003      5 (AUDIO_FORMAT_PCM_FLOAT)
+		- HAL buffers:
+			In(0x70064f4cb000) InConversion(nullptr) Out(0x70064f4cb000) OutConversion(nullptr)
+	Effect ID 387 HAL dump:
+EffectHal::threadLoop n=84 ave=0.0228357 std=0.00903157 min=0.016108 max=0.071556
+	Effect ID 379:
+		Session State Registered Internal Enabled Suspended:
+		00169   003   y          n        y       n
+		Descriptor:
+		- UUID: 1d4033c0-8557-11df-9f2d-0002a5d5c51b
+		- TYPE: 37cc2c00-dddd-11db-8577-0002a5d5c51b
+		- apiVersion: 00000000
+		- flags: 00000250 (conn. mode: insert, insert pref: last, volume mgmt: implements control, device indication: requires updates, input mode: not set, output mode: not set)
+		- name: Virtualizer
+		- implementor: NXP Software Ltd.
+		1 Clients:
+			  Pid Priority Ctrl Locked client server
+			23666        0  yes    yes      0      0
+		Status Engine:
+		000    0x7005484953c0
+		- data: float
+		- Input configuration:
+			Buffer     Frames  Smp rate Channels Format
+			0x70064f4cb000 01024   48000    00000003      5 (AUDIO_FORMAT_PCM_FLOAT)
+		- Output configuration:
+			Buffer     Frames  Smp rate Channels Format
+			0x70064f5f1000 01024   48000    00000003      5 (AUDIO_FORMAT_PCM_FLOAT)
+		- HAL buffers:
+			In(0x70064f4cb000) InConversion(nullptr) Out(0x70064f5f1000 -> 0x7004f8493640) OutConversion(nullptr)
+	Effect ID 379 HAL dump:
+EffectHal::threadLoop n=84 ave=0.0380183 std=0.0243846 min=0.020399 max=0.236416
+  Local log:
+                                                         Type     Id Active Client(pid/uid) Session Port Id S  Flags   Format Chn mask  SRate ST Usg CT  G db  L dB  R dB  VS dB  PortVol dB  PortMuted   Server FrmCnt  FrmRdy F Underruns  Flushed BitPerfect InternalMute   Latency
+   10-15 15:35:34.158 CFG_EVENT_CREATE_AUDIO_PATCH: old device  (Empty device types) new device 0x2 (AUDIO_DEVICE_OUT_SPEAKER)
+   10-15 15:55:17.207 AT::add       (0x7004c8495670)          55     no    3079/  10052      81       8 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0          nan      false 00000000  11328   11328 f         0        0      false        false       new
+   10-15 15:55:58.118 AT::remove    (0x7004c8495670)          55     no    3079/  10052      81       8 S  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0          nan      false 001AEC00  11328       0 f         0        0      false        false   unavail
+   10-15 15:56:01.038 threadLoop_standby: framesWritten:2064384  suspendedFrames:0  monoPipeWritten:2064384  monoPipeLeft:2048
+   10-15 15:56:01.038 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 2064384  time: 1238020349784), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:05:26.022 removeTrack_l (0x7004c8495670)          55     no    3079/  10052      81       8 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0          nan      false 001AEC00  11328       0 f         0        0      false        false   unavail
+   10-15 16:09:11.704 AT::add       (0x7004c8495670)          56     no    3079/  10052      89       9 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328       0 f         0        0      false        false       new
+   10-15 16:09:52.417 AT::remove    (0x7004c8495670)          56     no    3079/  10052      89       9 S  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 001AEC00  11328       0 f         0        0      false        false   unavail
+   10-15 16:09:55.350 threadLoop_standby: framesWritten:4129792  suspendedFrames:0  monoPipeWritten:4129792  monoPipeLeft:1536
+   10-15 16:09:55.350 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 4129792  time: 2072324700561), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:12:30.368 removeTrack_l (0x7004c8495670)          56     no    3079/  10052      89       9 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 001AEC00  11328       0 f         0        0      false        false   unavail
+   10-15 16:12:30.721 AT::add       (0x7004c8495670)          57     no    3079/  10052      97      10 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
+   10-15 16:13:03.928 AT::remove    (0x7004c8495670)          57     no    3079/  10052      97      10 S  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00159C00  11328       0 f         0        0      false        false   unavail
+   10-15 16:13:06.854 threadLoop_standby: framesWritten:5815296  suspendedFrames:0  monoPipeWritten:5815296  monoPipeLeft:1024
+   10-15 16:13:06.854 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 5815296  time: 2263825456705), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:13:13.393 removeTrack_l (0x7004c8495670)          57     no    3079/  10052      97      10 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00159C00  11328       0 f         0        0      false        false   unavail
+   10-15 16:16:55.967 AT::add       (0x7004c8494990)          58     no    3079/  10052     105      11 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
+   10-15 16:18:02.228 AT::remove    (0x7004c8494990)          58     no    3079/  10052     105      11 P  0x400 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 002C5466  11328   10387 A         0        0      false        false   unavail
+   10-15 16:18:04.186 AT::add       (0x7004c8494990)          58     no    3079/  10052     105      11 r  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 002C5466  11328   11328 f         0        0      false        false   unavail
+   10-15 16:18:06.305 AT::remove    (0x7004c8494990)          58     no    3079/  10052     105      11 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 002DB532  11328       0 f         0    10388      false        false   unavail
+   10-15 16:18:06.305 removeTrack_l (0x7004c8494990)          58     no    3079/  10052     105      11 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 002DB532  11328       0 f         0    10388      false        false   unavail
+   10-15 16:18:07.015 AT::add       (0x7004c84969c0)          59     no    3079/  10052     105      12 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
+   10-15 16:18:09.340 AT::remove    (0x7004c84969c0)          59     no    3079/  10052     105      12 S  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00018000  11328       0 f         0        0      false        false   unavail
+   10-15 16:18:12.250 threadLoop_standby: framesWritten:9461760  suspendedFrames:0  monoPipeWritten:9461760  monoPipeLeft:2048
+   10-15 16:18:12.250 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 9461760  time: 2569237529939), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:19:08.192 removeTrack_l (0x7004c84969c0)          59     no    3079/  10052     105      12 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00018000  11328       0 f         0        0      false        false   unavail
+   10-15 16:20:00.361 AT::add       (0x7004c84969c0)          60     no    3079/  10052     113      13 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
+   10-15 16:20:19.053 AT::remove    (0x7004c84969c0)          60     no    3079/  10052     113      13 P  0x401 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 000AF20C  11328   10387 A    100036        0      false        false   unavail
+   10-15 16:20:21.949 threadLoop_standby: framesWritten:10485760  suspendedFrames:0  monoPipeWritten:10485760  monoPipeLeft:1536
+   10-15 16:20:21.949 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 10485760  time: 2698920526902), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:20:32.719 removeTrack_l (0x7004c84969c0)          60     no    3079/  10052     113      13 T  0x601 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 000AF20C  11328       0 f    100036    11328      false        false   unavail
+   10-15 16:21:32.659 AT::add       (0x7004c84969c0)          61     no    3079/  10052     121      14 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
+   10-15 16:22:17.630 AT::remove    (0x7004c84969c0)          61     no    3079/  10052     121      14 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 001DC9A0  11328       0 f         0     9446      false        false   unavail
+   10-15 16:22:17.630 removeTrack_l (0x7004c84969c0)          61     no    3079/  10052     121      14 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 001DC9A0  11328       0 f         0     9446      false        false   unavail
+   10-15 16:22:20.559 threadLoop_standby: framesWritten:12753920  suspendedFrames:0  monoPipeWritten:12753920  monoPipeLeft:2048
+   10-15 16:22:20.559 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 12753920  time: 2817534115348), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:22:36.134 AT::add       (0x7004c84969c0)          62     no    3079/  10052     129      15 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
+   10-15 16:23:17.009 AT::remove    (0x7004c84969c0)          62     no    3079/  10052     129      15 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 001B6793  11328       0 f         0    10387      false        false   unavail
+   10-15 16:23:17.009 removeTrack_l (0x7004c84969c0)          62     no    3079/  10052     129      15 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 001B6793  11328       0 f         0    10387      false        false   unavail
+   10-15 16:23:19.936 threadLoop_standby: framesWritten:14852096  suspendedFrames:0  monoPipeWritten:14852096  monoPipeLeft:2048
+   10-15 16:23:19.936 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 14852096  time: 2876918998083), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:23:34.152 AT::add       (0x7004c8495670)          63     no    3079/  10052     137      16 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
+   10-15 16:24:09.525 AT::remove    (0x7004c8495670)          63     no    3079/  10052     137      16 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 0017AC13  11328       0 f         0    11328      false        false   unavail
+   10-15 16:24:09.525 removeTrack_l (0x7004c8495670)          63     no    3079/  10052     137      16 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 0017AC13  11328       0 f         0    11328      false        false   unavail
+   10-15 16:24:12.455 threadLoop_standby: framesWritten:16684032  suspendedFrames:0  monoPipeWritten:16684032  monoPipeLeft:512
+   10-15 16:24:12.455 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 16684032  time: 2929432988830), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:25:32.069 AT::add       (0x7004c8493640)          64     no   23666/  10052     145      17 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
+   10-15 16:26:21.947 AT::remove    (0x7004c8493640)          64     no   23666/  10052     145      17 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 0021640C  11328       0 f         0    10388      false        false   unavail
+   10-15 16:26:21.947 removeTrack_l (0x7004c8493640)          64     no   23666/  10052     145      17 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 0021640C  11328       0 f         0    10388      false        false   unavail
+   10-15 16:26:24.876 threadLoop_standby: framesWritten:19209216  suspendedFrames:0  monoPipeWritten:19209216  monoPipeLeft:1024
+   10-15 16:26:24.876 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 19209216  time: 3061845881782), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:26:39.973 AT::add       (0x7004c8493640)          65     no   23666/  10052     153      18 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
+   10-15 16:27:12.428 AT::remove    (0x7004c8493640)          65     no   23666/  10052     153      18 S  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00159400  11328       0 f         0        0      false        false   unavail
+   10-15 16:27:15.352 threadLoop_standby: framesWritten:20892672  suspendedFrames:0  monoPipeWritten:20892672  monoPipeLeft:1536
+   10-15 16:27:15.352 threadLoop_standby: BOOTTIME offset 0: ExtendedTimestamp: ([0]  position: 0  time: -1), ([1]  position: 20892672  time: 3112327233415), ([2]  position: 0  time: -1), ([3]  position: 0  time: -1), ([4]  position: 0  time: -1)
+   10-15 16:27:22.316 removeTrack_l (0x7004c8493640)          65     no   23666/  10052     153      18 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00159400  11328       0 f         0        0      false        false   unavail
+   10-15 16:27:22.526 AT::add       (0x7004c8493640)          66     no   23666/  10052     161      19 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000   5664       0 f         0        0      false        false       new
+   10-15 16:28:24.785 AT::add       (0x7004c8496350)          67     no   23666/  10052     169      20 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000   5664       0 f         0        0      false        false       new
+   10-15 16:28:24.832 AT::remove    (0x7004c8493640)          66     no   23666/  10052     161      19 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 0029CD99   5664    2023 f         0        0      false        false   unavail
+   10-15 16:28:24.832 removeTrack_l (0x7004c8493640)          66     no   23666/  10052     161      19 T  0x600 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 0029CD99   5664    2023 f         0        0      false        false   unavail
+
+ ## BEGIN setParameters dump 
+
+  Rejected setParameters:
+
+  App setParameters:
+
+  System setParameters:
+    10-15 15:35:42.217 UID  1000, 1 KVP received: BT_SCO=off
+    10-15 15:35:42.219 UID  1000, 1 KVP received: A2dpSuspended=false
+    10-15 15:35:42.220 UID  1000, 1 KVP received: LeAudioSuspended=false
+    10-15 15:35:42.730 UID  1000, 1 KVP received: screen_state=on
+    10-15 15:35:42.732 UID  1000, 1 KVP received: screen_state=on
+    10-15 15:35:57.079 UID  1000, 1 KVP received: screen_state=on
+    10-15 15:42:20.451 UID  1000, 1 KVP received: screen_state=on
+
+ ## BEGIN misc af dump 
+
+Patches:
+  Patch 12: No software bridge (thread 0x0 => thread 0x0) thread 0x70064efcbfe8 num sinks (1) first device type 00000002
+
+Device Effects:
+
+Sound Dose:
+CSD is disabled

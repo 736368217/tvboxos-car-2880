@@ -1,135 +1,96 @@
-# 音频与视频增强方案说明（car.5）
+# 音频与视频增强技术说明（car.6）
 
-本文对应 `TVBoxOS 1.0.0-car.5` Python 通用版。car.5 把原来的二元“臻彩开关”扩展为 8 个稳定编号的 SDR 画面预设，同时保留 car.2–car.4 的 6 档音效、HDR 保护和主线程 Surface 修复。
+## 设置与兼容性
 
-## 1. 能力总览
+car.6 保留 Python ARM32＋ARM64 flavor、Java/JAR、QuickJS 和既有车机修复。音效 0–5 与画面 0–7 的编号、参数不变；新增动漫音效为 6–8，新增动漫画面为 8–10。规格书基于较早版本，若直接把动漫画面写入 2–4，会覆盖已发布 car.5 的自然／影院／鲜艳，因此采用追加编号。
 
-| 能力 | 设置入口 | 生效时机 |
-|---|---|---|
-| 音效 | 关闭 / 影院 / 重低音 / 3D环绕 / HiFi / 人声 | 当前内部 EXO/IJK 播放会话重新绑定；新会话自动绑定 |
-| 画面 | 原画 / 臻彩 / 自然 / 影院 / 鲜艳 / 柔和 / 明亮 / 暖色 | 下一次播放创建渲染视图时 |
-| HDR 保护 | 无独立开关 | HDR/DoVi 强制使用恒等调色；本轮未用 HDR 片源实测 |
+| 设置 | 偏好键 | 默认 | 生效 |
+|---|---|---|---|
+| 9 档音效 | `hifi_audio` | 0 关闭 | 当前或下次内部 EXO/IJK 音频会话 |
+| 11 档画面 | `video_enhance` | 0 原画 | 下次播放 |
+| SGSR1 超分 | `video_sr` | 开启 | 下次播放 |
+| 时域平滑补帧 | `video_interp` | 开启 | 下次播放 |
 
-Python flavor 不会替换 Android 页面或播放器。APK 仍保留 Java、JAR、QuickJS 和原有 TVBox 业务链，只是 Python Spider 使用 Chaquopy 运行时。
+预设采用不可变参数表。旧 Boolean、数字与字符串偏好可读取；损坏预设回退 0。两个新开关独立解析和持久化，任何调色／SR／补帧启用时选统一 GL 渲染器；原画＋全部关闭时回普通渲染器。
 
-## 2. 音效链
+## 9 档音效
 
-相关源码：
+`AudioEffectPreset.java` 保存曲线，`AudioEffectController.java` 管理效果器。13 个参考频率（Hz）：`30,60,100,150,200,250,500,1000,2000,5000,8000,16000,32000`。设备实际 EQ 频带映射至最近参考点，dB×100 转为 millibel，再按设备范围裁剪。32kHz 是参考表尾，不表示设备具有该物理频段。
 
-- `app/src/main/java/com/github/tvbox/osc/car/AudioEffectController.java`
-- `app/src/main/java/com/github/tvbox/osc/car/CarEnhance.java`
-- `app/src/main/java/com/github/tvbox/osc/player/MyVideoView.java`
-- `app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java`
+| ID | 名称 | EQ dB（按上述频率顺序） | Bass | Virtualizer | Loudness mB |
+|---:|---|---|---:|---:|---:|
+| 0 | 关闭 | 释放效果器 | 0 | 0 | 0 |
+| 1 | 影院 | `7,8,6,3,2,1,0,0,1,2,3,3,2` | 900 | 850 | 900 |
+| 2 | 重低音 | `6,7,5,4,3,2,0,-1,-1,0,0,0,0` | 700 | 150 | 300 |
+| 3 | 3D环绕 | `-2,-1,0,1,2,3,2,1,2,3,4,4,3` | 450 | 1000 | 450 |
+| 4 | HiFi | `1,1,0,0,0,0,0,1,1,1,0,0,1` | 250 | 300 | 400 |
+| 5 | 人声 | `-4,-3,-1.5,0,1,2,3,4,3,2,1,0,-1` | 0 | 50 | 750 |
+| 6 | 动漫·标准 | `1,1.5,-.5,-2,-2.5,-1,.5,1.5,2,-1.5,.5,1.5,1` | 150 | 180 | 450 |
+| 7 | 动漫·剧场 | `2.5,3,.5,-1.5,-2,-.5,.5,1.5,2.5,-1,1.5,2.5,2` | 280 | 320 | 550 |
+| 8 | 动漫·对白 | `-1.5,-1,-1.5,-2.5,-3,-1.5,1,2.5,3,-2,0,1,.5` | 0 | 80 | 650 |
 
-播放准备完成后，`MyVideoView.prepared()` 读取当前播放器的音频 session：
+Bass／Virtualizer 强度范围 0–1000；Loudness 450mB 约 +4.5dB。效果器绑定当前内部 EXO/IJK session，不修改全局音量；16×32ms 渐入约 512ms。关闭或无有效 session 时释放。Bass=0 的对白模式不启用 BassBoost。设备不支持某效果时跳过该项，实际频响和听感由 HAL 与车内扬声器决定。
 
-```text
-EXO/IJK audio session
-        |
-        v
-CarEnhance.applyAudio()
-        |
-        +-- Equalizer
-        +-- BassBoost
-        +-- Virtualizer
-        +-- LoudnessEnhancer
-        |
-        v
-Android AudioFlinger / 当前 AudioTrack
+## 11 档画面
+
+参数集中于 `VideoEnhancePreset.java`。
+
+| ID | 名称 | 饱和度 | 对比度 | 亮度 | RGB 增益 | SGSR 锐度 |
+|---:|---|---:|---:|---:|---|---:|
+| 0 | 原画 | 1 | 1 | 0 | 1 / 1 / 1 | 1.25 |
+| 1 | 臻彩 | 1.35 | 1.12 | .030 | 1 / 1 / 1 | 1.60 |
+| 2 | 自然 | 1.08 | 1.04 | .010 | 1 / 1 / 1 | 1.25 |
+| 3 | 影院 | 1.08 | 1.16 | -.015 | 1.03 / 1 / .97 | 1.25 |
+| 4 | 鲜艳 | 1.50 | 1.16 | .015 | 1 / 1 / 1 | 1.25 |
+| 5 | 柔和 | .90 | .94 | .020 | 1.015 / 1 / .985 | 1.25 |
+| 6 | 明亮 | 1.12 | 1.02 | .080 | 1 / 1 / 1 | 1.25 |
+| 7 | 暖色 | 1.06 | 1.04 | .020 | 1.06 / 1 / .92 | 1.25 |
+| 8 | 动漫·暗光 | 1.08 | 1.05 | -.010 | 1 / .98 / .94 | 1.25 |
+| 9 | 动漫·日间 | 1.14 | 1.03 | .015 | 1 / .99 / .96 | 1.30 |
+| 10 | 动漫·清透 | 1.12 | 1.08 | -.005 | .99 / .99 / 1 | 1.45 |
+
+处理顺序沿用 car.5：RGB 增益 → 对比度／亮度 → Rec.709 亮度与饱和度混合 → clamp。UI 不进入视频纹理处理。
+
+## 两 Pass 渲染与 SGSR1
+
+```mermaid
+flowchart LR
+  A[EXO / IJK 解码] --> B[SurfaceTexture / OES]
+  B --> C[新源帧：调色写 RGBA8 FBO]
+  C --> D[当前帧与前帧]
+  D --> E[有差异抑制的时域混合]
+  E --> F[SGSR1 或双线性旁路]
+  F --> G[实际 viewport]
 ```
 
-6 档模式 ID：
+Pass 1 仅在新源帧到达时运行，写源尺寸的两个 RGBA8 FBO。Pass 2 使用当前／上一源帧输出到 MeasureHelper 确定的 viewport，保持原比例和布局，不硬编码车机有效区。
 
-```text
-0 关闭
-1 影院
-2 重低音
-3 3D环绕
-4 HiFi
-5 人声
-```
+SGSR1 来源：Snapdragon Game Super Resolution 上游提交 `d926f074bcb9d714e179f1ce0fcb9ee2eeb5074e`，`sgsr/v1/include/glsl/sgsr1_shader_mobile_edge_direction.frag`。BSD-3-Clause 许可证随 APK 放入 `assets/licenses/snapdragon-gsr.txt`，源码交付另附同文件。
 
-### 音效参数（沿用 car.4）
+`VideoShaders.java` 保留官方 12-tap 邻域、边缘方向与 Lanczos 重建。使用 GLES2 显式 2D 采样构造等价 gather，避免要求 GLSL ES 3.00。动漫平涂阈值为 32/255，边缘修正限制 ±16/255，分母及平坦区域有保护。SGSR delta 使用 `base.g - mean`，修正规格示例的错误邻点减法；所有邻域采样都使用一致的时域混合函数。
 
-EQ 使用 13 个参考中心频率（Hz）：`30, 60, 100, 150, 200, 250, 500, 1000, 2000, 5000, 8000, 16000, 32000`。设备频段映射到最近参考频点，dB 乘 100 转换为 Android millibel，并按设备 `getBandLevelRange()` 裁剪。
+源宽 ≥2560 或源尺寸不小于 viewport 时旁路 SGSR；请求开关仍保持，改变窗口可重新激活。
 
-| 模式 | EQ 曲线（依次对应 30…32000 Hz，dB） | BassBoost | Virtualizer | LoudnessEnhancer |
-|---|---|---:|---:|---:|
-| 关闭 | 释放全部效果 | 0 | 0 | 0 dB |
-| 影院 | `7, 8, 6, 3, 2, 1, 0, 0, 1, 2, 3, 3, 2` | 900 | 850 | +900 mB |
-| 重低音 | `6, 7, 5, 4, 3, 2, 0, -1, -1, 0, 0, 0, 0` | 700 | 150 | +300 mB |
-| 3D环绕 | `-2, -1, 0, 1, 2, 3, 2, 1, 2, 3, 4, 4, 3` | 450 | 1000 | +450 mB |
-| HiFi | `1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1` | 250 | 300 | +400 mB |
-| 人声 | `-4, -3, -1.5, 0, 1, 2, 3, 4, 3, 2, 1, 0, -1` | 0 | 50 | +750 mB |
+## 时域平滑策略
 
-BassBoost / Virtualizer 的 Android 强度范围为 0–1000；LoudnessEnhancer 的 `900 mB` 约为 +9 dB。音效偏好键 `hifi_audio`，默认 0。设置页按 0→1→2→3→4→5→0 循环，当前 Activity 若没有内部播放器，会在下一次 `prepared()` 绑定。
+`VideoPostProcessPolicy.java` 管理时间戳与历史状态。最大上一帧权重 0.28，在当前源帧周期前 35% 内递减。局部绿色通道差异由 `1-smoothstep(.015,.10,diff)` 抑制，差异达到 .10 时不混合，避免规格中反向 smoothstep 的未定义结果。
 
-调参常量：`CURVE_*`、`CURVE_FREQS`、`BASS_STRENGTH`、`VIRT_STRENGTH`、`LOUD_STRENGTH`。控制增益并检查削波；不同音频 HAL 的支持程度和实际听感不同。
+有效源帧周期为 8–150ms，以 3/4 旧周期＋1/4 新周期平滑。首帧、seek、暂停／恢复、时间戳逆序或异常时清历史。它是 Oversample SmoothMotion 式相邻帧混合，没有光流或运动矢量预测，不能生成被遮挡区域的真实中间运动。
 
+播放、可见、attached、补帧开启且后处理可用时才持续绘制，最大提交节奏 60Hz；其余状态为 `WHEN_DIRTY`。帧间节流不持有生命周期所需的 producer 锁。日志每约两秒分别记录源帧、输出提交和混合次数，不能把这些计数等同于显示器实际呈现帧数。
 
-效果链绑定当前会话，不修改全局系统音量。关闭或 `audioSessionId <= 0` 时释放效果。新建或切换效果链使用 16 × 32ms 的渐入，名义时长约 512ms。若设备不支持 BassBoost/Virtualizer 强度控制，则只跳过该效果，不阻塞播放。
+## Surface 生命周期与降级
 
-支持范围：内置 EXO 和 IJK；系统播放器、外部 MX/Kodi/VLC、当前直播基类 `VideoView` 不在这条绑定链路中。
+解码器输出始终绑定到 OES 的 SurfaceTexture producer，GLSurfaceView 的窗口 Surface 只供 EGL。`VideoView.resume()` 对增强渲染器使用其 producer，避免原 SurfaceView 恢复分支调用 `setDisplay(holder)` 绕开处理链。
 
-## 3. 8 档画面预设
+播放器 `setSurface` 在主线程执行，并核对 player／surface identity。GL context 重建时保留旧 producer，待新 Surface 绑定返回后释放旧对象。退出时先解除播放器输出绑定，再释放引擎；producer 的释放与完整 GL draw 串行，GL 对象在 GL 线程删除或随已退出的 context 回收。
 
-源码：
+FBO 分配或输出 shader 失败时记录 `POSTPROCESS_FALLBACK`，关闭持续补帧并回单 Pass 调色；不会只显示“开”而无诊断地黑屏。
 
-- `player/src/main/java/xyz/doikki/videoplayer/render/VideoEnhancePreset.java`
-- `player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java`
-- `player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderViewFactory.java`
-- `app/src/main/java/com/github/tvbox/osc/car/CarEnhance.java`
-- `app/src/main/java/com/github/tvbox/osc/util/PlayerHelper.java`
-- `app/src/main/java/com/github/tvbox/osc/player/MyVideoView.java`
+## 内存、HDR 与适用范围
 
-所有参数是 immutable snapshot，设置页和 GL renderer 共用同一张表：
+双 FBO 源尺寸实际开销为 `width × height × 4 × 2`：640×360 为 1,843,200B；1080p 为 16,588,800B；4K 为 66,355,200B。4K 旁路 SGSR 不等于不分配时域缓冲；不包括解码器、EGL、驱动与其他 UI 开销。
 
-| ID | 名称 | saturation | contrast | brightness | RGB 增益 |
-|---:|---|---:|---:|---:|---|
-| 0 | 原画 | 1.00 | 1.00 | 0.000 | 1.000 / 1.000 / 1.000 |
-| 1 | 臻彩 | 1.35 | 1.12 | +0.030 | 1.000 / 1.000 / 1.000 |
-| 2 | 自然 | 1.08 | 1.04 | +0.010 | 1.000 / 1.000 / 1.000 |
-| 3 | 影院 | 1.08 | 1.16 | -0.015 | 1.030 / 1.000 / 0.970 |
-| 4 | 鲜艳 | 1.50 | 1.16 | +0.015 | 1.000 / 1.000 / 1.000 |
-| 5 | 柔和 | 0.90 | 0.94 | +0.020 | 1.015 / 1.000 / 0.985 |
-| 6 | 明亮 | 1.12 | 1.02 | +0.080 | 1.000 / 1.000 / 1.000 |
-| 7 | 暖色 | 1.06 | 1.04 | +0.020 | 1.060 / 1.000 / 0.920 |
+HDR／DoVi 检测后使用恒等调色，保留独立 SR／补帧开关。EXO 读取颜色元数据，IJK 主要依赖 codec 名启发式；RGBA8 FBO 不保证端到端 10-bit HDR 精度。本轮未用 HDR 片源验收。
 
-ID 0 和 1 保留旧 car.2–car.4 语义。设置值支持旧 Boolean、数字和字符串：`false/0` 为原画，`true/1` 为臻彩，越界或损坏值回退原画。偏好键仍为 `HawkConfig.VIDEO_ENHANCE = "video_enhance"`，只是现在存稳定预设 ID。
-
-### GLSL 处理顺序
-
-```glsl
-raw = texture2D(uTexture, vTexCoord);
-color = raw.rgb * uRgb;
-color = (color - 0.5) * uCon + 0.5 + uBri;
-l = dot(color, vec3(0.2126, 0.7152, 0.0722));
-output = clamp(mix(vec3(l), color, uSat), 0.0, 1.0);
-```
-
-渲染使用 `GL_TEXTURE_EXTERNAL_OES` 和 `SurfaceTexture`。GL 线程负责创建纹理，播放器 `setSurface()` 通过主线程 Handler 执行；视频尺寸已知后显式调用 `setDefaultBufferSize(videoWidth, videoHeight)`。`RENDERMODE_WHEN_DIRTY` 只在新帧到达时请求绘制，暂停时保留上一帧供重绘。
-
-car.4 修复的跨线程黑屏问题仍然保留：EXO 不再从 GL 线程调用 `player.setSurface()`，日志会记录 `player surface bound (main thread)`、`setVideoSize`、`drawFrame` 和 shader 错误。
-
-## 4. HDR 策略
-
-EXO 检查 `dolby-vision`、`dvhe`、`dvh1`、`dovi`、`dolby` 及 `ColorInfo.isTransferHdr()`；IJK 使用 codec name 启发式检查 `dvhe/dvh1/dovi/dolby`。检测到 HDR/DoVi 时，`MyVideoView.prepared()` 让 renderer 使用 ID 0 的恒等参数，并提示用户。IJK 不能完整识别所有 HLG/PQ/HDR10 传输特性。
-
-## 5. car.5 运行期验收
-
-MuMu 6.8.4.0 / Android 15 / 横屏 2880×1620 / density 240：
-
-- Python 3.8.13 实际执行 `lxml`、`ujson`、`pyquery`、`requests`、`jsonpath`、`cachetools`、`Crypto`、`beautifulsoup4` 与本地 HTTP 断言。
-- Python 和 QuickJS fixture 均实际返回分类、卡片、详情；Python 详情播放合成 640×360 片。
-- 8 档逐项通过设置 UI 选择并走分类→详情→播放；ID 1–7 均记录对应 `preset applied` 和 `drawFrame #100`。
-- `evidence/car.5/pixel-comparison.json`：以原画为基准，7 个增强档视频区域均有非零平均差异；抽样 UI 区域差异为 0；鲜艳档平均饱和度提高，明亮档平均亮度提高。
-- 设置重启后保留：最终 UI 读取到 `臻彩`；`音效`读取到 `影院`。
-- 当前 EXO 播放 session 89 挂载 4 个效果：Equalizer、Dynamic Bass Boost、Loudness Enhancer、Virtualizer。
-
-## 6. 调参入口
-
-画面参数集中在 `VideoEnhancePreset.java`，不需要在 renderer 中维护多组 volatile float。音效曲线和强度集中在 `AudioEffectController.java`。修改后应重新构建，并用低饱和测试片做像素比较；shader 最后的 `clamp()` 会避免越界，但不能避免高光或色彩削顶。
-
-## 7. 边界
-
-真实车机 OEM 全屏、真实 DPI、ARM32 独立运行、HDR/DoVi 和 IJK 本轮未覆盖；外部播放器和直播页不在音效会话链路范围内。外部订阅源的可用性受网络、验证页、源自身实现和超时影响，不能由一次搜索承诺所有源永久正常。
+内部 EXO／IJK 已运行验证；外部播放器与现有直播基类不属于本轮完整音效／后处理链验收。真实 SA8295P <2ms 耗时、长期温升功耗、OEM 全屏与 ARM32 运行仍需对应硬件证据。完整结果见 [TEST-REPORT.md](TEST-REPORT.md)。

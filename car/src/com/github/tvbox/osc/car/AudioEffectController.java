@@ -13,7 +13,7 @@ import android.os.Message;
  * Car-edition audio enhancement chain: Equalizer + BassBoost + Virtualizer + LoudnessEnhancer
  * attached to the audio session of the playing video.
  *
- * <p>Six presets (关闭/影院/重低音/3D环绕/HiFi/人声). Each preset is a 13-point EQ curve keyed
+ * <p>Nine presets, retaining all six original modes and adding three anime curves. Each preset is keyed
  * by band centre frequency (30 Hz..32 kHz) plus bass, virtualizer and loudness strengths; a
  * device equalizer band takes the value of the nearest curve position. apply() ramps all values
  * in a 500 ms fade-in and swallows every failure. Only engines that expose a real audio session
@@ -22,22 +22,10 @@ import android.os.Message;
  */
 public final class AudioEffectController {
     public static final int MODE_OFF = 0, MODE_CINEMA = 1, MODE_BASS = 2,
-            MODE_SURROUND = 3, MODE_HIFI = 4, MODE_VOCAL = 5;
-    /** 关闭 / 影院 / 重低音 / 3D环绕 / HiFi / 人声; any other value reads as 关闭. */
-    private static final String[] NAMES = {"关闭", "影院", "重低音", "3D环绕", "HiFi", "人声"};
-
-    /** Band centre frequencies (Hz) the preset curves are keyed by. */
-    private static final int[] CURVE_FREQS = {30, 60, 100, 150, 200, 250, 500, 1000, 2000, 5000, 8000, 16000, 32000};
-    private static final float[] CURVE_CINEMA = {7f, 8f, 6f, 3f, 2f, 1f, 0f, 0f, 1f, 2f, 3f, 3f, 2f};
-    private static final float[] CURVE_BASS = {6f, 7f, 5f, 4f, 3f, 2f, 0f, -1f, -1f, 0f, 0f, 0f, 0f};
-    private static final float[] CURVE_SURROUND = {-2f, -1f, 0f, 1f, 2f, 3f, 2f, 1f, 2f, 3f, 4f, 4f, 3f};
-    private static final float[] CURVE_HIFI = {1f, 1f, 0f, 0f, 0f, 0f, 0f, 1f, 1f, 1f, 0f, 0f, 1f};
-    private static final float[] CURVE_VOCAL = {-4f, -3f, -1.5f, 0f, 1f, 2f, 3f, 4f, 3f, 2f, 1f, 0f, -1f};
-    /** Preset curves indexed by mode; index 0 (关闭) is unused and mirrors the HiFi shape. */
-    private static final float[][] CURVES = {CURVE_HIFI, CURVE_CINEMA, CURVE_BASS, CURVE_SURROUND, CURVE_HIFI, CURVE_VOCAL};
-    private static final int[] BASS_STRENGTH = {0, 900, 700, 450, 250, 0};
-    private static final int[] VIRT_STRENGTH = {0, 850, 150, 1000, 300, 50};
-    private static final int[] LOUD_STRENGTH = {0, 900, 300, 450, 400, 750};
+            MODE_SURROUND = 3, MODE_HIFI = 4, MODE_VOCAL = 5,
+            MODE_ANIME_STD = 6, MODE_ANIME_ACTION = 7, MODE_ANIME_DIALOG = 8;
+    public static final int MODE_COUNT = AudioEffectPreset.COUNT;
+    private static final int[] CURVE_FREQS = AudioEffectPreset.frequencies();
 
     private static final int FADE_STEPS = 16, MSG_FADE_STEP = 1;
     private static final long FADE_STEP_MILLIS = 32L;
@@ -72,7 +60,7 @@ public final class AudioEffectController {
     }
 
     public static String name(int mode) {
-        return mode >= MODE_OFF && mode < NAMES.length ? NAMES[mode] : NAMES[MODE_OFF];
+        return AudioEffectPreset.forMode(mode).name;
     }
 
     public static String label(int mode) {
@@ -81,7 +69,7 @@ public final class AudioEffectController {
 
     /** Attach or retarget the chain; mode 关闭 or an invalid session id releases it. */
     public static void apply(int mode, int audioSessionId) {
-        if (mode < MODE_OFF || mode > MODE_VOCAL) mode = MODE_OFF;
+        if (mode < MODE_OFF || mode >= MODE_COUNT) mode = MODE_OFF;
         if (mode == MODE_OFF || audioSessionId <= 0) {
             release();
             return;
@@ -100,6 +88,8 @@ public final class AudioEffectController {
         enableChain();
         FADE.removeMessages(MSG_FADE_STEP); fadeIndex = 0;
         FADE.sendEmptyMessage(MSG_FADE_STEP);
+        android.util.Log.i("CarAudio", "applied mode=" + mode + " name=" + name(mode) + " session=" + audioSessionId
+                + " bass=" + bassTarget + " virtualizer=" + virtualTarget + " loudness=" + loudnessTarget);
     }
 
     /** Disable and release the four effects, stop a running fade and reset all state. */
@@ -125,9 +115,7 @@ public final class AudioEffectController {
 
     /** Tolerant bridge from the old boolean pref: true -> 影院, false/null/other -> 关闭. */
     public static int modeFromPrefValue(Object stored) {
-        if (stored instanceof Integer) return ((Integer) stored).intValue();
-        if (stored instanceof Boolean) return ((Boolean) stored).booleanValue() ? MODE_CINEMA : MODE_OFF;
-        return MODE_OFF;
+        return AudioEffectPreset.modeFromPreference(stored);
     }
 
     private static void buildChain(int session) {
@@ -138,9 +126,10 @@ public final class AudioEffectController {
     }
 
     private static void computeTargets(int mode) {
-        bassTarget = BASS_STRENGTH[mode];
-        virtualTarget = VIRT_STRENGTH[mode];
-        loudnessTarget = LOUD_STRENGTH[mode];
+        AudioEffectPreset preset = AudioEffectPreset.forMode(mode);
+        bassTarget = preset.bass;
+        virtualTarget = preset.virtualizer;
+        loudnessTarget = preset.loudness;
         try { bassSupported = bassBoost != null && bassTarget > 0 && bassBoost.getStrengthSupported(); } catch (Throwable ignored) { bassSupported = false; }
         try { virtualSupported = virtualizer != null && virtualTarget > 0 && virtualizer.getStrengthSupported(); } catch (Throwable ignored) { virtualSupported = false; }
         eqStart = null; eqTarget = null;
@@ -152,7 +141,7 @@ public final class AudioEffectController {
                 eqMin = range[0];
                 eqMax = range[1];
             }
-            float[] curve = CURVES[mode];
+            float[] curve = preset.curve();
             short bands = equalizer.getNumberOfBands();
             int[] targets = new int[bands];
             for (int band = 0; band < bands; band++) {

@@ -110,6 +110,9 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
 
     @Override
     public void seekTo(long pos) {
+        if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
+            ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).resetFrameHistory();
+        }
         super.seekTo(pos);
         if (danmuSeekListener != null) {
             danmuSeekListener.onDanmuSeek(pos);
@@ -178,6 +181,9 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
             setVideoEnhanceMode(mode);
         }
         CarEnhance.applyAudio(this);
+        if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
+            ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).setPlaybackActive(isPlaying());
+        }
     }
 
     /**
@@ -187,6 +193,15 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
     public void setVideoEnhanceMode(int mode) {
         if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
             ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).setVideoEnhanceMode(mode);
+        }
+    }
+
+    @Override
+    protected void setPlayState(int state) {
+        super.setPlayState(state);
+        if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
+            boolean active = state == STATE_PLAYING || (state == STATE_BUFFERED && isPlaying());
+            ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).setPlaybackActive(active);
         }
     }
 

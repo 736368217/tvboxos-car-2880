@@ -69,9 +69,10 @@ public class HawkConfig {
     // Car edition: in-app floating Back button (shown on every page, no accessibility needed).
     public static final String IN_APP_BACK = "inapp_back"; // default true
     public static final String BACK_HIDE_SECONDS = "hide_seconds"; // 4/6/8, 0 = 常显
-    // Car edition: audio effect preset (0 off / 1 cinema / 2 bass / 3 surround / 4 hifi / 5 vocal)
-    // and SDR colour preset. IDs 0/1 preserve the old off/臻彩 switch.
+    // Car edition: audio IDs 0..8 and stable SDR preset IDs (car.5 IDs remain unchanged).
     public static final String HIFI_AUDIO = "hifi_audio"; // default 0
-    public static final String VIDEO_ENHANCE = "video_enhance"; // 0 original, 1 臻彩, 2..7 other presets
+    public static final String VIDEO_ENHANCE = "video_enhance"; // 0 original, 1 臻彩, 8..10 anime
+    public static final String VIDEO_SR = "video_sr"; // default 1: SGSR1
+    public static final String VIDEO_INTERP = "video_interp"; // default 1: temporal smooth motion
     public static boolean hotVodDelete;
 }

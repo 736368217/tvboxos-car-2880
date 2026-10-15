@@ -1,0 +1,1 @@
+{"spider":"","sites":[{"key":"car5_py","name":"Python兼容验收","type":3,"api":"http://127.0.0.1:9978/file/TVBoxCar5/car5_python_probe.py","searchable":1,"quickSearch":1},{"key":"car5_js","name":"QuickJS兼容验收","type":3,"api":"http://127.0.0.1:9978/file/TVBoxCar5/car5_js_probe.js","searchable":1,"quickSearch":1}],"parses":[],"flags":[]}

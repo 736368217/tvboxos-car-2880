@@ -4,529 +4,538 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.Surface;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import xyz.doikki.videoplayer.player.AbstractPlayer;
 
-/**
- * 基于 GLSurfaceView 的 GPU 色彩增强渲染 View，在画面到达屏幕前做饱和度/对比度/亮度调色。
- *
- * 播放器依然解码到 Surface 上（Surface 由 SurfaceTexture 创建），画面先进入
- * GL_TEXTURE_EXTERNAL_OES 外部纹理，再由片元着色器调色后绘制到屏幕，
- * 解码链路不变，适合车机等依赖硬解的场景。
- * 调色档位通过 {@link #setVideoEnhanceMode(int)} 切换。
- */
+/** OES colour pass -> two source-sized RGBA8 FBOs -> temporal/SGSR1 output pass. */
 @SuppressLint("ViewConstructor")
 public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, GLSurfaceView.Renderer,
         SurfaceTexture.OnFrameAvailableListener {
-
     private static final String TAG = "GlEnhance";
-
-    private static final String VERTEX_SHADER =
-            "attribute vec4 aPosition;\n" +
-            "attribute vec4 aTexCoord;\n" +
-            "uniform mat4 uTexMatrix;\n" +
-            "varying vec2 vTexCoord;\n" +
-            "void main() {\n" +
-            "    gl_Position = aPosition;\n" +
-            "    vTexCoord = (uTexMatrix * aTexCoord).xy;\n" +
-            "}\n";
-
-    private static final String FRAGMENT_SHADER =
-            "#extension GL_OES_EGL_image_external : require\n" +
-            "precision mediump float;\n" +
-            "uniform samplerExternalOES uTexture;\n" +
-            "uniform float uSat;\n" +
-            "uniform float uCon;\n" +
-            "uniform float uBri;\n" +
-            "uniform vec3 uRgb;\n" +
-            "varying vec2 vTexCoord;\n" +
-            "void main() {\n" +
-            "    vec4 raw = texture2D(uTexture, vTexCoord);\n" +
-            "    vec3 color = raw.rgb * uRgb;\n" +
-            "    color = (color - 0.5) * uCon + 0.5 + uBri;\n" +
-            "    float l = dot(color, vec3(0.2126, 0.7152, 0.0722));\n" +
-            "    gl_FragColor = vec4(clamp(mix(vec3(l), color, uSat), 0.0, 1.0), 1.0);\n" +
-            "}\n";
-
-    /** 全屏四边形（GL_TRIANGLE_STRIP，4 个顶点），NDC 坐标 */
-    private static final FloatBuffer QUAD_POSITION = createFloatBuffer(new float[]{
-            -1f, -1f,
-            1f, -1f,
-            -1f, 1f,
-            1f, 1f
-    });
-
-    /** 纹理坐标，实际变换由 SurfaceTexture 的 uTexMatrix 完成 */
-    private static final FloatBuffer QUAD_TEX_COORD = createFloatBuffer(new float[]{
-            0f, 0f,
-            1f, 0f,
-            0f, 1f,
-            1f, 1f
-    });
-
+    private static final long OUTPUT_INTERVAL_NS = 16_666_667L;
     private final MeasureHelper mMeasureHelper = new MeasureHelper();
+    private final Handler mMain = new Handler(Looper.getMainLooper());
+    private final AtomicBoolean mFrameAvailable = new AtomicBoolean();
+    private final AtomicBoolean mResetHistory = new AtomicBoolean();
+    private final FloatBuffer mPositions = buffer(-1,-1, 1,-1, -1,1, 1,1);
+    private final FloatBuffer mCoordinates = buffer(0,0, 1,0, 0,1, 1,1);
+    private final float[] mTextureMatrix = new float[16];
+    private final int[] mFbos = new int[2];
+    private final int[] mFrameTextures = new int[2];
+    private final VideoPostProcessPolicy mTiming = new VideoPostProcessPolicy();
+    private final Object mProducerLock = new Object();
+    private final ArrayList<ProducerSurface> mProducers = new ArrayList<>();
+    private Surface mBoundSurface;
 
-    @Nullable
     private volatile AbstractPlayer mMediaPlayer;
-
-    /** 播放器渲染目标，由 GL 线程在 onSurfaceCreated 时创建 */
     private volatile Surface mPlayerSurface;
     private volatile SurfaceTexture mSurfaceTexture;
-
-    /** 由 SurfaceTexture 回调线程置位，耗尽后由 GL 线程清除 */
-    private volatile boolean mFrameAvailable;
+    private volatile VideoEnhancePreset mPreset;
+    private volatile boolean mSrEnabled;
+    private volatile boolean mInterpEnabled;
+    private volatile boolean mPlaybackActive;
     private volatile boolean mReleased;
-
-    /** 视频尺寸，主线程写入、GL 线程读取，用于设置 SurfaceTexture 的缓冲区大小 */
-    private volatile int mVideoWidth;
-    private volatile int mVideoHeight;
-
-    /** GL 线程内绘制计数，仅用于取证日志 */
-    private int mFramesDrawn;
+    private volatile boolean mAttached;
+    private volatile boolean mWindowVisible = true;
+    private volatile boolean mViewPaused;
+    private volatile int mVideoWidth, mVideoHeight;
+    private volatile long mFrameArrivalNs;
+    private boolean mContinuous;
+    private volatile boolean mPostProcessSupported;
     private boolean mHasFrame;
+    private boolean mHasPrevious;
+    private int mColourProgram, mOutputProgram, mOesTexture;
+    private int mFboWidth, mFboHeight, mFailedWidth, mFailedHeight;
+    private int mCurrentIndex, mPreviousIndex;
+    private int mViewportWidth, mViewportHeight;
+    private int cPosition, cCoordinate, cMatrix, cSat, cCon, cBri, cRgb;
+    private int oPosition, oCoordinate, oViewport, oParams;
+    private long mSourceFrames, mOutputFrames, mMixedOutputs;
+    private long mLastOutputNs, mStatsStartNs, mStatsSource, mStatsOutput, mStatsMixed;
+    private boolean mLoggedSr, mLastSrActive;
+    private int mDrawErrors;
 
-    /** A single immutable snapshot prevents mixed parameters across UI and GL threads. */
-    private volatile VideoEnhancePreset mPreset = VideoEnhancePreset.forMode(VideoEnhancePreset.ORIGINAL);
-
-    /** 以下字段只在 GL 线程访问 */
-    private int mProgram;
-    private int mTextureId;
-    private int aPosition;
-    private int aTexCoord;
-    private int uTexMatrix;
-    private int uSat;
-    private int uCon;
-    private int uBri;
-    private int uRgb;
-    private final float[] mTexMatrixValue = new float[16];
-    private int mViewportWidth;
-    private int mViewportHeight;
-
-    public GlEnhanceRenderView(Context context) {
-        this(context, VideoEnhancePreset.ORIGINAL);
-    }
-
-    public GlEnhanceRenderView(Context context, int mode) {
+    public GlEnhanceRenderView(Context context) { this(context, 0, false, false); }
+    public GlEnhanceRenderView(Context context, int mode) { this(context, mode, false, false); }
+    public GlEnhanceRenderView(Context context, int mode, boolean sr, boolean interp) {
         super(context);
         mPreset = VideoEnhancePreset.forMode(mode);
+        mSrEnabled = sr;
+        mInterpEnabled = interp;
         setEGLContextClientVersion(2);
-        // RGBA 配置，保证画面不透明；GL 内容全部自己绘制，无需 depth/stencil
-        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        // 切页时尽量保留 GL 上下文，避免每次切换都重建纹理
+        setEGLConfigChooser(8, 8, 8, 8, 0, 0);
         setPreserveEGLContextOnPause(true);
         setRenderer(this);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
 
-    @Override
-    public void attachToPlayer(@NonNull AbstractPlayer player) {
+    @Override public void attachToPlayer(@NonNull AbstractPlayer player) {
         mMediaPlayer = player;
+        resetFrameHistory();
         bindSurfaceToPlayer();
     }
 
-    /**
-     * 把渲染 Surface 交给播放器。
-     * 注意：EXO 会校验调用线程（IllegalStateException: Player is accessed on the wrong thread），
-     * 而 SurfaceTexture 是在 GL 线程创建的，因此这里必须切回主线程再绑定。
-     */
     private void bindSurfaceToPlayer() {
         final AbstractPlayer player = mMediaPlayer;
         final Surface surface = mPlayerSurface;
         if (player == null || surface == null) return;
-        try {
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mReleased || mMediaPlayer != player || mPlayerSurface != surface || !surface.isValid()) return;
-                    try {
-                        player.setSurface(surface);
-                        Log.i(TAG, "player surface bound (main thread)");
-                    } catch (Throwable e) {
-                        Log.i(TAG, "player.setSurface failed: " + e);
-                    }
+        mMain.post(() -> {
+            if (mReleased || mMediaPlayer != player || mPlayerSurface != surface || !surface.isValid()) return;
+            try {
+                player.setSurface(surface);
+                synchronized (mProducerLock) {
+                    mBoundSurface = surface;
+                    releaseRetiredProducers();
                 }
-            });
-        } catch (Throwable e) {
-            Log.i(TAG, "bindSurfaceToPlayer failed: " + e);
-        }
+                Log.i(TAG, "player surface bound (main thread)");
+            } catch (Throwable error) { Log.e(TAG, "player.setSurface failed", error); }
+        });
     }
 
-    public void setVideoSize(int videoWidth, int videoHeight) {
-        if (videoWidth > 0 && videoHeight > 0) {
-            mVideoWidth = videoWidth;
-            mVideoHeight = videoHeight;
-            mMeasureHelper.setVideoSize(videoWidth, videoHeight);
-            applySurfaceTextureBufferSize();
-            requestLayout();
-            Log.i(TAG, "setVideoSize " + videoWidth + "x" + videoHeight);
-        }
-    }
-
-    /** 自建 SurfaceTexture 必须显式设定缓冲区大小，否则解码器输出会落到默认(1x1)缓冲上 */
-    private void applySurfaceTextureBufferSize() {
-        SurfaceTexture surfaceTexture = mSurfaceTexture;
-        int width = mVideoWidth;
-        int height = mVideoHeight;
-        if (surfaceTexture == null) return;
+    @Override public void setVideoSize(int width, int height) {
         if (width <= 0 || height <= 0) return;
-        try {
-            surfaceTexture.setDefaultBufferSize(width, height);
-            Log.i(TAG, "surfaceTexture buffer size -> " + width + "x" + height);
-        } catch (Throwable e) {
-            Log.i(TAG, "setDefaultBufferSize failed: " + e);
+        if (mVideoWidth != width || mVideoHeight != height) mResetHistory.set(true);
+        mVideoWidth = width;
+        mVideoHeight = height;
+        mMeasureHelper.setVideoSize(width, height);
+        synchronized (mProducerLock) {
+            SurfaceTexture texture = mSurfaceTexture;
+            if (texture != null) {
+                try { texture.setDefaultBufferSize(width, height); }
+                catch (Throwable error) { Log.w(TAG, "setDefaultBufferSize failed", error); }
+            }
         }
+        requestLayout();
+        requestRender();
+        Log.i(TAG, "setVideoSize " + width + "x" + height);
     }
 
-    @Override
-    public void setVideoRotation(int degree) {
+    @Override public void setVideoRotation(int degree) {
         mMeasureHelper.setVideoRotation(degree);
         setRotation(degree);
     }
-
-    @Override
-    public void setScaleType(int scaleType) {
+    @Override public void setScaleType(int scaleType) {
         mMeasureHelper.setScreenScale(scaleType);
         requestLayout();
     }
+    @Override public View getView() { return this; }
+    @Override public Bitmap doScreenShot() { return null; }
 
-    @Override
-    public View getView() {
-        return this;
+    public void setPlaybackActive(boolean active) {
+        if (mPlaybackActive == active) return;
+        mPlaybackActive = active;
+        resetFrameHistory();
+        updateRenderMode();
+        requestRender();
+        Log.i(TAG, "playback active=" + active + " interp=" + mInterpEnabled);
     }
-
-    @Override
-    public Bitmap doScreenShot() {
-        // 画面在 GL 线程的 framebuffer 里，截图必须在 GL 线程做 glReadPixels 回读
-        // （还要处理线程同步与 Y 翻转），无法同步返回且阻塞主线程会卡死播放，
-        // 因此这里返回 null，不提供截图能力。
-        return null;
-    }
-
-    @Override
-    public void release() {
-        if (mReleased) {
-            return;
-        }
-        mReleased = true;
-        mMediaPlayer = null;
-        try {
-            queueEvent(new Runnable() {
-                @Override
-                public void run() {
-                    releaseGlResources();
-                }
-            });
-        } catch (Throwable ignored) {
-            // GL 线程可能已退出，忽略，保证 release 幂等且不抛异常
-        }
-    }
-
-    public boolean isEnhanceMode() {
-        return mPreset.id != VideoEnhancePreset.ORIGINAL;
-    }
-
-    /** Applies one immutable preset snapshot on the GL thread; mode 0 is the HDR identity path. */
+    public void resetFrameHistory() { mResetHistory.set(true); }
+    public boolean isEnhanceMode() { return mPreset.id != 0; }
     public void setVideoEnhanceMode(int mode) {
         mPreset = VideoEnhancePreset.forMode(mode);
-        try {
-            queueEvent(new Runnable() {
-                @Override
-                public void run() {
-                    applyEnhanceUniforms();
-                }
-            });
-        } catch (Throwable ignored) {
-            // onSurfaceCreated applies the stored preset if the GL thread is not ready yet.
+        mResetHistory.set(true);
+        requestRender();
+        logConfiguration();
+    }
+
+    private boolean shouldAnimate() {
+        return mInterpEnabled && mPostProcessSupported && mPlaybackActive && mAttached
+                && mWindowVisible && !mViewPaused && !mReleased;
+    }
+    private void updateRenderMode() {
+        if (Looper.myLooper() != Looper.getMainLooper()) { mMain.post(this::updateRenderMode); return; }
+        boolean continuous = shouldAnimate();
+        if (mContinuous != continuous) {
+            mContinuous = continuous;
+            setRenderMode(continuous ? RENDERMODE_CONTINUOUSLY : RENDERMODE_WHEN_DIRTY);
+            Log.i(TAG, "renderMode=" + (continuous ? "CONTINUOUS_60HZ_MAX" : "WHEN_DIRTY"));
         }
+    }
+    @Override protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mAttached = true;
+        updateRenderMode();
+    }
+    @Override protected void onDetachedFromWindow() {
+        mAttached = false;
+        updateRenderMode();
+        super.onDetachedFromWindow();
+    }
+    @Override protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        mWindowVisible = visibility == VISIBLE;
+        if (mMain != null) updateRenderMode();
+    }
+    @Override public void onPause() {
+        mViewPaused = true;
+        updateRenderMode();
+        super.onPause();
+    }
+    @Override public void onResume() {
+        super.onResume();
+        mViewPaused = false;
+        resetFrameHistory();
+        updateRenderMode();
+    }
+    @Override protected void onMeasure(int widthSpec, int heightSpec) {
+        int[] size = mMeasureHelper.doMeasure(widthSpec, heightSpec);
+        setMeasuredDimension(size[0], size[1]);
+    }
+
+    /** Called before the engine's asynchronous release, while it can still detach its output. */
+    public void detachFromPlayer() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mMain.post(this::detachFromPlayer);
+            return;
+        }
+        AbstractPlayer player = mMediaPlayer;
+        mMediaPlayer = null;
+        mPlaybackActive = false;
+        updateRenderMode();
+        if (player != null) {
+            try {
+                player.setSurface(null);
+                Log.i(TAG, "player surface detached (main thread)");
+            } catch (Throwable error) { Log.w(TAG, "player surface detach failed", error); }
+        }
+        synchronized (mProducerLock) { mBoundSurface = null; }
+    }
+
+    @Override public void release() {
+        if (mReleased) return;
+        mReleased = true;
+        if (Looper.myLooper() == Looper.getMainLooper()) finishRelease();
+        else mMain.post(this::finishRelease);
+    }
+    private void finishRelease() {
+        detachFromPlayer();
+        // Wait for updateTexImage and the complete draw to finish before releasing its consumer.
+        synchronized (mProducerLock) { releaseProducerSurfaces(); }
+        try { queueEvent(this::releaseGlResources); }
+        catch (Throwable error) { Log.i(TAG, "GL context already stopped; context owns remaining texture deletion"); }
+        Log.i(TAG, "release requested source=" + mSourceFrames + " outputs=" + mOutputFrames);
+    }
+
+    @Override public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        synchronized (mProducerLock) { createGlResources(); }
+    }
+    private void createGlResources() {
+        if (mReleased) return;
+        releaseGlResources();
+        mDrawErrors = 0;
+        mSourceFrames = mOutputFrames = mMixedOutputs = 0;
+        mStatsStartNs = mLastOutputNs = 0;
+        mStatsSource = mStatsOutput = mStatsMixed = 0;
+        mFailedWidth = mFailedHeight = 0;
+        mColourProgram = VideoShaders.createProgram(VideoShaders.OES_VERTEX, VideoShaders.colourFragment(true));
+        if (mColourProgram == 0) { Log.e(TAG, "OES colour shader unavailable"); return; }
+        cPosition = GLES20.glGetAttribLocation(mColourProgram, "aPosition");
+        cCoordinate = GLES20.glGetAttribLocation(mColourProgram, "aTexCoord");
+        cMatrix = GLES20.glGetUniformLocation(mColourProgram, "uTexMatrix");
+        cSat = GLES20.glGetUniformLocation(mColourProgram, "uSat");
+        cCon = GLES20.glGetUniformLocation(mColourProgram, "uCon");
+        cBri = GLES20.glGetUniformLocation(mColourProgram, "uBri");
+        cRgb = GLES20.glGetUniformLocation(mColourProgram, "uRgb");
+        GLES20.glUseProgram(mColourProgram);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(mColourProgram, "uTexture"), 0);
+        mOutputProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoShaders.OUTPUT_FRAGMENT);
+        mPostProcessSupported = mOutputProgram != 0;
+        if (mPostProcessSupported) {
+            oPosition = GLES20.glGetAttribLocation(mOutputProgram, "aPosition");
+            oCoordinate = GLES20.glGetAttribLocation(mOutputProgram, "aTexCoord");
+            oViewport = GLES20.glGetUniformLocation(mOutputProgram, "uViewportInfo");
+            oParams = GLES20.glGetUniformLocation(mOutputProgram, "uParams");
+            GLES20.glUseProgram(mOutputProgram);
+            GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uCurrFrameTex"), 0);
+            GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uPrevFrameTex"), 1);
+        } else Log.w(TAG, "POSTPROCESS_FALLBACK output shader failed; direct OES colour only");
+        createProducerSurface();
+        Log.i(TAG, "GL ready version=" + GLES20.glGetString(GLES20.GL_VERSION)
+                + " renderer=" + GLES20.glGetString(GLES20.GL_RENDERER));
+        logConfiguration();
+        updateRenderMode();
+    }
+    @Override public void onSurfaceChanged(GL10 gl, int width, int height) {
+        mViewportWidth = width;
+        mViewportHeight = height;
+        mLoggedSr = false;
         requestRender();
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int[] measuredSize = mMeasureHelper.doMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(measuredSize[0], measuredSize[1]);
-    }
-
-    // ------------------------------ GLSurfaceView.Renderer ------------------------------
-
-    @Override
-    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        try {
-            if (mReleased) {
-                return;
-            }
-            // GL 上下文可能被系统回收后重建（onSurfaceCreated 再次回调），
-            // 先释放上一轮的 Surface/SurfaceTexture，避免句柄泄漏和重复挂载
-            releaseGlResources();
-            if (createProgram()) {
-                createSurfaceTexture();
-                Log.i(TAG, "GL surface ready, view=" + getWidth() + "x" + getHeight()
-                        + ", program=" + mProgram + ", texture=" + mTextureId);
-            } else {
-                Log.i(TAG, "GL program creation failed");
-            }
-        } catch (Throwable e) {
-            // 车机环境下宁可黑屏也不能崩溃，保持 View 可用
-            Log.i(TAG, "onSurfaceCreated error: " + e);
+    @Override public void onDrawFrame(GL10 gl) {
+        // Pacing must not hold the producer lock needed by the main-thread lifecycle.
+        if (shouldAnimate() && mLastOutputNs > 0) {
+            long remaining = OUTPUT_INTERVAL_NS - (System.nanoTime() - mLastOutputNs);
+            if (remaining > 0) LockSupport.parkNanos(remaining);
         }
+        synchronized (mProducerLock) { drawFrame(); }
     }
-
-    @Override
-    public void onSurfaceChanged(GL10 gl, int width, int height) {
+    private void drawFrame() {
+        if (mReleased || mColourProgram == 0) return;
         try {
-            mViewportWidth = width;
-            mViewportHeight = height;
-            GLES20.glViewport(0, 0, width, height);
-        } catch (Throwable ignored) {
-        }
-    }
-
-    @Override
-    public void onDrawFrame(GL10 gl) {
-        try {
-            int width = mViewportWidth > 0 ? mViewportWidth : getWidth();
-            int height = mViewportHeight > 0 ? mViewportHeight : getHeight();
-            GLES20.glViewport(0, 0, width, height);
-
-            GLES20.glClearColor(0f, 0f, 0f, 1f);
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-
-            if (mProgram == 0 || mTextureId == 0) return;
-            SurfaceTexture surfaceTexture = mSurfaceTexture;
-            if (surfaceTexture == null) return;
-            if (mFrameAvailable) {
-                mFrameAvailable = false;
-                surfaceTexture.updateTexImage();
-                surfaceTexture.getTransformMatrix(mTexMatrixValue);
+            long now = System.nanoTime();
+            if (mResetHistory.getAndSet(false)) {
+                mTiming.reset();
+                mHasPrevious = false;
+            }
+            SurfaceTexture texture = mSurfaceTexture;
+            boolean fresh = texture != null && mFrameAvailable.getAndSet(false);
+            if (fresh) {
+                texture.updateTexImage();
+                texture.getTransformMatrix(mTextureMatrix);
                 mHasFrame = true;
+                mSourceFrames++;
+                mTiming.onSourceFrame(texture.getTimestamp(), System.nanoTime());
             }
-            // A preset/resize can request a redraw while paused: retain the last decoded frame.
+            int width = mViewportWidth, height = mViewportHeight;
+            if (width <= 0 || height <= 0) return;
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+            GLES20.glViewport(0, 0, width, height);
+            GLES20.glClearColor(0, 0, 0, 1);
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
             if (!mHasFrame) return;
-
-            GLES20.glUseProgram(mProgram);
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTextureId);
-            GLES20.glUniformMatrix4fv(uTexMatrix, 1, false, mTexMatrixValue, 0);
-
-            QUAD_POSITION.position(0);
-            GLES20.glEnableVertexAttribArray(aPosition);
-            GLES20.glVertexAttribPointer(aPosition, 2, GLES20.GL_FLOAT, false, 0, QUAD_POSITION);
-
-            QUAD_TEX_COORD.position(0);
-            GLES20.glEnableVertexAttribArray(aTexCoord);
-            GLES20.glVertexAttribPointer(aTexCoord, 2, GLES20.GL_FLOAT, false, 0, QUAD_TEX_COORD);
-
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-            if (mFramesDrawn < 3 || mFramesDrawn % 100 == 0) {
-                VideoEnhancePreset preset = mPreset;
-                Log.i(TAG, "drawFrame #" + mFramesDrawn + " preset=" + preset.id + ":" + preset.name
-                        + " sat=" + preset.saturation + " con=" + preset.contrast
-                        + " bri=" + preset.brightness + " viewport=" + width + "x" + height);
-            }
-            mFramesDrawn++;
-
-            GLES20.glDisableVertexAttribArray(aPosition);
-            GLES20.glDisableVertexAttribArray(aTexCoord);
-            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
-        } catch (Throwable e) {
-            // 绘制异常不能影响后续帧
-            Log.i(TAG, "onDrawFrame error: " + e);
-        }
-    }
-
-    // ------------------------------ SurfaceTexture.OnFrameAvailableListener ------------------------------
-
-    @Override
-    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-        mFrameAvailable = true;
-        try {
-            if (!post(new Runnable() {
-                @Override
-                public void run() {
-                    requestRender();
+            boolean postProcess = mPostProcessSupported && (mSrEnabled || mInterpEnabled);
+            if (postProcess) {
+                int sw = mVideoWidth > 0 ? mVideoWidth : width;
+                int sh = mVideoHeight > 0 ? mVideoHeight : height;
+                boolean resized = mFboWidth != sw || mFboHeight != sh;
+                postProcess = ensureFrameBuffers(sw, sh);
+                if (postProcess) {
+                    if (fresh || resized) {
+                        boolean hadCurrent = !resized && mFboWidth > 0 && mSourceFrames > 1;
+                        int oldIndex = mCurrentIndex;
+                        mCurrentIndex = 1 - oldIndex;
+                        mPreviousIndex = oldIndex;
+                        drawColour(mFbos[mCurrentIndex], sw, sh);
+                        mHasPrevious = hadCurrent;
+                    }
+                    float alpha = mHasPrevious ? mTiming.blendAlpha(System.nanoTime(), mInterpEnabled, shouldAnimate()) : 0;
+                    boolean sr = VideoPostProcessPolicy.superResolutionActive(mSrEnabled,
+                            mVideoWidth, mVideoHeight, width, height);
+                    drawOutput(width, height, sr, alpha);
+                    if (alpha > 0.001f) mMixedOutputs++;
+                    if (!mLoggedSr || mLastSrActive != sr) {
+                        mLoggedSr = true;
+                        mLastSrActive = sr;
+                        Log.i(TAG, "output srRequested=" + mSrEnabled + " srActive=" + sr
+                                + " interp=" + mInterpEnabled + " viewport=" + width + "x" + height);
+                    }
                 }
-            })) {
-                requestRender();
             }
-        } catch (Throwable ignored) {
+            if (!postProcess) drawColour(0, width, height);
+            mOutputFrames++;
+            mLastOutputNs = now;
+            if (mOutputFrames <= 3 || mOutputFrames % 100 == 0) {
+                Log.i(TAG, "drawFrame #" + mOutputFrames + " preset=" + mPreset.id + ":" + mPreset.name
+                        + " source=" + mSourceFrames + " fbo=" + postProcess + " sr=" + mLastSrActive
+                        + " interp=" + mInterpEnabled + " viewport=" + width + "x" + height);
+            }
+            logFrameStats(now);
+        } catch (Throwable error) {
+            if (mDrawErrors++ < 3) Log.e(TAG, "draw failed", error);
+            if (mDrawErrors == 3) {
+                mPostProcessSupported = false;
+                releaseFrameBuffers();
+                updateRenderMode();
+                Log.w(TAG, "POSTPROCESS_FALLBACK repeated draw errors; direct OES colour only");
+            }
         }
     }
 
-    // ------------------------------ 内部实现 ------------------------------
-
-    private void createSurfaceTexture() {
-        int[] textures = new int[1];
-        GLES20.glGenTextures(1, textures, 0);
-        mTextureId = textures[0];
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTextureId);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-
-        SurfaceTexture surfaceTexture = new SurfaceTexture(mTextureId);
-        try {
-            // GL 线程没有 Looper：必须显式指定主线程 Handler，否则帧到达回调不会触发
-            surfaceTexture.setOnFrameAvailableListener(this, new Handler(Looper.getMainLooper()));
-            Log.i(TAG, "frame-available listener bound to main looper");
-        } catch (Throwable e) {
-            Log.i(TAG, "setOnFrameAvailableListener(main looper) failed: " + e);
-            try {
-                surfaceTexture.setOnFrameAvailableListener(this);
-                Log.i(TAG, "frame-available listener bound to current thread");
-            } catch (Throwable e2) {
-                Log.i(TAG, "setOnFrameAvailableListener failed: " + e2);
-            }
-        }
-        mFrameAvailable = false;
-        mSurfaceTexture = surfaceTexture;
-        applySurfaceTextureBufferSize();
-
-        // 播放器渲染到这个 Surface，而不是屏幕 Surface
-        mPlayerSurface = new Surface(surfaceTexture);
-        // 切回主线程再交给播放器（EXO 校验调用线程）
-        bindSurfaceToPlayer();
+    @Override public void onFrameAvailable(SurfaceTexture texture) {
+        if (mReleased || texture != mSurfaceTexture) return;
+        mFrameArrivalNs = System.nanoTime();
+        mFrameAvailable.set(true);
+        requestRender();
     }
 
-    private boolean createProgram() {
-        int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, VERTEX_SHADER);
-        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
-        if (vertexShader == 0 || fragmentShader == 0) {
+    private boolean ensureFrameBuffers(int width, int height) {
+        if (mFboWidth == width && mFboHeight == height && mFbos[0] != 0) return true;
+        if (mFailedWidth == width && mFailedHeight == height) return false;
+        releaseFrameBuffers();
+        int[] max = new int[1];
+        GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, max, 0);
+        if (width <= 0 || height <= 0 || width > max[0] || height > max[0]) {
+            failFrameBuffers(width, height, "GL_MAX_TEXTURE_SIZE=" + max[0]);
             return false;
         }
-        int program = GLES20.glCreateProgram();
-        if (program == 0) {
-            GLES20.glDeleteShader(vertexShader);
-            GLES20.glDeleteShader(fragmentShader);
-            return false;
+        GLES20.glGenTextures(2, mFrameTextures, 0);
+        GLES20.glGenFramebuffers(2, mFbos, 0);
+        for (int i=0; i<2; i++) {
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mFrameTextures[i]);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D,0,GLES20.GL_RGBA,width,height,0,GLES20.GL_RGBA,GLES20.GL_UNSIGNED_BYTE,null);
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,mFbos[i]);
+            GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER,GLES20.GL_COLOR_ATTACHMENT0,GLES20.GL_TEXTURE_2D,mFrameTextures[i],0);
+            int status=GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
+            int error=GLES20.glGetError();
+            if (status != GLES20.GL_FRAMEBUFFER_COMPLETE || error != GLES20.GL_NO_ERROR) {
+                failFrameBuffers(width,height,"status="+status+" error="+error);
+                return false;
+            }
         }
-        GLES20.glAttachShader(program, vertexShader);
-        GLES20.glAttachShader(program, fragmentShader);
-        GLES20.glLinkProgram(program);
-        int[] linkStatus = new int[1];
-        GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, linkStatus, 0);
-        GLES20.glDeleteShader(vertexShader);
-        GLES20.glDeleteShader(fragmentShader);
-        if (linkStatus[0] == 0) {
-            Log.i(TAG, "program link failed: " + GLES20.glGetProgramInfoLog(program));
-            GLES20.glDeleteProgram(program);
-            return false;
-        }
-
-        mProgram = program;
-        aPosition = GLES20.glGetAttribLocation(program, "aPosition");
-        aTexCoord = GLES20.glGetAttribLocation(program, "aTexCoord");
-        uTexMatrix = GLES20.glGetUniformLocation(program, "uTexMatrix");
-        uSat = GLES20.glGetUniformLocation(program, "uSat");
-        uCon = GLES20.glGetUniformLocation(program, "uCon");
-        uBri = GLES20.glGetUniformLocation(program, "uBri");
-        uRgb = GLES20.glGetUniformLocation(program, "uRgb");
-
-        GLES20.glUseProgram(program);
-        GLES20.glUniform1i(GLES20.glGetUniformLocation(program, "uTexture"), 0);
-        applyEnhanceUniforms();
-        GLES20.glUseProgram(0);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,0);
+        mFboWidth=width; mFboHeight=height;
+        mCurrentIndex=0; mPreviousIndex=1;
+        mHasPrevious=false;
+        mTiming.reset();
+        long bytes=VideoPostProcessPolicy.frameBufferBytes(width,height);
+        Log.i(TAG,"FBO ping-pong allocated 2x "+width+"x"+height+" RGBA8 bytes="+bytes);
         return true;
     }
-
-    private void applyEnhanceUniforms() {
-        try {
-            if (mProgram == 0) {
-                return;
+    private void failFrameBuffers(int width,int height,String reason) {
+        releaseFrameBuffers();
+        mFailedWidth=width; mFailedHeight=height;
+        Log.w(TAG,"POSTPROCESS_FALLBACK FBO "+width+"x"+height+" "+reason);
+        mPostProcessSupported = false;
+        updateRenderMode();
+    }
+    private void drawColour(int framebuffer,int width,int height) {
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,framebuffer);
+        GLES20.glViewport(0,0,width,height);
+        GLES20.glUseProgram(mColourProgram);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,mOesTexture);
+        GLES20.glUniformMatrix4fv(cMatrix,1,false,mTextureMatrix,0);
+        VideoEnhancePreset p=mPreset;
+        GLES20.glUniform1f(cSat,p.saturation); GLES20.glUniform1f(cCon,p.contrast);
+        GLES20.glUniform1f(cBri,p.brightness); GLES20.glUniform3f(cRgb,p.red,p.green,p.blue);
+        drawQuad(cPosition,cCoordinate);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,0);
+    }
+    private void drawOutput(int width,int height,boolean sr,float alpha) {
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,0);
+        GLES20.glViewport(0,0,width,height);
+        GLES20.glUseProgram(mOutputProgram);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,mFrameTextures[mCurrentIndex]);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,mFrameTextures[mHasPrevious?mPreviousIndex:mCurrentIndex]);
+        GLES20.glUniform4f(oViewport,1f/mFboWidth,1f/mFboHeight,mFboWidth,mFboHeight);
+        GLES20.glUniform3f(oParams,sr?1f:0f,mPreset.sgsrSharpness,alpha);
+        drawQuad(oPosition,oCoordinate);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,0);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,0);
+    }
+    private void drawQuad(int position,int coordinate) {
+        mPositions.position(0); mCoordinates.position(0);
+        GLES20.glEnableVertexAttribArray(position); GLES20.glEnableVertexAttribArray(coordinate);
+        GLES20.glVertexAttribPointer(position,2,GLES20.GL_FLOAT,false,0,mPositions);
+        GLES20.glVertexAttribPointer(coordinate,2,GLES20.GL_FLOAT,false,0,mCoordinates);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,0,4);
+        GLES20.glDisableVertexAttribArray(position); GLES20.glDisableVertexAttribArray(coordinate);
+    }
+    private void createProducerSurface() {
+        int[] textures=new int[1];
+        GLES20.glGenTextures(1,textures,0); mOesTexture=textures[0];
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,mOesTexture);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_MIN_FILTER,GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_MAG_FILTER,GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_WRAP_S,GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_WRAP_T,GLES20.GL_CLAMP_TO_EDGE);
+        SurfaceTexture texture=new SurfaceTexture(mOesTexture);
+        mSurfaceTexture=texture;
+        texture.setOnFrameAvailableListener(this,mMain);
+        if (mVideoWidth>0 && mVideoHeight>0) texture.setDefaultBufferSize(mVideoWidth,mVideoHeight);
+        mFrameAvailable.set(false);
+        mPlayerSurface=new Surface(texture);
+        mProducers.add(new ProducerSurface(texture, mPlayerSurface));
+        bindSurfaceToPlayer();
+    }
+    private void logConfiguration() {
+        VideoEnhancePreset p=mPreset;
+        Log.i(TAG,"mode="+p.id+"("+p.name+") sat="+p.saturation+" con="+p.contrast+" bri="+p.brightness
+                +" rgb="+p.red+","+p.green+","+p.blue+" sr="+mSrEnabled+" sharp="+p.sgsrSharpness
+                +" interp="+mInterpEnabled+" maxAlpha="+VideoPostProcessPolicy.MAX_BLEND_ALPHA);
+    }
+    private void logFrameStats(long now) {
+        if (mStatsStartNs==0) { mStatsStartNs=now; return; }
+        long elapsed=now-mStatsStartNs;
+        if (elapsed<2_000_000_000L) return;
+        float seconds=elapsed/1_000_000_000f;
+        Log.i(TAG,"frame_stats seconds="+seconds+" sourceFps="+(mSourceFrames-mStatsSource)/seconds
+                +" outputFps="+(mOutputFrames-mStatsOutput)/seconds+" blended="+(mMixedOutputs-mStatsMixed)
+                +" intervalNs="+mTiming.frameIntervalNs()+" active="+mPlaybackActive);
+        mStatsStartNs=now; mStatsSource=mSourceFrames; mStatsOutput=mOutputFrames; mStatsMixed=mMixedOutputs;
+    }
+    private void releaseFrameBuffers() {
+        boolean allocated=mFbos[0]!=0 || mFrameTextures[0]!=0;
+        GLES20.glDeleteFramebuffers(2,mFbos,0); GLES20.glDeleteTextures(2,mFrameTextures,0);
+        mFbos[0]=mFbos[1]=mFrameTextures[0]=mFrameTextures[1]=0;
+        mFboWidth=mFboHeight=0; mHasPrevious=false;
+        mTiming.reset();
+        if (allocated) Log.i(TAG,"FBO ping-pong released");
+    }
+    private static final class ProducerSurface {
+        final SurfaceTexture texture;
+        final Surface surface;
+        ProducerSurface(SurfaceTexture texture, Surface surface) {
+            this.texture = texture;
+            this.surface = surface;
+        }
+        void release() {
+            texture.setOnFrameAvailableListener(null);
+            surface.release();
+            texture.release();
+        }
+    }
+    // Caller holds mProducerLock. Keep both the decoder's bound surface and the newest
+    // producer alive until setSurface(newSurface) has returned on the main thread.
+    private void releaseRetiredProducers() {
+        Iterator<ProducerSurface> iterator = mProducers.iterator();
+        while (iterator.hasNext()) {
+            ProducerSurface producer = iterator.next();
+            if (producer.surface != mPlayerSurface && producer.surface != mBoundSurface) {
+                producer.release();
+                iterator.remove();
+                Log.i(TAG, "retired producer released; live=" + mProducers.size());
             }
-            GLES20.glUseProgram(mProgram);
-            VideoEnhancePreset preset = mPreset;
-            GLES20.glUniform1f(uSat, preset.saturation);
-            GLES20.glUniform1f(uCon, preset.contrast);
-            GLES20.glUniform1f(uBri, preset.brightness);
-            GLES20.glUniform3f(uRgb, preset.red, preset.green, preset.blue);
-            Log.i(TAG, "preset applied id=" + preset.id + " name=" + preset.name
-                    + " sat=" + preset.saturation + " con=" + preset.contrast
-                    + " bri=" + preset.brightness + " rgb=" + preset.red + "," + preset.green + "," + preset.blue);
-        } catch (Throwable ignored) {
         }
     }
-
-    private int loadShader(int type, String source) {
-        int shader = GLES20.glCreateShader(type);
-        if (shader == 0) {
-            return 0;
-        }
-        GLES20.glShaderSource(shader, source);
-        GLES20.glCompileShader(shader);
-        int[] status = new int[1];
-        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0);
-        if (status[0] == 0) {
-            Log.i(TAG, "shader compile failed: " + GLES20.glGetShaderInfoLog(shader));
-            GLES20.glDeleteShader(shader);
-            return 0;
-        }
-        return shader;
+    private void releaseProducerSurfaces() {
+        for (ProducerSurface producer : mProducers) producer.release();
+        mProducers.clear();
+        mPlayerSurface = mBoundSurface = null;
+        mSurfaceTexture = null;
+        mFrameAvailable.set(false);
+        Log.i(TAG, "producer surfaces released; live=0");
     }
-
-    /**
-     * 释放 GL 相关资源，幂等，可在 GL 线程反复调用（重建 SurfaceTexture 前也会调用）。
-     */
     private void releaseGlResources() {
-        try {
-            Surface surface = mPlayerSurface;
-            mPlayerSurface = null;
-            if (surface != null) {
-                surface.release();
-            }
-        } catch (Throwable ignored) {
-        }
-        try {
-            SurfaceTexture surfaceTexture = mSurfaceTexture;
-            mSurfaceTexture = null;
-            mFrameAvailable = false;
-            mHasFrame = false;
-            if (surfaceTexture != null) {
-                surfaceTexture.setOnFrameAvailableListener(null);
-                surfaceTexture.release();
-            }
-        } catch (Throwable ignored) {
-        }
-        try {
-            if (mTextureId != 0) {
-                GLES20.glDeleteTextures(1, new int[]{mTextureId}, 0);
-                mTextureId = 0;
-            }
-        } catch (Throwable ignored) {
-        }
-        try {
-            if (mProgram != 0) {
-                GLES20.glDeleteProgram(mProgram);
-                mProgram = 0;
-            }
-        } catch (Throwable ignored) {
-        }
+        releaseFrameBuffers();
+        if (mOesTexture!=0) GLES20.glDeleteTextures(1,new int[]{mOesTexture},0);
+        if (mColourProgram!=0) GLES20.glDeleteProgram(mColourProgram);
+        if (mOutputProgram!=0) GLES20.glDeleteProgram(mOutputProgram);
+        mOesTexture=mColourProgram=mOutputProgram=0;
+        mHasFrame=false; mLoggedSr=false;
     }
-
-    private static FloatBuffer createFloatBuffer(float[] values) {
-        FloatBuffer buffer = ByteBuffer.allocateDirect(values.length * 4)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        buffer.put(values);
-        buffer.position(0);
+    private static FloatBuffer buffer(float... values) {
+        FloatBuffer buffer=ByteBuffer.allocateDirect(values.length*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        buffer.put(values).position(0);
         return buffer;
     }
 }

@@ -1,0 +1,41 @@
+{
+  "apk": "TVBox-1.0.0-car.6-python-signed.apk",
+  "bytes": 52635477,
+  "sha256": "02C7CF892C49BA5D286A325C6FC46B69B861070582FB552A2868B75352808D08",
+  "baseline_matrix_sha256": "E3B83211B34E4261AD72731DFC1F5D1D1DA4CCFC792162072ACB5380331426F8",
+  "changes_after_matrix": [
+    "SurfaceTexture producer resume branch",
+    "retain old producer until replacement binding",
+    "detach decoder before release and serialize consumer release with GL draw"
+  ],
+  "unchanged_after_matrix": [
+    "9 audio / 11 video preset data",
+    "VideoShaders production GLSL",
+    "VideoPostProcessPolicy",
+    "independent preference switches"
+  ],
+  "targeted_final_retest": {
+    "pid": 2408,
+    "engines": [
+      "EXO",
+      "IJK"
+    ],
+    "resume_source_frames_continue": true,
+    "fullscreen": [
+      2880,
+      1620
+    ],
+    "release_live_producers": 0,
+    "exit_reentry": true,
+    "python_runtime": true,
+    "original_jar_restored": true,
+    "app_errors_found": []
+  },
+  "lease_released": true,
+  "main_app_kept_running": true,
+  "accessibility_enabled": "0",
+  "muted_settings": [
+    "0",
+    "0"
+  ]
+}

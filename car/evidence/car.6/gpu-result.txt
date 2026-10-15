@@ -1,0 +1,51 @@
+PASS EGL initialize
+PASS Choose RGBA8 EGL
+PASS Make current
+GPU=Adreno (TM) 640 GL=OpenGL ES 3.2 v334 R
+PASS Production OES shader compile/link
+PASS Production SGSR/temporal shader compile/link
+PASS Low difference temporal numeric result
+PASS Temporal toggle changes actual pixels
+PASS High difference cuts temporal blend
+PASS Flat fields preserved with both features on
+PASS SR toggle changes edges
+PASS SR delta bounded by 16/255 plus quantization
+PASS Static frames stay identical with temporal enabled
+SGSR edge meanAbsDiff=1.0410970052083333 maxAbsDiff=16
+PASS Shared production colour body compile
+PASS Exact GPU colour preset 0 channel 0
+PASS Exact GPU colour preset 0 channel 1
+PASS Exact GPU colour preset 0 channel 2
+PASS Exact GPU colour preset 1 channel 0
+PASS Exact GPU colour preset 1 channel 1
+PASS Exact GPU colour preset 1 channel 2
+PASS Exact GPU colour preset 2 channel 0
+PASS Exact GPU colour preset 2 channel 1
+PASS Exact GPU colour preset 2 channel 2
+PASS Exact GPU colour preset 3 channel 0
+PASS Exact GPU colour preset 3 channel 1
+PASS Exact GPU colour preset 3 channel 2
+PASS Exact GPU colour preset 4 channel 0
+PASS Exact GPU colour preset 4 channel 1
+PASS Exact GPU colour preset 4 channel 2
+PASS Exact GPU colour preset 5 channel 0
+PASS Exact GPU colour preset 5 channel 1
+PASS Exact GPU colour preset 5 channel 2
+PASS Exact GPU colour preset 6 channel 0
+PASS Exact GPU colour preset 6 channel 1
+PASS Exact GPU colour preset 6 channel 2
+PASS Exact GPU colour preset 7 channel 0
+PASS Exact GPU colour preset 7 channel 1
+PASS Exact GPU colour preset 7 channel 2
+PASS Exact GPU colour preset 8 channel 0
+PASS Exact GPU colour preset 8 channel 1
+PASS Exact GPU colour preset 8 channel 2
+PASS Exact GPU colour preset 9 channel 0
+PASS Exact GPU colour preset 9 channel 1
+PASS Exact GPU colour preset 9 channel 2
+PASS Exact GPU colour preset 10 channel 0
+PASS Exact GPU colour preset 10 channel 1
+PASS Exact GPU colour preset 10 channel 2
+PASS No GL error
+CAR6_GPU_PASS: OES compile, 4 switch combinations, adaptive temporal cutoff, flat protection, SGSR edge change/clamp, 11 colour presets, cleanup
+Segmentation fault 

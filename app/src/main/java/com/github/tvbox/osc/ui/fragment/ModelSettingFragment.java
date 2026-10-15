@@ -110,6 +110,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvCarBackHide;
     private TextView tvCarAudio;
     private TextView tvCarVideoEnhance;
+    private TextView tvCarVideoSr;
+    private TextView tvCarVideoInterp;
 
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
@@ -176,6 +178,10 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvCarAudio.setText(AudioEffectController.name(CarEnhance.audioMode()));
         tvCarVideoEnhance = findViewById(R.id.tvCarVideoEnhance);
         tvCarVideoEnhance.setText(VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
+        tvCarVideoSr = findViewById(R.id.tvCarVideoSr);
+        tvCarVideoSr.setText(CarEnhance.videoSrEnabled() ? "开启" : "关闭");
+        tvCarVideoInterp = findViewById(R.id.tvCarVideoInterp);
+        tvCarVideoInterp.setText(CarEnhance.videoInterpEnabled() ? "开启" : "关闭");
         tvSearchView.setText(getSearchView(Hawk.get(HawkConfig.SEARCH_VIEW, 0)));
         tvHomeApi.setText(ApiConfig.get().getHomeSourceBean().getName());
         tvScale.setText(PlayerHelper.getScaleName(Hawk.get(HawkConfig.PLAY_SCALE, 0)));
@@ -849,7 +855,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                int next = (CarEnhance.audioMode() + 1) % 6;
+                int next = (CarEnhance.audioMode() + 1) % AudioEffectController.MODE_COUNT;
                 CarEnhance.setAudioMode(next);
                 tvCarAudio.setText(AudioEffectController.name(next));
                 CarEnhance.toast(getContext(), AudioEffectController.label(next));
@@ -893,6 +899,21 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 }, SelectDialogAdapter.stringDiff, options, CarEnhance.videoMode());
                 dialog.show();
             }
+        });
+
+        findViewById(R.id.llCarVideoSr).setOnClickListener(v -> {
+            FastClickCheckUtil.check(v);
+            boolean enabled = !CarEnhance.videoSrEnabled();
+            CarEnhance.setVideoSrEnabled(enabled);
+            tvCarVideoSr.setText(enabled ? "开启" : "关闭");
+            CarEnhance.toast(getContext(), "SGSR1 超分：" + (enabled ? "开启" : "关闭") + "（下次播放生效）");
+        });
+        findViewById(R.id.llCarVideoInterp).setOnClickListener(v -> {
+            FastClickCheckUtil.check(v);
+            boolean enabled = !CarEnhance.videoInterpEnabled();
+            CarEnhance.setVideoInterpEnabled(enabled);
+            tvCarVideoInterp.setText(enabled ? "开启" : "关闭");
+            CarEnhance.toast(getContext(), "60Hz 时域平滑补帧：" + (enabled ? "开启" : "关闭") + "（下次播放生效）");
         });
 
         //下次进入
