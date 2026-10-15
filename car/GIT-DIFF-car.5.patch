@@ -1,0 +1,795 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index 353d2ca..081ca76 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -6,8 +6,8 @@ android {
+     defaultConfig {
+         applicationId 'com.github.tvbox.osc.jun'
+         targetSdkVersion 28
+-        versionCode 5
+-        versionName '1.0.0-car.4'
++        versionCode 6
++        versionName '1.0.0-car.5'
+         multiDexEnabled true
+         //设置room的Schema的位置
+         javaCompileOptions {
+diff --git a/app/src/main/java/com/github/tvbox/osc/car/CarEnhance.java b/app/src/main/java/com/github/tvbox/osc/car/CarEnhance.java
+index e91fad0..44c7032 100644
+--- a/app/src/main/java/com/github/tvbox/osc/car/CarEnhance.java
++++ b/app/src/main/java/com/github/tvbox/osc/car/CarEnhance.java
+@@ -8,6 +8,7 @@ import com.github.tvbox.osc.util.HawkConfig;
+ import com.orhanobut.hawk.Hawk;
+ 
+ import xyz.doikki.videoplayer.player.VideoView;
++import xyz.doikki.videoplayer.render.VideoEnhancePreset;
+ 
+ /**
+  * Car edition glue for the two audio/video enhancement features ported from the reference car build:
+@@ -22,7 +23,7 @@ import xyz.doikki.videoplayer.player.VideoView;
+  * </ul>
+  *
+  * Preference keys: {@link HawkConfig#HIFI_AUDIO} (int preset, default 0 = off) and
+- * {@link HawkConfig#VIDEO_ENHANCE} (0/1, legacy 1..4 is normalised to "on").
++ * {@link HawkConfig#VIDEO_ENHANCE} (stable preset ID; old Boolean/0/1 values are retained).
+  */
+ public final class CarEnhance {
+ 
+@@ -64,15 +65,20 @@ public final class CarEnhance {
+ 
+     // ------------------------------------------------------------------ video
+ 
++    public static int videoMode() {
++        return VideoEnhancePreset.modeFromPrefValue(Hawk.get(HawkConfig.VIDEO_ENHANCE, 0));
++    }
++
+     public static boolean videoEnhanceEnabled() {
+-        Object stored = Hawk.get(HawkConfig.VIDEO_ENHANCE, 0);
+-        if (stored instanceof Boolean) return ((Boolean) stored).booleanValue();
+-        if (stored instanceof Number) return ((Number) stored).intValue() != 0;
+-        return false;
++        return videoMode() != VideoEnhancePreset.ORIGINAL;
++    }
++
++    public static void setVideoMode(int mode) {
++        Hawk.put(HawkConfig.VIDEO_ENHANCE, VideoEnhancePreset.forMode(mode).id);
+     }
+ 
+     public static void setVideoEnhanceEnabled(boolean enabled) {
+-        Hawk.put(HawkConfig.VIDEO_ENHANCE, enabled ? 1 : 0);
++        setVideoMode(enabled ? VideoEnhancePreset.VIVID_COLOR : VideoEnhancePreset.ORIGINAL);
+     }
+ 
+     /**
+diff --git a/app/src/main/java/com/github/tvbox/osc/player/MyVideoView.java b/app/src/main/java/com/github/tvbox/osc/player/MyVideoView.java
+index 7ce47e3..82eba31 100644
+--- a/app/src/main/java/com/github/tvbox/osc/player/MyVideoView.java
++++ b/app/src/main/java/com/github/tvbox/osc/player/MyVideoView.java
+@@ -169,13 +169,13 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
+                 danmuView.start(getCurrentPosition());
+             }
+         });
+-        // Car edition: the render view was picked before the tracks were known, so the 臻彩 grading
+-        // decision is finalised here: never grade HDR/Dolby Vision, otherwise follow the switch.
++        // Track metadata is available now: HDR always keeps an identity colour transform.
++        int mode = CarEnhance.videoMode();
+         if (isHdrVideo()) {
+             setVideoEnhanceMode(0);
+-            CarEnhance.toast(getContext(), "HDR 视频已自动关闭臻彩");
+-        } else if (CarEnhance.videoEnhanceEnabled()) {
+-            setVideoEnhanceMode(1);
++            if (mode != 0) CarEnhance.toast(getContext(), "HDR 视频已自动关闭画面调色");
++        } else {
++            setVideoEnhanceMode(mode);
+         }
+         CarEnhance.applyAudio(this);
+     }
+diff --git a/app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java b/app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java
+index de34e20..766c666 100644
+--- a/app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java
++++ b/app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java
+@@ -70,6 +70,7 @@ import java.util.List;
+ import okhttp3.HttpUrl;
+ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+ 
++import xyz.doikki.videoplayer.render.VideoEnhancePreset;
+ /**
+  * @author pj567
+  * @date :2020/12/23
+@@ -174,7 +175,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
+         tvCarAudio = findViewById(R.id.tvCarAudio);
+         tvCarAudio.setText(AudioEffectController.name(CarEnhance.audioMode()));
+         tvCarVideoEnhance = findViewById(R.id.tvCarVideoEnhance);
+-        tvCarVideoEnhance.setText(CarEnhance.videoEnhanceEnabled() ? "开启" : "关闭");
++        tvCarVideoEnhance.setText(VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
+         tvSearchView.setText(getSearchView(Hawk.get(HawkConfig.SEARCH_VIEW, 0)));
+         tvHomeApi.setText(ApiConfig.get().getHomeSourceBean().getName());
+         tvScale.setText(PlayerHelper.getScaleName(Hawk.get(HawkConfig.PLAY_SCALE, 0)));
+@@ -865,15 +866,32 @@ public class ModelSettingFragment extends BaseLazyFragment {
+             }
+         });
+ 
+-        // Car edition: 臻彩 — GPU colour grading; takes effect on the next playback (HDR is skipped).
+         findViewById(R.id.llCarVideoEnhance).setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+                 FastClickCheckUtil.check(v);
+-                boolean enable = !CarEnhance.videoEnhanceEnabled();
+-                CarEnhance.setVideoEnhanceEnabled(enable);
+-                tvCarVideoEnhance.setText(enable ? "开启" : "关闭");
+-                CarEnhance.toast(getContext(), enable ? "画质增强：臻彩（下次播放生效）" : "画质增强：关闭");
++                SelectDialog<String> dialog = new SelectDialog<>(mActivity, R.layout.dialog_video_presets);
++                dialog.setTip("画面预设 · 下次播放生效");
++                dialog.findViewById(R.id.btnVideoPresetCancel).setOnClickListener(button -> dialog.dismiss());
++                List<String> options = new ArrayList<>();
++                for (VideoEnhancePreset preset : VideoEnhancePreset.all()) {
++                    options.add(preset.name + " · " + preset.description);
++                }
++                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
++                    @Override
++                    public void click(String value, int pos) {
++                        CarEnhance.setVideoMode(pos);
++                        tvCarVideoEnhance.setText(VideoEnhancePreset.forMode(pos).name);
++                        dialog.dismiss();
++                        CarEnhance.toast(getContext(), "画面预设：" + VideoEnhancePreset.forMode(pos).name + "（下次播放生效）");
++                    }
++
++                    @Override
++                    public String getDisplay(String value) {
++                        return value;
++                    }
++                }, SelectDialogAdapter.stringDiff, options, CarEnhance.videoMode());
++                dialog.show();
+             }
+         });
+ 
+diff --git a/app/src/main/java/com/github/tvbox/osc/util/HawkConfig.java b/app/src/main/java/com/github/tvbox/osc/util/HawkConfig.java
+index 86af593..b62fd49 100644
+--- a/app/src/main/java/com/github/tvbox/osc/util/HawkConfig.java
++++ b/app/src/main/java/com/github/tvbox/osc/util/HawkConfig.java
+@@ -70,8 +70,8 @@ public class HawkConfig {
+     public static final String IN_APP_BACK = "inapp_back"; // default true
+     public static final String BACK_HIDE_SECONDS = "hide_seconds"; // 4/6/8, 0 = 常显
+     // Car edition: audio effect preset (0 off / 1 cinema / 2 bass / 3 surround / 4 hifi / 5 vocal)
+-    // and GPU colour grading ("臻彩") switch, ported from the reference car build.
++    // and SDR colour preset. IDs 0/1 preserve the old off/臻彩 switch.
+     public static final String HIFI_AUDIO = "hifi_audio"; // default 0
+-    public static final String VIDEO_ENHANCE = "video_enhance"; // 0 off, 1 on (legacy 1..4 normalise to on)
++    public static final String VIDEO_ENHANCE = "video_enhance"; // 0 original, 1 臻彩, 2..7 other presets
+     public static boolean hotVodDelete;
+ }
+diff --git a/app/src/main/java/com/github/tvbox/osc/util/PlayerHelper.java b/app/src/main/java/com/github/tvbox/osc/util/PlayerHelper.java
+index 33e5b10..65de8e0 100644
+--- a/app/src/main/java/com/github/tvbox/osc/util/PlayerHelper.java
++++ b/app/src/main/java/com/github/tvbox/osc/util/PlayerHelper.java
+@@ -88,7 +88,7 @@ public class PlayerHelper {
+         }
+         // Car edition: 臻彩 replaces the render view with the GPU colour-grading one (never for HDR).
+         if (CarEnhance.useEnhanceRenderView(videoView)) {
+-            renderViewFactory = GlEnhanceRenderViewFactory.create();
++            renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode());
+         }
+         if(videoView!=null){
+             videoView.setPlayerFactory(playerFactory);
+@@ -139,7 +139,7 @@ public class PlayerHelper {
+         }
+         // Car edition: 臻彩 replaces the render view with the GPU colour-grading one (never for HDR).
+         if (CarEnhance.useEnhanceRenderView(videoView)) {
+-            renderViewFactory = GlEnhanceRenderViewFactory.create();
++            renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode());
+         }
+         videoView.setPlayerFactory(playerFactory);
+         videoView.setRenderViewFactory(renderViewFactory);
+diff --git a/app/src/main/res/layout/dialog_video_presets.xml b/app/src/main/res/layout/dialog_video_presets.xml
+new file mode 100644
+index 0000000..3aeb615
+--- /dev/null
++++ b/app/src/main/res/layout/dialog_video_presets.xml
+@@ -0,0 +1,65 @@
++<?xml version="1.0" encoding="utf-8"?>
++<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:paddingTop="@dimen/car_top_padding"
++    android:paddingBottom="@dimen/car_bottom_padding"
++    android:paddingLeft="@dimen/car_side_padding"
++    android:paddingRight="@dimen/car_side_padding">
++
++    <LinearLayout
++        android:id="@+id/cl_root"
++        android:layout_width="900mm"
++        android:layout_height="wrap_content"
++        android:layout_gravity="center"
++        android:orientation="vertical"
++        android:padding="20mm"
++        android:background="@drawable/shape_danmu_setting_bg">
++
++        <TextView
++            android:id="@+id/title"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:minHeight="50mm"
++            android:gravity="center"
++            android:text="画面预设 · 下次播放生效"
++            android:textColor="@color/dialog_text_primary"
++            android:textSize="@dimen/ts_24"
++            android:textStyle="bold" />
++
++        <com.owen.tvrecyclerview.widget.TvRecyclerView
++            android:id="@+id/list"
++            android:layout_width="match_parent"
++            android:layout_height="350mm"
++            android:clipToPadding="false"
++            android:paddingTop="12mm"
++            android:paddingBottom="12mm"
++            android:orientation="vertical"
++            app:tv_layoutManager="V7LinearLayoutManager"
++            app:tv_selectedItemIsCentered="true"
++            app:tv_verticalSpacingWithMargins="12mm" />
++
++        <TextView
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:paddingTop="12mm"
++            android:text="上下滑动选择 · HDR 视频自动保留原始色彩"
++            android:gravity="center"
++            android:textColor="@color/dialog_text_primary"
++            android:textSize="@dimen/ts_20" />
++
++        <TextView
++            android:id="@+id/btnVideoPresetCancel"
++            android:layout_width="match_parent"
++            android:layout_height="50mm"
++            android:layout_marginTop="12mm"
++            android:background="@drawable/button_danmu_setting"
++            android:clickable="true"
++            android:focusable="true"
++            android:gravity="center"
++            android:text="取消"
++            android:textColor="@color/dialog_text_primary"
++            android:textSize="@dimen/ts_24" />
++    </LinearLayout>
++</FrameLayout>
+diff --git a/app/src/main/res/layout/fragment_model.xml b/app/src/main/res/layout/fragment_model.xml
+index 191d176..e35acb3 100644
+--- a/app/src/main/res/layout/fragment_model.xml
++++ b/app/src/main/res/layout/fragment_model.xml
+@@ -213,7 +213,7 @@
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+-                    android:text="臻彩增强"
++                    android:text="画面预设"
+                     android:textColor="@android:color/white"
+                     android:textSize="@dimen/ts_24" />
+ 
+@@ -226,7 +226,7 @@
+                     android:id="@+id/tvCarVideoEnhance"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+-                    android:text="关闭"
++                    android:text="原画"
+                     android:textColor="@android:color/white"
+                     android:textSize="@dimen/ts_24" />
+ 
+diff --git a/car/tests/VideoEnhancePresetTest.java b/car/tests/VideoEnhancePresetTest.java
+new file mode 100644
+index 0000000..db82b31
+--- /dev/null
++++ b/car/tests/VideoEnhancePresetTest.java
+@@ -0,0 +1,38 @@
++import java.util.HashSet;
++import java.util.Set;
++import xyz.doikki.videoplayer.render.VideoEnhancePreset;
++
++/** Host checks for persisted IDs, migration and distinct shader inputs (no Android runtime). */
++public final class VideoEnhancePresetTest {
++    private static void check(boolean ok, String message) {
++        if (!ok) throw new AssertionError(message);
++    }
++
++    public static void main(String[] args) {
++        check(VideoEnhancePreset.all().size() == 8, "Eight selectable presets");
++        Set<String> curves = new HashSet<>();
++        for (int i = 0; i < VideoEnhancePreset.all().size(); i++) {
++            VideoEnhancePreset p = VideoEnhancePreset.all().get(i);
++            check(p.id == i && VideoEnhancePreset.forMode(i) == p, "Stable ID " + i);
++            check(VideoEnhancePreset.modeFromPrefValue(i) == i, "Integer round trip " + i);
++            check(VideoEnhancePreset.modeFromPrefValue(Integer.toString(i)) == i, "String migration " + i);
++            float[] values = {p.saturation, p.contrast, p.brightness, p.red, p.green, p.blue};
++            for (float value : values) check(!Float.isNaN(value) && !Float.isInfinite(value), "Finite shader input");
++            check(p.saturation >= 0 && p.contrast > 0 && p.red > 0 && p.green > 0 && p.blue > 0, "Valid transform");
++            check(!p.name.isEmpty() && !p.description.isEmpty(), "Label and guidance");
++            curves.add(p.saturation + "/" + p.contrast + "/" + p.brightness + "/" + p.red + "/" + p.green + "/" + p.blue);
++        }
++        check(curves.size() == 8, "Every preset has distinct parameters");
++        VideoEnhancePreset off = VideoEnhancePreset.forMode(0), vivid = VideoEnhancePreset.forMode(1);
++        check(off.saturation == 1 && off.contrast == 1 && off.brightness == 0 && off.red == 1 && off.green == 1 && off.blue == 1, "Original is identity");
++        check(vivid.saturation == 1.35f && vivid.contrast == 1.12f && vivid.brightness == .03f, "Legacy 臻彩 retained");
++        check(VideoEnhancePreset.modeFromPrefValue(Boolean.TRUE) == 1, "Old true -> 臻彩");
++        check(VideoEnhancePreset.modeFromPrefValue(Boolean.FALSE) == 0, "Old false -> original");
++        for (Object invalid : new Object[]{null, -1, 8, Integer.MAX_VALUE, "broken", "99999999999999999"}) {
++            check(VideoEnhancePreset.modeFromPrefValue(invalid) == 0, "Corrupt preference -> original: " + invalid);
++        }
++        try { VideoEnhancePreset.all().clear(); throw new AssertionError("Mutable list"); }
++        catch (UnsupportedOperationException expected) { }
++        System.out.println("PASS: 8 presets, stable IDs, legacy migration, corrupt preference fallback, distinct immutable curves");
++    }
++}
+diff --git a/car/tests/compare_presets.py b/car/tests/compare_presets.py
+new file mode 100644
+index 0000000..9fd5eee
+--- /dev/null
++++ b/car/tests/compare_presets.py
+@@ -0,0 +1,42 @@
++"""Recompute car.5 pixel evidence. Requires Pillow and NumPy; no emulator operations."""
++import argparse
++import json
++from pathlib import Path
++
++import numpy as np
++from PIL import Image
++
++parser = argparse.ArgumentParser()
++parser.add_argument('screenshots', type=Path, help='Directory containing preset-0.png ... preset-7.png')
++parser.add_argument('--output', type=Path, help='Optional output JSON path')
++args = parser.parse_args()
++names = ['原画', '臻彩', '自然', '影院', '鲜艳', '柔和', '明亮', '暖色']
++video_roi = (250, 180, 1050, 650)
++ui_roi = (1250, 100, 2700, 700)
++original = Image.open(args.screenshots / 'preset-0.png').convert('RGB')
++video_original = np.asarray(original.crop(video_roi), dtype=float)
++ui_original = np.asarray(original.crop(ui_roi), dtype=float)
++rows = []
++for mode, name in enumerate(names):
++    path = args.screenshots / ('preset-%d.png' % mode)
++    image = Image.open(path).convert('RGB')
++    if image.size != (2880, 1620):
++        raise ValueError('Expected a 2880x1620 capture: ' + str(path))
++    rgb = np.asarray(image.crop(video_roi), dtype=float)
++    hsv = np.asarray(image.crop(video_roi).convert('HSV'), dtype=float)
++    row = dict(mode=mode, name=name, screenshot=path.name, size=list(image.size),
++               mean_rgb=np.round(rgb.mean(axis=(0, 1)), 3).tolist(),
++               mean_saturation=round(float(hsv[:, :, 1].mean()), 3),
++               mean_value=round(float(hsv[:, :, 2].mean()), 3),
++               video_mean_absolute_difference=round(float(np.abs(rgb-video_original).mean()), 3),
++               ui_mean_absolute_difference=round(float(np.abs(np.asarray(image.crop(ui_roi), dtype=float)-ui_original).mean()), 3))
++    rows.append(row)
++    print(json.dumps(row, ensure_ascii=False))
++result = dict(video_roi=video_roi, ui_roi=ui_roi, rows=rows)
++if args.output:
++    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
++assert all(row['video_mean_absolute_difference'] > .1 for row in rows[1:]), 'No video change'
++assert all(row['ui_mean_absolute_difference'] == 0 for row in rows), 'Sampled UI changed'
++assert rows[4]['mean_saturation'] > rows[0]['mean_saturation'], 'Vivid saturation did not increase'
++assert rows[6]['mean_value'] > rows[0]['mean_value'], 'Bright value did not increase'
++print('PASS: 8 screenshots; 7 distinct video changes, expected vivid/bright directions, sampled UI unchanged')
+diff --git a/car/tests/fixtures/api.json b/car/tests/fixtures/api.json
+new file mode 100644
+index 0000000..0dd017c
+--- /dev/null
++++ b/car/tests/fixtures/api.json
+@@ -0,0 +1 @@
++{"spider":"","sites":[{"key":"car5_py","name":"Python兼容验收","type":3,"api":"http://127.0.0.1:9978/file/TVBoxCar5/car5_python_probe.py","searchable":1,"quickSearch":1},{"key":"car5_js","name":"QuickJS兼容验收","type":3,"api":"http://127.0.0.1:9978/file/TVBoxCar5/car5_js_probe.js","searchable":1,"quickSearch":1}],"parses":[],"flags":[]}
+diff --git a/car/tests/fixtures/car5_js_probe.js b/car/tests/fixtures/car5_js_probe.js
+new file mode 100644
+index 0000000..117c1cd
+--- /dev/null
++++ b/car/tests/fixtures/car5_js_probe.js
+@@ -0,0 +1,20 @@
++// Self-contained QuickJS acceptance fixture. No remote template or network dependency.
++const base = 'http://127.0.0.1:9978/file/TVBoxCar5/';
++const video = () => ({vod_id: 'js-video', vod_name: 'QuickJS运行成功', vod_pic: base + 'poster.png', vod_remarks: 'QUICKJS-EXECUTED'});
++export default {
++    init: function () {},
++    home: function () { return JSON.stringify({class: [{type_id: 'js', type_name: 'JS验收分类'}], filters: {}}); },
++    homeVod: function () { return JSON.stringify({list: [video()]}); },
++    category: function () { return JSON.stringify({page: 1, pagecount: 1, limit: 1, total: 1, list: [video()]}); },
++    detail: function () {
++        const item = video();
++        item.vod_content = 'QuickJS executes this module and returns a synthetic video.';
++        item.vod_play_from = 'JS本地测试';
++        item.vod_play_url = '低饱和测试$' + base + 'lowsat.mp4';
++        return JSON.stringify({list: [item]});
++    },
++    search: function () { return JSON.stringify({list: [video()]}); },
++    play: function (flag, id) { return JSON.stringify({parse: 0, playUrl: '', url: id, header: {}}); },
++    isVideo: function (url) { return url.endsWith('.mp4'); },
++    sniffer: function () { return false; }
++};
+diff --git a/car/tests/fixtures/car5_python_probe.py b/car/tests/fixtures/car5_python_probe.py
+new file mode 100644
+index 0000000..e6ff6a5
+--- /dev/null
++++ b/car/tests/fixtures/car5_python_probe.py
+@@ -0,0 +1,72 @@
++# -*- coding: utf-8 -*-
++"""Local acceptance fixture: real Python imports -> cards -> detail -> synthetic playback."""
++import sys
++import json
++import requests
++import ujson
++from lxml import etree
++from pyquery import PyQuery
++from jsonpath import jsonpath
++from cachetools import TTLCache
++from bs4 import BeautifulSoup
++from Crypto.Hash import SHA256
++from base.spider import Spider as BaseSpider
++
++BASE = 'http://127.0.0.1:9978/file/TVBoxCar5/'
++
++
++class Spider(BaseSpider):
++    def getName(self):
++        return 'Python兼容验收'
++
++    def init(self, extend=''):
++        assert etree.HTML('<p>lxml</p>').xpath('string(//p)') == 'lxml'
++        assert PyQuery('<p>pyquery</p>')('p').text() == 'pyquery'
++        assert BeautifulSoup('<p>bs4</p>', 'html.parser').p.text == 'bs4'
++        assert ujson.loads('{"ok":true}')['ok']
++        assert jsonpath({'values': [5]}, '$.values[0]') == [5]
++        cache = TTLCache(maxsize=2, ttl=60)
++        cache['probe'] = SHA256.new(b'car5-python-runtime').hexdigest()
++        assert len(cache['probe']) == 64
++        response = requests.get(BASE + 'check.json', timeout=8)
++        response.raise_for_status()
++        assert response.json()['fixture'] == 'car5'
++        self.version = sys.version.split()[0]
++        print('CAR5_PY_RUNTIME version=' + self.version + ' dependencies=8 network=OK')
++
++    def _video(self, key='python-video'):
++        return {'vod_id': key, 'vod_name': 'Python运行成功 ' + getattr(self, 'version', ''),
++                'vod_pic': BASE + 'poster.png', 'vod_remarks': 'PYTHON-EXECUTED-8-DEPS'}
++
++    def homeContent(self, filter):
++        return {'class': [{'type_id': 'python', 'type_name': 'Python验收分类'}], 'filters': {}}
++
++    def homeVideoContent(self):
++        return {'list': [self._video()]}
++
++    def categoryContent(self, tid, pg, filter, extend):
++        return {'page': int(pg), 'pagecount': 1, 'limit': 1, 'total': 1, 'list': [self._video()]}
++
++    def detailContent(self, ids):
++        video = self._video(ids[0])
++        video.update({'vod_content': '真实运行 Python、lxml、ujson、pyquery、requests、jsonpath、cachetools、bs4、Crypto；播放合成片。',
++                      'vod_play_from': 'Python本地测试',
++                      'vod_play_url': '低饱和测试$' + BASE + 'lowsat.mp4'})
++        return {'list': [video]}
++
++    def searchContent(self, key, quick, pg='1'):
++        print('CAR5_PY_SEARCH key=' + key)
++        return {'list': [self._video('python-search')]}
++
++    def playerContent(self, flag, id, vipFlags):
++        print('CAR5_PY_PLAY url=' + id)
++        return {'parse': 0, 'playUrl': '', 'url': id, 'header': {}}
++
++    def manualVideoCheck(self):
++        return False
++
++    def isVideoFormat(self, url):
++        return url.endswith('.mp4')
++
++    def localProxy(self, param):
++        return [200, 'application/json', json.dumps({'fixture': 'car5-python'})]
+diff --git a/car/tests/fixtures/check.json b/car/tests/fixtures/check.json
+new file mode 100644
+index 0000000..7cefcdc
+--- /dev/null
++++ b/car/tests/fixtures/check.json
+@@ -0,0 +1 @@
++{"fixture":"car5"}
+diff --git a/car/tests/prepare_fixtures.py b/car/tests/prepare_fixtures.py
+new file mode 100644
+index 0000000..e58cb1a
+--- /dev/null
++++ b/car/tests/prepare_fixtures.py
+@@ -0,0 +1,25 @@
++"""Stage only local acceptance fixtures; destination must be an explicit scratch directory."""
++import argparse
++from pathlib import Path
++import shutil
++import subprocess
++from PIL import Image
++
++parser = argparse.ArgumentParser()
++parser.add_argument('--output', required=True, type=Path)
++parser.add_argument('--long-clip', action='store_true', help='Loop 8-second test clip to 32 seconds using ffmpeg')
++args = parser.parse_args()
++tests = Path(__file__).resolve().parent
++car = tests.parent
++args.output.mkdir(parents=True, exist_ok=True)
++for name in ('api.json', 'check.json', 'car5_python_probe.py', 'car5_js_probe.js'):
++    shutil.copy2(tests / 'fixtures' / name, args.output / name)
++Image.new('RGB', (180, 260), (45, 100, 160)).save(args.output / 'poster.png')
++if args.long_clip:
++    subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-stream_loop', '3',
++                    '-i', str(car / 'cartest-lowsat.mp4'), '-c', 'copy', str(args.output / 'lowsat.mp4')], check=True)
++else:
++    shutil.copy2(car / 'cartest-lowsat.mp4', args.output / 'lowsat.mp4')
++print('Staged:', args.output)
++print('Copy the staged contents to guest /sdcard/TVBoxCar5 using the leased emulator plugin/shared folder.')
++print('Then import http://127.0.0.1:9978/file/TVBoxCar5/api.json through Settings > configuration address.')
+diff --git a/player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java b/player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java
+index b69449e..b2aeefe 100644
+--- a/player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java
++++ b/player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java
+@@ -101,15 +101,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
+ 
+     /** GL 线程内绘制计数，仅用于取证日志 */
+     private int mFramesDrawn;
++    private boolean mHasFrame;
+ 
+-    /** 调色参数，主线程写入，GL 线程读取 */
+-    private volatile int mEnhanceMode;
+-    private volatile float mSat = 1.0f;
+-    private volatile float mCon = 1.0f;
+-    private volatile float mBri = 0.0f;
+-    private volatile float mRgbR = 1.0f;
+-    private volatile float mRgbG = 1.0f;
+-    private volatile float mRgbB = 1.0f;
++    /** A single immutable snapshot prevents mixed parameters across UI and GL threads. */
++    private volatile VideoEnhancePreset mPreset = VideoEnhancePreset.forMode(VideoEnhancePreset.ORIGINAL);
+ 
+     /** 以下字段只在 GL 线程访问 */
+     private int mProgram;
+@@ -126,7 +121,12 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
+     private int mViewportHeight;
+ 
+     public GlEnhanceRenderView(Context context) {
++        this(context, VideoEnhancePreset.ORIGINAL);
++    }
++
++    public GlEnhanceRenderView(Context context, int mode) {
+         super(context);
++        mPreset = VideoEnhancePreset.forMode(mode);
+         setEGLContextClientVersion(2);
+         // RGBA 配置，保证画面不透明；GL 内容全部自己绘制，无需 depth/stencil
+         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+@@ -155,6 +155,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
+             new Handler(Looper.getMainLooper()).post(new Runnable() {
+                 @Override
+                 public void run() {
++                    if (mReleased || mMediaPlayer != player || mPlayerSurface != surface || !surface.isValid()) return;
+                     try {
+                         player.setSurface(surface);
+                         Log.i(TAG, "player surface bound (main thread)");
+@@ -238,32 +239,13 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
+         }
+     }
+ 
+-    /**
+-     * 是否处于增强模式（mode == 1）
+-     */
+     public boolean isEnhanceMode() {
+-        return mEnhanceMode == 1;
++        return mPreset.id != VideoEnhancePreset.ORIGINAL;
+     }
+ 
+-    /**
+-     * 设置调色档位：0 为原始画面，1 为增强画面（其余取值按 1 处理）。
+-     * 参数立即记录，并在 GL 线程应用；若 GL 上下文尚未创建，则在创建时应用。
+-     */
++    /** Applies one immutable preset snapshot on the GL thread; mode 0 is the HDR identity path. */
+     public void setVideoEnhanceMode(int mode) {
+-        if (mode == 0) {
+-            mEnhanceMode = 0;
+-            mSat = 1.0f;
+-            mCon = 1.0f;
+-            mBri = 0.0f;
+-        } else {
+-            mEnhanceMode = 1;
+-            mSat = 1.35f;
+-            mCon = 1.12f;
+-            mBri = 0.03f;
+-        }
+-        mRgbR = 1.0f;
+-        mRgbG = 1.0f;
+-        mRgbB = 1.0f;
++        mPreset = VideoEnhancePreset.forMode(mode);
+         try {
+             queueEvent(new Runnable() {
+                 @Override
+@@ -272,7 +254,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
+                 }
+             });
+         } catch (Throwable ignored) {
+-            // GL 线程尚未就绪，onSurfaceCreated 时会应用当前值
++            // onSurfaceCreated applies the stored preset if the GL thread is not ready yet.
+         }
+         requestRender();
+     }
+@@ -327,21 +309,17 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
+             GLES20.glClearColor(0f, 0f, 0f, 1f);
+             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+ 
+-            if (mProgram == 0 || mTextureId == 0 || !mFrameAvailable) {
+-                if (mFramesDrawn < 3) {
+-                    Log.i(TAG, "skip draw: program=" + mProgram + " texture=" + mTextureId
+-                            + " frameAvailable=" + mFrameAvailable);
+-                }
+-                return;
+-            }
+-            mFrameAvailable = false;
+-
++            if (mProgram == 0 || mTextureId == 0) return;
+             SurfaceTexture surfaceTexture = mSurfaceTexture;
+-            if (surfaceTexture == null) {
+-                return;
++            if (surfaceTexture == null) return;
++            if (mFrameAvailable) {
++                mFrameAvailable = false;
++                surfaceTexture.updateTexImage();
++                surfaceTexture.getTransformMatrix(mTexMatrixValue);
++                mHasFrame = true;
+             }
+-            surfaceTexture.updateTexImage();
+-            surfaceTexture.getTransformMatrix(mTexMatrixValue);
++            // A preset/resize can request a redraw while paused: retain the last decoded frame.
++            if (!mHasFrame) return;
+ 
+             GLES20.glUseProgram(mProgram);
+             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+@@ -358,8 +336,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
+ 
+             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+             if (mFramesDrawn < 3 || mFramesDrawn % 100 == 0) {
+-                Log.i(TAG, "drawFrame #" + mFramesDrawn + " sat=" + mSat + " con=" + mCon
+-                        + " bri=" + mBri + " viewport=" + width + "x" + height);
++                VideoEnhancePreset preset = mPreset;
++                Log.i(TAG, "drawFrame #" + mFramesDrawn + " preset=" + preset.id + ":" + preset.name
++                        + " sat=" + preset.saturation + " con=" + preset.contrast
++                        + " bri=" + preset.brightness + " viewport=" + width + "x" + height);
+             }
+             mFramesDrawn++;
+ 
+@@ -473,10 +453,14 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
+                 return;
+             }
+             GLES20.glUseProgram(mProgram);
+-            GLES20.glUniform1f(uSat, mSat);
+-            GLES20.glUniform1f(uCon, mCon);
+-            GLES20.glUniform1f(uBri, mBri);
+-            GLES20.glUniform3f(uRgb, mRgbR, mRgbG, mRgbB);
++            VideoEnhancePreset preset = mPreset;
++            GLES20.glUniform1f(uSat, preset.saturation);
++            GLES20.glUniform1f(uCon, preset.contrast);
++            GLES20.glUniform1f(uBri, preset.brightness);
++            GLES20.glUniform3f(uRgb, preset.red, preset.green, preset.blue);
++            Log.i(TAG, "preset applied id=" + preset.id + " name=" + preset.name
++                    + " sat=" + preset.saturation + " con=" + preset.contrast
++                    + " bri=" + preset.brightness + " rgb=" + preset.red + "," + preset.green + "," + preset.blue);
+         } catch (Throwable ignored) {
+         }
+     }
+@@ -514,6 +498,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
+             SurfaceTexture surfaceTexture = mSurfaceTexture;
+             mSurfaceTexture = null;
+             mFrameAvailable = false;
++            mHasFrame = false;
+             if (surfaceTexture != null) {
+                 surfaceTexture.setOnFrameAvailableListener(null);
+                 surfaceTexture.release();
+diff --git a/player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderViewFactory.java b/player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderViewFactory.java
+index 8d33dbd..86d3703 100644
+--- a/player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderViewFactory.java
++++ b/player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderViewFactory.java
+@@ -2,17 +2,24 @@ package xyz.doikki.videoplayer.render;
+ 
+ import android.content.Context;
+ 
+-/**
+- * {@link GlEnhanceRenderView} 的工厂，用法参考 {@link TextureRenderViewFactory}。
+- */
++/** Creates a colour renderer with its preset set before the GL surface is created. */
+ public class GlEnhanceRenderViewFactory extends RenderViewFactory {
++    private final int mode;
++
++    private GlEnhanceRenderViewFactory(int mode) {
++        this.mode = VideoEnhancePreset.forMode(mode).id;
++    }
+ 
+     public static GlEnhanceRenderViewFactory create() {
+-        return new GlEnhanceRenderViewFactory();
++        return create(VideoEnhancePreset.VIVID_COLOR);
++    }
++
++    public static GlEnhanceRenderViewFactory create(int mode) {
++        return new GlEnhanceRenderViewFactory(mode);
+     }
+ 
+     @Override
+     public IRenderView createRenderView(Context context) {
+-        return new GlEnhanceRenderView(context);
++        return new GlEnhanceRenderView(context, mode);
+     }
+ }
+diff --git a/player/src/main/java/xyz/doikki/videoplayer/render/VideoEnhancePreset.java b/player/src/main/java/xyz/doikki/videoplayer/render/VideoEnhancePreset.java
+new file mode 100644
+index 0000000..323f4af
+--- /dev/null
++++ b/player/src/main/java/xyz/doikki/videoplayer/render/VideoEnhancePreset.java
+@@ -0,0 +1,66 @@
++package xyz.doikki.videoplayer.render;
++
++import java.util.Arrays;
++import java.util.Collections;
++import java.util.List;
++
++/** Stable, immutable SDR colour presets shared by settings and the GL renderer. */
++public final class VideoEnhancePreset {
++    public static final int ORIGINAL = 0;
++    public static final int VIVID_COLOR = 1; // Keeps the car.2-car.4 臻彩 setting unchanged.
++
++    public final int id;
++    public final String name;
++    public final String description;
++    public final float saturation;
++    public final float contrast;
++    public final float brightness;
++    public final float red;
++    public final float green;
++    public final float blue;
++
++    private static final List<VideoEnhancePreset> PRESETS = Collections.unmodifiableList(Arrays.asList(
++            new VideoEnhancePreset(0, "原画", "保留原始画面",       1.00f, 1.00f,  0.000f, 1.000f, 1.000f, 1.000f),
++            new VideoEnhancePreset(1, "臻彩", "增强色彩与层次",     1.35f, 1.12f,  0.030f, 1.000f, 1.000f, 1.000f),
++            new VideoEnhancePreset(2, "自然", "轻调色，接近原片",   1.08f, 1.04f,  0.010f, 1.000f, 1.000f, 1.000f),
++            new VideoEnhancePreset(3, "影院", "温润色调，强化明暗", 1.08f, 1.16f, -0.015f, 1.030f, 1.000f, 0.970f),
++            new VideoEnhancePreset(4, "鲜艳", "浓郁色彩，突出画面", 1.50f, 1.16f,  0.015f, 1.000f, 1.000f, 1.000f),
++            new VideoEnhancePreset(5, "柔和", "降低反差，柔化色彩", 0.90f, 0.94f,  0.020f, 1.015f, 1.000f, 0.985f),
++            new VideoEnhancePreset(6, "明亮", "提亮偏暗片源",       1.12f, 1.02f,  0.080f, 1.000f, 1.000f, 1.000f),
++            new VideoEnhancePreset(7, "暖色", "暖色温，减少蓝色",   1.06f, 1.04f,  0.020f, 1.060f, 1.000f, 0.920f)
++    ));
++
++    private VideoEnhancePreset(int id, String name, String description, float saturation,
++                               float contrast, float brightness, float red, float green, float blue) {
++        this.id = id;
++        this.name = name;
++        this.description = description;
++        this.saturation = saturation;
++        this.contrast = contrast;
++        this.brightness = brightness;
++        this.red = red;
++        this.green = green;
++        this.blue = blue;
++    }
++
++    public static List<VideoEnhancePreset> all() {
++        return PRESETS;
++    }
++
++    public static VideoEnhancePreset forMode(int mode) {
++        return PRESETS.get(mode >= 0 && mode < PRESETS.size() ? mode : ORIGINAL);
++    }
++
++    /** Migrates the old Boolean/0/1 switch and tolerates corrupt preferences. */
++    public static int modeFromPrefValue(Object stored) {
++        if (stored instanceof Boolean) return (Boolean) stored ? VIVID_COLOR : ORIGINAL;
++        if (stored instanceof Number) return forMode(((Number) stored).intValue()).id;
++        if (stored instanceof String) {
++            String value = ((String) stored).trim();
++            if ("true".equalsIgnoreCase(value)) return VIVID_COLOR;
++            if ("false".equalsIgnoreCase(value)) return ORIGINAL;
++            try { return forMode(Integer.parseInt(value)).id; } catch (NumberFormatException ignored) { }
++        }
++        return ORIGINAL;
++    }
++}
+diff --git a/pyramid/build.gradle b/pyramid/build.gradle
+index 4413173..5aacb8d 100644
+--- a/pyramid/build.gradle
++++ b/pyramid/build.gradle
+@@ -10,7 +10,8 @@ android {
+         minSdkVersion 19
+         targetSdkVersion 28
+         python {
+-            buildPython("D:/Programs/Python/Python38/python.exe")
++            // Override with -PbuildPython=<Python 3.8 executable> or TVBOX_BUILD_PYTHON.
++            buildPython(project.findProperty('buildPython') ?: System.getenv('TVBOX_BUILD_PYTHON') ?: 'python3.8')
+             pip {
+                 install "lxml"
+                 install "ujson"

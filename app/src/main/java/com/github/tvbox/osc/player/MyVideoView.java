@@ -169,13 +169,13 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
                 danmuView.start(getCurrentPosition());
             }
         });
-        // Car edition: the render view was picked before the tracks were known, so the 臻彩 grading
-        // decision is finalised here: never grade HDR/Dolby Vision, otherwise follow the switch.
+        // Track metadata is available now: HDR always keeps an identity colour transform.
+        int mode = CarEnhance.videoMode();
         if (isHdrVideo()) {
             setVideoEnhanceMode(0);
-            CarEnhance.toast(getContext(), "HDR 视频已自动关闭臻彩");
-        } else if (CarEnhance.videoEnhanceEnabled()) {
-            setVideoEnhanceMode(1);
+            if (mode != 0) CarEnhance.toast(getContext(), "HDR 视频已自动关闭画面调色");
+        } else {
+            setVideoEnhanceMode(mode);
         }
         CarEnhance.applyAudio(this);
     }

@@ -88,7 +88,7 @@ public class PlayerHelper {
         }
         // Car edition: 臻彩 replaces the render view with the GPU colour-grading one (never for HDR).
         if (CarEnhance.useEnhanceRenderView(videoView)) {
-            renderViewFactory = GlEnhanceRenderViewFactory.create();
+            renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode());
         }
         if(videoView!=null){
             videoView.setPlayerFactory(playerFactory);
@@ -139,7 +139,7 @@ public class PlayerHelper {
         }
         // Car edition: 臻彩 replaces the render view with the GPU colour-grading one (never for HDR).
         if (CarEnhance.useEnhanceRenderView(videoView)) {
-            renderViewFactory = GlEnhanceRenderViewFactory.create();
+            renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode());
         }
         videoView.setPlayerFactory(playerFactory);
         videoView.setRenderViewFactory(renderViewFactory);

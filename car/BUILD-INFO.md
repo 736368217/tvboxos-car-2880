@@ -1,160 +1,108 @@
-# BUILD-INFO — TVBoxOS 车机版 1.0.0-car.4
+# BUILD-INFO — TVBoxOS 1.0.0-car.5 Python 通用版
 
-## 交付身份（car.4，当前版本）
+## 交付身份
 
-- APK：`TVBox-1.0.0-car.4-signed.apk`
-- 包名（Application ID）：**`com.github.tvbox.osc.jun`（白名单第 41 项，未改名）**
-- 应用名：`TVBox`（白名单第 13 项，未改名）
-- VersionCode / VersionName：`5` / `1.0.0-car.4`
-- 大小：`33,302,029` 字节
-- SHA-256：`21C9FC004CCB2CF405E47E8F9536360A52012EB847F35BD96A8C3F41D872495D`
-- 签名：v1/v2/v3 通过；测试证书 `C=US, O=Android, CN=Android Debug`，证书 SHA-256 `2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c`
-- zipalign 4 字节对齐：通过
-- 启动 Activity：`com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.HomeActivity`
-- flavor：`java` release（R8）；native ABI：`arm64-v8a` + `armeabi-v7a`
-- 构建时间：2026-10-14
+- APK：`TVBox-1.0.0-car.5-python-signed.apk`
+- Flavor：`python` release，包含 `armeabi-v7a` 与 `arm64-v8a`
+- VersionCode / VersionName：`6` / `1.0.0-car.5`
+- 包名：`com.github.tvbox.osc.jun`
+- Label：`TVBox`
+- 大小：`52,627,205` 字节
+- SHA-256：`6F43817EB9C4E2A97C8E30C190826244A2333E14CD46D064964F91AE45DF0C3B`
+- 签名：v1/v2/v3 通过；沿用 Android Debug 测试证书，证书 SHA-256 `2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c`
+- zipalign：4 字节对齐通过
+- Release：[v1.0.0-car.5](https://github.com/736368217/tvboxos-car-2880/releases/tag/v1.0.0-car.5)
 
-历史版本（同目录保留）：`TVBox-1.0.0-car.3-signed.apk` versionCode 4 / SHA-256 `50744783…57557`；`TVBox-1.0.0-car.2-signed.apk` versionCode 3 / SHA-256 `4FE471C3…C8567`。
+car.4 构建的是 Java flavor。car.5 使用 Python flavor；Python 仅替换 Spider 运行 flavor，Android 页面、Java 播放器、Java/JAR 加载和 QuickJS 仍保留。APK 内检查到两个 ARM ABI 的 `libpython3.8.so`、`libchaquopy_java.so`、`libquickjs-android-wrapper.so`，以及 Chaquopy 资源。
 
-> 各版本签名相同（同一 debug 证书），可直接覆盖升级；若设备上装的是**上游官方白壳**（`20260914-1520`，另一套签名），需先卸载再安装。
+## 构建环境
 
-## car.4 改动：修复臻彩 GL 渲染（开臻彩时画面全黑）
+- Windows PowerShell
+- JDK：`C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot`
+- Gradle Wrapper 7.5 / Android Gradle Plugin 7.2.2
+- compileSdk 33 / targetSdk 28 / minSdk 19
+- Android SDK：`C:\Users\WIN10\AppData\Local\Android\Sdk`
+- Build Tools 34.0.0
+- `GRADLE_USER_HOME=D:\gradle-cache`
+- Chaquopy plugin `12.0.1`，Android runtime `Python 3.8.13`
+- 主机构建解释器：官方 Python 3.8.10 embeddable（放在会话 scratch，不需要全局安装）
+- `TVBOX_BUILD_PYTHON` 或 `-PbuildPython` 可指定 Python 3.8 可执行文件
 
-### 问题
+Chaquopy 12.0.1 的 Android runtime 固定为 Python 3.8.13，因此 `pyramid/build.gradle` 不设置 `python.version`；只通过 `buildPython(...)` 选择构建解释器。
 
-开启 `臻彩增强` 后播放视频，视频区域**全黑**（只剩声音）；关闭臻彩则正常。真机/模拟器像素实测（同一段静态测试片，OFF 为正常画面）：
+## 可复现构建
 
-| 区域 | 臻彩 ON | 臻彩 OFF |
-|---|---|---|
-| 视频区 饱和度/亮度 | 0.05–0.17 / 0.02–0.11 | 0.71 / 0.69 |
-| UI 区 饱和度/亮度 | 0.33 / 0.09 | 0.33 / 0.09（完全一致） |
-
-### 根因（设备日志实证）
-
-```text
-I GlEnhance: frame-available listener bound to main looper
-I GlEnhance: onSurfaceCreated error: java.lang.IllegalStateException: Player is accessed on the wrong thread.
-I GlEnhance: Current thread: 'GLThread 85'
-I GlEnhance: Expected thread: 'main'
-I GlEnhance: skip draw: program=3 texture=1 frameAvailable=false
-```
-
-`GlEnhanceRenderView.createSurfaceTexture()` 运行在 **GL 线程**，其中 `player.setSurface(mPlayerSurface)` 被 EXO 的线程校验拒绝（异常被 `catch (Throwable)` 吞掉）→ 异常导致 `createSurfaceTexture()` 中断，解码器始终拿不到本视图的渲染 Surface → 画面永远黑。
-
-### 修法
-
-| 文件 | 改动 |
-|---|---|
-| `player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java` | ① 新增 `bindSurfaceToPlayer()`：统一切回**主线程**（`new Handler(Looper.getMainLooper())`）再调用 `player.setSurface()`；`attachToPlayer()` 与 `createSurfaceTexture()` 都走它。② 新增 `applySurfaceTextureBufferSize()`：自建 SurfaceTexture 显式 `setDefaultBufferSize(videoW, videoH)`（默认只有 1×1）。③ 补 `GlEnhance` 取证日志：帧回调绑定、GL surface 就绪、`setVideoSize`、每帧 `drawFrame #n sat/con/bri viewport`、shader 编译/链接失败原因；异常不再静默。 |
-| `app/build.gradle` | `versionCode 5` / `versionName '1.0.0-car.4'` |
-
-### 修复后设备日志
-
-```text
-I GlEnhance: frame-available listener bound to main looper
-I GlEnhance: GL surface ready, view=1057x675, program=3, texture=1
-I GlEnhance: player surface bound (main thread)
-I GlEnhance: surfaceTexture buffer size -> 640x360
-I GlEnhance: setVideoSize 640x360
-I GlEnhance: drawFrame #0  sat=1.35 con=1.12 bri=0.03 viewport=1057x594
-I GlEnhance: drawFrame #100 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
-```
-
-像素实测（低饱和静态测试片 `cartest-lowsat.mp4`，sat 真值 0.41）：视频区分块 **ON 相对 OFF 饱和度 +10%~20%、亮度 +10% 左右**，UI 区完全一致（见 `TEST-REPORT.md` §1.5）。
-
-## car.3 改动：修复 `ProtectedInitJar` 误判导致订阅站点全废
-
-### 问题（car.3）
-
-订阅 `…/tvbox/123/xiaosa/api.json?v=3` 含 **106 个 `csp_*` 站点**，JAR 下载与 md5 均正常，但页面只显示“主页”，其它全失败。设备日志：
-
-```text
-I/JarLoader: echo-load initProtectedJar file=/data/user/0/com.github.tvbox.osc.jun/files/csp/370c76a7….jar
-I/JarLoader: load error key=main, protected jar loader not bound
-```
-
-### 根因
-
-1. `ProtectedInitJar.check()` 用 DEX 扫描判定“保护型 JAR”，条件之一是**在该 JAR 的 `com.github.catvod.spider.Init` 类的 `init()` 方法字符串常量里找不到宿主包名**；而这份 JAR 的白名单密文放在 `Init.a()/Init.b()`，`init()` 里只有一个 4 字符的无关密文 → 扫描漏判。
-2. 被判为“保护型”后走 `ProtectedInitJar.init()`，其中 `bindDexLoader()` 硬要求 JAR 内存在 `com.github.catvod.spider.DexNative`——本 JAR 没有（`DexNative`/`getLoader`/`replaceCloudDiskNames` 出现 0 次）→ `return false`。
-3. 上游 `JarLoader.invokeInit()` 在保护型路径失败时**不回退**，直接返回 false → JAR 不装载 → 106 个站点全部 `SpiderNull` → “只有主页”。
-
-### 修法（两层，互补）
-
-| 层 | 文件 | 改动 |
-|---|---|---|
-| ① 修正误判 | `app/src/main/java/com/github/catvod/crawler/ProtectedInitJar.java` | `scanInitWhitelist()` 只扫 `init` → 改为 `scanWhitelistMethods()` 扫 `Init*` 全类全方法；`isProtected()` 对每个 `Init*` 类都做白名单扫描 |
-| ② 兜底回退 | `app/src/main/java/com/github/catvod/crawler/JarLoader.java` | `invokeInit()` 在 `protectedInitJar.init(clz)` 失败时，回退调用 `Init.init(Context)`（新增 `invokeInitMethod()`，带 `echo-load` 取证日志） |
-
-安全性：层 ① 只在**该 JAR 自己的白名单里出现本机包名**时才判定“非保护型”，对不在白名单的包名（如车机包名 `cn.kuwo.kwmusiccar`）仍判为保护型——已用 `tools/WhitelistScanTest.java` 做负控验证（见 `TEST-REPORT.md` §1.1）。
-包名/应用名都未改（白名单第 41 / 13 项），因此层 ①② 之后 JAR 自身的三项身份自检（包名 / 应用名 / 签名 DN 黑名单）全部通过，不会触发「加载失败」+5 秒自杀。
-
-### 版本号
-
-`app/build.gradle`：`versionCode 4`、`versionName '1.0.0-car.3'`。
-
-## car.2 内容（沿用）
-
-### 1. 画面与音效增强（对齐参考车机版“音效 / 臻彩”）
-
-| 文件 | 作用 |
-|---|---|
-| `car/AudioEffectController.java`（新） | 6 档音效链：Equalizer + BassBoost + Virtualizer + LoudnessEnhancer；500ms 渐入（16×32ms）；切换重建、释放安全 |
-| `car/CarEnhance.java`（新） | 偏好读写 + 会话下发 + 臻彩可用性判定（HDR 强制关闭） |
-| `player/.../render/GlEnhanceRenderView.java`（新） | GLSurfaceView + 外部 OES 纹理着色器调色：开 (sat 1.35, con 1.12, bri 0.03)，关 (1,1,0) |
-| `player/.../render/GlEnhanceRenderViewFactory.java`（新） | 渲染视图工厂 |
-| `player/.../player/MyVideoView.java` | `getAudioSessionId()` / `isHdrVideo()` / `setVideoEnhanceMode()`；`prepared()` 内 HDR 判定与音效下发；`release()` 释放音效 |
-| `player/.../player/ExoPlayer.java`（app 侧） | EXO 音频会话 id + HDR 判定（`ColorInfo.isTransferHdr`、`dolby-vision`、`dvhe/dvh1/dovi`） |
-| `player/.../player/IjkMediaPlayer.java`（app 侧） | IJK 音频会话 id（native）+ 杜比视界编码名启发式（本 fork 无 color_trc 元数据，已注明） |
-| `util/PlayerHelper.java` | 播放前按开关选择 `GlEnhanceRenderViewFactory`（HDR 时自动回退普通渲染视图） |
-| `ui/fragment/ModelSettingFragment.java` + `fragment_model.xml` | 设置页新增 `音效`（6 档循环）与 `臻彩增强`（开/关）两行 |
-| `util/HawkConfig.java` | 偏好键 `hifi_audio`（默认 0）、`video_enhance`（0/1） |
-
-### 2. 按 `CAR-UI-SPEC-TVBOX-2880x1620` 的整改
-
-详见 [`AUDIT-CAR-UI-SPEC.md`](AUDIT-CAR-UI-SPEC.md)。摘要：上下避让禁区（40mm/55mm）与左右 35mm 安全边距落地到 11 个页面布局；播放器覆盖层 40mm/60mm 让位；非零 dp/sp 清零；热区与间距按 40mm/12mm 提升；Manifest（resizeableActivity、configChanges、design_width/height、uses-feature）补齐；暗色主题与规范色板落地；可点控件补 focusable。
-
-### 3. 应用内返回按钮（car.1 交付，car.2 调位）
-
-- 位置/尺寸用 mm：左侧 35mm 安全边距、50mm 圆钮（2880×1620 下 `[79,486]-[192,599]`）。
-- `focusable=true` + 2mm 高亮焦点描边（方控/旋钮可选中）。
-
-## 构建步骤（可复现）
+在仓库根目录 `tvbox-os-src` 执行。先准备 `local.properties`，并让 `TVBOX_BUILD_PYTHON` 指向 Python 3.8 可执行文件：
 
 ```powershell
-git clone https://github.com/q215613905/TVBoxOS.git tvbox-os-src
-cd tvbox-os-src
-git apply ..\tvbox-os-car\GIT-DIFF-car.2.patch    # 增强 + 规范整改（相对上游 main）
-git apply ..\tvbox-os-car\GIT-DIFF-car.3.patch    # JAR 装载修复（相对 car.2）
-git apply ..\tvbox-os-car\GIT-DIFF-car.4.patch    # 臻彩 GL 渲染修复（相对 car.3）
-"sdk.dir=$env:LOCALAPPDATA\Android\Sdk" | Set-Content local.properties -Encoding ASCII
 $env:JAVA_HOME='C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot'
 $env:GRADLE_USER_HOME='D:\gradle-cache'
-.\gradlew.bat :app:assembleJavaRelease            # -> app/build/outputs/apk/java/release/TVBox_release-java.apk
-# 对齐 + 签名（测试证书）
-& "$env:LOCALAPPDATA\Android\Sdk\build-tools\34.0.0\zipalign.exe" -f -p 4 TVBox_release-java.apk aligned.apk
-& "$env:LOCALAPPDATA\Android\Sdk\build-tools\34.0.0\apksigner.bat" sign --ks "$env:USERPROFILE\.android\debug.keystore" `
-    --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out TVBox-1.0.0-car.4-signed.apk aligned.apk
+$env:TVBOX_BUILD_PYTHON='C:\path\to\python3.8.exe'
+$env:TEMP='C:\path\to\scratch\gradle-tmp'
+$env:TMP=$env:TEMP
+$env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
+New-Item -ItemType Directory -Force $env:TEMP | Out-Null
+$car5SdkPath=(Join-Path $env:LOCALAPPDATA 'Android\Sdk').Replace('\','/')
+[System.IO.File]::WriteAllText((Join-Path (Get-Location) 'local.properties'),
+  "sdk.dir=$car5SdkPath`n", [System.Text.Encoding]::ASCII)
+
+.\gradlew.bat --no-daemon --max-workers 1 `
+  -Dorg.gradle.jvmargs=-Xmx1536m `
+  :app:assemblePythonRelease --console=plain
 ```
 
-离线复核 JAR 误判修复（无需设备，JDK 11+ 直接跑单文件）：
+成功输出：`app/build/outputs/apk/python/release/TVBox_release-python.apk`。本轮 Gradle 构建耗时约 155 秒，exit code 0。
+
+若使用官方 Windows embeddable Python 3.8，先将目录中的 `python38._pth` 重命名为 `python38._pth.disabled`，使 Chaquopy 能加入它自己的构建模块搜索路径。本轮使用 3.8.10 构建解释器；Android 内实际运行版本是 3.8.13。
+
+## 对齐、签名与校验
 
 ```powershell
-java tools\WhitelistScanTest.java spider.jar com.github.tvbox.osc.jun   # 期望: OLD=true, NEW=false
-java tools\WhitelistScanTest.java spider.jar cn.kuwo.kwmusiccar         # 负控: OLD=true, NEW=true
+$sdk='C:\Users\WIN10\AppData\Local\Android\Sdk\build-tools\34.0.0'
+$unsigned='app\build\outputs\apk\python\release\TVBox_release-python.apk'
+& "$sdk\zipalign.exe" -f -p 4 $unsigned .\TVBox-car5-aligned.apk
+& "$sdk\apksigner.bat" sign `
+  --ks "$env:USERPROFILE\.android\debug.keystore" `
+  --ks-key-alias androiddebugkey `
+  --ks-pass pass:android --key-pass pass:android `
+  --out .\TVBox-1.0.0-car.5-python-signed.apk .\TVBox-car5-aligned.apk
+& "$sdk\apksigner.bat" verify --verbose .\TVBox-1.0.0-car.5-python-signed.apk
+Get-FileHash .\TVBox-1.0.0-car.5-python-signed.apk -Algorithm SHA256
 ```
 
-播放链路（音效 / 臻彩）复测提示：车机版内置 HTTP 服务（默认 `:9978`），可把本地测试片直接推进播放器，无需依赖站点：
+不要把 APK、keystore 或下载的 Spider JAR 提交到 Git。APK 通过 GitHub Release 附件交付。
+
+## car.5 代码改动
+
+- `VideoEnhancePreset`：8 个稳定 ID、不可变参数表、旧 Boolean/0/1 设置迁移和损坏值回退。
+- `CarEnhance`、`MyVideoView`、`PlayerHelper`、`GlEnhanceRenderView`：设置、渲染工厂、HDR 恒等调色、主线程 Surface 绑定和 GL 取证日志统一使用预设 ID。
+- `ModelSettingFragment` 与 `dialog_video_presets.xml`：从二元开关改为带说明和当前高亮的画面预设列表。
+- `pyramid/build.gradle`：移除不存在的主机 Python 硬编码路径，支持 `TVBOX_BUILD_PYTHON`/`buildPython`。
+- `car/tests/`：Java 8 host test、Python 依赖/HTTP/播放 fixture、QuickJS fixture。
+
+## 依赖解析结果
+
+本轮 Python 双 ARM 构建实际解析并打包：`lxml 4.6.3`、`ujson 1.35`、`pyquery 2.0.2`、`requests 2.32.4`、`jsonpath 0.82.2`、`cachetools 5.5.2`、`pycryptodome 3.9.4`、`beautifulsoup4 4.15` 及其传递依赖。设备验收通过的是运行时 Python 3.8.13。
+
+## 历史构建
+
+- car.4：Java flavor，versionCode 5，SHA-256 `21C9FC004CCB2CF405E47E8F9536360A52012EB847F35BD96A8C3F41D872495D`
+- car.3：Java flavor，versionCode 4，SHA-256 `5074478347ADC8870DA35BD0F8806728D215EAB2F942B8BEC6637282C9857557`
+- car.2：Java flavor，versionCode 3，SHA-256 `4FE471C3791235F5AED86528206F10B00ECE4FB01F56862C7B706EAD5DBC8567`
+
+## 复核本地测试材料
+
+以下命令从工程根目录运行，测试输出写临时目录。像素比较依赖主机 Pillow、NumPy；准备 32 秒片还需 PATH 中的 ffmpeg。
 
 ```powershell
-adb push cartest-lowsat.mp4 /sdcard/Movies/
-adb forward tcp:19978 tcp:9978
-# 用 b64 形式推送 URL（避免转义问题），播放器会打开 DetailActivity 并起播
-$u = 'http://127.0.0.1:9978/file/Movies/cartest-lowsat.mp4'
-$b = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($u)).Replace('+','-').Replace('/','_')
-Invoke-WebRequest "http://127.0.0.1:19978/push/b64:$b" -UseBasicParsing
-adb shell dumpsys media.audio_flinger | Select-String 'effects for session'   # 期望: 4 effects
-adb logcat -d | Select-String 'GlEnhance'                                    # 期望: drawFrame #n sat=1.35 ...
+$car5TestOut=Join-Path $env:TEMP 'tvbox-preset-tests'
+New-Item -ItemType Directory -Force $car5TestOut | Out-Null
+javac -encoding UTF-8 --release 8 -d $car5TestOut `
+  player\src\main\java\xyz\doikki\videoplayer\render\VideoEnhancePreset.java `
+  car\tests\VideoEnhancePresetTest.java
+java -cp $car5TestOut VideoEnhancePresetTest
+python car\tests\compare_presets.py car\evidence\car.5
+python car\tests\prepare_fixtures.py --output "$car5TestOut\fixtures" --long-clip
 ```
 
-环境备注：Gradle wrapper 分发包改用腾讯镜像（本机 `services.gradle.org` 不可达）；JDK 17；compileSdk 33。
+把生成目录的文件放到测试设备 `/sdcard/TVBoxCar5/`，在应用中授予文件读取权限，再从配置地址导入 `http://127.0.0.1:9978/file/TVBoxCar5/api.json`。该配置仅用于本地验收，测试结束恢复用户订阅。`lives` 为可选字段，fixture 特意省略；上游 `ApiConfig` 对 `lives:[]` 的解析会越界，本轮未修改该业务代码。

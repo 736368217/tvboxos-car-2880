@@ -101,15 +101,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
 
     /** GL 线程内绘制计数，仅用于取证日志 */
     private int mFramesDrawn;
+    private boolean mHasFrame;
 
-    /** 调色参数，主线程写入，GL 线程读取 */
-    private volatile int mEnhanceMode;
-    private volatile float mSat = 1.0f;
-    private volatile float mCon = 1.0f;
-    private volatile float mBri = 0.0f;
-    private volatile float mRgbR = 1.0f;
-    private volatile float mRgbG = 1.0f;
-    private volatile float mRgbB = 1.0f;
+    /** A single immutable snapshot prevents mixed parameters across UI and GL threads. */
+    private volatile VideoEnhancePreset mPreset = VideoEnhancePreset.forMode(VideoEnhancePreset.ORIGINAL);
 
     /** 以下字段只在 GL 线程访问 */
     private int mProgram;
@@ -126,7 +121,12 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private int mViewportHeight;
 
     public GlEnhanceRenderView(Context context) {
+        this(context, VideoEnhancePreset.ORIGINAL);
+    }
+
+    public GlEnhanceRenderView(Context context, int mode) {
         super(context);
+        mPreset = VideoEnhancePreset.forMode(mode);
         setEGLContextClientVersion(2);
         // RGBA 配置，保证画面不透明；GL 内容全部自己绘制，无需 depth/stencil
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
@@ -155,6 +155,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
+                    if (mReleased || mMediaPlayer != player || mPlayerSurface != surface || !surface.isValid()) return;
                     try {
                         player.setSurface(surface);
                         Log.i(TAG, "player surface bound (main thread)");
@@ -238,32 +239,13 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         }
     }
 
-    /**
-     * 是否处于增强模式（mode == 1）
-     */
     public boolean isEnhanceMode() {
-        return mEnhanceMode == 1;
+        return mPreset.id != VideoEnhancePreset.ORIGINAL;
     }
 
-    /**
-     * 设置调色档位：0 为原始画面，1 为增强画面（其余取值按 1 处理）。
-     * 参数立即记录，并在 GL 线程应用；若 GL 上下文尚未创建，则在创建时应用。
-     */
+    /** Applies one immutable preset snapshot on the GL thread; mode 0 is the HDR identity path. */
     public void setVideoEnhanceMode(int mode) {
-        if (mode == 0) {
-            mEnhanceMode = 0;
-            mSat = 1.0f;
-            mCon = 1.0f;
-            mBri = 0.0f;
-        } else {
-            mEnhanceMode = 1;
-            mSat = 1.35f;
-            mCon = 1.12f;
-            mBri = 0.03f;
-        }
-        mRgbR = 1.0f;
-        mRgbG = 1.0f;
-        mRgbB = 1.0f;
+        mPreset = VideoEnhancePreset.forMode(mode);
         try {
             queueEvent(new Runnable() {
                 @Override
@@ -272,7 +254,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                 }
             });
         } catch (Throwable ignored) {
-            // GL 线程尚未就绪，onSurfaceCreated 时会应用当前值
+            // onSurfaceCreated applies the stored preset if the GL thread is not ready yet.
         }
         requestRender();
     }
@@ -327,21 +309,17 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             GLES20.glClearColor(0f, 0f, 0f, 1f);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-            if (mProgram == 0 || mTextureId == 0 || !mFrameAvailable) {
-                if (mFramesDrawn < 3) {
-                    Log.i(TAG, "skip draw: program=" + mProgram + " texture=" + mTextureId
-                            + " frameAvailable=" + mFrameAvailable);
-                }
-                return;
-            }
-            mFrameAvailable = false;
-
+            if (mProgram == 0 || mTextureId == 0) return;
             SurfaceTexture surfaceTexture = mSurfaceTexture;
-            if (surfaceTexture == null) {
-                return;
+            if (surfaceTexture == null) return;
+            if (mFrameAvailable) {
+                mFrameAvailable = false;
+                surfaceTexture.updateTexImage();
+                surfaceTexture.getTransformMatrix(mTexMatrixValue);
+                mHasFrame = true;
             }
-            surfaceTexture.updateTexImage();
-            surfaceTexture.getTransformMatrix(mTexMatrixValue);
+            // A preset/resize can request a redraw while paused: retain the last decoded frame.
+            if (!mHasFrame) return;
 
             GLES20.glUseProgram(mProgram);
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -358,8 +336,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
 
             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
             if (mFramesDrawn < 3 || mFramesDrawn % 100 == 0) {
-                Log.i(TAG, "drawFrame #" + mFramesDrawn + " sat=" + mSat + " con=" + mCon
-                        + " bri=" + mBri + " viewport=" + width + "x" + height);
+                VideoEnhancePreset preset = mPreset;
+                Log.i(TAG, "drawFrame #" + mFramesDrawn + " preset=" + preset.id + ":" + preset.name
+                        + " sat=" + preset.saturation + " con=" + preset.contrast
+                        + " bri=" + preset.brightness + " viewport=" + width + "x" + height);
             }
             mFramesDrawn++;
 
@@ -473,10 +453,14 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                 return;
             }
             GLES20.glUseProgram(mProgram);
-            GLES20.glUniform1f(uSat, mSat);
-            GLES20.glUniform1f(uCon, mCon);
-            GLES20.glUniform1f(uBri, mBri);
-            GLES20.glUniform3f(uRgb, mRgbR, mRgbG, mRgbB);
+            VideoEnhancePreset preset = mPreset;
+            GLES20.glUniform1f(uSat, preset.saturation);
+            GLES20.glUniform1f(uCon, preset.contrast);
+            GLES20.glUniform1f(uBri, preset.brightness);
+            GLES20.glUniform3f(uRgb, preset.red, preset.green, preset.blue);
+            Log.i(TAG, "preset applied id=" + preset.id + " name=" + preset.name
+                    + " sat=" + preset.saturation + " con=" + preset.contrast
+                    + " bri=" + preset.brightness + " rgb=" + preset.red + "," + preset.green + "," + preset.blue);
         } catch (Throwable ignored) {
         }
     }
@@ -514,6 +498,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             SurfaceTexture surfaceTexture = mSurfaceTexture;
             mSurfaceTexture = null;
             mFrameAvailable = false;
+            mHasFrame = false;
             if (surfaceTexture != null) {
                 surfaceTexture.setOnFrameAvailableListener(null);
                 surfaceTexture.release();

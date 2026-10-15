@@ -213,7 +213,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="臻彩增强"
+                    android:text="画面预设"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/ts_24" />
 
@@ -226,7 +226,7 @@
                     android:id="@+id/tvCarVideoEnhance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="关闭"
+                    android:text="原画"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/ts_24" />
 

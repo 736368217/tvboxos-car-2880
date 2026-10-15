@@ -1,0 +1,160 @@
+{
+  "video_roi": [
+    250,
+    180,
+    1050,
+    650
+  ],
+  "ui_roi": [
+    1250,
+    100,
+    2700,
+    700
+  ],
+  "rows": [
+    {
+      "mode": 0,
+      "name": "原画",
+      "screenshot": "preset-0.png",
+      "size": [
+        2880,
+        1620
+      ],
+      "mean_rgb": [
+        90.733,
+        94.585,
+        87.538
+      ],
+      "mean_saturation": 111.825,
+      "mean_value": 111.175,
+      "video_mean_absolute_difference": 0.0,
+      "ui_mean_absolute_difference": 0.0
+    },
+    {
+      "mode": 1,
+      "name": "臻彩",
+      "screenshot": "preset-1.png",
+      "size": [
+        2880,
+        1620
+      ],
+      "mean_rgb": [
+        92.876,
+        98.213,
+        88.157
+      ],
+      "mean_saturation": 125.8,
+      "mean_value": 123.346,
+      "video_mean_absolute_difference": 10.65,
+      "ui_mean_absolute_difference": 0.0
+    },
+    {
+      "mode": 2,
+      "name": "自然",
+      "screenshot": "preset-2.png",
+      "size": [
+        2880,
+        1620
+      ],
+      "mean_rgb": [
+        91.554,
+        95.625,
+        88.008
+      ],
+      "mean_saturation": 119.378,
+      "mean_value": 114.317,
+      "video_mean_absolute_difference": 2.694,
+      "ui_mean_absolute_difference": 0.0
+    },
+    {
+      "mode": 3,
+      "name": "影院",
+      "screenshot": "preset-3.png",
+      "size": [
+        2880,
+        1620
+      ],
+      "mean_rgb": [
+        86.952,
+        88.435,
+        77.248
+      ],
+      "mean_saturation": 123.915,
+      "mean_value": 109.835,
+      "video_mean_absolute_difference": 8.354,
+      "ui_mean_absolute_difference": 0.0
+    },
+    {
+      "mode": 4,
+      "name": "鲜艳",
+      "screenshot": "preset-4.png",
+      "size": [
+        2880,
+        1620
+      ],
+      "mean_rgb": [
+        88.874,
+        94.837,
+        83.282
+      ],
+      "mean_saturation": 139.031,
+      "mean_value": 123.712,
+      "video_mean_absolute_difference": 14.908,
+      "ui_mean_absolute_difference": 0.0
+    },
+    {
+      "mode": 5,
+      "name": "柔和",
+      "screenshot": "preset-5.png",
+      "size": [
+        2880,
+        1620
+      ],
+      "mean_rgb": [
+        99.377,
+        101.563,
+        94.545
+      ],
+      "mean_saturation": 80.764,
+      "mean_value": 116.017,
+      "video_mean_absolute_difference": 7.915,
+      "ui_mean_absolute_difference": 0.0
+    },
+    {
+      "mode": 6,
+      "name": "明亮",
+      "screenshot": "preset-6.png",
+      "size": [
+        2880,
+        1620
+      ],
+      "mean_rgb": [
+        108.627,
+        113.119,
+        104.96
+      ],
+      "mean_saturation": 91.217,
+      "mean_value": 131.99,
+      "video_mean_absolute_difference": 17.95,
+      "ui_mean_absolute_difference": 0.0
+    },
+    {
+      "mode": 7,
+      "name": "暖色",
+      "screenshot": "preset-7.png",
+      "size": [
+        2880,
+        1620
+      ],
+      "mean_rgb": [
+        98.511,
+        97.762,
+        82.836
+      ],
+      "mean_saturation": 121.243,
+      "mean_value": 118.178,
+      "video_mean_absolute_difference": 5.219,
+      "ui_mean_absolute_difference": 0.0
+    }
+  ]
+}

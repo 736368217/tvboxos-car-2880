@@ -8,6 +8,7 @@ import com.github.tvbox.osc.util.HawkConfig;
 import com.orhanobut.hawk.Hawk;
 
 import xyz.doikki.videoplayer.player.VideoView;
+import xyz.doikki.videoplayer.render.VideoEnhancePreset;
 
 /**
  * Car edition glue for the two audio/video enhancement features ported from the reference car build:
@@ -22,7 +23,7 @@ import xyz.doikki.videoplayer.player.VideoView;
  * </ul>
  *
  * Preference keys: {@link HawkConfig#HIFI_AUDIO} (int preset, default 0 = off) and
- * {@link HawkConfig#VIDEO_ENHANCE} (0/1, legacy 1..4 is normalised to "on").
+ * {@link HawkConfig#VIDEO_ENHANCE} (stable preset ID; old Boolean/0/1 values are retained).
  */
 public final class CarEnhance {
 
@@ -64,15 +65,20 @@ public final class CarEnhance {
 
     // ------------------------------------------------------------------ video
 
+    public static int videoMode() {
+        return VideoEnhancePreset.modeFromPrefValue(Hawk.get(HawkConfig.VIDEO_ENHANCE, 0));
+    }
+
     public static boolean videoEnhanceEnabled() {
-        Object stored = Hawk.get(HawkConfig.VIDEO_ENHANCE, 0);
-        if (stored instanceof Boolean) return ((Boolean) stored).booleanValue();
-        if (stored instanceof Number) return ((Number) stored).intValue() != 0;
-        return false;
+        return videoMode() != VideoEnhancePreset.ORIGINAL;
+    }
+
+    public static void setVideoMode(int mode) {
+        Hawk.put(HawkConfig.VIDEO_ENHANCE, VideoEnhancePreset.forMode(mode).id);
     }
 
     public static void setVideoEnhanceEnabled(boolean enabled) {
-        Hawk.put(HawkConfig.VIDEO_ENHANCE, enabled ? 1 : 0);
+        setVideoMode(enabled ? VideoEnhancePreset.VIVID_COLOR : VideoEnhancePreset.ORIGINAL);
     }
 
     /**

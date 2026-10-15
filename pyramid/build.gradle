@@ -10,7 +10,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         python {
-            buildPython("D:/Programs/Python/Python38/python.exe")
+            // Override with -PbuildPython=<Python 3.8 executable> or TVBOX_BUILD_PYTHON.
+            buildPython(project.findProperty('buildPython') ?: System.getenv('TVBOX_BUILD_PYTHON') ?: 'python3.8')
             pip {
                 install "lxml"
                 install "ujson"

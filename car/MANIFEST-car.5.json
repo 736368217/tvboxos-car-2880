@@ -1,0 +1,54 @@
+{
+  "version_name": "1.0.0-car.5",
+  "version_code": 6,
+  "flavor": "python",
+  "application_id": "com.github.tvbox.osc.jun",
+  "label": "TVBox",
+  "artifact": "TVBox-1.0.0-car.5-python-signed.apk",
+  "bytes": 52627205,
+  "sha256": "6F43817EB9C4E2A97C8E30C190826244A2333E14CD46D064964F91AE45DF0C3B",
+  "python_runtime": "3.8.13",
+  "chaquopy_plugin": "12.0.1",
+  "native_libraries": {
+    "armeabi-v7a": [
+      "libpython3.8.so",
+      "libchaquopy_java.so",
+      "libquickjs-android-wrapper.so"
+    ],
+    "arm64-v8a": [
+      "libpython3.8.so",
+      "libchaquopy_java.so",
+      "libquickjs-android-wrapper.so"
+    ]
+  },
+  "chaquopy_asset_entries": 37,
+  "signature_schemes_verified": [
+    "v1",
+    "v2",
+    "v3"
+  ],
+  "zipalign_bytes": 4,
+  "code_patch_base": "febc8fa",
+  "code_patch_sha256": "AA41C96EF00A9790E190797186EC465548BEA2D2835F3F6990C4CD040C86CD5E",
+  "source_sha256": {
+    "app/build.gradle": "22936906f7d0e108da7c1add5619475e0c196bd3ac4622a3dcba08a8aa4255cd",
+    "app/src/main/java/com/github/tvbox/osc/car/CarEnhance.java": "2fdefb2bec9fb220a84d1974ebd0debd72ea8bb8968d6b82b294ca5319c39789",
+    "app/src/main/java/com/github/tvbox/osc/player/MyVideoView.java": "61ec1066855f494b8ce6ea7799c10872bfb5c2b428599522a61aeb527f40a87a",
+    "app/src/main/java/com/github/tvbox/osc/ui/fragment/ModelSettingFragment.java": "e9d5f962698af24966a343bd1b31190fffe7d1c2d7f4e70739af57eab191451d",
+    "app/src/main/java/com/github/tvbox/osc/util/HawkConfig.java": "7f4d0e6a6259b648808b47f1e042a541ae2f75cdcfeee9bc0cd2416e315fafe8",
+    "app/src/main/java/com/github/tvbox/osc/util/PlayerHelper.java": "fa40167d2b7777571770b7dd48032750f8dae2fee4215ad878c815e9a1e95189",
+    "app/src/main/res/layout/dialog_video_presets.xml": "7f7dfec221eef5b807723e6943b22759829e0ef3a40c5998ce03c8018be1d242",
+    "app/src/main/res/layout/fragment_model.xml": "a2ece6967bf0e9cc73648e5e9a4ccdea2f67db4849e4b958b7cd1e257db96e26",
+    "car/tests/VideoEnhancePresetTest.java": "554909b17f5142b699d2544f552a9a4d1afe12dc91ea344be22471afe7822eb9",
+    "car/tests/compare_presets.py": "18e8fcad9ff7e23273b3a126b660c0b8baeff3fb116de53a8037206aee9b843b",
+    "car/tests/fixtures/api.json": "164c9b812e7b3ae247cf332c257762d0aaaf6327405448bbddb5b41792a2ac94",
+    "car/tests/fixtures/car5_js_probe.js": "14cc6608a69959726fd398cbbf987f073decc1d8fe497e0bbfd59a9c2763df22",
+    "car/tests/fixtures/car5_python_probe.py": "8a3742eecaf0e5bf318a6981496250c2e56ab0858d3caa8c5d024f765bca204a",
+    "car/tests/fixtures/check.json": "0ac7efb6593c011ce0bc61c7f2c40aec81cbbf2a244cacd289c715035b335406",
+    "car/tests/prepare_fixtures.py": "0a272638c61a26a9aef2baeaad7fc2f1ff7ef8e6c97cd9acf7228feec5468f89",
+    "player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java": "a57126b3737243e1f04ef9914a49fbb9a96e4c0f23a2dcf9f656d8d2b4829abc",
+    "player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderViewFactory.java": "d393f3b5c5fe67d4ae66009da99173f1e2964c64a5c66f664386663ffe728561",
+    "player/src/main/java/xyz/doikki/videoplayer/render/VideoEnhancePreset.java": "c544d120c9a91fb3fb19b68b5e0026f3236bfc84944aeac80035d05c5c90f345",
+    "pyramid/build.gradle": "cd0d793cc4b1557ad101c6d97649e6094d8824b6eacec26d642bca56a217526b"
+  }
+}

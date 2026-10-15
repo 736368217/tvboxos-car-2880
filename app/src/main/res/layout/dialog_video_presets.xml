@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="@dimen/car_top_padding"
+    android:paddingBottom="@dimen/car_bottom_padding"
+    android:paddingLeft="@dimen/car_side_padding"
+    android:paddingRight="@dimen/car_side_padding">
+
+    <LinearLayout
+        android:id="@+id/cl_root"
+        android:layout_width="900mm"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:padding="20mm"
+        android:background="@drawable/shape_danmu_setting_bg">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="50mm"
+            android:gravity="center"
+            android:text="画面预设 · 下次播放生效"
+            android:textColor="@color/dialog_text_primary"
+            android:textSize="@dimen/ts_24"
+            android:textStyle="bold" />
+
+        <com.owen.tvrecyclerview.widget.TvRecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="350mm"
+            android:clipToPadding="false"
+            android:paddingTop="12mm"
+            android:paddingBottom="12mm"
+            android:orientation="vertical"
+            app:tv_layoutManager="V7LinearLayoutManager"
+            app:tv_selectedItemIsCentered="true"
+            app:tv_verticalSpacingWithMargins="12mm" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="12mm"
+            android:text="上下滑动选择 · HDR 视频自动保留原始色彩"
+            android:gravity="center"
+            android:textColor="@color/dialog_text_primary"
+            android:textSize="@dimen/ts_20" />
+
+        <TextView
+            android:id="@+id/btnVideoPresetCancel"
+            android:layout_width="match_parent"
+            android:layout_height="50mm"
+            android:layout_marginTop="12mm"
+            android:background="@drawable/button_danmu_setting"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="取消"
+            android:textColor="@color/dialog_text_primary"
+            android:textSize="@dimen/ts_24" />
+    </LinearLayout>
+</FrameLayout>

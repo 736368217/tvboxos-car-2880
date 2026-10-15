@@ -1,46 +1,53 @@
-# TVBoxOS 车机版（源码构建）— 返回按钮 + 音效 / 臻彩 + 车机规范 + JAR 装载与臻彩渲染修复
+# TVBoxOS 车机版 1.0.0-car.5 — Python 通用包与 8 档画面预设
 
-上游工程：<https://github.com/q215613905/TVBoxOS>（白盒源码）。
-本目录是车机适配产物：**每个页面都有可点击的应用内返回按钮（不依赖无障碍）**、**画面（臻彩 GL 调色）与音效（6 档）增强**、按 `CAR-UI-SPEC-TVBOX-2880x1620` 完成整改，并修复了两个上游/自身缺陷：
-① 上游白壳的 `ProtectedInitJar` 误判（订阅里 106 个 `csp_*` 站点此前全部失效、只剩主页）；
-② 臻彩 GL 渲染视图在 GL 线程绑定 Surface 导致 **开臻彩时画面全黑**。
+基于 [q215613905/TVBoxOS](https://github.com/q215613905/TVBoxOS) 源码构建。源码与交付文档位于私有仓库 [736368217/tvboxos-car-2880](https://github.com/736368217/tvboxos-car-2880)。
 
-## 交付物（推荐使用 car.4）
+car.4 交付的是 **Java flavor**；car.5 改为 **Python flavor，ARM32＋ARM64 通用 APK**，加入 Python 3.8.13 运行时，继续保留 Java/JAR 和 QuickJS。Android 界面及播放器仍使用原工程的 Java 代码；这里的“Python 版”指支持 Python Spider 的构建版本。
 
-| 文件 | 说明 |
+## 下载与文件
+
+- [v1.0.0-car.5 Release](https://github.com/736368217/tvboxos-car-2880/releases/tag/v1.0.0-car.5)：`TVBox-1.0.0-car.5-python-signed.apk`，52,627,205 字节。
+- SHA-256：`6F43817EB9C4E2A97C8E30C190826244A2333E14CD46D064964F91AE45DF0C3B`。
+- 包名 `com.github.tvbox.osc.jun`、应用名 `TVBox`，versionCode `6`，versionName `1.0.0-car.5`；沿用 car.2–car.4 的测试签名，可覆盖升级同签名版本。
+- APK 通过 Release 附件交付，仓库不存 APK、下载的 Spider JAR 或签名私钥。
+
+| 材料 | 用途 |
 |---|---|
-| `TVBox-1.0.0-car.4-signed.apk` | **最新（推荐）**，可直接安装的签名 APK（33,302,029 B，SHA-256 `21C9FC00…2495D`） |
-| `GIT-DIFF-car.4.patch` | car.4 改动（臻彩 GL 渲染修复 + 版本号） |
-| `GIT-DIFF-car.3.patch` | car.3 改动（JAR 装载修复 + 版本号） |
-| `GIT-DIFF-car.2.patch` | car.2 改动（增强 + 规范整改，相对上游 `main`，含新增文件） |
-| `src/` | 新增/修改类的源码副本（`car/`、`player/render/`、`xyz/…/render/`、`com/github/catvod/crawler/`） |
-| `tools/WhitelistScanTest.java` | 离线复现“保护型 JAR 误判 / 已修复”的独立 DEX 扫描器（见 `TEST-REPORT.md` §1.1） |
-| `AUDIT-CAR-UI-SPEC.md` | 按规范的逐条审查与整改记录（含实测数值、残留项） |
-| `BUILD-INFO.md` | 版本/签名/改动清单/可复现构建步骤 |
-| `TEST-REPORT.md` | 验收证据、测试范围与已知边界 |
-| `AUDIO-VIDEO-ENHANCE.md` | 音频/视频增强的完整方案、参数表、源码入口、调优方式与运行期验收命令 |
-| `INSTALL.md` | 安装与使用说明 |
-| `cartest-lowsat.mp4` | 低饱和静态测试片（640×360 / 8s / 440Hz，sat≈0.41），用于验证臻彩调色的**像素级**生效 |
-| `cartest.mp4` | 原始合成测试片（640×360 / 8s / 440Hz，sat≈0.76） |
+| `BUILD-INFO.md` | 构建环境、Python flavor、依赖版本、签名与校验步骤 |
+| `INSTALL.md` | 安装、Python 源使用、画面预设选择与升级说明 |
+| `TEST-REPORT.md` | 本轮实际验证结果及边界 |
+| `AUDIO-VIDEO-ENHANCE.md` | 6 档音效与 8 档画面的参数和代码入口 |
+| `tests/` | 预设/迁移 host 测试与独立 Python、QuickJS 验收源 |
+| `evidence/car.5/` | 原生节点、截图、渲染日志摘要、音效会话和像素比较数据 |
+| `GIT-DIFF-car.5.patch` | 相对 car.4 源码提交 `febc8fa` 的 UTF-8 代码增量，包含新增源码 |
+| `src/` | 新增类和关键修改类、布局的源码副本；完整工程以仓库根目录为准 |
 
-历史版本保留在同目录仅供对比：`TVBox-1.0.0-car.3-signed.apk`（33,302,029 B，SHA-256 `50744783…57557`）、`TVBox-1.0.0-car.2-signed.apk`（33,297,933 B，SHA-256 `4FE471C3…C8567`）。
+## 画面预设
 
-## 四块能力
+设置 → **画面预设** → 选择档位，**下次播放生效**。列表可上下滑动，当前项高亮；重复点击当前项保持弹窗，可点“取消”退出。
 
-1. **应用内返回按钮**（car.1 起，car.2 按新规范调位）
-   窗口内 View，挂在当前 Activity decor；无需无障碍/权限/ADB。空闲 4 秒自动隐藏、任何触摸或按键唤醒；点击上一级（分类页→主页分类、播放页先退全屏），首页根级只提示不退出。设置页可开关、可设 4/6/8 秒或「常显」。
-2. **音效（6 档）**
-   `关闭 / 影院 / 重低音 / 3D环绕 / HiFi / 人声`，由 Equalizer + BassBoost + Virtualizer + LoudnessEnhancer 组成，绑定 EXO/IJK 的音频会话，500ms 渐入。设置页 `音效` 行循环切换。
-3. **臻彩（画面增强）**
-   GL 片元着色器调色（饱和度/对比度/亮度），开：(1.35 / 1.12 / +0.03)、关：(1 / 1 / 0)；HDR/HLG/杜比视界自动关闭并提示。设置页 `臻彩增强` 行开关，**下次播放生效**。
-   - car.4 修复：`GlEnhanceRenderView` 原先在 **GL 线程**调用 `player.setSurface()`，EXO 抛 `IllegalStateException: Player is accessed on the wrong thread`（异常被吞）→ 解码器拿不到渲染 Surface → **开臻彩时画面全黑**。现改为切回主线程绑定 Surface，并补 `SurfaceTexture.setDefaultBufferSize()` 与 `GlEnhance` 取证日志。
-4. **订阅站点全部可用**
-   上游白壳把本订阅的 `spider.jar` 误判为“保护型 JAR”，而该 JAR 没有 `DexNative`，导致初始化失败且**不回退** → 所有 `csp_*` 站点拿到 `SpiderNull`，现象就是“只有主页”。
-   car.3 两层修复：① 修正误判本身（白名单密文在 `Init.a()/Init.b()`，扫描范围由 `Init.init` 扩到 `Init*` 全类全方法）；② `JarLoader.invokeInit()` 在保护型路径失败后**回退**到 `Init.init(Context)`。
-   实测：`load success key=main` + 全站 `getSpider success`，主页分类、站点分类、搜索、多站聚合（`源 77/77`）、详情与选集全部正常。
+| ID | 名称 | 用途 |
+|---|---|---|
+| 0 | 原画 | 保留原始画面 |
+| 1 | 臻彩 | 增强色彩与层次，保留旧版开启时的参数 |
+| 2 | 自然 | 轻调色，接近原片 |
+| 3 | 影院 | 温润色调，强化明暗 |
+| 4 | 鲜艳 | 浓郁色彩，突出画面 |
+| 5 | 柔和 | 降低反差，柔化色彩 |
+| 6 | 明亮 | 提亮偏暗片源 |
+| 7 | 暖色 | 暖色温，减少蓝色 |
 
-## 车机规范（摘要）
+旧 `video_enhance=false/0` 读取为原画，`true/1` 读取为臻彩；异常值回退原画。HDR/杜比视界保留自动关闭 SDR 调色的策略；本轮 HDR 自动处理未实测。
 
-- 顶部 40mm / 底部 55mm 避让禁区、左右 35mm 安全边距；播放器覆盖层顶部 ≥40mm、底部 ≥60mm；视频渲染层不缩放不变形。
-- 全部 XML 使用 `mm`（1mm = 2.25px @2880×1620）；最小热区 40mm×40mm；相邻热区间距 ≥12mm；暗色沉浸主题（`#101318` / `#1E222B` / `#EDEDED` / `#2979FF`）。
-- 包名保持 `com.github.tvbox.osc.jun`（白名单第 41 项，未改名）；应用名保持 `TVBox`（白名单第 13 项）——两者都是 JAR 身份自检通过的前提，**不要改**。
+## 沿用的车机能力
+
+- 每个 Activity 窗口内的返回按钮，无需无障碍、系统悬浮窗权限或 ADB；闲置 4 秒隐藏、触摸唤醒，可设 4/6/8 秒或常显，首页根级只提示。
+- 6 档音效：关闭、影院、重低音、3D环绕、HiFi、人声。四个 Android AudioEffect 绑定内部播放器音频会话。
+- 17.3″ / 2880×1620 的安全边距、触控热区、mm 单位与暗色主题；沿用 car.2 布局整改。
+- car.3 的 JAR 保护型误判修复和初始化回退，以及 car.4 的主线程绑定 Surface 修复。本轮再次确认原订阅 `Init.init success`、分类和多站搜索。
+
+## 本轮验证范围
+
+MuMu 6.8.4.0 / Android 15 / 横屏 2880×1620：Python 3.8.13 实际执行 8 项依赖和本地 HTTP 断言；Python 与 QuickJS 均返回分类、卡片、详情并播放合成片。8 档设置均走真实播放路径，7 个增强档均有第 100 帧参数日志；截图比较证明视频变化且抽样 UI 区域逐像素一致。设置在应用重启后保留，影院音效四效果器挂于 session 89。
+
+原订阅本轮“潜伏6”搜索 **21 结果、78/78 完成、3 超时**。部分外部站点返回验证页或解析错误；不保证每个外部源持续可用。真实车机、ARM32 运行、HDR/杜比视界和 IJK 全路径仍待验证。完整证据与范围见 `TEST-REPORT.md`。

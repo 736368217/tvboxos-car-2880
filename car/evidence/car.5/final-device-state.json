@@ -1,0 +1,32 @@
+{
+  "emulator": "MuMu 6.8.4.0 / Android 15",
+  "lease_instance": 1,
+  "canvas": [
+    2880,
+    1620
+  ],
+  "density": 240,
+  "runtime_abi": "arm64-v8a via native translation on x86_64",
+  "pid_before_explicit_restart": 4480,
+  "pid_after_explicit_restart_and_at_end": 16125,
+  "enabled_accessibility_services": null,
+  "accessibility_enabled": 0,
+  "volume_music": 0,
+  "sound_effects_enabled": 0,
+  "app_fatal_exception_in_captured_final_pid_log": false,
+  "original_subscription": "https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/123/xiaosa/api.json?v=3",
+  "original_search": {
+    "query": "潜伏6",
+    "results": 21,
+    "sources_done": 78,
+    "sources_total": 78,
+    "timeouts": 3
+  },
+  "known_external_errors": [
+    "HTML verification/challenge page",
+    "spider parsing exceptions",
+    "empty JSON response"
+  ],
+  "external_detail_native_xml": "not captured: UiAutomator could not get idle state",
+  "old_setting_upgrade_runtime": "not verified; host migration test only"
+}

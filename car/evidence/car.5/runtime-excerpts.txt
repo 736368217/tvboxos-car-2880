@@ -1,0 +1,407 @@
+
+[py-fixed]
+10-15 12:37:41.572  4480  4718 I python.stdout: CAR5_PY_RUNTIME version=3.8.13 dependencies=8 network=OK
+
+[py-detail]
+10-15 12:37:41.572  4480  4718 I python.stdout: CAR5_PY_RUNTIME version=3.8.13 dependencies=8 network=OK
+10-15 12:46:13.259  4480  5106 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:46:13.618  4480  5115 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:46:13.618  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:46:13.868  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:46:13.925  4480  5115 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+
+[natural-play]
+10-15 12:46:13.259  4480  5106 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:46:13.618  4480  5115 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:46:13.618  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:46:13.868  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:46:13.925  4480  5115 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:46:17.775  4480  5115 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+10-15 12:54:01.918  4480  6580 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:54:02.179  4480  6583 I GlEnhance: preset applied id=2 name=自然 sat=1.08 con=1.04 bri=0.01 rgb=1.0,1.0,1.0
+10-15 12:54:02.191  4480  6583 I GlEnhance: preset applied id=2 name=自然 sat=1.08 con=1.04 bri=0.01 rgb=1.0,1.0,1.0
+10-15 12:54:02.235  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:54:02.302  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:54:06.292  4480  6583 I GlEnhance: drawFrame #100 preset=2:自然 sat=1.08 con=1.04 bri=0.01 viewport=1057x594
+
+[preset-0]
+10-15 12:57:25.610  4480 11368 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:57:25.714  4480 11371 I GlEnhance: preset applied id=6 name=明亮 sat=1.12 con=1.02 bri=0.08 rgb=1.0,1.0,1.0
+10-15 12:57:25.714  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:57:25.843  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:57:25.866  4480 11371 I GlEnhance: preset applied id=6 name=明亮 sat=1.12 con=1.02 bri=0.08 rgb=1.0,1.0,1.0
+10-15 12:57:29.751  4480 11371 I GlEnhance: drawFrame #100 preset=6:明亮 sat=1.12 con=1.02 bri=0.08 viewport=1057x594
+10-15 12:58:01.855  4480 12440 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:58:01.965  4480 12443 I GlEnhance: preset applied id=7 name=暖色 sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92
+10-15 12:58:01.980  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:58:02.290  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:58:02.304  4480 12443 I GlEnhance: preset applied id=7 name=暖色 sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92
+10-15 12:58:06.234  4480 12443 I GlEnhance: drawFrame #100 preset=7:暖色 sat=1.06 con=1.04 bri=0.02 viewport=1057x594
+10-15 12:58:48.444  4480 13927 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+
+[preset-1]
+10-15 12:58:01.855  4480 12440 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:58:01.965  4480 12443 I GlEnhance: preset applied id=7 name=暖色 sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92
+10-15 12:58:01.980  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:58:02.290  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:58:02.304  4480 12443 I GlEnhance: preset applied id=7 name=暖色 sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92
+10-15 12:58:06.234  4480 12443 I GlEnhance: drawFrame #100 preset=7:暖色 sat=1.06 con=1.04 bri=0.02 viewport=1057x594
+10-15 12:58:48.444  4480 13927 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:59:27.387  4480 15233 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:59:27.468  4480 15236 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:59:27.469  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:59:27.757  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:59:27.763  4480 15236 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:59:31.704  4480 15236 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+
+[preset-3]
+10-15 12:54:01.918  4480  6580 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:54:02.179  4480  6583 I GlEnhance: preset applied id=2 name=自然 sat=1.08 con=1.04 bri=0.01 rgb=1.0,1.0,1.0
+10-15 12:54:02.191  4480  6583 I GlEnhance: preset applied id=2 name=自然 sat=1.08 con=1.04 bri=0.01 rgb=1.0,1.0,1.0
+10-15 12:54:02.235  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:54:02.302  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:54:06.292  4480  6583 I GlEnhance: drawFrame #100 preset=2:自然 sat=1.08 con=1.04 bri=0.01 viewport=1057x594
+10-15 12:54:41.596  4480  7925 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:54:41.700  4480  7928 I GlEnhance: preset applied id=3 name=影院 sat=1.08 con=1.16 bri=-0.015 rgb=1.03,1.0,0.97
+10-15 12:54:41.719  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:54:42.026  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:54:42.057  4480  7928 I GlEnhance: preset applied id=3 name=影院 sat=1.08 con=1.16 bri=-0.015 rgb=1.03,1.0,0.97
+10-15 12:54:45.954  4480  7928 I GlEnhance: drawFrame #100 preset=3:影院 sat=1.08 con=1.16 bri=-0.015 viewport=1057x594
+
+[preset-4]
+10-15 12:54:01.918  4480  6580 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:54:02.179  4480  6583 I GlEnhance: preset applied id=2 name=自然 sat=1.08 con=1.04 bri=0.01 rgb=1.0,1.0,1.0
+10-15 12:54:02.191  4480  6583 I GlEnhance: preset applied id=2 name=自然 sat=1.08 con=1.04 bri=0.01 rgb=1.0,1.0,1.0
+10-15 12:54:02.235  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:54:02.302  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:54:06.292  4480  6583 I GlEnhance: drawFrame #100 preset=2:自然 sat=1.08 con=1.04 bri=0.01 viewport=1057x594
+10-15 12:54:41.596  4480  7925 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:54:41.700  4480  7928 I GlEnhance: preset applied id=3 name=影院 sat=1.08 con=1.16 bri=-0.015 rgb=1.03,1.0,0.97
+10-15 12:54:41.719  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:54:42.026  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:54:42.057  4480  7928 I GlEnhance: preset applied id=3 name=影院 sat=1.08 con=1.16 bri=-0.015 rgb=1.03,1.0,0.97
+10-15 12:54:45.954  4480  7928 I GlEnhance: drawFrame #100 preset=3:影院 sat=1.08 con=1.16 bri=-0.015 viewport=1057x594
+10-15 12:55:21.548  4480  9014 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:55:21.667  4480  9017 I GlEnhance: preset applied id=4 name=鲜艳 sat=1.5 con=1.16 bri=0.015 rgb=1.0,1.0,1.0
+10-15 12:55:21.684  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:55:21.806  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:55:21.825  4480  9017 I GlEnhance: preset applied id=4 name=鲜艳 sat=1.5 con=1.16 bri=0.015 rgb=1.0,1.0,1.0
+10-15 12:55:25.726  4480  9017 I GlEnhance: drawFrame #100 preset=4:鲜艳 sat=1.5 con=1.16 bri=0.015 viewport=1057x594
+
+[preset-5]
+10-15 12:54:41.596  4480  7925 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:54:41.700  4480  7928 I GlEnhance: preset applied id=3 name=影院 sat=1.08 con=1.16 bri=-0.015 rgb=1.03,1.0,0.97
+10-15 12:54:41.719  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:54:42.026  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:54:42.057  4480  7928 I GlEnhance: preset applied id=3 name=影院 sat=1.08 con=1.16 bri=-0.015 rgb=1.03,1.0,0.97
+10-15 12:54:45.954  4480  7928 I GlEnhance: drawFrame #100 preset=3:影院 sat=1.08 con=1.16 bri=-0.015 viewport=1057x594
+10-15 12:55:21.548  4480  9014 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:55:21.667  4480  9017 I GlEnhance: preset applied id=4 name=鲜艳 sat=1.5 con=1.16 bri=0.015 rgb=1.0,1.0,1.0
+10-15 12:55:21.684  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:55:21.806  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:55:21.825  4480  9017 I GlEnhance: preset applied id=4 name=鲜艳 sat=1.5 con=1.16 bri=0.015 rgb=1.0,1.0,1.0
+10-15 12:55:25.726  4480  9017 I GlEnhance: drawFrame #100 preset=4:鲜艳 sat=1.5 con=1.16 bri=0.015 viewport=1057x594
+10-15 12:56:06.944  4480 10648 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:56:07.069  4480 10651 I GlEnhance: preset applied id=5 name=柔和 sat=0.9 con=0.94 bri=0.02 rgb=1.015,1.0,0.985
+10-15 12:56:07.081  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:56:07.218  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:56:07.254  4480 10651 I GlEnhance: preset applied id=5 name=柔和 sat=0.9 con=0.94 bri=0.02 rgb=1.015,1.0,0.985
+10-15 12:56:11.104  4480 10651 I GlEnhance: drawFrame #100 preset=5:柔和 sat=0.9 con=0.94 bri=0.02 viewport=1057x594
+
+[preset-6]
+10-15 12:55:21.548  4480  9014 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:55:21.667  4480  9017 I GlEnhance: preset applied id=4 name=鲜艳 sat=1.5 con=1.16 bri=0.015 rgb=1.0,1.0,1.0
+10-15 12:55:21.684  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:55:21.806  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:55:21.825  4480  9017 I GlEnhance: preset applied id=4 name=鲜艳 sat=1.5 con=1.16 bri=0.015 rgb=1.0,1.0,1.0
+10-15 12:55:25.726  4480  9017 I GlEnhance: drawFrame #100 preset=4:鲜艳 sat=1.5 con=1.16 bri=0.015 viewport=1057x594
+10-15 12:56:06.944  4480 10648 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:56:07.069  4480 10651 I GlEnhance: preset applied id=5 name=柔和 sat=0.9 con=0.94 bri=0.02 rgb=1.015,1.0,0.985
+10-15 12:56:07.081  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:56:07.218  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:56:07.254  4480 10651 I GlEnhance: preset applied id=5 name=柔和 sat=0.9 con=0.94 bri=0.02 rgb=1.015,1.0,0.985
+10-15 12:56:11.104  4480 10651 I GlEnhance: drawFrame #100 preset=5:柔和 sat=0.9 con=0.94 bri=0.02 viewport=1057x594
+10-15 12:57:25.610  4480 11368 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:57:25.714  4480 11371 I GlEnhance: preset applied id=6 name=明亮 sat=1.12 con=1.02 bri=0.08 rgb=1.0,1.0,1.0
+10-15 12:57:25.714  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:57:25.843  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:57:25.866  4480 11371 I GlEnhance: preset applied id=6 name=明亮 sat=1.12 con=1.02 bri=0.08 rgb=1.0,1.0,1.0
+10-15 12:57:29.751  4480 11371 I GlEnhance: drawFrame #100 preset=6:明亮 sat=1.12 con=1.02 bri=0.08 viewport=1057x594
+
+[preset-7]
+10-15 12:56:06.944  4480 10648 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:56:07.069  4480 10651 I GlEnhance: preset applied id=5 name=柔和 sat=0.9 con=0.94 bri=0.02 rgb=1.015,1.0,0.985
+10-15 12:56:07.081  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:56:07.218  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:56:07.254  4480 10651 I GlEnhance: preset applied id=5 name=柔和 sat=0.9 con=0.94 bri=0.02 rgb=1.015,1.0,0.985
+10-15 12:56:11.104  4480 10651 I GlEnhance: drawFrame #100 preset=5:柔和 sat=0.9 con=0.94 bri=0.02 viewport=1057x594
+10-15 12:57:25.610  4480 11368 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:57:25.714  4480 11371 I GlEnhance: preset applied id=6 name=明亮 sat=1.12 con=1.02 bri=0.08 rgb=1.0,1.0,1.0
+10-15 12:57:25.714  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:57:25.843  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:57:25.866  4480 11371 I GlEnhance: preset applied id=6 name=明亮 sat=1.12 con=1.02 bri=0.08 rgb=1.0,1.0,1.0
+10-15 12:57:29.751  4480 11371 I GlEnhance: drawFrame #100 preset=6:明亮 sat=1.12 con=1.02 bri=0.08 viewport=1057x594
+10-15 12:58:01.855  4480 12440 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:58:01.965  4480 12443 I GlEnhance: preset applied id=7 name=暖色 sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92
+10-15 12:58:01.980  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:58:02.290  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:58:02.304  4480 12443 I GlEnhance: preset applied id=7 name=暖色 sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92
+10-15 12:58:06.234  4480 12443 I GlEnhance: drawFrame #100 preset=7:暖色 sat=1.06 con=1.04 bri=0.02 viewport=1057x594
+
+[js-detail]
+10-15 12:58:01.855  4480 12440 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:58:01.965  4480 12443 I GlEnhance: preset applied id=7 name=暖色 sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92
+10-15 12:58:01.980  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:58:02.290  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:58:02.304  4480 12443 I GlEnhance: preset applied id=7 name=暖色 sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92
+10-15 12:58:06.234  4480 12443 I GlEnhance: drawFrame #100 preset=7:暖色 sat=1.06 con=1.04 bri=0.02 viewport=1057x594
+10-15 12:58:48.444  4480 13927 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:59:27.387  4480 15233 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:59:27.468  4480 15236 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:59:27.469  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:59:27.757  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:59:27.763  4480 15236 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:59:31.704  4480 15236 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+10-15 13:00:16.066 16125 16260 I python.stdout: CAR5_PY_RUNTIME version=3.8.13 dependencies=8 network=OK
+10-15 13:01:31.813 16125 16425 I JSLoader: echo-getSpider cached car5_js
+10-15 13:01:31.814 16125 16426 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:18.902 16125 16501 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.756 16125 16565 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.831 16125 16568 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.993 16125 16575 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:02:38.009 16125 16125 I GlEnhance: player surface bound (main thread)
+10-15 13:02:38.194 16125 16125 I GlEnhance: setVideoSize 640x360
+10-15 13:02:38.236 16125 16575 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:02:42.126 16125 16575 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+
+[original-home]
+10-15 12:58:48.444  4480 13927 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:59:27.387  4480 15233 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:59:27.468  4480 15236 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:59:27.469  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:59:27.757  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:59:27.763  4480 15236 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:59:31.704  4480 15236 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+10-15 13:00:16.066 16125 16260 I python.stdout: CAR5_PY_RUNTIME version=3.8.13 dependencies=8 network=OK
+10-15 13:01:31.813 16125 16425 I JSLoader: echo-getSpider cached car5_js
+10-15 13:01:31.814 16125 16426 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:18.902 16125 16501 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.756 16125 16565 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.831 16125 16568 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.993 16125 16575 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:02:38.009 16125 16125 I GlEnhance: player surface bound (main thread)
+10-15 13:02:38.194 16125 16125 I GlEnhance: setVideoSize 640x360
+10-15 13:02:38.236 16125 16575 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:02:42.126 16125 16575 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+10-15 13:04:52.552 16125 18473 I JarLoader: echo-load Init.init success
+10-15 13:04:52.552 16125 18473 I JarLoader: load success key=main, file=/data/user/0/com.github.tvbox.osc.jun/files/csp/1b083ab4277cd89f8b9f081c112edbea.jar
+10-15 13:04:52.616 16125 16242 I JarLoader: getSpider success key=main本地
+10-15 13:04:52.616 16125 18496 I JarLoader: getSpider success key=main豆瓣
+10-15 13:04:52.616 16125 16242 I JarLoader: getSpider success key=main热播影视
+10-15 13:04:52.617 16125 16242 I JarLoader: getSpider success key=main一起影视
+10-15 13:04:52.618 16125 16242 I JarLoader: getSpider success key=main咕噜
+10-15 13:04:52.619 16125 16242 I JarLoader: getSpider success key=main布布
+10-15 13:04:52.620 16125 16242 I JarLoader: getSpider success key=main马猴影视
+10-15 13:04:52.623 16125 16242 I JarLoader: getSpider success key=main韩圈
+10-15 13:04:52.760 16125 16242 I JarLoader: getSpider success key=main哔哩视频
+10-15 13:04:52.761 16125 16242 I JarLoader: getSpider success key=main三六零
+10-15 13:04:53.631 16125 16242 I JarLoader: getSpider success key=main玩偶
+
+[original-search-final]
+10-15 12:59:27.387  4480 15233 I python.stdout: CAR5_PY_PLAY url=http://127.0.0.1:9978/file/TVBoxCar5/lowsat.mp4
+10-15 12:59:27.468  4480 15236 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:59:27.469  4480  4480 I GlEnhance: player surface bound (main thread)
+10-15 12:59:27.757  4480  4480 I GlEnhance: setVideoSize 640x360
+10-15 12:59:27.763  4480 15236 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 12:59:31.704  4480 15236 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+10-15 13:00:16.066 16125 16260 I python.stdout: CAR5_PY_RUNTIME version=3.8.13 dependencies=8 network=OK
+10-15 13:01:31.813 16125 16425 I JSLoader: echo-getSpider cached car5_js
+10-15 13:01:31.814 16125 16426 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:18.902 16125 16501 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.756 16125 16565 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.831 16125 16568 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.993 16125 16575 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:02:38.009 16125 16125 I GlEnhance: player surface bound (main thread)
+10-15 13:02:38.194 16125 16125 I GlEnhance: setVideoSize 640x360
+10-15 13:02:38.236 16125 16575 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:02:42.126 16125 16575 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+10-15 13:04:52.552 16125 18473 I JarLoader: echo-load Init.init success
+10-15 13:04:52.552 16125 18473 I JarLoader: load success key=main, file=/data/user/0/com.github.tvbox.osc.jun/files/csp/1b083ab4277cd89f8b9f081c112edbea.jar
+10-15 13:04:52.616 16125 16242 I JarLoader: getSpider success key=main本地
+10-15 13:04:52.616 16125 18496 I JarLoader: getSpider success key=main豆瓣
+10-15 13:04:52.616 16125 16242 I JarLoader: getSpider success key=main热播影视
+10-15 13:04:52.617 16125 16242 I JarLoader: getSpider success key=main一起影视
+10-15 13:04:52.618 16125 16242 I JarLoader: getSpider success key=main咕噜
+10-15 13:04:52.619 16125 16242 I JarLoader: getSpider success key=main布布
+10-15 13:04:52.620 16125 16242 I JarLoader: getSpider success key=main马猴影视
+10-15 13:04:52.623 16125 16242 I JarLoader: getSpider success key=main韩圈
+10-15 13:04:52.760 16125 16242 I JarLoader: getSpider success key=main哔哩视频
+10-15 13:04:52.761 16125 16242 I JarLoader: getSpider success key=main三六零
+10-15 13:04:53.631 16125 16242 I JarLoader: getSpider success key=main玩偶
+10-15 13:06:08.050 16125 18700 I JarLoader: getSpider success key=main剧圈99
+10-15 13:06:08.233 16125 18700 I JarLoader: getSpider success key=main天堂
+10-15 13:06:08.471 16125 18704 I JarLoader: getSpider success key=main蓝鹰
+10-15 13:06:08.532 16125 18700 I JarLoader: getSpider success key=main橘汁
+10-15 13:06:08.564 16125 18715 I JarLoader: getSpider success key=main苹果
+10-15 13:06:08.621 16125 18762 I JarLoader: getSpider success key=main魔方
+10-15 13:06:08.631 16125 18715 I JarLoader: getSpider success key=main王子
+10-15 13:06:08.671 16125 18702 I JarLoader: getSpider success key=main半日99
+10-15 13:06:08.750 16125 18704 I JarLoader: getSpider success key=main蓝鸟
+10-15 13:06:08.838 16125 18703 I JarLoader: getSpider success key=main华谊
+10-15 13:06:08.866 16125 18700 I JarLoader: getSpider success key=main哔哩合集
+10-15 13:06:08.898 16125 18705 I JarLoader: getSpider success key=main茉莉
+10-15 13:06:09.317 16125 18704 I JarLoader: getSpider success key=main快映
+10-15 13:06:09.491 16125 18700 I JarLoader: getSpider success key=main木偶
+10-15 13:06:09.901 16125 18854 I JarLoader: getSpider success key=main爱盼
+10-15 13:06:09.901 16125 18853 I JarLoader: getSpider success key=main指南
+10-15 13:06:09.902 16125 18856 I JarLoader: getSpider success key=main人人
+10-15 13:06:09.904 16125 18857 I JarLoader: getSpider success key=main即刻
+10-15 13:06:09.905 16125 18855 I JarLoader: getSpider success key=main移动
+10-15 13:06:09.908 16125 18715 I JarLoader: getSpider success key=main虎斑
+10-15 13:06:10.107 16125 18715 I JarLoader: getSpider success key=main卡卡
+10-15 13:06:10.299 16125 18855 I JarLoader: getSpider success key=main七猫短剧
+10-15 13:06:10.364 16125 18702 I JarLoader: getSpider success key=main八零
+10-15 13:06:10.409 16125 18879 I JarLoader: getSpider success key=main双星
+10-15 13:06:10.447 16125 18879 I JarLoader: getSpider success key=main河马短剧
+10-15 13:06:10.508 16125 18855 I JarLoader: getSpider success key=main围观短剧
+10-15 13:06:10.522 16125 18704 I JarLoader: getSpider success key=main蜡笔
+10-15 13:06:10.569 16125 18879 I JarLoader: getSpider success key=main好看短剧
+10-15 13:06:10.587 16125 18854 I JarLoader: getSpider success key=main星芽短剧
+10-15 13:06:10.673 16125 18879 I JarLoader: getSpider success key=main果果短剧
+10-15 13:06:10.858 16125 18855 I JarLoader: getSpider success key=main飞娱影视
+10-15 13:06:10.977 16125 18705 I JarLoader: getSpider success key=main多多
+10-15 13:06:11.080 16125 18702 I JarLoader: getSpider success key=main旺旺影视
+10-15 13:06:11.099 16125 18853 I JarLoader: getSpider success key=main独播影视
+10-15 13:06:11.229 16125 18762 I JarLoader: getSpider success key=main花卷
+10-15 13:06:11.466 16125 18704 I JarLoader: getSpider success key=main爱看机器人
+10-15 13:06:11.468 16125 18702 I JarLoader: getSpider success key=main金牌影视
+10-15 13:06:11.683 16125 18705 I JarLoader: getSpider success key=main面包影视
+10-15 13:06:11.711 16125 18855 I JarLoader: getSpider success key=main厂长影视
+10-15 13:06:11.906 16125 18857 I JarLoader: getSpider success key=main1905
+10-15 13:06:11.906 16125 19022 I JarLoader: getSpider success key=main咕咕动漫
+10-15 13:06:11.908 16125 19020 I JarLoader: getSpider success key=main番社动漫
+10-15 13:06:11.908 16125 19023 I JarLoader: getSpider success key=main巴士动漫
+10-15 13:06:11.937 16125 18700 I JarLoader: getSpider success key=main种子
+10-15 13:06:11.987 16125 18703 I JarLoader: getSpider success key=main闪电
+10-15 13:06:11.989 16125 18703 I JarLoader: getSpider success key=mainNew6v
+10-15 13:06:12.008 16125 18853 I JarLoader: getSpider success key=main美剧迷
+10-15 13:06:12.014 16125 18857 I JarLoader: getSpider success key=main迅雷吧
+10-15 13:06:12.050 16125 19021 I JarLoader: getSpider success key=main双星99
+10-15 13:06:12.094 16125 18715 I JarLoader: getSpider success key=main瓜子影视
+10-15 13:06:12.188 16125 19062 I JarLoader: getSpider success key=main觅盘
+10-15 13:06:12.272 16125 19062 I JarLoader: getSpider success key=main盘搜
+10-15 13:06:12.284 16125 18855 I JarLoader: getSpider success key=main百酷
+10-15 13:06:12.298 16125 18762 I JarLoader: getSpider success key=main酷乐
+10-15 13:06:12.308 16125 18854 I JarLoader: getSpider success key=main骚火影视
+10-15 13:06:12.515 16125 19021 I JarLoader: getSpider success key=main鬼鬼
+10-15 13:06:12.629 16125 18702 I JarLoader: getSpider success key=main趣盘
+10-15 13:06:12.665 16125 18704 I JarLoader: getSpider success key=main呦呦DJ
+10-15 13:06:12.720 16125 18855 I JarLoader: getSpider success key=main听友听书
+10-15 13:06:12.733 16125 18762 I JarLoader: getSpider success key=main堇夏听书
+10-15 13:06:12.745 16125 19024 I JarLoader: getSpider success key=main荐片
+10-15 13:06:12.748 16125 18703 I JarLoader: getSpider success key=main博看听书
+10-15 13:06:12.805 16125 18715 I JarLoader: getSpider success key=main童趣
+10-15 13:06:12.901 16125 18704 I JarLoader: getSpider success key=main兔小贝
+10-15 13:06:12.914 16125 18703 I JarLoader: getSpider success key=main贝乐虎
+10-15 13:06:13.285 16125 18856 I JarLoader: getSpider success key=main枫叶影视
+10-15 13:06:33.742 16125 18702 I JarLoader: getSpider success key=main世界听书
+
+[final-app]
+10-15 13:00:16.066 16125 16260 I python.stdout: CAR5_PY_RUNTIME version=3.8.13 dependencies=8 network=OK
+10-15 13:01:31.813 16125 16425 I JSLoader: echo-getSpider cached car5_js
+10-15 13:01:31.814 16125 16426 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:18.902 16125 16501 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.756 16125 16565 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.831 16125 16568 I JSLoader: echo-getSpider cached car5_js
+10-15 13:02:37.993 16125 16575 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:02:38.009 16125 16125 I GlEnhance: player surface bound (main thread)
+10-15 13:02:38.194 16125 16125 I GlEnhance: setVideoSize 640x360
+10-15 13:02:38.236 16125 16575 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:02:42.126 16125 16575 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x594
+10-15 13:04:52.552 16125 18473 I JarLoader: echo-load Init.init success
+10-15 13:04:52.552 16125 18473 I JarLoader: load success key=main, file=/data/user/0/com.github.tvbox.osc.jun/files/csp/1b083ab4277cd89f8b9f081c112edbea.jar
+10-15 13:04:52.616 16125 16242 I JarLoader: getSpider success key=main本地
+10-15 13:04:52.616 16125 18496 I JarLoader: getSpider success key=main豆瓣
+10-15 13:04:52.616 16125 16242 I JarLoader: getSpider success key=main热播影视
+10-15 13:04:52.617 16125 16242 I JarLoader: getSpider success key=main一起影视
+10-15 13:04:52.618 16125 16242 I JarLoader: getSpider success key=main咕噜
+10-15 13:04:52.619 16125 16242 I JarLoader: getSpider success key=main布布
+10-15 13:04:52.620 16125 16242 I JarLoader: getSpider success key=main马猴影视
+10-15 13:04:52.623 16125 16242 I JarLoader: getSpider success key=main韩圈
+10-15 13:04:52.760 16125 16242 I JarLoader: getSpider success key=main哔哩视频
+10-15 13:04:52.761 16125 16242 I JarLoader: getSpider success key=main三六零
+10-15 13:04:53.631 16125 16242 I JarLoader: getSpider success key=main玩偶
+10-15 13:06:08.050 16125 18700 I JarLoader: getSpider success key=main剧圈99
+10-15 13:06:08.233 16125 18700 I JarLoader: getSpider success key=main天堂
+10-15 13:06:08.471 16125 18704 I JarLoader: getSpider success key=main蓝鹰
+10-15 13:06:08.532 16125 18700 I JarLoader: getSpider success key=main橘汁
+10-15 13:06:08.564 16125 18715 I JarLoader: getSpider success key=main苹果
+10-15 13:06:08.621 16125 18762 I JarLoader: getSpider success key=main魔方
+10-15 13:06:08.631 16125 18715 I JarLoader: getSpider success key=main王子
+10-15 13:06:08.671 16125 18702 I JarLoader: getSpider success key=main半日99
+10-15 13:06:08.750 16125 18704 I JarLoader: getSpider success key=main蓝鸟
+10-15 13:06:08.838 16125 18703 I JarLoader: getSpider success key=main华谊
+10-15 13:06:08.866 16125 18700 I JarLoader: getSpider success key=main哔哩合集
+10-15 13:06:08.898 16125 18705 I JarLoader: getSpider success key=main茉莉
+10-15 13:06:09.317 16125 18704 I JarLoader: getSpider success key=main快映
+10-15 13:06:09.491 16125 18700 I JarLoader: getSpider success key=main木偶
+10-15 13:06:09.901 16125 18854 I JarLoader: getSpider success key=main爱盼
+10-15 13:06:09.901 16125 18853 I JarLoader: getSpider success key=main指南
+10-15 13:06:09.902 16125 18856 I JarLoader: getSpider success key=main人人
+10-15 13:06:09.904 16125 18857 I JarLoader: getSpider success key=main即刻
+10-15 13:06:09.905 16125 18855 I JarLoader: getSpider success key=main移动
+10-15 13:06:09.908 16125 18715 I JarLoader: getSpider success key=main虎斑
+10-15 13:06:10.107 16125 18715 I JarLoader: getSpider success key=main卡卡
+10-15 13:06:10.299 16125 18855 I JarLoader: getSpider success key=main七猫短剧
+10-15 13:06:10.364 16125 18702 I JarLoader: getSpider success key=main八零
+10-15 13:06:10.409 16125 18879 I JarLoader: getSpider success key=main双星
+10-15 13:06:10.447 16125 18879 I JarLoader: getSpider success key=main河马短剧
+10-15 13:06:10.508 16125 18855 I JarLoader: getSpider success key=main围观短剧
+10-15 13:06:10.522 16125 18704 I JarLoader: getSpider success key=main蜡笔
+10-15 13:06:10.569 16125 18879 I JarLoader: getSpider success key=main好看短剧
+10-15 13:06:10.587 16125 18854 I JarLoader: getSpider success key=main星芽短剧
+10-15 13:06:10.673 16125 18879 I JarLoader: getSpider success key=main果果短剧
+10-15 13:06:10.858 16125 18855 I JarLoader: getSpider success key=main飞娱影视
+10-15 13:06:10.977 16125 18705 I JarLoader: getSpider success key=main多多
+10-15 13:06:11.080 16125 18702 I JarLoader: getSpider success key=main旺旺影视
+10-15 13:06:11.099 16125 18853 I JarLoader: getSpider success key=main独播影视
+10-15 13:06:11.229 16125 18762 I JarLoader: getSpider success key=main花卷
+10-15 13:06:11.466 16125 18704 I JarLoader: getSpider success key=main爱看机器人
+10-15 13:06:11.468 16125 18702 I JarLoader: getSpider success key=main金牌影视
+10-15 13:06:11.683 16125 18705 I JarLoader: getSpider success key=main面包影视
+10-15 13:06:11.711 16125 18855 I JarLoader: getSpider success key=main厂长影视
+10-15 13:06:11.906 16125 18857 I JarLoader: getSpider success key=main1905
+10-15 13:06:11.906 16125 19022 I JarLoader: getSpider success key=main咕咕动漫
+10-15 13:06:11.908 16125 19020 I JarLoader: getSpider success key=main番社动漫
+10-15 13:06:11.908 16125 19023 I JarLoader: getSpider success key=main巴士动漫
+10-15 13:06:11.937 16125 18700 I JarLoader: getSpider success key=main种子
+10-15 13:06:11.987 16125 18703 I JarLoader: getSpider success key=main闪电
+10-15 13:06:11.989 16125 18703 I JarLoader: getSpider success key=mainNew6v
+10-15 13:06:12.008 16125 18853 I JarLoader: getSpider success key=main美剧迷
+10-15 13:06:12.014 16125 18857 I JarLoader: getSpider success key=main迅雷吧
+10-15 13:06:12.050 16125 19021 I JarLoader: getSpider success key=main双星99
+10-15 13:06:12.094 16125 18715 I JarLoader: getSpider success key=main瓜子影视
+10-15 13:06:12.188 16125 19062 I JarLoader: getSpider success key=main觅盘
+10-15 13:06:12.272 16125 19062 I JarLoader: getSpider success key=main盘搜
+10-15 13:06:12.284 16125 18855 I JarLoader: getSpider success key=main百酷
+10-15 13:06:12.298 16125 18762 I JarLoader: getSpider success key=main酷乐
+10-15 13:06:12.308 16125 18854 I JarLoader: getSpider success key=main骚火影视
+10-15 13:06:12.515 16125 19021 I JarLoader: getSpider success key=main鬼鬼
+10-15 13:06:12.629 16125 18702 I JarLoader: getSpider success key=main趣盘
+10-15 13:06:12.665 16125 18704 I JarLoader: getSpider success key=main呦呦DJ
+10-15 13:06:12.720 16125 18855 I JarLoader: getSpider success key=main听友听书
+10-15 13:06:12.733 16125 18762 I JarLoader: getSpider success key=main堇夏听书
+10-15 13:06:12.745 16125 19024 I JarLoader: getSpider success key=main荐片
+10-15 13:06:12.748 16125 18703 I JarLoader: getSpider success key=main博看听书
+10-15 13:06:12.805 16125 18715 I JarLoader: getSpider success key=main童趣
+10-15 13:06:12.901 16125 18704 I JarLoader: getSpider success key=main兔小贝
+10-15 13:06:12.914 16125 18703 I JarLoader: getSpider success key=main贝乐虎
+10-15 13:06:13.285 16125 18856 I JarLoader: getSpider success key=main枫叶影视
+10-15 13:06:33.742 16125 18702 I JarLoader: getSpider success key=main世界听书
+10-15 13:10:13.155 16125 19349 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:10:13.156 16125 16125 I GlEnhance: player surface bound (main thread)
+10-15 13:10:13.449 16125 16125 I GlEnhance: setVideoSize 960x400
+10-15 13:10:13.471 16125 19349 I GlEnhance: preset applied id=1 name=臻彩 sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0
+10-15 13:10:17.392 16125 19349 I GlEnhance: drawFrame #100 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x440
+10-15 13:10:54.176 16125 19349 I GlEnhance: drawFrame #1000 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x440
+10-15 13:17:00.529 16125 19349 I GlEnhance: drawFrame #10000 preset=1:臻彩 sat=1.35 con=1.12 bri=0.03 viewport=1057x440

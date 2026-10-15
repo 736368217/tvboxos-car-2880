@@ -70,6 +70,7 @@ import java.util.List;
 import okhttp3.HttpUrl;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
+import xyz.doikki.videoplayer.render.VideoEnhancePreset;
 /**
  * @author pj567
  * @date :2020/12/23
@@ -174,7 +175,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvCarAudio = findViewById(R.id.tvCarAudio);
         tvCarAudio.setText(AudioEffectController.name(CarEnhance.audioMode()));
         tvCarVideoEnhance = findViewById(R.id.tvCarVideoEnhance);
-        tvCarVideoEnhance.setText(CarEnhance.videoEnhanceEnabled() ? "开启" : "关闭");
+        tvCarVideoEnhance.setText(VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
         tvSearchView.setText(getSearchView(Hawk.get(HawkConfig.SEARCH_VIEW, 0)));
         tvHomeApi.setText(ApiConfig.get().getHomeSourceBean().getName());
         tvScale.setText(PlayerHelper.getScaleName(Hawk.get(HawkConfig.PLAY_SCALE, 0)));
@@ -865,15 +866,32 @@ public class ModelSettingFragment extends BaseLazyFragment {
             }
         });
 
-        // Car edition: 臻彩 — GPU colour grading; takes effect on the next playback (HDR is skipped).
         findViewById(R.id.llCarVideoEnhance).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                boolean enable = !CarEnhance.videoEnhanceEnabled();
-                CarEnhance.setVideoEnhanceEnabled(enable);
-                tvCarVideoEnhance.setText(enable ? "开启" : "关闭");
-                CarEnhance.toast(getContext(), enable ? "画质增强：臻彩（下次播放生效）" : "画质增强：关闭");
+                SelectDialog<String> dialog = new SelectDialog<>(mActivity, R.layout.dialog_video_presets);
+                dialog.setTip("画面预设 · 下次播放生效");
+                dialog.findViewById(R.id.btnVideoPresetCancel).setOnClickListener(button -> dialog.dismiss());
+                List<String> options = new ArrayList<>();
+                for (VideoEnhancePreset preset : VideoEnhancePreset.all()) {
+                    options.add(preset.name + " · " + preset.description);
+                }
+                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
+                    @Override
+                    public void click(String value, int pos) {
+                        CarEnhance.setVideoMode(pos);
+                        tvCarVideoEnhance.setText(VideoEnhancePreset.forMode(pos).name);
+                        dialog.dismiss();
+                        CarEnhance.toast(getContext(), "画面预设：" + VideoEnhancePreset.forMode(pos).name + "（下次播放生效）");
+                    }
+
+                    @Override
+                    public String getDisplay(String value) {
+                        return value;
+                    }
+                }, SelectDialogAdapter.stringDiff, options, CarEnhance.videoMode());
+                dialog.show();
             }
         });
 

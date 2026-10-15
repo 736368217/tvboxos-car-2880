@@ -1,0 +1,8 @@
+       89    5    4480  10057  com.github.tvbox.osc.jun
+             61    yes    4480/  10057      89      14 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 0003E040  11328   11328 A         0        0      false        false   unavail
+    4 effects for session 89
+		- name: Equalizer
+		- name: Dynamic Bass Boost
+		- name: Loudness Enhancer
+		- name: Virtualizer
+   10-15 12:58:02.295 AT::add       (0x7ad3c0e1d960)          61     no    4480/  10057      89      14 A  0x000 00000001 00000001  44100  3   1  0  -inf     0     0     0         -inf       true 00000000  11328   11328 f         0        0      false        false       new
