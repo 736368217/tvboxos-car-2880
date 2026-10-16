@@ -1,235 +1,297 @@
 package com.github.tvbox.osc.car;
 
 import android.app.Activity;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
+import android.app.Application;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.TypedValue;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.ComponentActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.viewpager.widget.ViewPager;
 
 import com.github.tvbox.osc.base.BaseActivity;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.orhanobut.hawk.Hawk;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 
-/**
- * Car head-unit in-app floating Back button.
- *
- * <p>Head units cannot authorize an accessibility service, so there is no global Back key.
- * This button is a plain View inside the current Activity window: no system overlay, no
- * accessibility, no permission and no ADB. It is attached by {@link BaseActivity} on every
- * page, wakes on any touch, hides after a few idle seconds so it never blocks content, and
- * one tap goes up one level inside the app. The home root only shows a hint and never exits
- * the app by itself.</p>
- */
+/** Ordinary Activity-decor children; no overlay window, service or permission is involved. */
 public final class InAppBackButton {
-    private static final Handler MAIN = new Handler(Looper.getMainLooper());
-    private static final List<Entry> ENTRIES = new ArrayList<Entry>();
+    private static final String HOST_TAG = "tvbox.car.back.host";
+    private static final int ATTACH = 0, WAKE = 1, RELEASE = 2, REFRESH = 3;
+    private static WeakReference<Application> application = new WeakReference<>(null);
 
-    private InAppBackButton() {
+    /** Optional opt-out for splash or other noninteractive Activities. */
+    public interface IgnoreInAppBack { }
+
+    /** An Activity can close an in-window panel before the normal navigation chain. */
+    public interface BackInterceptor {
+        boolean onInterceptInAppBack();
     }
 
-    /** 0 means 常显 (always visible); otherwise the configured idle seconds. */
-    private static int idleMillis() {
-        int seconds = Hawk.get(HawkConfig.BACK_HIDE_SECONDS, 4);
-        if (seconds == 0) return 0;
-        if (seconds < 2 || seconds > 15) seconds = 4;
-        return seconds * 1000;
-    }
-
-    private static boolean enabled() {
-        return Hawk.get(HawkConfig.IN_APP_BACK, true);
-    }
-
-    /** Attach on every resumed page; safe to call repeatedly. */
-    public static void attach(final Activity activity) {
-        if (activity == null || activity.isFinishing() || activity.isDestroyed()) return;
-        if (!enabled()) return;
-        final View decor;
-        try {
-            decor = activity.getWindow().getDecorView();
-        } catch (Throwable error) {
-            return;
-        }
-        Entry existing = find(decor);
-        if (existing != null) {
-            existing.show();
-            return;
-        }
-        Entry entry = create(activity, decor);
-        if (entry == null) return;
-        synchronized (ENTRIES) {
-            ENTRIES.add(entry);
-        }
-        entry.show();
-    }
-
-    /** Show and restart the idle timer; called on any touch of the current page. */
-    public static void wake(Activity activity) {
-        if (activity == null) return;
-        Entry entry;
-        try {
-            entry = find(activity.getWindow().getDecorView());
-        } catch (Throwable error) {
-            return;
-        }
-        if (entry != null) entry.show();
-    }
-
-    /** Detach when the page is destroyed. */
-    public static void release(Activity activity) {
-        if (activity == null) return;
-        Entry entry;
-        try {
-            entry = find(activity.getWindow().getDecorView());
-        } catch (Throwable error) {
-            return;
-        }
-        if (entry == null) return;
-        synchronized (ENTRIES) {
-            ENTRIES.remove(entry);
-        }
-        MAIN.removeCallbacks(entry);
-        View parent = (View) entry.view.getParent();
-        if (parent instanceof android.view.ViewGroup) {
-            ((android.view.ViewGroup) parent).removeView(entry.view);
-        }
-    }
-
-    private static final class Entry implements Runnable, View.OnClickListener {
-        final WeakReference<Activity> activity;
-        final View decor;
-        final TextView view;
-
-        Entry(Activity owner, View decor, TextView view) {
-            this.activity = new WeakReference<Activity>(owner);
-            this.decor = decor;
-            this.view = view;
-        }
-
-        @Override
-        public void onClick(View ignored) {
-            hide();
-            Activity owner = activity.get();
-            if (owner == null || owner.isFinishing() || owner.isDestroyed()) return;
-            if (owner instanceof BaseActivity) {
-                BaseActivity base = (BaseActivity) owner;
-                try {
-                    if (base.onBackButtonStepUp()) return;
-                    if (base.onBackButtonAtRoot()) {
-                        Toast.makeText(owner, "已在首页", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                } catch (Throwable error) {
-                    // fall through to the normal back handling
+    private static final Application.ActivityLifecycleCallbacks LIFECYCLE =
+            new Application.ActivityLifecycleCallbacks() {
+                @Override public void onActivityCreated(Activity a, Bundle state) { attach(a); }
+                @Override public void onActivityResumed(Activity a) { attach(a); }
+                @Override public void onActivityPaused(Activity a) {
+                    InAppBackHostLayout host = find(a);
+                    if (host != null) host.pause();
                 }
+                @Override public void onActivityDestroyed(Activity a) { release(a); }
+                @Override public void onActivityStarted(Activity a) { }
+                @Override public void onActivityStopped(Activity a) { }
+                @Override public void onActivitySaveInstanceState(Activity a, Bundle state) { }
+            };
+
+    private InAppBackButton() { }
+
+    /** Idempotent; the first call also enables automatic mounting/cleanup for later Activities. */
+    public static void attach(Activity activity) { update(activity, ATTACH); }
+
+    /** Wake only: never synchronously move a hit box under the initiating page touch. */
+    public static void wake(Activity activity) { update(activity, WAKE); }
+
+    public static void release(Activity activity) { update(activity, RELEASE); }
+
+    /** Apply Hawk changes immediately, including size, mode, side, skin and root visibility. */
+    public static void refresh(Activity activity) { update(activity, REFRESH); }
+
+    private static void update(Activity activity, int operation) {
+        if (activity == null) return;
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            final WeakReference<Activity> owner = new WeakReference<>(activity);
+            new Handler(Looper.getMainLooper()).post(() -> update(owner.get(), operation));
+            return;
+        }
+        InAppBackHostLayout host = find(activity);
+        if (operation == RELEASE) {
+            if (host != null) {
+                host.dispose();
+                if (host.getParent() instanceof ViewGroup) ((ViewGroup) host.getParent()).removeView(host);
             }
-            try {
-                owner.onBackPressed();
-            } catch (Throwable error) {
-                try {
-                    owner.finish();
-                } catch (Throwable ignored2) {
+            return;
+        }
+        if (!alive(activity)) return;
+        if (operation == WAKE) {
+            if (host != null) host.wake();
+            return;
+        }
+        installLifecycle(activity.getApplication());
+        if (!isEnabled() || activity instanceof IgnoreInAppBack) {
+            release(activity);
+            return;
+        }
+        boolean created = host == null;
+        if (host == null) {
+            View decor = activity.getWindow().getDecorView();
+            if (!(decor instanceof ViewGroup)) return;
+            host = new InAppBackHostLayout(activity);
+            host.setTag(HOST_TAG);
+            ((ViewGroup) decor).addView(host, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        }
+        host.bringToFront();
+        if (operation == ATTACH || created) host.resume();
+        else host.refresh();
+    }
+
+    private static void installLifecycle(Application app) {
+        if (application.get() == app) return;
+        Application previous = application.get();
+        if (previous != null) previous.unregisterActivityLifecycleCallbacks(LIFECYCLE);
+        app.registerActivityLifecycleCallbacks(LIFECYCLE);
+        application = new WeakReference<>(app);
+    }
+
+    private static InAppBackHostLayout find(Activity activity) {
+        if (activity == null || activity.getWindow() == null) return null;
+        View host = activity.getWindow().getDecorView().findViewWithTag(HOST_TAG);
+        return host instanceof InAppBackHostLayout ? (InAppBackHostLayout) host : null;
+    }
+
+    static boolean alive(Activity activity) {
+        return activity != null && !activity.isFinishing() && !activity.isDestroyed();
+    }
+
+    static void performBack(Activity activity) {
+        if (!alive(activity)) return;
+        try {
+            if (activity instanceof BackInterceptor && ((BackInterceptor) activity).onInterceptInAppBack()) return;
+            WebView web = focusedBackWebView(activity.getWindow().getDecorView());
+            if (web != null) {
+                web.goBack();
+                return;
+            }
+            FragmentManager stack = fragmentBackStack(activity);
+            if (stack != null) {
+                if (!stack.isStateSaved()) stack.popBackStackImmediate();
+                return;
+            }
+            if (activity instanceof BaseActivity) {
+                BaseActivity base = (BaseActivity) activity;
+                if (base.onBackButtonStepUp()) return;
+                if (base.onBackButtonAtRoot()) {
+                    hintRoot(activity);
+                    return;
                 }
+            } else if (activity.isTaskRoot()) {
+                hintRoot(activity);
+                return;
             }
-        }
-
-        @Override
-        public void run() {
-            Activity owner = activity.get();
-            if (owner == null || owner.isFinishing() || owner.isDestroyed()) return;
-            view.setVisibility(View.GONE);
-        }
-
-        void hide() {
-            MAIN.removeCallbacks(this);
-            view.setVisibility(View.GONE);
-        }
-
-        void show() {
-            Activity owner = activity.get();
-            if (owner == null || owner.isFinishing() || owner.isDestroyed()) return;
-            view.setVisibility(View.VISIBLE);
-            MAIN.removeCallbacks(this);
-            int idle = idleMillis();
-            if (idle > 0) MAIN.postDelayed(this, idle);
+            // Preserve player overrides, then the inherited ComponentActivity dispatcher.
+            // Root hooks have already blocked the legacy HomeActivity exit path; no finish fallback.
+            activity.onBackPressed();
+        } catch (RuntimeException error) {
+            Log.w("InAppBack", "Back handler rejected navigation", error);
+        } finally {
+            InAppBackHostLayout host = find(activity);
+            if (host != null) host.recheckRootAfterNavigation();
         }
     }
 
-    private static Entry find(View decor) {
-        synchronized (ENTRIES) {
-            for (int i = 0; i < ENTRIES.size(); i++) {
-                if (ENTRIES.get(i).decor == decor) return ENTRIES.get(i);
+    static boolean atRoot(Activity activity) {
+        if (!alive(activity)) return false;
+        try {
+            if (activity instanceof BackInterceptor || fragmentBackStack(activity) != null) return false;
+            if (activity instanceof ComponentActivity
+                    && ((ComponentActivity) activity).getOnBackPressedDispatcher().hasEnabledCallbacks()) return false;
+            View decor = activity.getWindow().getDecorView();
+            if (focusedBackWebView(decor) != null || hasSecondaryPager(decor)) return false;
+            return activity instanceof BaseActivity
+                    ? ((BaseActivity) activity).onBackButtonAtRoot() : activity.isTaskRoot();
+        } catch (RuntimeException error) {
+            // A root that cannot be proven must keep its navigation affordance.
+            return false;
+        }
+    }
+
+    private static void hintRoot(Activity activity) {
+        Toast.makeText(activity, "\u5df2\u5728\u9996\u9875", Toast.LENGTH_SHORT).show();
+    }
+
+    private static FragmentManager fragmentBackStack(Activity activity) {
+        return activity instanceof FragmentActivity
+                ? fragmentBackStack(((FragmentActivity) activity).getSupportFragmentManager()) : null;
+    }
+
+    private static FragmentManager fragmentBackStack(FragmentManager manager) {
+        Fragment primary = manager.getPrimaryNavigationFragment();
+        if (primary != null && primary.isAdded()) {
+            FragmentManager child = fragmentBackStack(primary.getChildFragmentManager());
+            if (child != null) return child;
+        }
+        return manager.getBackStackEntryCount() > 0 ? manager : null;
+    }
+
+    private static WebView focusedBackWebView(View view) {
+        if (view instanceof InAppBackHostLayout || !view.isShown()) return null;
+        if (view instanceof WebView && view.hasFocus() && ((WebView) view).canGoBack()) return (WebView) view;
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                WebView web = focusedBackWebView(group.getChildAt(i));
+                if (web != null) return web;
             }
         }
         return null;
     }
 
-    /**
-     * Car-spec geometry (CAR-UI-SPEC-TVBOX-2880x1620 §2/§4/§5.2):
-     * left safe margin 35mm, button 50mm x 50mm (>= the 40mm minimum touch target), kept clear of
-     * the top 40mm and bottom 55mm exclusion strips, focusable with a bright focus state.
-     */
-    private static Entry create(Activity activity, View decor) {
-        android.util.DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
-        int screenWidth = metrics.widthPixels;
-        int screenHeight = metrics.heightPixels;
-        if (decor.getHeight() > 100) screenHeight = decor.getHeight();
-        int size = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 50f, metrics));
-        int margin = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 35f, metrics));
-        int stroke = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 2f, metrics));
-        if (size < 90) size = Math.max(90, Math.min(240, Math.round(screenWidth * 0.05f)));
-        if (margin < 40) margin = Math.max(40, Math.round(screenWidth * 0.012f));
-        if (stroke < 2) stroke = 2;
-        int top = Math.round(screenHeight * 0.30f);
-
-        TextView view = new TextView(activity);
-        view.setText("\u2190");
-        view.setTextColor(Color.WHITE);
-        view.setTextSize(TypedValue.COMPLEX_UNIT_PX, size * 0.42f);
-        view.setGravity(Gravity.CENTER);
-        view.setContentDescription("应用内返回");
-        view.setAlpha(0.9f);
-        view.setClickable(true);
-        view.setFocusable(true);
-        view.setFocusableInTouchMode(false);
-        view.setElevation(Math.round(size * 0.06f));
-        view.setBackground(focusAwareBackground(stroke));
-        FrameLayout.LayoutParams parameters = new FrameLayout.LayoutParams(
-                size, size, Gravity.LEFT | Gravity.TOP);
-        parameters.leftMargin = margin;
-        parameters.topMargin = top;
-        try {
-            ((android.view.ViewGroup) decor).addView(view, parameters);
-        } catch (Throwable error) {
-            return null;
+    private static boolean hasSecondaryPager(View view) {
+        if (view instanceof InAppBackHostLayout || !view.isShown()) return false;
+        // Older HomeActivity hooks mark the entire Activity as root, including category pages.
+        // Read pager state without invoking the mutating step-up hook to probe visibility.
+        if (view instanceof ViewPager && ((ViewPager) view).getCurrentItem() > 0) return true;
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                if (hasSecondaryPager(group.getChildAt(i))) return true;
+            }
         }
-        Entry entry = new Entry(activity, decor, view);
-        view.setOnClickListener(entry);
-        return entry;
+        return false;
     }
 
-    /** Normal: translucent black circle. Focused: lighter fill with the car accent ring (2mm). */
-    private static android.graphics.drawable.Drawable focusAwareBackground(int stroke) {
-        android.graphics.drawable.StateListDrawable states =
-                new android.graphics.drawable.StateListDrawable();
-        GradientDrawable focused = new GradientDrawable();
-        focused.setShape(GradientDrawable.OVAL);
-        focused.setColor(0xE6242A36);
-        focused.setStroke(stroke, 0xFF2979FF);
-        states.addState(new int[]{android.R.attr.state_focused}, focused);
-        GradientDrawable normal = new GradientDrawable();
-        normal.setShape(GradientDrawable.OVAL);
-        normal.setColor(0xA6000000);
-        states.addState(new int[]{}, normal);
-        return states;
+    public static boolean isEnabled() { return bool(HawkConfig.IN_APP_BACK, true); }
+    public static String getMode() { return mode(text(HawkConfig.BACK_MODE, HawkConfig.BACK_MODE_FLOATING)); }
+    public static String getSide() { return side(text(HawkConfig.BACK_SIDE, HawkConfig.BACK_SIDE_LEFT)); }
+    public static boolean isLarge() { return bool(HawkConfig.BACK_LARGE, false); }
+    public static boolean isHapticEnabled() { return bool(HawkConfig.BACK_HAPTIC, true); }
+    public static boolean isHideOnRoot() { return bool(HawkConfig.BACK_HIDE_ON_ROOT, false); }
+    public static String getEdgeSkin() { return skin(text(HawkConfig.BACK_EDGE_SKIN, HawkConfig.BACK_SKIN_TEARDROP)); }
+    public static int getHideSeconds() { return validHideSeconds(integer(HawkConfig.BACK_HIDE_SECONDS, 4)); }
+
+    public static void setEnabled(Activity a, boolean value) { put(a, HawkConfig.IN_APP_BACK, value); }
+    public static void setMode(Activity a, String value) { put(a, HawkConfig.BACK_MODE, mode(value)); }
+    public static void setSide(Activity a, String value) {
+        String next = side(value);
+        if (!HawkConfig.BACK_SIDE_BOTH.equals(next)) {
+            Hawk.put(HawkConfig.BACK_POSITION_X, HawkConfig.BACK_SIDE_RIGHT.equals(next) ? 10000 : 0);
+        }
+        put(a, HawkConfig.BACK_SIDE, next);
+    }
+    public static void setLarge(Activity a, boolean value) { put(a, HawkConfig.BACK_LARGE, value); }
+    public static void setHapticEnabled(Activity a, boolean value) { put(a, HawkConfig.BACK_HAPTIC, value); }
+    public static void setHideOnRoot(Activity a, boolean value) { put(a, HawkConfig.BACK_HIDE_ON_ROOT, value); }
+    public static void setEdgeSkin(Activity a, String value) { put(a, HawkConfig.BACK_EDGE_SKIN, skin(value)); }
+    public static void setHideSeconds(Activity a, int value) { put(a, HawkConfig.BACK_HIDE_SECONDS, validHideSeconds(value)); }
+
+    private static <T> void put(Activity activity, String key, T value) {
+        Hawk.put(key, value);
+        refresh(activity);
+    }
+
+    private static int validHideSeconds(int value) {
+        return value == 0 || value == 4 || value == 6 || value == 8 ? value : 4;
+    }
+
+    private static String mode(String raw) {
+        String value = raw == null ? "" : raw.toLowerCase(Locale.ROOT);
+        if ("1".equals(value) || "edge_pull_only".equals(value) || HawkConfig.BACK_MODE_EDGE.equals(value)) return HawkConfig.BACK_MODE_EDGE;
+        if ("2".equals(value) || "dual_enabled".equals(value) || HawkConfig.BACK_MODE_BOTH.equals(value)) return HawkConfig.BACK_MODE_BOTH;
+        return HawkConfig.BACK_MODE_FLOATING;
+    }
+
+    private static String side(String raw) {
+        String value = raw == null ? "" : raw.toLowerCase(Locale.ROOT);
+        if ("1".equals(value) || HawkConfig.BACK_SIDE_RIGHT.equals(value)) return HawkConfig.BACK_SIDE_RIGHT;
+        if ("2".equals(value) || HawkConfig.BACK_SIDE_BOTH.equals(value)) return HawkConfig.BACK_SIDE_BOTH;
+        return HawkConfig.BACK_SIDE_LEFT;
+    }
+
+    private static String skin(String raw) {
+        return HawkConfig.BACK_SKIN_CAPSULE.equalsIgnoreCase(raw) || "capsule_drawer".equalsIgnoreCase(raw)
+                ? HawkConfig.BACK_SKIN_CAPSULE : HawkConfig.BACK_SKIN_TEARDROP;
+    }
+
+    private static String text(String key, String fallback) {
+        try { return String.valueOf(Hawk.get(key, (Object) fallback)); }
+        catch (RuntimeException error) { return fallback; }
+    }
+
+    static int integer(String key, int fallback) {
+        try {
+            Object value = Hawk.get(key, (Object) fallback);
+            return value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(String.valueOf(value));
+        } catch (RuntimeException error) { return fallback; }
+    }
+
+    private static boolean bool(String key, boolean fallback) {
+        try {
+            Object value = Hawk.get(key, (Object) fallback);
+            if (value instanceof Boolean) return (Boolean) value;
+            String text = String.valueOf(value);
+            if ("true".equalsIgnoreCase(text) || "1".equals(text)) return true;
+            if ("false".equalsIgnoreCase(text) || "0".equals(text)) return false;
+            return fallback;
+        } catch (RuntimeException error) { return fallback; }
     }
 }

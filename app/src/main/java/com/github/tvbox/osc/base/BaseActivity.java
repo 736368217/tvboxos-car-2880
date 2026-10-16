@@ -74,6 +74,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
             th.printStackTrace();
         }
         super.onCreate(savedInstanceState);
+        if (shouldRefreshAutoSize()) refreshAutoSize();
         setContentView(getLayoutResID());
         mContext = this;
         initSystemUiListener();

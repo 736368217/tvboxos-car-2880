@@ -3,22 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingTop="@dimen/car_top_padding"
-    android:paddingBottom="@dimen/car_bottom_padding"
-    android:paddingLeft="@dimen/car_side_padding"
-    android:paddingRight="@dimen/car_side_padding">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/topLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/vs_50"
-        android:layout_marginTop="@dimen/vs_10"
+        android:layout_marginTop="@dimen/car_top_padding"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingLeft="@dimen/vs_50"
-        android:paddingRight="@dimen/vs_50"
-        android:paddingTop="@dimen/vs_10"
+        android:paddingLeft="@dimen/car_side_padding"
+        android:paddingRight="@dimen/car_side_padding"
+        android:paddingTop="@dimen/vs_0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -27,6 +23,9 @@
             android:id="@+id/tvName"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:maxWidth="480mm"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:focusable="true"
             android:focusableInTouchMode="false"
             android:gravity="left|center_vertical"
@@ -68,16 +67,20 @@
             android:id="@+id/mGridView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/vs_15"
-            android:layout_marginBottom="@dimen/vs_10"
-            android:paddingLeft="@dimen/vs_50"
-            android:paddingRight="@dimen/vs_50"
-            app:tv_horizontalSpacingWithMargins="@dimen/vs_15"
+            android:layout_marginTop="@dimen/vs_10"
+            android:layout_marginBottom="@dimen/vs_4"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:overScrollMode="always"
+            android:paddingLeft="@dimen/car_side_padding"
+            android:paddingRight="@dimen/car_side_padding"
+            app:tv_horizontalSpacingWithMargins="@dimen/vs_12"
             app:tv_selectedItemIsCentered="true" />
 
         <com.github.tvbox.osc.ui.tv.widget.NoScrollViewPager
             android:id="@+id/mViewPager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="0dp"
+            android:layout_weight="1" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,78 +1,35 @@
-# BUILD-INFO — TVBoxOS 1.0.0-car.6
+# BUILD-INFO — TVBoxOS 1.0.0-car.7 候选
 
-## 产物
+## 最终测试候选 D2A49B5D
 
-- `TVBox-1.0.0-car.6-python-signed.apk`，Python release，ARM32＋ARM64。
-- 包名 `com.github.tvbox.osc.jun`，Label `TVBox`，versionCode7 / versionName1.0.0-car.6。
-- 52,635,477B，SHA-256 `02C7CF892C49BA5D286A325C6FC46B69B861070582FB552A2868B75352808D08`。
-- v1/v2/v3及zipalign4验证通过。沿用既有Android Debug测试证书，证书SHA-256 `2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c`。
-- [v1.0.0-car.6 Release](https://github.com/736368217/tvboxos-car-2880/releases/tag/v1.0.0-car.6)。
+- `TVBox-1.0.0-car.7-python-signed.apk`
+- 包名/标签：`com.github.tvbox.osc.jun` / `TVBox`
+- versionCode/versionName：`8` / `1.0.0-car.7`
+- Python release，ARM32＋ARM64，保留Java/JAR、QuickJS和全部既有音画参数。
+- 大小：52,668,696B。
+- SHA-256：`D2A49B5DA2B0371CF3C84CCDAC6C5753EF649721639434FB21955F4054A30803`。
+- v1/v2/v3、zipalign4、badging/Manifest、双ABI Python/Chaquopy/QuickJS检查通过。
+- 签名证书SHA-256：`2FEB63C511CD725795CADC8FA890F9CBC754FE59C0BBFE0787AC33F94F44FA9C`；沿用既有测试证书。
+- 正式发布暂缓；本包以候选和私有草稿交付，IJK硬解全屏像素异常仍未解决。
 
-## 环境与构建
+## 构建
 
-Windows PowerShell；JDK17.0.20.8；Gradle7.5 / AGP7.2.2；compileSdk33 / targetSdk28 / minSdk19；Android build-tools34.0.0。Chaquopy12.0.1，Android Python3.8.13，主机构建Python3.8.10。Python flavor继续保留Java/JAR和QuickJS。
-
-在完整工程根目录执行：
+Windows/JDK17.0.20.8/Gradle7.5/AGP7.2.2/build-tools34.0.0/Chaquopy12.0.1/Android Python3.8.13。主机构建使用指定Python3.8，缓存D:\gradle-cache。
 
 ```powershell
 $env:JAVA_HOME='C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot'
 $env:GRADLE_USER_HOME='D:\gradle-cache'
 $env:TVBOX_BUILD_PYTHON='C:\path\to\python3.8.exe'
-$env:TEMP='C:\path\to\scratch\gradle-tmp'
-$env:TMP=$env:TEMP
 $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
-New-Item -ItemType Directory -Force $env:TEMP | Out-Null
-$car6Sdk=(Join-Path $env:LOCALAPPDATA 'Android\Sdk').Replace('\','/')
-[IO.File]::WriteAllText((Join-Path (Get-Location) 'local.properties'), "sdk.dir=$car6Sdk`n", [Text.Encoding]::ASCII)
-.\gradlew.bat --no-daemon --max-workers 1 -Dorg.gradle.jvmargs=-Xmx1536m :app:assemblePythonRelease --console=plain
+.\gradlew.bat --no-daemon --max-workers 1 '-Dorg.gradle.jvmargs=-Xmx1536m' :app:compileJavaReleaseJavaWithJavac :app:assemblePythonRelease --console=plain
 ```
 
-最终生命周期修复构建107.23s，exit0。输出 `app/build/outputs/apk/python/release/TVBox_release-python.apk`。官方embeddable Python3.8需禁用`python38._pth`，使Chaquopy可以设置构建模块搜索路径；不设置不受该插件支持的`python.version`。
+最终实际exit0，123.67秒。未签名包52,561,339B，SHA-256 `61ACF26E5A73EA4C593AC9B7F5712FD6A689CD9AB3605E92B3F966ADB90F5721`。再经zipalign、签名与最终包检查，未以编译成功替代设备结果。
 
-双ARM均检查到`libpython3.8.so`、`libchaquopy_java.so`、`libquickjs-android-wrapper.so`和Chaquopy资源。依赖沿用car.5解析：lxml4.6.3、ujson1.35、pyquery2.0.2、requests2.32.4、jsonpath0.82.2、cachetools5.5.2、pycryptodome3.9.4、beautifulsoup4 4.15及传递依赖。
+## 验证入口
 
-## 对齐与签名
+`car/tests/test_python_http.py` 20项通过；Java8 host suite包括164 XML、11预设、音画旧参数保持、44配置/88 SDR-HDR/1936比较、738返回策略。可复现native harness见 `car/tests/native/README.md`；绑定实际APK SHA和最终R8映射。生成物留scratch。
 
-```powershell
-$car6Tools=Join-Path $env:LOCALAPPDATA 'Android\Sdk\build-tools\34.0.0'
-& "$car6Tools\zipalign.exe" -f -p 4 app\build\outputs\apk\python\release\TVBox_release-python.apk $env:TEMP\TVBox-car6-aligned.apk
-& "$car6Tools\apksigner.bat" sign --ks "$env:USERPROFILE\.android\debug.keystore" --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out .\TVBox-1.0.0-car.6-python-signed.apk $env:TEMP\TVBox-car6-aligned.apk
-& "$car6Tools\apksigner.bat" verify --verbose .\TVBox-1.0.0-car.6-python-signed.apk
-& "$car6Tools\zipalign.exe" -c 4 .\TVBox-1.0.0-car.6-python-signed.apk
-Get-FileHash .\TVBox-1.0.0-car.6-python-signed.apk -Algorithm SHA256
-```
+D2A播放PID47234，95/0状态/生命周期；八图像素7/8，唯一失败IJK硬解全屏。IJK保留恒等GL输出，关闭时无SR/补帧/FBO处理，EXO保留Texture/GL切换。早期E395的PY五站、真实远程播放及返回控件58/0保留为历史基线；最终D2A的PY/UI结果见测试报告和device-acceptance.json，不自动继承旧哈希的通过项。
 
-APK、私钥和下载的Spider JAR不入Git。签名使用已知的开发测试证书，不适合作为独占生产发布证书。
-
-## Host与GPU复现
-
-```powershell
-$car6Tests=Join-Path $env:TEMP 'tvbox-car6-tests'
-New-Item -ItemType Directory -Force $car6Tests | Out-Null
-javac -encoding UTF-8 --release 8 -d $car6Tests `
-  player\src\main\java\xyz\doikki\videoplayer\render\VideoEnhancePreset.java `
-  player\src\main\java\xyz\doikki\videoplayer\render\VideoPostProcessPolicy.java `
-  app\src\main\java\com\github\tvbox\osc\car\AudioEffectPreset.java `
-  car\tests\VideoEnhancePresetTest.java car\tests\Car6PostProcessTest.java
-java -cp $car6Tests VideoEnhancePresetTest
-java -cp $car6Tests Car6PostProcessTest
-python car\tests\prepare_car6_fixtures.py --output "$car6Tests\fixtures"
-```
-
-GPU探针编译类为`car/tests/VideoGpuProbe.java`及生产`VideoShaders`、`VideoEnhancePreset`、`VideoPostProcessPolicy`。用Android33的android.jar作为classpath，经d8转换dex后放入测试设备`/data/local/tmp/car6-gpu/classes.dex`，在可用Android namespace/classpath中运行：
-
-```sh
-CLASSPATH=/data/local/tmp/car6-gpu/classes.dex app_process /system/bin VideoGpuProbe /data/local/tmp/car6-gpu/results
-```
-
-MuMu Java shell需通过插件`mumu_shell`执行共享LF脚本，进入system_server的mount namespace并导入classpath。测试仅在独占租用实例运行并保持静音。原始GPU断言全部通过后进程Shutdown139的情况已记录，详见TEST-REPORT。
-
-## 本地播放复现
-
-生成脚本需要Pillow及ffmpeg，独立生成32s低饱和片、200s 24fps移动片、80s1080p、32s4K。将生成目录放到guest `/sdcard/TVBoxCar5/`，从应用设置导入`http://127.0.0.1:9978/file/TVBoxCar5/api.json`。测试源通过应用原有Python/QuickJS及HTTP文件服务运行，不新增产品调试入口；结束恢复用户订阅。
-
-`lives`可选字段省略，上游`ApiConfig`对`lives:[]`会越界，本次未改该业务代码。car.5历史fixture和文档单独保留；car.6媒体生成器不依赖旧版被用户移除的mp4文件。
-
-## 源码与差异
-
-相对car.5源码提交`1038379`，新增音效不可变表、11档画面、独立开关、两Pass FBO、官方SGSR1适配、时域策略与Surface生命周期修复。`GIT-DIFF-car.6.patch`由Git以UTF-8 bytes生成，包含新增源码/测试；`src/`是对应关键类副本。SGSR上游及许可证见AUDIO-VIDEO-ENHANCE。
+APK、Spider JAR、keystore、私有偏好、完整远程响应与运行时敏感字段不入Git。模拟器不证明真实OEM全屏、SA8295P性能、HDR/DoVi或ARM32运行。

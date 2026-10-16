@@ -1,0 +1,33 @@
+{
+  "candidateSha256": "E39569F00375D074761C7D40EB14D1C9D40184CDA2BA32C8493338E1E9C3E880",
+  "package": "com.github.tvbox.osc.jun",
+  "label": "TVBox",
+  "apiUrl": "https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/api.json",
+  "testedVia": "https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/api.json",
+  "apiHttpStatus": 200,
+  "apiBytes": 28993,
+  "siteCount": 109,
+  "jarOrCspCount": 108,
+  "quickJsCount": 1,
+  "pythonCount": 0,
+  "declaredSpiderMd5": "bca2498f2d40c694b285471062748cf0",
+  "resolvedSpiderUrl": "https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/spider.jar",
+  "downloadedSpiderMd5": "bca2498f2d40c694b285471062748cf0",
+  "jarZipAndDex": true,
+  "devicePid": 10878,
+  "loader": {
+    "init": "success",
+    "main": "success",
+    "cacheFile": "71d7c115dfaf9e0c4d87ec428fb219f4.jar"
+  },
+  "sites": [
+    {"key":"热播影视","runtime":"JAR","home":true,"categoryItems":12,"detailItems":1,"searchItems":0,"search":"source returned no result"},
+    {"key":"枫叶影视","runtime":"JAR","home":true,"categoryItems":24,"detailItems":1,"searchItems":7},
+    {"key":"爱动漫","runtime":"QuickJS","home":true,"categoryItems":48,"detailItems":1,"search":"30s bounded timeout"}
+  ],
+  "notes": [
+    "The first failed import was caused by an input test typo that concatenated the old URL and the new URL; a fresh XML check caught it before the successful retry.",
+    "No application crash or identity-gate failure was observed; JAR Init.init and main loader both succeeded.",
+    "Search limitations are source/network behavior and are not counted as Python runtime failures."
+  ]
+}

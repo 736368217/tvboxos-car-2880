@@ -1,0 +1,39 @@
+Fri Oct 16 07:55:29 UTC 2026
+===boot===
+1
+===launcher===
+Physical size: 1620x2880
+Physical density: 160
+free
+default
+1
+1
+    mCurrentOrientation=1
+    mCurrentDisplayRect=Rect(0, 0 - 2880, 1620)
+      Viewport INTERNAL: displayId=0, uniqueId=local:4619827820427265280, port=0, orientation=1, logicalFrame=[0, 0, 2880, 1620], physicalFrame=[0, 0, 2880, 1620], deviceSize=[2880, 1620], isActive=[1]
+    init=1620x2880 160dpi mMinSizeOfResizeableTaskDp=220 noscale
+ cur=2880x1620 app=2880x1620 rng=1620x1620-2880x2880
+  DisplayFrames w=2880 h=1620 r=1
+===app===
+Starting: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.HomeActivity }
+Physical size: 1620x2880
+Physical density: 160
+free
+default
+1
+1
+    mCurrentOrientation=1
+    mCurrentDisplayRect=Rect(0, 0 - 2880, 1620)
+      Viewport INTERNAL: displayId=0, uniqueId=local:4619827820427265280, port=0, orientation=1, logicalFrame=[0, 0, 2880, 1620], physicalFrame=[0, 0, 2880, 1620], deviceSize=[2880, 1620], isActive=[1]
+    init=1620x2880 160dpi mMinSizeOfResizeableTaskDp=220 noscale
+ cur=2880x1620 app=2880x1620 rng=1620x1620-2880x2880
+  DisplayFrames w=2880 h=1620 r=1
+    topResumedActivity=ActivityRecord{105993130 u0 com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.HomeActivity t146}
+      mCurrentConfig={1.0 460mcc?mnc [zh_CN_#Hans] ldltr sw1620dp w2880dp h1620dp 160dpi xlrg long land finger -keyb/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2880, 1620) mAppBounds=Rect(0, 0 - 2880, 1620) mMaxBounds=Rect(0, 0 - 2880, 1620) mDisplayRotation=ROTATION_90 mWindowingMode=fullscreen mActivityType=home mAlwaysOnTop=undefined mRotation=ROTATION_90} s.3 fontWeightAdjustment=0}
+      mCurrentConfig={1.0 460mcc?mnc [zh_CN_#Hans] ldltr sw1620dp w2880dp h1620dp 160dpi xlrg long land finger -keyb/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2880, 1620) mAppBounds=Rect(0, 0 - 2880, 1620) mMaxBounds=Rect(0, 0 - 2880, 1620) mDisplayRotation=ROTATION_90 mWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_90} s.2 fontWeightAdjustment=0}
+e7aa9b70f9a6f945cdfa2177060099350d5d31961c1c83d442742c3c06d8975d  /data/app/~~u-GPPteGKy97pDzyrNKBbQ==/com.github.tvbox.osc.jun-AWJWQTB5jN_Ff5no2TSQlA==/base.apk
+2161
+===mute_and_accessibility===
+0
+0
+0

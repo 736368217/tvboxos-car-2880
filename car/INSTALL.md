@@ -1,52 +1,46 @@
-# INSTALL — TVBoxOS 1.0.0-car.6 Python 通用版
+# INSTALL — TVBoxOS car.7 Python 通用候选
 
-## 安装
+## 安装与识别
 
-从 [car.6 Release](https://github.com/736368217/tvboxos-car-2880/releases/tag/v1.0.0-car.6) 下载 `TVBox-1.0.0-car.6-python-signed.apk`，核对同页 `SHA256SUMS-car.6.txt`。包内包含 ARM32 与 ARM64，Python 运行时 3.8.13，同时保留 Java/JAR 和 QuickJS。
+使用 `TVBox-1.0.0-car.7-python-signed.apk`，核对 `SHA256SUMS-car.7.txt` 或 `BUILD-INFO-car.7.md`。APK code8/name1.0.0-car.7，标签TVBox，包名com.github.tvbox.osc.jun，包含ARM32＋ARM64的Python3.8.13、Chaquopy与QuickJS。沿用既有签名，可覆盖安装同签名car.2–car.6，保留配置和历史。
 
-沿用既有 Android Debug 测试证书，同签名的 car.2–car.5 可直接覆盖安装。真实设备连接 ADB 时可使用：
+真实车机可用文件管理器安装，或：
 
 ```powershell
-adb install -r .\TVBox-1.0.0-car.6-python-signed.apk
+adb install -r .\TVBox-1.0.0-car.7-python-signed.apk
 ```
 
-也可用车机文件管理器打开 APK 安装。若系统提示签名冲突，说明设备内同包名 APK 使用了不同证书；备份其配置后再处理原安装，避免丢失订阅和历史。
+本候选以私有草稿交付，IJK硬解全屏重建producer时仍有颜色异常，正式发布暂缓。当前使用默认EXO；IJK软解对照正常。D2A的生命周期95项通过不能代替像素画质检查（八图7/8）。
 
-包名必须保持 `com.github.tvbox.osc.jun`，应用名保持 `TVBox`，以兼容当前 Spider JAR 的身份检查。应用内返回按钮无需 Root、ADB、无障碍或系统悬浮窗权限。
+## 配置订阅
 
-## 订阅
+设置 → **配置地址** → 在“点播”输入框完整替换旧地址 → 确定。直播输入框独立。可通过对话框提供的浏览器推送入口输入长URL。先核对文本，避免旧地址和新地址拼接。
 
-设置 → **配置地址** → 输入地址 → **确定**。已有订阅在同签名覆盖升级后保留。测试使用并恢复的原地址为：
+本轮测试：
 
 ```text
-https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/123/xiaosa/api.json?v=3
+https://clun.top/box.json
+https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/api.json
 ```
 
-Python flavor 指支持 Python Spider 的构建，不会把 Android 页面或播放器改写成 Python。
+GitHub网络受限时，测试成功的转发入口为：
 
-## 音效与画面
+```text
+https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/api.json
+```
 
-设置 → **音效**，依次循环 9 档：关闭、影院、重低音、3D环绕、HiFi、人声、动漫·标准、动漫·剧场、动漫·对白。每次点击后核对右侧名称；界面有防连点节流。当前没有内部播放会话时，会在下次播放准备完成后绑定。
+clun快照含44个PY；xiaosa快照是108个JAR/CSP＋1个JS、没有PY。Python flavor支持Python Spider，不替换Android页面、Java/JAR、QuickJS或播放器。版本判断以APK设置/versionCode及SHA为准，不能从站点名的py/js后缀判断APK flavor。
 
-设置 → **画面预设**，选择 11 档之一：原画、臻彩、自然、影院、鲜艳、柔和、明亮、暖色、动漫·暗光、动漫·日间、动漫·清透。列表可向上滑动到新增项，选择后**下次播放生效**。再次点击当前项不会关闭弹窗，可点击“取消”。
+## 音画与返回
 
-旧版画面设置 false/0 仍为原画、true/1 仍为臻彩；car.5 的 0–7 全部保持原编号和参数。新增项追加在 8–10，旧偏好不会被重解释成动漫档位。
+设置 → **画面与音效高级功能** 可选择9音效、11画面，以及独立SGSR1/时域补帧开关。音效按当前内部EXO/IJK会话更新；视频配置直接作用当前视频，已验证切换保持decoder identity/位置。没有播放时保存给下次播放。外部播放器与直播基类不属于完整音效链范围。
 
-## 超分与补帧
+原画ID0、臻彩ID1及既有0–7保持；动漫画面追加8–10，动漫音效追加6–8。两开关默认开启，原画下也可单独启用；原画＋两项关时EXO回普通Texture，IJK保留恒等OES输出但不做调色/SR/补帧。HDR/DoVi色彩处理与真实车机性能边界见技术说明。
 
-设置中有两个独立开关，默认均开启：
+返回模式：悬浮球、边缘拉杆、双模；支持标准/大号、拖动吸边、水滴/胶囊、触感和4/6/8秒或常显。闲置半透明靠边，触摸唤醒。返回控件为应用内View，无Root/ADB/无障碍/悬浮窗权限要求。根主页不自行退出，全屏先退全屏，分类回主页，其他页面回上一级。弹窗按其取消/确定语义处理，外拖与多指不会提交。
 
-- **SGSR1 超分**：低分辨率视频放大时做边缘重建；源宽度 ≥2560 或窗口无需放大时自动旁路。
-- **60Hz 时域平滑补帧**：以最大 60 次/秒的节奏提交有差异抑制的相邻帧混合；暂停、后台和播放完成时停止持续绘制。它没有运动矢量估计。
+## 已验收范围
 
-开关会保存，**下次播放生效**。设置后退出当前播放再进入即可，无需重启整个应用。两项互不依赖；选择原画仍可使用任一功能，原画＋两项关闭则回普通渲染器。
+MuMu6.8.4.0/Android15/横屏2880×1620/d160：最终D2A苹果PY远程EXO播放1280×720、位置243→2761ms，豆瓣/剧踪/苹果/瓜子分类正常，枫叶本轮内容为空；返回/UI58项、播放状态/生命周期95项通过，八图像素7/8。外站空响应和超时单列，详情/解析成功不等于每条线路都可播放。完整范围见 `TEST-REPORT-car.7.md`。
 
-## 返回按钮
-
-设置 → **应用内返回按钮**，默认开启。按钮位于应用窗口内，闲置 4 秒隐藏，触摸后唤醒，时间可选 4/6/8 秒或常显。全屏播放先退全屏，详情回上一级，分类回主页；首页根级只提示，不自行退出应用。弹窗使用自身的“取消／确定”按钮关闭。
-
-## 实测范围
-
-测试环境为 MuMu 6.8.4.0 / Android 15 / 横屏 2880×1620，包含 EXO 与 IJK、本地 Python/QuickJS 合成片和原订阅 JAR 回归。详见 [TEST-REPORT.md](TEST-REPORT.md)。
-
-真实零跑 B01／SA8295P 的性能、OEM 全屏、长期功耗、ARM32 独立运行与 HDR/DoVi 未实测。模拟器输出提交次数不等于显示器实际呈现帧数。外部站点的验证页、空响应或超时不由本地画面开关解决。
+真实OEM全屏、SA8295P性能、长期温升功耗、稳定60fps、ARM32运行及HDR/DoVi未实测。测试不改变真实车机DPI。

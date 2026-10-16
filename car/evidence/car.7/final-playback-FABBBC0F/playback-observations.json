@@ -1,0 +1,130 @@
+[
+  {
+    "stage": "EXO initial GL",
+    "source_before": 11,
+    "source_after": 54,
+    "position_before": 712,
+    "position_after": 2519,
+    "state": 3
+  },
+  {
+    "stage": "EXO after paused switch",
+    "source_before": 1,
+    "source_after": 44,
+    "position_before": 14069,
+    "position_after": 15888,
+    "state": 3
+  },
+  {
+    "stage": "EXO fullscreen",
+    "source_before": 36,
+    "source_after": 79,
+    "position_before": 17434,
+    "position_after": 19240,
+    "state": 3
+  },
+  {
+    "stage": "EXO foreground window1",
+    "source_before": 29,
+    "source_after": 72,
+    "position_before": 20711,
+    "position_after": 22521,
+    "state": 3
+  },
+  {
+    "stage": "EXO foreground window2",
+    "source_before": 72,
+    "source_after": 116,
+    "position_before": 22531,
+    "position_after": 24341,
+    "state": 3
+  },
+  {
+    "stage": "EXO rapid settings",
+    "source_before": 40,
+    "source_after": 83,
+    "position_before": 26417,
+    "position_after": 28221,
+    "state": 3
+  },
+  {
+    "stage": "EXO final GL",
+    "source_before": 12,
+    "source_after": 52,
+    "position_before": 29237,
+    "position_after": 30916,
+    "state": 3
+  },
+  {
+    "stage": "EXO reentry",
+    "source_before": 5,
+    "source_after": 48,
+    "position_before": 206,
+    "position_after": 2026,
+    "state": 3
+  },
+  {
+    "stage": "IJK initial GL",
+    "source_before": 0,
+    "source_after": 36,
+    "position_before": 669,
+    "position_after": 2461,
+    "state": 3
+  },
+  {
+    "stage": "IJK after paused switch",
+    "source_before": 0,
+    "source_after": 26,
+    "position_before": 13932,
+    "position_after": 15746,
+    "state": 3
+  },
+  {
+    "stage": "IJK fullscreen",
+    "source_before": 18,
+    "source_after": 60,
+    "position_before": 17277,
+    "position_after": 19076,
+    "state": 3
+  },
+  {
+    "stage": "IJK foreground window1",
+    "source_before": 8,
+    "source_after": 49,
+    "position_before": 20536,
+    "position_after": 22256,
+    "state": 3
+  },
+  {
+    "stage": "IJK foreground window2",
+    "source_before": 49,
+    "source_after": 93,
+    "position_before": 22273,
+    "position_after": 24073,
+    "state": 3
+  },
+  {
+    "stage": "IJK rapid settings",
+    "source_before": 23,
+    "source_after": 66,
+    "position_before": 26174,
+    "position_after": 27970,
+    "state": 3
+  },
+  {
+    "stage": "IJK final GL",
+    "source_before": 0,
+    "source_after": 31,
+    "position_before": 28996,
+    "position_after": 30803,
+    "state": 3
+  },
+  {
+    "stage": "IJK reentry",
+    "source_before": 5,
+    "source_after": 48,
+    "position_before": 169,
+    "position_after": 1968,
+    "state": 3
+  }
+]

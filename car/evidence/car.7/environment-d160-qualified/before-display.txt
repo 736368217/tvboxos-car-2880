@@ -1,0 +1,44 @@
+Fri Oct 16 07:49:31 UTC 2026
+===wm===
+Physical size: 1620x2880
+Override size: 2880x1620
+Physical density: 160
+===rotation_settings===
+1
+0
+===display===
+  DisplayDeviceInfo{"内置屏幕": uniqueId="local:4619827820427265280", 1620 x 2880, modeId 1, renderFrameRate 60.000004, hasArrSupport false, frameRateCategoryRate FrameRateCategoryRate {normal=60.0, high=90.0}, supportedRefreshRates [], defaultModeId 1, userPreferredModeId -1, supportedModes [{id=1, width=1620, height=2880, fps=60.000004, vsync=60.000004, synthetic=false, alternativeRefreshRates=[15.000001], supportedHdrTypes=[]}, {id=2, width=1620, height=2880, fps=15.000001, vsync=15.000001, synthetic=false, alternativeRefreshRates=[60.000004], supportedHdrTypes=[]}], colorMode 0, supportedColorModes [0], hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[], mMaxLuminance=500.0, mMaxAverageLuminance=500.0, mMinLuminance=0.0}, isForceSdr false, allmSupported false, gameContentTypeSupported false, density 160, 160.0 x 160.0 dpi, appVsyncOff 1000000, presDeadline 16666666, touch INTERNAL, rotation 0, type INTERNAL, address {port=0, model=0x401ceced0008c5}, deviceProductInfo DeviceProductInfo{name=mumuscreen000, manufacturerPnpId=GGL, productId=1, modelYear=null, manufactureDate=ManufactureDate{week=27, year=2006}, connectionToSinkType=1}, state ON, committedState ON, frameRateOverride , brightnessMinimum 0.035433073, brightnessMaximum 1.0, brightnessDefault 0.08279251, brightnessDim 0.05, hdrSdrRatio NaN, FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY, FLAG_ROTATES_WITH_CONTENT, FLAG_SECURE, FLAG_SUPPORTS_PROTECTED_BUFFERS, FLAG_TRUSTED, installOrientation 0, displayShape DisplayShape{ spec=811174849 displayWidth=1620 displayHeight=2880 physicalPixelDisplaySizeRatio=1.0 rotation=0 offsetX=0 offsetY=0 scale=1.0}}
+    mCurrentOrientation=0
+    mCurrentDisplayRect=Rect(0, 984 - 1620, 1895)
+    mDisplayId=0
+    mBaseDisplayInfo=DisplayInfo{"内置屏幕", displayId 0, displayGroupId 0, FLAG_SECURE, FLAG_SUPPORTS_PROTECTED_BUFFERS, FLAG_TRUSTED, real 1620 x 2880, largest app 1620 x 2880, smallest app 1620 x 2880, appVsyncOff 1000000, presDeadline 16666666, mode 1, renderFrameRate 60.000004, hasArrSupport false, frameRateCategoryRate FrameRateCategoryRate {normal=60.0, high=90.0}, supportedRefreshRates [], defaultMode 1, userPreferredModeId -1, supportedModes [{id=1, width=1620, height=2880, fps=60.000004, vsync=60.000004, synthetic=false, alternativeRefreshRates=[15.000001], supportedHdrTypes=[]}, {id=2, width=1620, height=2880, fps=15.000001, vsync=15.000001, synthetic=false, alternativeRefreshRates=[60.000004], supportedHdrTypes=[]}], appsSupportedModes [{id=1, width=1620, height=2880, fps=60.000004, vsync=60.000004, synthetic=false, alternativeRefreshRates=[15.000001], supportedHdrTypes=[]}, {id=2, width=1620, height=2880, fps=15.000001, vsync=15.000001, synthetic=false, alternativeRefreshRates=[60.000004], supportedHdrTypes=[]}], hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[], mMaxLuminance=500.0, mMaxAverageLuminance=500.0, mMinLuminance=0.0}, isForceSdr false, userDisabledHdrTypes [], minimalPostProcessingSupported false, rotation 0, state ON, committedState ON, type INTERNAL, uniqueId "local:4619827820427265280", app 1620 x 2880, density 160 (160.0 x 160.0) dpi, layerStack 0, colorMode 0, supportedColorModes [0], address {port=0, model=0x401ceced0008c5}, deviceProductInfo DeviceProductInfo{name=mumuscreen000, manufacturerPnpId=GGL, productId=1, modelYear=null, manufactureDate=ManufactureDate{week=27, year=2006}, connectionToSinkType=1}, removeMode 0, refreshRateOverride 0.0, brightnessMinimum 0.035433073, brightnessMaximum 1.0, brightnessDefault 0.08279251, brightnessDim 0.05, installOrientation ROTATION_0, layoutLimitedRefreshRate null, hdrSdrRatio not_available, thermalRefreshRateThrottling {}, thermalBrightnessThrottlingDataId default}
+    mOverrideDisplayInfo=DisplayInfo{"内置屏幕", displayId 0, displayGroupId 0, FLAG_SECURE, FLAG_SUPPORTS_PROTECTED_BUFFERS, FLAG_SCALING_DISABLED, FLAG_TRUSTED, real 2880 x 1620, largest app 2880 x 2880, smallest app 1620 x 1620, appVsyncOff 1000000, presDeadline 16666666, mode 1, renderFrameRate 60.000004, hasArrSupport false, frameRateCategoryRate FrameRateCategoryRate {normal=60.0, high=90.0}, supportedRefreshRates [], defaultMode 1, userPreferredModeId -1, supportedModes [{id=1, width=1620, height=2880, fps=60.000004, vsync=60.000004, synthetic=false, alternativeRefreshRates=[15.000001], supportedHdrTypes=[]}, {id=2, width=1620, height=2880, fps=15.000001, vsync=15.000001, synthetic=false, alternativeRefreshRates=[60.000004], supportedHdrTypes=[]}], appsSupportedModes [{id=1, width=1620, height=2880, fps=60.000004, vsync=60.000004, synthetic=false, alternativeRefreshRates=[15.000001], supportedHdrTypes=[]}, {id=2, width=1620, height=2880, fps=15.000001, vsync=15.000001, synthetic=false, alternativeRefreshRates=[60.000004], supportedHdrTypes=[]}], hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[], mMaxLuminance=500.0, mMaxAverageLuminance=500.0, mMinLuminance=0.0}, isForceSdr false, userDisabledHdrTypes [], minimalPostProcessingSupported false, rotation 0, state ON, committedState ON, type INTERNAL, uniqueId "local:4619827820427265280", app 2880 x 1620, density 160 (160.0 x 160.0) dpi, layerStack 0, colorMode 0, supportedColorModes [0], address {port=0, model=0x401ceced0008c5}, deviceProductInfo DeviceProductInfo{name=mumuscreen000, manufacturerPnpId=GGL, productId=1, modelYear=null, manufactureDate=ManufactureDate{week=27, year=2006}, connectionToSinkType=1}, removeMode 0, refreshRateOverride 0.0, brightnessMinimum 0.035433073, brightnessMaximum 1.0, brightnessDefault 0.08279251, brightnessDim 0.05, installOrientation ROTATION_0, layoutLimitedRefreshRate null, hdrSdrRatio not_available, thermalRefreshRateThrottling {}, thermalBrightnessThrottlingDataId default}
+  mDisplayId=0
+  mDisplayId=0
+  mDisplayId=: 0
+  mDisplayId= 0
+  mDisplayId=0
+  mDisplayId=0
+  mDisplayId=0
+  mDisplayId=0
+===window_displays===
+  Display: mDisplayId=0 (organized)
+    init=1620x2880 160dpi mMinSizeOfResizeableTaskDp=220 base=2880x1620 160dpi noscale
+ cur=2880x1620 app=2880x1620 rng=1620x1620-2880x2880
+  mLastOrientationSource=WindowedMagnification:0:31@116148697
+  overrideConfig={1.0 460mcc?mnc [zh_CN_#Hans] ldltr sw1620dp w2880dp h1620dp 160dpi xlrg long land finger -keyb/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2880, 1620) mAppBounds=Rect(0, 0 - 2880, 1620) mMaxBounds=Rect(0, 0 - 2880, 1620) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.306 fontWeightAdjustment=0}
+  DisplayFrames w=2880 h=1620 r=0
+    mCurrentAppOrientation=SCREEN_ORIENTATION_LANDSCAPE
+    mLastOrientation=0
+    mRotation=0 mDeferredRotationPauseCount=0
+===top_activity===
+      topResumedActivity=ActivityRecord{245799382 u0 app.lawnchair/.LawnchairLauncher t2}
+===current_app_config===
+      mResumed=true mStopped=false mFinished=false
+      mCurrentConfig={1.0 460mcc?mnc [zh_CN_#Hans] ldltr sw1620dp w2880dp h1620dp 160dpi xlrg long land finger -keyb/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2880, 1620) mAppBounds=Rect(0, 0 - 2880, 1620) mMaxBounds=Rect(0, 0 - 2880, 1620) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=home mAlwaysOnTop=undefined mRotation=ROTATION_0} s.6 fontWeightAdjustment=0}
+      mLastReportedMergedConfiguration={mGlobalConfig={1.0 460mcc?mnc [zh_CN_#Hans] ldltr sw1620dp w2880dp h1620dp 160dpi xlrg long land finger -keyb/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2880, 1620) mAppBounds=Rect(0, 0 - 2880, 1620) mMaxBounds=Rect(0, 0 - 2880, 1620) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.50 fontWeightAdjustment=0} mOverrideConfig={1.0 460mcc?mnc [zh_CN_#Hans] ldltr sw1620dp w2880dp h1620dp 160dpi xlrg long land finger -keyb/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2880, 1620) mAppBounds=Rect(0, 0 - 2880, 1620) mMaxBounds=Rect(0, 0 - 2880, 1620) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=home mAlwaysOnTop=undefined mRotation=ROTATION_0} s.6 fontWeightAdjustment=0}}
+      mLastConfigurationFromResources={1.0 460mcc?mnc [zh_CN_#Hans] ldltr sw1620dp w2880dp h1620dp 443dpi xlrg long land finger -keyb/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2880, 1620) mAppBounds=Rect(0, 0 - 2880, 1620) mMaxBounds=Rect(0, 0 - 2880, 1620) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=home mAlwaysOnTop=undefined mRotation=ROTATION_0} s.6 fontWeightAdjustment=0}
+===mute===
+0
+0
+0

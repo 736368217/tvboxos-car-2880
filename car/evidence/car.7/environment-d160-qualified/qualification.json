@@ -1,0 +1,65 @@
+{
+  "status": "display_environment_qualified",
+  "scope": "Display and touch environment only; NOT final car.7 functional acceptance.",
+  "mumuVersion": "6.8.7.0",
+  "instance": 1,
+  "apkSha256": "E7AA9B70F9A6F945CDFA2177060099350D5D31961C1C83D442742C3C06D8975D",
+  "appPid": 2161,
+  "densityDpi": 160,
+  "sizeOverridePresent": false,
+  "orientation": 1,
+  "displayRectsLauncherThenApp": [
+    [
+      0,
+      0,
+      2880,
+      1620
+    ],
+    [
+      0,
+      0,
+      2880,
+      1620
+    ]
+  ],
+  "inputViewportsLauncherThenApp": [
+    {
+      "logical": "0, 0, 2880, 1620",
+      "physical": "0, 0, 2880, 1620",
+      "deviceSize": "2880, 1620"
+    },
+    {
+      "logical": "0, 0, 2880, 1620",
+      "physical": "0, 0, 2880, 1620",
+      "deviceSize": "2880, 1620"
+    }
+  ],
+  "imageDimensions": {
+    "qualified-launcher.png": [
+      2880,
+      1620
+    ],
+    "qualified-app.png": [
+      2880,
+      1620
+    ],
+    "after-restart-launcher.png": [
+      2880,
+      1620
+    ],
+    "after-restart-app.png": [
+      2880,
+      1620
+    ]
+  },
+  "beforeDisplayRect": "Rect(0, 984 - 1620, 1895)",
+  "automaticRotationRejectedAfterRestart": true,
+  "rotationLockPersistsAcrossMumuRestart": false,
+  "startupRequirement": "After each MuMu restart, reapply the landscape lock and require verify_car_display.sh to pass before tests.",
+  "currentGatePassed": true,
+  "unverified": [
+    "Visual browser inspection unavailable in this session",
+    "Real head-unit OEM behaviour and hardware performance",
+    "Final car.7 functional retest after environment correction"
+  ]
+}

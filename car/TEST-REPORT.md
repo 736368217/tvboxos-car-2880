@@ -1,112 +1,83 @@
-# TEST-REPORT — TVBoxOS 1.0.0-car.6
+# car.7 候选验收报告
 
-验收日期：2026-10-15。最终交付 `TVBox-1.0.0-car.6-python-signed.apk`，**52,635,477 字节**，SHA-256：
+日期：2026-10-16。当前交付为私有草稿候选，正式发布暂缓。Python运行兼容缺口已修复，真实PY内容和EXO播放已验证；枫叶源当前内容为空、IJK硬解全屏像素异常仍保留。
 
-```text
-02C7CF892C49BA5D286A325C6FC46B69B861070582FB552A2868B75352808D08
-```
+## 最终候选和环境
 
-## 测试对象与环境
-
-MuMu 6.8.4.0 / Android 15，横屏 2880×1620、density 240，经 ARM64 翻译运行。独占实例 2，两批各 acquire/release 一次，结束保留 MuMu 主程序；不操作其他会话实例。整批主机与 guest 静音，`volume_music=0`、`sound_effects_enabled=0`；`accessibility_enabled=0`。
-
-测试分两阶段，避免把旧包证据冒充最终包的全量复测：
-
-| 阶段 | APK SHA-256 | 覆盖 |
-|---|---|---|
-| 完整功能矩阵基线 | `E3B83211B34E4261AD72731DFC1F5D1D1DA4CCFC792162072ACB5380331426F8` | 新预设、四开关、1080p/4K、普通渲染回退、持久化、Python/QuickJS/JAR；PID3079，显式重启后23666 |
-| 最终生命周期修复包 | `02C7CF892C49BA5D286A325C6FC46B69B861070582FB552A2868B75352808D08` | EXO/IJK真实前后台恢复、暂停恢复、全屏、退出重进、producer释放、Python/JAR恢复；PID2408 |
-
-两包之间仅调整 `VideoView` 恢复/释放分支及 `GlEnhanceRenderView` producer 生命周期。音画参数表、生产 GLSL、时域策略和独立设置代码不变；没有在修复包上重复整个四组合矩阵。机器摘要：`evidence/car.6/baseline-device-acceptance.json` 与 `device-acceptance.json`。
-
-## 构建与静态检查
-
-| 项目 | 结果 |
+| 项目 | 实际值 |
 |---|---|
-| 最终 Python release 构建 | exit 0，107.23s |
-| APK 身份 | `com.github.tvbox.osc.jun` / `TVBox` / code7 / name1.0.0-car.6 |
-| native ABI | `armeabi-v7a`、`arm64-v8a`；均有 Python／Chaquopy／QuickJS 库 |
-| 签名与对齐 | v1/v2/v3 true，zipalign 4通过，沿用既有测试证书 |
-| 覆盖安装 | 最终包安装并启动通过 |
-| Java 8 host tests | 11画面／9音效精确新旧参数、稳定ID、不可变表、迁移、默认开关与损坏值回退通过 |
-| 时域/旁路策略 | 首帧、seek、暂停、切镜头差异抑制、权重衰减、4K/小窗口SR旁路、真实FBO字节测试通过 |
+| APK | TVBox-1.0.0-car.7-python-signed.apk |
+| package / label | com.github.tvbox.osc.jun / TVBox |
+| versionCode / versionName | 8 / 1.0.0-car.7 |
+| 大小 | 52,668,696B |
+| SHA-256 | D2A49B5DA2B0371CF3C84CCDAC6C5753EF649721639434FB21955F4054A30803 |
+| 静态检查 | v1/v2/v3、zipalign4、入口/Manifest、双ARM的Python/Chaquopy/QuickJS通过 |
+| 环境 | MuMu6.8.4.0 / Android15 / 实例1 / 完整2880×1620 / density160 / rotation1 / 无override |
 
-签名工具仍输出上游 META-INF 条目未被 v1 单独保护的提示；v2/v3 完整 APK 签名验证通过。构建有上游可选库缺类提示，最终 exit0。原始摘要在 `final-build-result.json`、`final-apk-signature.txt`。
+每轮先验证真实显示和输入viewport均2880×1620，打印CAR_DISPLAY_PASS。host与guest静音，未启用无障碍。所有设备操作经过MuMu插件并检查独占租约；原配置恢复后核验，最后只释放实例1，保留MuMu主程序。
 
-## 生产 GLSL 像素验证
+## Python故障原理与修复
 
-独立 `VideoGpuProbe.java` 经 app_process/EGL pbuffer 运行，直接编译生产 `VideoShaders` 字符串，无产品测试 Activity。输入16×16，输出96×96，GPU报告 `Adreno (TM) 640 / OpenGL ES 3.2 v334 R`，是模拟器环境。
+之前已切换到Python flavor，解释器原本就在APK内。JS与PY的Spider/HTTP链不同，JS成功不能证明PY的Requests兼容。缺口在请求体/原始字节、Cookie、Response、相对重定向和TLS回退语义，以及下载缓存与同步预热调度。
 
-- OES 调色 shader 与 SGSR/时域 shader 编译、链接通过。
-- 四开关组合的实际 readback 像素通过；低差异数值混合、高差异切断、静态帧恒等通过。
-- SGSR 平涂区域差异0；边缘平均绝对差异 **1.041097**、最大差异 **16/255**，符合限幅。
-- 11档生产调色参数逐通道与CPU参考比较，误差≤1个8bit量化值。
-- GL清理检查无错误，输出完整 `CAR6_GPU_PASS`。
+car.7新增标准Requests BaseAdapter与真实Response，保留原始字节、超时、reason、final URL、重复header和Cookie策略；可重放HTTPS请求遇既定错误时Java回退，native仍优先。脚本下载有重定向上限、2xx/非空/语法检查，临时文件通过后原子替换；失败不覆盖有效缓存、不静默导入旧脚本冒充成功。ApiConfig传递完整配置，PY不参与后台抢锁预热，解释器与pending config在首次真实请求时应用。
 
-全部断言完成后，工具进程在 Shutdown 阶段发生 `Segmentation fault`／退出139。这是独立探针退出异常，不能写成整个进程 exit0，也不是 TVBox 应用崩溃。原始输出与逐组合PNG保存在 `gpu-result.txt`、`gpu-*.png`。
+不修改用户订阅内容，不移除Java/JAR或QuickJS，不盲目补依赖。Windows只下载/静态解析远程数据；实际脚本仅在Android目标进程内执行。新增HTTP诊断仅method/host/status/耗时，完整URL、headers、body和运行时凭据不归档。
 
-## 新增音效和画面预设
+## 最终D2A真实PY结果
 
-9档音效 UI 循环0→1→…→8→0逐项有新鲜节点。快速连点曾被上游防连点节流，随后按≥0.8秒间隔选择，并在播放前核对设置值。
+订阅 `https://clun.top/box.json`，当日97站/44PY。实际安装APK哈希与D2A一致。tag `final-python-D2A49B5D-r1`，PID51004；严格断言12 PASS/1 FAIL。失败源为py_maple返回空数据，不能把它从报告中删掉。
 
-| 音效 | 实际会话 | Bass / Virtualizer / Loudness mB | 证据 |
-|---|---:|---|---|
-| 6 动漫·标准 | 89 | 150 / 180 / 450 | 运行日志；AudioFlinger四效果启用 |
-| 7 动漫·剧场 | 105 | 280 / 320 / 550 | 运行参数日志；未成功保存该会话AudioFlinger转储 |
-| 8 动漫·对白 | 113 | 0 / 80 / 650 | 运行日志与AudioFlinger转储；BassBoost按0强度禁用 |
+| PY样本 | 分类数 | 分类条目 | 详情 | 搜索“潜伏” | 播放解析 |
+|---|---:|---:|---:|---:|---|
+| py_douban | 10 | 20 | 不适用 | 不适用 | 不适用 |
+| py_maple | 8 | 0 | 未到达 | 0 | 未到达 |
+| py_juzong | 18 | 42 | 1 | 12 | URL返回，parse=1，需网页解析 |
+| py_apples | 7 | 21 | 1 | 20 | URL返回，parse=0 |
+| py_guazi | 5 | 30 | 1 | 15 | URL返回，parse=0 |
 
-静音测试验证绑定和参数，不构成车内频响、削波或主观听感验收。标准的四效果为 Equalizer、Dynamic Bass Boost、Loudness Enhancer、Virtualizer。
+苹果PY真实EXO播放：1280×720，STATE_PLAYING=3，位置243→2761ms；不是fixture、脚本下载或URL存在性检查。桥接form/0..255字节POST和响应/重复Cookie相对跳转/Response合约通过，真实clun脚本200/17,227B。证据 `evidence/car.7/final-python-D2A49B5D/`。未逐站验证全部44PY，也未验证每一条外部线路。
 
-新画面8动漫·暗光、9动漫·日间、10动漫·清透，均由设置UI实际选择，播放日志的饱和度/对比度/亮度/RGB/SGSR锐度与规格表一致。11档精确像素由生产GLSL探针覆盖；旧8档car.5截图比较保留在历史证据，不把本轮移动片截图当同帧视觉对比。
+历史E395同一天的完整五站轮：PID10695、12/0，枫叶分类24/详情1/搜索7，其余四站与上表数量一致，见 `python-real-E39569F0/`。E395补充播放轮PID36591也实际播放苹果1280×720、192→2712ms，但枫叶那轮已经为空。不同轮结果一起保留，说明枫叶并非解释器缺失，当前源端响应仍有限制。不能把历史有数据自动当作最终轮通过。
 
-## 开关组合、持久化与内存
+## 最终D2A xiaosa JAR/QuickJS
 
-| SR / 补帧 | 实际播放结果 |
-|---|---|
-| 开 / 开 | 双FBO、SR激活、非零blended，24fps移动片常见输出提交约47–58次/秒 |
-| 开 / 关 | SR激活，源/输出约24fps，blended=0，无持续补帧 |
-| 关 / 开 | SR关闭，输出约57次/秒，非零blended |
-| 关 / 关（清透调色） | 单Pass，fbo=false、sr=false、interp=false，blended=0 |
-| 关 / 关（原画） | 原生视图树为 `TextureRenderView`，普通播放通过 |
-| 开 / 开（原画） | EXO/IJK均能走增强链，原画不强制禁用两功能 |
+原地址 `https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/api.json`；guest以ghfast转发加载。快照109站＝108JAR/CSP＋1JS，0PY。API200/28,993B，JAR200/1,863,956B，ZIP含classes.dex；声明/host/guest JAR MD5均 `bca2498f2d40c694b285471062748cf0`，元数据在 `xiaosa-real-E39569F0/network-metadata.json`（同一当日JAR快照）。
 
-显式关闭/启动应用后，节点仍为动漫·对白、原画、SR关闭、补帧关闭。两个新开关初始默认均开启，首次安装后设置节点已记录。
+最终tag `final-xiaosa-D2A49B5D-r1`，PID51918；9 PASS/4 FAIL，JAR Init.init/main及JSLoader加载成功，没有身份门终止或应用FATAL。
 
-1080p：双FBO **16,588,800B**，1057×594小窗 `srActive=false`，2880×1620全屏 `srActive=true`。4K：双FBO **66,355,200B**，全屏仍 `srActive=false`，正常出帧。4K采样窗口输出提交约44–56次/秒；这些是软件计数，含启动、解码与采集扰动，不是目标硬件性能基准。
+| 样本 | 分类数 | 分类条目 | 详情 | 搜索 |
+|---|---:|---:|---:|---|
+| 热播影视（JAR） | 10 | 12 | 1 | 0 |
+| 枫叶影视（JAR） | 8 | 0 | 未到达 | 7 |
+| 爱动漫（QuickJS） | 6 | 48 | 1 | 30秒超时 |
 
-## 生命周期复核与最终包复测
+4个失败记录为热播搜索空、枫叶分类空、爱动漫超时及超时终止剩余探针。证据 `final-xiaosa-D2A49B5D/`。历史E395真实UI已通过导入、豆瓣分类/推荐、聚合搜索37结果（抓取时72/79完成）和热播47集详情；不宣称所有源永久可用。首次错误导入是测试输入残留拼接URL，fresh XML识别后纠正，不算应用缺陷。
 
-独立代码复核发现原 `VideoView.resume()` 把 GLSurfaceView 识别为 SurfaceView，调用 `setDisplay(holder)` 会绕过 OES producer；另发现重建/退出时 producer 过早释放。已修复并重建：
+## 返回与车机UI
 
-1. GL恢复分支重绑SurfaceTexture producer，保留主线程调用。
-2. 重建时旧producer保留至新Surface绑定返回后再释放。
-3. 引擎异步释放前解除输出绑定，producer释放与完整GL帧串行。
+最终D2A tag `final-ui-D2A49B5D-r1`，PID51576，58 PASS/0 FAIL；证据 `final-ui-D2A49B5D/`。覆盖冷启动热区243px、主页设置入口安全范围、横向分类/推荐最后项、独立标题区、分类回主页、根点击不退出、高级页返回、三模式、球拖动吸边/位置持久化、闲置alpha.38与触摸唤醒、边缘短拉/反悔/CANCEL/纵向拒绝/400ms长按移位，以及多指和弹窗外拖不误提交/取消。
 
-最终包 PID2408 的实际验证：
+返回View位于Activity decor，无系统overlay/无障碍权限。标准视觉/热区189/243px，大号216/270px。历史E395的屏幕水滴139×331、胶囊328×256已测量且在内置浏览器实际查看形状/文字，证据 `back-redesign-d160-E39569F0-edge-trace/`；最终D2A重复了全部58项和截图，但没有把浏览器后续不可见描述为人工查看完成。真实车机的人机工程仍待实机确认。
 
-- EXO全屏、暂停/恢复、退后台→插件app launch回前台：日志出现 `resume uses SurfaceTexture producer`，恢复后源帧持续增长，source约24fps、output约57次/秒、blended非零。
-- 切换IJK，原生日志 `MEDIA_INFO_VIDEO_RENDERING_START`，session33；再次退后台/回前台，出现相同producer恢复标记，源帧和混合输出继续增长。
-- 全屏输出viewport2880×1620，退出播放先 `player surface detached (main thread)`，再 `producer surfaces released; live=0`；退出后重新进入低饱和片正常播放。
-- 两次会话退出均释放至live0，PID不变；未出现应用FATAL EXCEPTION、wrong-thread、draw failed、setSurface失败或POSTPROCESS_FALLBACK。
+## 当前视频、生命周期与像素
 
-未通过测试入口强制注入EGL context loss；全屏移动与前后台恢复已经实测，异常context丢失后的所有驱动路径仍不作全覆盖承诺。证据见 `lifecycle-runtime-excerpts.txt`、`repair-*-1440.jpg`。
+最终D2A tag `final-playback-D2A49B5D-r1`，PID47234，95 PASS/0 FAIL。EXO/IJK各实际播放本地200秒24fps合成片，验证9音效/11画面作用当前decoder/session、暂停迟到701/702/3不提升为PLAYING、快速连续配置、全屏/退全屏、HOME后台/前台两段源帧推进、释放live=0、重复release、重进、切换中退出清理。
 
-## 脚本、订阅与返回按钮回归
+EXO的Texture/GL交接保留旧consumer至新setSurface成功，提交/回滚延后一条主线程消息，避免Texture回调在绘制遍历中移除子View。IJK保留从prepare建立的GL消费者；全关为恒等OES直通，无FBO/SR/持续补帧，仍保持原画语义。不restart/seek、不替换decoder identity。全屏producer重建时IJK有短暂原生暂停和原播放意图恢复；用户显式暂停优先。
 
-Python3.8.13实际执行8项依赖及本地HTTP断言，四卡片分类→详情→本地合成片播放。QuickJS基线包分类、详情与播放通过；最终生命周期包重新执行Python与JAR，未重复QuickJS全流程。测试源未写入APK默认订阅。
+像素门禁独立检查8张实际PNG：7 PASS/1 FAIL。EXO初始/全屏/前台/重进4图正常；IJK初始/前台/重进正常，硬解全屏图仍绿偏并有块状异常。不能用95项状态断言代替画质通过。证据 `final-playback-D2A49B5D/{result,playback-observations,pixels}.json`。
 
-两批结束都通过配置地址弹窗恢复：
+历史对照：E395动态硬解Texture正常/GL绿，软解Texture/GL均正常；初始GL硬解正常。C996交接曾发生ViewGroup.dispatchDraw空指针，FABB改为异步提交后不再崩溃；02C固定IJK输出后剩余全屏一图，D2A短暂停重绑仍未消除此图。失败与通过均保留，未重试到绿或修改像素门槛。当前MuMu结果不能直接推断真实ARM车机解码器表现。
 
-```text
-https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/123/xiaosa/api.json?v=3
-```
+没有强制注入detach失败、暂停期间EGL context-loss；播放控制栏四入口已接生产方法，当前实例行为通过，不把它写成逐按钮UI全矩阵验收。
 
-最终包记录 `echo-load Init.init success`、`load success key=main`。基线包原订阅主页推荐与热播剧集真实卡片可见；猜你喜欢返回“没找到数据”。没有逐站验证全部外部源，也未在car.6重复car.5的78源聚合搜索。
+## 主机、驱动和清理
 
-应用内返回用于全屏→详情、详情→主页、分类→主页、设置→主页。原生节点证据：闲置6秒后按钮0个，触摸后1个；首页根级连续点击仍留在应用，PID稳定，无障碍关闭。弹窗仍用自己的取消/确定按钮。
+最终Java release编译＋Python release构建exit0；Python HTTP/下载20测试、164 XML、Java8、11预设/参数保持、44运行配置/88SDR-HDR/1936比较、738返回策略、diff whitespace通过。apksigner有上游META-INF的v1提示，v2/v3整包验证通过。全局台账checker仍因另一任务未登记 `com.carhd.fileopener` 非零，未改他人条目，TVBoxOS保持occupied且路径/身份正确。
 
-## 剩余边界
+Computer Use插件与原生driver分开核对，0.28.2已安装并通过probe/doctor/list_apps。后续观察被覆盖、浏览器面板间歇不可见不是“驱动未安装”。本任务Paint已关闭。
 
-真实2027零跑B01／SA8295P、OEM全屏、方控与真实DPI、长时间功耗温升、稳定60fps呈现、单帧<2ms尚无硬件证据。ARM32完成打包核验，未独立运行；HDR/DoVi、端到端10bit精度、旧Android版本、直播/外部播放器未全量验收。时域混合不含运动矢量估计。
+原偏好/订阅从guest私有备份恢复且cmp一致，测试包com.github.tvbox.osc.car7.test卸载成功；恢复后PID52210稳定、HomeActivity前台、FATAL0、fresh XML。实例1release返回released=true、shutdown成功，MuMu主程序仍运行；未操作实例5。未发现本批Python/Java辅助进程残留。
 
-全局包名检查最终exit0、Errors0、Warnings18；TVBoxOS全部8个产物路径与occupied身份一致。提示为历史多版本/已占用产物等记录，详见 `evidence/car.6/package-registry-check.txt`。检查期间一度遇到JSON解析错误，当前文件经Python、PowerShell解析与完整脚本复查均通过。
+正式发布阻塞：IJK硬解全屏像素异常。源端枫叶空响应、部分JAR/JS搜索超时明确保留。真实OEM全屏、SA8295P性能、长期温升功耗、稳定60fps、ARM32运行、HDR/DoVi未实测。候选可按默认EXO测试Python修复，正式car.7 Release不发布为完成状态。

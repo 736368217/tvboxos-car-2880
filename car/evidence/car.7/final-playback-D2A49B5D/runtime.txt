@@ -1,0 +1,611 @@
+--------- beginning of main
+10-16 21:26:44.247 47234 47304 I JarLoader: echo-load Init.init success
+10-16 21:26:44.247 47234 47304 I JarLoader: load success key=main, file=/data/user/0/com.github.tvbox.osc.jun/files/csp/1b083ab4277cd89f8b9f081c112edbea.jar
+10-16 21:26:44.324 47234 47317 I JarLoader: getSpider success key=main豆瓣
+10-16 21:26:44.325 47234 47285 I JarLoader: getSpider success key=main本地
+10-16 21:26:44.326 47234 47285 I JarLoader: getSpider success key=main热播影视
+10-16 21:26:44.326 47234 47285 I JarLoader: getSpider success key=main一起影视
+10-16 21:26:44.326 47234 47285 I JarLoader: getSpider success key=main番茄影视
+10-16 21:26:44.328 47234 47285 I JarLoader: getSpider success key=main咕噜
+10-16 21:26:44.330 47234 47285 I JarLoader: getSpider success key=main布布
+10-16 21:26:44.330 47234 47285 I JarLoader: getSpider success key=main马猴影视
+10-16 21:26:44.332 47234 47285 I JarLoader: getSpider success key=main韩圈
+10-16 21:26:44.464 47234 47285 I JarLoader: getSpider success key=main哔哩视频
+10-16 21:26:44.464 47234 47285 I JarLoader: getSpider success key=main三六零
+10-16 21:27:00.122 47234 47234 I CarVideo: runtime_config TextureRenderView mode=0 sr=false interp=false
+10-16 21:27:00.123 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=1 player=202905196
+10-16 21:27:00.123 47234 47234 I CarAudio: runtime_apply mode=0 session=217 active=false state=2 player=202905196
+10-16 21:27:00.123 47234 47234 I CarAudio: runtime_apply mode=0 session=217 active=false state=3 player=202905196
+10-16 21:27:00.424 47234 47248 I Car7Native: PASS EXO local video playing 
+10-16 21:27:00.424 47234 47248 I Car7Native: PASS EXO actual engine 
+10-16 21:27:00.425 47234 47248 I Car7Native: PASS EXO initial Texture 
+10-16 21:27:00.432 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:00.432 47234 47234 I GlEnhance: playback active=true interp=true
+10-16 21:27:00.432 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:00.461 47234 47403 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:27:00.461 47234 47403 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:00.463 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:00.463 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:27:00.463 47234 47403 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:00.463 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:00.464 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:00.465 47234 47234 I CarVideo: runtime_switch TextureRenderView -> GlEnhanceRenderView mode=1 sr=true interp=true player=202905196 state=3 playing=true decoderRestart=false
+10-16 21:27:00.506 47234 47403 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:27:00.507 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:00.507 47234 47403 I GlEnhance: drawFrame #1 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:00.523 47234 47403 I GlEnhance: drawFrame #2 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:00.540 47234 47403 I GlEnhance: drawFrame #3 preset=1:臻彩 source=2 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:00.933 47234 47248 I Car7Native: PASS EXO Texture to GL without restart 
+10-16 21:27:02.176 47234 47403 I GlEnhance: drawFrame #100 preset=1:臻彩 source=41 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:02.520 47234 47403 I GlEnhance: frame_stats seconds=2.014132 sourceFps=24.328098 outputFps=59.579014 blended=47 intervalNs=40476192 active=true
+10-16 21:27:02.741 47234 47248 I Car7Native: PASS EXO initial GL advancing decoder and source 
+10-16 21:27:03.237 47234 47234 I GlEnhance: runtime_config requested mode=0 sr=true interp=true
+10-16 21:27:03.237 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:03.247 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=0 sr=true interp=true
+10-16 21:27:03.248 47234 47403 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:03.248 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:03.738 47234 47248 I Car7Native: PASS EXO video preset 0 
+10-16 21:27:03.744 47234 47234 I GlEnhance: runtime_config requested mode=1 sr=true interp=true
+10-16 21:27:03.744 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:03.754 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:27:03.754 47234 47403 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:03.754 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:03.872 47234 47403 I GlEnhance: drawFrame #200 preset=1:臻彩 source=81 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:04.245 47234 47248 I Car7Native: PASS EXO video preset 1 
+10-16 21:27:04.251 47234 47234 I GlEnhance: runtime_config requested mode=2 sr=true interp=true
+10-16 21:27:04.251 47234 47234 I CarVideo: runtime_apply requestedMode=2 effectiveMode=2 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:04.260 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=2 sr=true interp=true
+10-16 21:27:04.260 47234 47403 I GlEnhance: mode=2(自然) sat=1.08 con=1.04 bri=0.01 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:04.260 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:04.530 47234 47403 I GlEnhance: frame_stats seconds=2.0095806 sourceFps=23.88558 outputFps=59.216335 blended=45 intervalNs=40695483 active=true
+10-16 21:27:04.752 47234 47248 I Car7Native: PASS EXO video preset 2 
+10-16 21:27:04.756 47234 47234 I GlEnhance: runtime_config requested mode=3 sr=true interp=true
+10-16 21:27:04.756 47234 47234 I CarVideo: runtime_apply requestedMode=3 effectiveMode=3 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:04.766 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=3 sr=true interp=true
+10-16 21:27:04.766 47234 47403 I GlEnhance: mode=3(影院) sat=1.08 con=1.16 bri=-0.015 rgb=1.03,1.0,0.97 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:04.766 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:05.257 47234 47248 I Car7Native: PASS EXO video preset 3 
+10-16 21:27:05.262 47234 47234 I GlEnhance: runtime_config requested mode=4 sr=true interp=true
+10-16 21:27:05.262 47234 47234 I CarVideo: runtime_apply requestedMode=4 effectiveMode=4 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:05.272 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=4 sr=true interp=true
+10-16 21:27:05.272 47234 47403 I GlEnhance: mode=4(鲜艳) sat=1.5 con=1.16 bri=0.015 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:05.272 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:05.559 47234 47403 I GlEnhance: drawFrame #300 preset=4:鲜艳 source=122 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:05.762 47234 47248 I Car7Native: PASS EXO video preset 4 
+10-16 21:27:05.767 47234 47234 I GlEnhance: runtime_config requested mode=5 sr=true interp=true
+10-16 21:27:05.767 47234 47234 I CarVideo: runtime_apply requestedMode=5 effectiveMode=5 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:05.777 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=5 sr=true interp=true
+10-16 21:27:05.777 47234 47403 I GlEnhance: mode=5(柔和) sat=0.9 con=0.94 bri=0.02 rgb=1.015,1.0,0.985 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:05.777 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:06.267 47234 47248 I Car7Native: PASS EXO video preset 5 
+10-16 21:27:06.272 47234 47234 I GlEnhance: runtime_config requested mode=6 sr=true interp=true
+10-16 21:27:06.272 47234 47234 I CarVideo: runtime_apply requestedMode=6 effectiveMode=6 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:06.284 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=6 sr=true interp=true
+10-16 21:27:06.284 47234 47403 I GlEnhance: mode=6(明亮) sat=1.12 con=1.02 bri=0.08 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:06.284 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:06.537 47234 47403 I GlEnhance: frame_stats seconds=2.006857 sourceFps=23.917997 outputFps=59.296703 blended=44 intervalNs=40203571 active=true
+10-16 21:27:06.773 47234 47248 I Car7Native: PASS EXO video preset 6 
+10-16 21:27:06.778 47234 47234 I GlEnhance: runtime_config requested mode=7 sr=true interp=true
+10-16 21:27:06.778 47234 47234 I CarVideo: runtime_apply requestedMode=7 effectiveMode=7 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:06.790 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=7 sr=true interp=true
+10-16 21:27:06.790 47234 47403 I GlEnhance: mode=7(暖色) sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:06.790 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:07.245 47234 47403 I GlEnhance: drawFrame #400 preset=7:暖色 source=163 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:07.279 47234 47248 I Car7Native: PASS EXO video preset 7 
+10-16 21:27:07.284 47234 47234 I GlEnhance: runtime_config requested mode=8 sr=true interp=true
+10-16 21:27:07.284 47234 47234 I CarVideo: runtime_apply requestedMode=8 effectiveMode=8 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:07.295 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=8 sr=true interp=true
+10-16 21:27:07.295 47234 47403 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:07.296 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:07.785 47234 47248 I Car7Native: PASS EXO video preset 8 
+10-16 21:27:07.791 47234 47234 I GlEnhance: runtime_config requested mode=9 sr=true interp=true
+10-16 21:27:07.791 47234 47234 I CarVideo: runtime_apply requestedMode=9 effectiveMode=9 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:07.801 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=9 sr=true interp=true
+10-16 21:27:07.801 47234 47403 I GlEnhance: mode=9(动漫·日间) sat=1.14 con=1.03 bri=0.015 rgb=1.0,0.99,0.96 sr=true sharp=1.3 interp=true maxAlpha=0.28
+10-16 21:27:07.802 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:08.292 47234 47248 I Car7Native: PASS EXO video preset 9 
+10-16 21:27:08.298 47234 47234 I GlEnhance: runtime_config requested mode=10 sr=true interp=true
+10-16 21:27:08.298 47234 47234 I CarVideo: runtime_apply requestedMode=10 effectiveMode=10 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:08.307 47234 47403 I GlEnhance: runtime_config applied (GL thread) mode=10 sr=true interp=true
+10-16 21:27:08.307 47234 47403 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=true sharp=1.45 interp=true maxAlpha=0.28
+10-16 21:27:08.308 47234 47403 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:08.543 47234 47403 I GlEnhance: frame_stats seconds=2.006512 sourceFps=23.92211 outputFps=59.3069 blended=44 intervalNs=40203573 active=true
+10-16 21:27:08.799 47234 47248 I Car7Native: PASS EXO video preset 10 
+10-16 21:27:08.799 47234 47248 I Car7Native: PASS EXO audio session valid 
+10-16 21:27:08.802 47234 47234 I CarAudio: runtime_apply mode=0 session=217 active=false state=3 player=202905196
+10-16 21:27:08.932 47234 47403 I GlEnhance: drawFrame #500 preset=10:动漫·清透 source=203 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:09.403 47234 47248 I Car7Native: PASS EXO audio preset 0 
+10-16 21:27:09.426 47234 47234 I CarAudio: applied mode=1 name=影院 session=217 bass=900 virtualizer=850 loudness=900
+10-16 21:27:09.426 47234 47234 I CarAudio: runtime_apply mode=1 session=217 active=true state=3 player=202905196
+10-16 21:27:10.027 47234 47248 I Car7Native: PASS EXO audio preset 1 
+10-16 21:27:10.030 47234 47234 I CarAudio: applied mode=2 name=重低音 session=217 bass=700 virtualizer=150 loudness=300
+10-16 21:27:10.030 47234 47234 I CarAudio: runtime_apply mode=2 session=217 active=true state=3 player=202905196
+10-16 21:27:10.550 47234 47403 I GlEnhance: frame_stats seconds=2.006572 sourceFps=23.423033 outputFps=59.305122 blended=50 intervalNs=46502976 active=true
+10-16 21:27:10.618 47234 47403 I GlEnhance: drawFrame #600 preset=10:动漫·清透 source=242 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:10.631 47234 47248 I Car7Native: PASS EXO audio preset 2 
+10-16 21:27:10.635 47234 47234 I CarAudio: applied mode=3 name=3D环绕 session=217 bass=450 virtualizer=1000 loudness=450
+10-16 21:27:10.635 47234 47234 I CarAudio: runtime_apply mode=3 session=217 active=true state=3 player=202905196
+10-16 21:27:11.235 47234 47248 I Car7Native: PASS EXO audio preset 3 
+10-16 21:27:11.241 47234 47234 I CarAudio: applied mode=4 name=HiFi session=217 bass=250 virtualizer=300 loudness=400
+10-16 21:27:11.241 47234 47234 I CarAudio: runtime_apply mode=4 session=217 active=true state=3 player=202905196
+10-16 21:27:11.841 47234 47248 I Car7Native: PASS EXO audio preset 4 
+10-16 21:27:11.846 47234 47234 I CarAudio: applied mode=5 name=人声 session=217 bass=0 virtualizer=50 loudness=750
+10-16 21:27:11.846 47234 47234 I CarAudio: runtime_apply mode=5 session=217 active=true state=3 player=202905196
+10-16 21:27:12.301 47234 47403 I GlEnhance: drawFrame #700 preset=10:动漫·清透 source=282 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:12.446 47234 47248 I Car7Native: PASS EXO audio preset 5 
+10-16 21:27:12.449 47234 47234 I CarAudio: applied mode=6 name=动漫·标准 session=217 bass=150 virtualizer=180 loudness=450
+10-16 21:27:12.449 47234 47234 I CarAudio: runtime_apply mode=6 session=217 active=true state=3 player=202905196
+10-16 21:27:12.555 47234 47403 I GlEnhance: frame_stats seconds=2.004792 sourceFps=23.942635 outputFps=59.35778 blended=48 intervalNs=40476199 active=true
+10-16 21:27:13.050 47234 47248 I Car7Native: PASS EXO audio preset 6 
+10-16 21:27:13.053 47234 47234 I CarAudio: applied mode=7 name=动漫·剧场 session=217 bass=280 virtualizer=320 loudness=550
+10-16 21:27:13.053 47234 47234 I CarAudio: runtime_apply mode=7 session=217 active=true state=3 player=202905196
+10-16 21:27:13.654 47234 47248 I Car7Native: PASS EXO audio preset 7 
+10-16 21:27:13.658 47234 47234 I CarAudio: applied mode=8 name=动漫·对白 session=217 bass=0 virtualizer=80 loudness=650
+10-16 21:27:13.658 47234 47234 I CarAudio: runtime_apply mode=8 session=217 active=true state=3 player=202905196
+10-16 21:27:13.987 47234 47403 I GlEnhance: drawFrame #800 preset=10:动漫·清透 source=322 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:14.258 47234 47248 I Car7Native: PASS EXO audio preset 8 
+10-16 21:27:14.259 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:14.259 47234 47234 I GlEnhance: playback active=false interp=true
+10-16 21:27:14.710 47234 47234 I CarVideo: buffering end ignored state=4
+10-16 21:27:14.710 47234 47234 I CarVideo: rendering start ignored state=4
+10-16 21:27:14.711 47234 47248 I Car7Native: PASS EXO late callbacks keep explicit pause 
+10-16 21:27:14.715 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=4 player=202905196
+10-16 21:27:14.727 47234 47234 I GlEnhance: producer surfaces released; live=0
+10-16 21:27:14.727 47234 47234 I GlEnhance: release requested source=329 outputs=818
+10-16 21:27:14.727 47234 47234 I CarVideo: runtime_switch GlEnhanceRenderView -> TextureRenderView mode=0 sr=false interp=false player=202905196 state=4 playing=false decoderRestart=false
+10-16 21:27:14.727 47234 47234 I CarVideo: runtime_config TextureRenderView mode=0 sr=false interp=false
+10-16 21:27:15.217 47234 47248 I Car7Native: PASS EXO paused GL to Texture preserves state 
+10-16 21:27:15.222 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:15.222 47234 47234 I CarVideo: runtime_apply requestedMode=8 effectiveMode=8 hdrBypass=false sr=true interp=true state=4 player=202905196
+10-16 21:27:15.256 47234 48075 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:27:15.256 47234 48075 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:15.257 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:15.257 47234 48075 I GlEnhance: runtime_config applied (GL thread) mode=8 sr=true interp=true
+10-16 21:27:15.257 47234 48075 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:15.258 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:15.259 47234 47234 I CarVideo: runtime_switch TextureRenderView -> GlEnhanceRenderView mode=8 sr=true interp=true player=202905196 state=4 playing=false decoderRestart=false
+10-16 21:27:15.260 47234 48075 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:27:15.260 47234 48075 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:15.260 47234 48075 I GlEnhance: drawFrame #1 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:15.723 47234 47248 I Car7Native: PASS EXO paused Texture to GL preserves state 
+10-16 21:27:15.723 47234 47234 I GlEnhance: resume uses SurfaceTexture producer
+10-16 21:27:15.725 47234 47234 I CarAudio: runtime_apply mode=8 session=217 active=true state=3 player=202905196
+10-16 21:27:15.725 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:15.725 47234 47234 I GlEnhance: playback active=true interp=true
+10-16 21:27:15.725 47234 48075 I GlEnhance: drawFrame #2 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:15.725 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:15.738 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:15.739 47234 47248 I Car7Native: PASS EXO paused switch resumes 
+10-16 21:27:15.742 47234 48075 I GlEnhance: drawFrame #3 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:17.275 47234 48075 I GlEnhance: frame_stats seconds=2.0148213 sourceFps=18.36391 outputFps=46.654263 blended=35 intervalNs=40476137 active=true
+10-16 21:27:17.376 47234 48075 I GlEnhance: drawFrame #100 preset=8:动漫·暗光 source=39 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:17.563 47234 47248 I Car7Native: PASS EXO after paused switch advancing decoder and source 
+10-16 21:27:17.579 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:17.579 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:17.587 47234 48165 I GlEnhance: FBO ping-pong released
+10-16 21:27:17.599 47234 48165 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:27:17.599 47234 48165 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:17.600 47234 47234 I GlEnhance: retired producer released; live=1
+10-16 21:27:17.600 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:17.600 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:17.657 47234 48165 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:27:17.657 47234 48165 I GlEnhance: output srRequested=true srActive=true interp=true viewport=2880x1620
+10-16 21:27:17.657 47234 48165 I GlEnhance: drawFrame #1 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=2880x1620
+10-16 21:27:17.673 47234 48165 I GlEnhance: drawFrame #2 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=2880x1620
+10-16 21:27:17.690 47234 48165 I GlEnhance: drawFrame #3 preset=8:动漫·暗光 source=2 fbo=true sr=true interp=true viewport=2880x1620
+10-16 21:27:19.080 47234 47248 I Car7Native: PASS EXO fullscreen active 
+10-16 21:27:19.324 47234 48165 I GlEnhance: drawFrame #100 preset=8:动漫·暗光 source=41 fbo=true sr=true interp=true viewport=2880x1620
+10-16 21:27:19.661 47234 48165 I GlEnhance: frame_stats seconds=2.0043943 sourceFps=24.446287 outputFps=59.86846 blended=47 intervalNs=42857140 active=true
+10-16 21:27:20.893 47234 47248 I Car7Native: PASS EXO fullscreen advancing decoder and source 
+10-16 21:27:21.012 47234 48165 I GlEnhance: drawFrame #200 preset=8:动漫·暗光 source=81 fbo=true sr=true interp=true viewport=2880x1620
+10-16 21:27:21.236 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:21.236 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:21.249 47234 48342 I GlEnhance: FBO ping-pong released
+10-16 21:27:21.262 47234 48342 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:27:21.262 47234 48342 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:21.262 47234 47234 I GlEnhance: retired producer released; live=1
+10-16 21:27:21.262 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:21.262 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:21.266 47234 48342 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:27:21.266 47234 48342 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:21.266 47234 48342 I GlEnhance: drawFrame #1 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:21.282 47234 48342 I GlEnhance: drawFrame #2 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:21.299 47234 48342 I GlEnhance: drawFrame #3 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:22.437 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:22.437 47234 47234 I GlEnhance: playback active=false interp=true
+10-16 21:27:24.953 47234 47248 I Car7Native: PASS EXO background not continuous 
+10-16 21:27:24.999 47234 48342 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:24.999 47234 48342 I GlEnhance: frame_stats seconds=3.7339969 sourceFps=7.7664766 outputFps=19.550097 blended=27 intervalNs=41708333 active=false
+10-16 21:27:26.980 47234 47234 I GlEnhance: resume uses SurfaceTexture producer
+10-16 21:27:26.981 47234 47234 I CarAudio: runtime_apply mode=8 session=217 active=true state=3 player=202905196
+10-16 21:27:26.981 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:26.981 47234 47234 I GlEnhance: playback active=true interp=true
+10-16 21:27:26.983 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:26.990 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:26.992 47234 47248 I Car7Native: PASS EXO background resumes 
+10-16 21:27:27.028 47234 48342 I GlEnhance: frame_stats seconds=2.0172749 sourceFps=0.49571827 outputFps=1.9828731 blended=0 intervalNs=41708333 active=true
+10-16 21:27:27.429 47234 48342 I GlEnhance: drawFrame #100 preset=8:动漫·暗光 source=39 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:28.864 47234 47248 I Car7Native: PASS EXO foreground window1 advancing decoder and source 
+10-16 21:27:29.032 47234 48342 I GlEnhance: frame_stats seconds=2.0148075 sourceFps=23.823616 outputFps=58.56639 blended=49 intervalNs=40476186 active=true
+10-16 21:27:29.115 47234 48342 I GlEnhance: drawFrame #200 preset=8:动漫·暗光 source=80 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:30.684 47234 47248 I Car7Native: PASS EXO foreground window2 advancing decoder and source 
+10-16 21:27:30.801 47234 48342 I GlEnhance: drawFrame #300 preset=8:动漫·暗光 source=120 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:31.037 47234 48342 I GlEnhance: frame_stats seconds=2.005877 sourceFps=23.929682 outputFps=59.325672 blended=48 intervalNs=40476186 active=true
+10-16 21:27:31.187 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=3 player=202905196
+10-16 21:27:31.187 47234 47234 I CarVideo: runtime_config queued during surface handoff mode=1 sr=true interp=true
+10-16 21:27:31.187 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:31.187 47234 47234 I CarVideo: runtime_config queued during surface handoff mode=0 sr=false interp=false
+10-16 21:27:31.187 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=3 player=202905196
+10-16 21:27:31.187 47234 47234 I CarVideo: runtime_config queued during surface handoff mode=1 sr=true interp=true
+10-16 21:27:31.187 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:31.193 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:31.209 47234 47234 I GlEnhance: producer surfaces released; live=0
+10-16 21:27:31.209 47234 47234 I GlEnhance: release requested source=130 outputs=324
+10-16 21:27:31.209 47234 47234 I CarVideo: runtime_switch GlEnhanceRenderView -> TextureRenderView mode=0 sr=false interp=false player=202905196 state=3 playing=true decoderRestart=false
+10-16 21:27:31.209 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:31.209 47234 47234 I GlEnhance: playback active=true interp=true
+10-16 21:27:31.237 47234 48649 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:27:31.237 47234 48649 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:31.237 47234 48649 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:27:31.237 47234 48649 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:31.240 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:31.240 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:31.240 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:31.242 47234 47234 I CarVideo: runtime_switch TextureRenderView -> GlEnhanceRenderView mode=1 sr=true interp=true player=202905196 state=3 playing=true decoderRestart=false
+10-16 21:27:31.279 47234 48649 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:27:31.279 47234 48649 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:31.279 47234 48649 I GlEnhance: drawFrame #1 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:31.292 47234 48649 I GlEnhance: drawFrame #2 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:31.308 47234 48649 I GlEnhance: drawFrame #3 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:32.888 47234 47248 I Car7Native: PASS EXO rapid settings preserve decoder 
+10-16 21:27:32.945 47234 48649 I GlEnhance: drawFrame #100 preset=1:臻彩 source=41 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:33.284 47234 48649 I GlEnhance: frame_stats seconds=2.0084274 sourceFps=24.397198 outputFps=59.748238 blended=47 intervalNs=40476189 active=true
+10-16 21:27:34.633 47234 48649 I GlEnhance: drawFrame #200 preset=1:臻彩 source=81 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:34.702 47234 47248 I Car7Native: PASS EXO rapid settings advancing decoder and source 
+10-16 21:27:34.709 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=3 player=202905196
+10-16 21:27:34.724 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:34.737 47234 47234 I GlEnhance: producer surfaces released; live=0
+10-16 21:27:34.737 47234 47234 I GlEnhance: release requested source=83 outputs=206
+10-16 21:27:34.737 47234 47234 I CarVideo: runtime_switch GlEnhanceRenderView -> TextureRenderView mode=0 sr=false interp=false player=202905196 state=3 playing=true decoderRestart=false
+10-16 21:27:34.737 47234 47234 I CarVideo: runtime_config TextureRenderView mode=0 sr=false interp=false
+10-16 21:27:35.210 47234 47248 I Car7Native: PASS EXO playing GL to Texture no restart 
+10-16 21:27:35.215 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:35.215 47234 47234 I GlEnhance: playback active=true interp=true
+10-16 21:27:35.216 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=202905196
+10-16 21:27:35.251 47234 48843 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:27:35.251 47234 48843 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:35.251 47234 48843 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:27:35.251 47234 48843 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:35.252 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:35.252 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:35.252 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:35.253 47234 47234 I CarVideo: runtime_switch TextureRenderView -> GlEnhanceRenderView mode=1 sr=true interp=true player=202905196 state=3 playing=true decoderRestart=false
+10-16 21:27:35.275 47234 48843 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:27:35.275 47234 48843 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:35.275 47234 48843 I GlEnhance: drawFrame #1 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:35.290 47234 48843 I GlEnhance: drawFrame #2 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:35.307 47234 48843 I GlEnhance: drawFrame #3 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:36.942 47234 48843 I GlEnhance: drawFrame #100 preset=1:臻彩 source=41 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:37.278 47234 48843 I GlEnhance: frame_stats seconds=2.0055087 sourceFps=23.435452 outputFps=59.835194 blended=44 intervalNs=39991533 active=true
+10-16 21:27:37.532 47234 47248 I Car7Native: PASS EXO final GL advancing decoder and source 
+10-16 21:27:37.537 47234 47234 I GlEnhance: player surface detached (main thread)
+10-16 21:27:37.537 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:37.549 47234 47234 I GlEnhance: producer surfaces released; live=0
+10-16 21:27:37.549 47234 47234 I GlEnhance: release requested source=53 outputs=136
+10-16 21:27:38.202 47234 47248 I Car7Native: PASS EXO release terminal producer empty 
+10-16 21:27:38.203 47234 47248 I Car7Native: PASS EXO repeated release idempotent 
+10-16 21:27:38.248 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=1 player=246190831
+10-16 21:27:38.249 47234 48956 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:27:38.250 47234 48956 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:38.250 47234 48956 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:27:38.250 47234 48956 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:38.259 47234 47234 I CarAudio: applied mode=8 name=动漫·对白 session=225 bass=0 virtualizer=80 loudness=650
+10-16 21:27:38.259 47234 47234 I CarAudio: runtime_apply mode=8 session=225 active=true state=2 player=246190831
+10-16 21:27:38.259 47234 47234 I CarAudio: runtime_apply mode=8 session=225 active=true state=3 player=246190831
+10-16 21:27:38.259 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:38.259 47234 47234 I GlEnhance: playback active=true interp=true
+10-16 21:27:38.260 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:38.318 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:38.323 47234 48956 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:27:38.323 47234 48956 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:38.323 47234 48956 I GlEnhance: drawFrame #1 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:38.340 47234 48956 I GlEnhance: drawFrame #2 preset=1:臻彩 source=2 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:38.357 47234 48956 I GlEnhance: drawFrame #3 preset=1:臻彩 source=2 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:38.528 47234 47248 I Car7Native: PASS EXO reentry plays 
+10-16 21:27:39.991 47234 48956 I GlEnhance: drawFrame #100 preset=1:臻彩 source=41 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:40.328 47234 48956 I GlEnhance: frame_stats seconds=2.004829 sourceFps=24.939783 outputFps=59.85548 blended=48 intervalNs=42857142 active=true
+10-16 21:27:40.347 47234 47248 I Car7Native: PASS EXO reentry advancing decoder and source 
+10-16 21:27:40.951 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=3 player=246190831
+10-16 21:27:40.952 47234 47234 I GlEnhance: player surface detached (main thread)
+10-16 21:27:40.952 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:40.961 47234 47234 I GlEnhance: producer surfaces released; live=0
+10-16 21:27:40.961 47234 47234 I GlEnhance: release requested source=65 outputs=157
+10-16 21:27:41.770 47234 47248 I Car7Native: PASS EXO release during handoff cleans old producer 
+10-16 21:27:41.770 47234 47248 I Car7Native: PASS EXO pending handoff engine released 
+10-16 21:27:42.222 47234 49126 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:27:42.222 47234 49126 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=false sharp=1.25 interp=false maxAlpha=0.28
+10-16 21:27:42.222 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:42.222 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=0 sr=false interp=false
+10-16 21:27:42.222 47234 49126 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=false sharp=1.25 interp=false maxAlpha=0.28
+10-16 21:27:42.308 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:42.308 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:42.310 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=1 player=234233174
+10-16 21:27:42.310 47234 47234 I CarAudio: runtime_apply mode=0 session=233 active=false state=2 player=234233174
+10-16 21:27:42.416 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:42.416 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:42.434 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:27:42.434 47234 49126 I GlEnhance: drawFrame #1 preset=0:原画 source=1 fbo=false sr=false interp=false viewport=1280x720
+10-16 21:27:42.441 47234 47234 I CarAudio: runtime_apply mode=0 session=233 active=false state=3 player=234233174
+10-16 21:27:42.441 47234 47234 I GlEnhance: playback active=true interp=false
+10-16 21:27:42.442 47234 49126 I GlEnhance: drawFrame #2 preset=0:原画 source=1 fbo=false sr=false interp=false viewport=1280x720
+10-16 21:27:42.511 47234 49126 I GlEnhance: drawFrame #3 preset=0:原画 source=2 fbo=false sr=false interp=false viewport=1280x720
+10-16 21:27:42.797 47234 47248 I Car7Native: PASS IJK local video playing 
+10-16 21:27:42.797 47234 47248 I Car7Native: PASS IJK actual engine 
+10-16 21:27:42.797 47234 47248 I Car7Native: PASS IJK initial GL 
+10-16 21:27:42.805 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:42.805 47234 47234 I GlEnhance: runtime_config requested mode=1 sr=true interp=true
+10-16 21:27:42.805 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:42.805 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:27:42.805 47234 49126 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:42.805 47234 49126 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:27:42.805 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:43.306 47234 47248 I Car7Native: PASS IJK Texture to GL without restart 
+10-16 21:27:44.373 47234 49126 I GlEnhance: drawFrame #100 preset=1:臻彩 source=42 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:44.440 47234 49126 I GlEnhance: frame_stats seconds=2.005972 sourceFps=21.934505 outputFps=51.845192 blended=37 intervalNs=41666756 active=true
+10-16 21:27:45.115 47234 47248 I Car7Native: PASS IJK initial GL advancing decoder and source 
+10-16 21:27:45.506 47234 47234 I GlEnhance: runtime_config requested mode=0 sr=true interp=true
+10-16 21:27:45.506 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:45.522 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=0 sr=true interp=true
+10-16 21:27:45.522 47234 49126 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:45.523 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:46.007 47234 47248 I Car7Native: PASS IJK video preset 0 
+10-16 21:27:46.012 47234 47234 I GlEnhance: runtime_config requested mode=1 sr=true interp=true
+10-16 21:27:46.012 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:46.028 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:27:46.028 47234 49126 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:27:46.028 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:46.062 47234 49126 I GlEnhance: drawFrame #200 preset=1:臻彩 source=83 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:46.450 47234 49126 I GlEnhance: frame_stats seconds=2.0102217 sourceFps=23.877964 outputFps=59.19745 blended=46 intervalNs=41669101 active=true
+10-16 21:27:46.513 47234 47248 I Car7Native: PASS IJK video preset 1 
+10-16 21:27:46.517 47234 47234 I GlEnhance: runtime_config requested mode=2 sr=true interp=true
+10-16 21:27:46.517 47234 47234 I CarVideo: runtime_apply requestedMode=2 effectiveMode=2 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:46.518 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=2 sr=true interp=true
+10-16 21:27:46.518 47234 49126 I GlEnhance: mode=2(自然) sat=1.08 con=1.04 bri=0.01 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:46.518 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:47.018 47234 47248 I Car7Native: PASS IJK video preset 2 
+10-16 21:27:47.023 47234 47234 I GlEnhance: runtime_config requested mode=3 sr=true interp=true
+10-16 21:27:47.023 47234 47234 I CarVideo: runtime_apply requestedMode=3 effectiveMode=3 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:47.024 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=3 sr=true interp=true
+10-16 21:27:47.024 47234 49126 I GlEnhance: mode=3(影院) sat=1.08 con=1.16 bri=-0.015 rgb=1.03,1.0,0.97 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:47.024 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:47.523 47234 47248 I Car7Native: PASS IJK video preset 3 
+10-16 21:27:47.527 47234 47234 I GlEnhance: runtime_config requested mode=4 sr=true interp=true
+10-16 21:27:47.527 47234 47234 I CarVideo: runtime_apply requestedMode=4 effectiveMode=4 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:47.530 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=4 sr=true interp=true
+10-16 21:27:47.530 47234 49126 I GlEnhance: mode=4(鲜艳) sat=1.5 con=1.16 bri=0.015 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:47.530 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:47.749 47234 49126 I GlEnhance: drawFrame #300 preset=4:鲜艳 source=123 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:48.028 47234 47248 I Car7Native: PASS IJK video preset 4 
+10-16 21:27:48.033 47234 47234 I GlEnhance: runtime_config requested mode=5 sr=true interp=true
+10-16 21:27:48.033 47234 47234 I CarVideo: runtime_apply requestedMode=5 effectiveMode=5 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:48.036 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=5 sr=true interp=true
+10-16 21:27:48.036 47234 49126 I GlEnhance: mode=5(柔和) sat=0.9 con=0.94 bri=0.02 rgb=1.015,1.0,0.985 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:48.036 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:48.457 47234 49126 I GlEnhance: frame_stats seconds=2.006726 sourceFps=23.919558 outputFps=59.30057 blended=44 intervalNs=41669877 active=true
+10-16 21:27:48.533 47234 47248 I Car7Native: PASS IJK video preset 5 
+10-16 21:27:48.538 47234 47234 I GlEnhance: runtime_config requested mode=6 sr=true interp=true
+10-16 21:27:48.538 47234 47234 I CarVideo: runtime_apply requestedMode=6 effectiveMode=6 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:48.541 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=6 sr=true interp=true
+10-16 21:27:48.541 47234 49126 I GlEnhance: mode=6(明亮) sat=1.12 con=1.02 bri=0.08 rgb=1.0,1.0,1.0 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:48.541 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:49.039 47234 47248 I Car7Native: PASS IJK video preset 6 
+10-16 21:27:49.044 47234 47234 I GlEnhance: runtime_config requested mode=7 sr=true interp=true
+10-16 21:27:49.044 47234 47234 I CarVideo: runtime_apply requestedMode=7 effectiveMode=7 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:49.046 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=7 sr=true interp=true
+10-16 21:27:49.046 47234 49126 I GlEnhance: mode=7(暖色) sat=1.06 con=1.04 bri=0.02 rgb=1.06,1.0,0.92 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:49.046 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:49.434 47234 49126 I GlEnhance: drawFrame #400 preset=7:暖色 source=164 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:49.544 47234 47248 I Car7Native: PASS IJK video preset 7 
+10-16 21:27:49.550 47234 47234 I GlEnhance: runtime_config requested mode=8 sr=true interp=true
+10-16 21:27:49.550 47234 47234 I CarVideo: runtime_apply requestedMode=8 effectiveMode=8 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:49.552 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=8 sr=true interp=true
+10-16 21:27:49.552 47234 49126 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:49.552 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:50.050 47234 47248 I Car7Native: PASS IJK video preset 8 
+10-16 21:27:50.057 47234 47234 I GlEnhance: runtime_config requested mode=9 sr=true interp=true
+10-16 21:27:50.057 47234 47234 I CarVideo: runtime_apply requestedMode=9 effectiveMode=9 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:50.073 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=9 sr=true interp=true
+10-16 21:27:50.073 47234 49126 I GlEnhance: mode=9(动漫·日间) sat=1.14 con=1.03 bri=0.015 rgb=1.0,0.99,0.96 sr=true sharp=1.3 interp=true maxAlpha=0.28
+10-16 21:27:50.073 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:50.460 47234 49126 I GlEnhance: frame_stats seconds=2.0034015 sourceFps=23.959251 outputFps=59.398975 blended=44 intervalNs=41669877 active=true
+10-16 21:27:50.558 47234 47248 I Car7Native: PASS IJK video preset 9 
+10-16 21:27:50.563 47234 47234 I GlEnhance: runtime_config requested mode=10 sr=true interp=true
+10-16 21:27:50.563 47234 47234 I CarVideo: runtime_apply requestedMode=10 effectiveMode=10 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:27:50.578 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=10 sr=true interp=true
+10-16 21:27:50.578 47234 49126 I GlEnhance: mode=10(动漫·清透) sat=1.12 con=1.08 bri=-0.005 rgb=0.99,0.99,1.0 sr=true sharp=1.45 interp=true maxAlpha=0.28
+10-16 21:27:50.578 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:51.063 47234 47248 I Car7Native: PASS IJK video preset 10 
+10-16 21:27:51.063 47234 47248 I Car7Native: PASS IJK audio session valid 
+10-16 21:27:51.065 47234 47234 I CarAudio: runtime_apply mode=0 session=233 active=false state=3 player=234233174
+10-16 21:27:51.117 47234 49126 I GlEnhance: drawFrame #500 preset=10:动漫·清透 source=204 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:51.666 47234 47248 I Car7Native: PASS IJK audio preset 0 
+10-16 21:27:51.677 47234 47234 I CarAudio: applied mode=1 name=影院 session=233 bass=900 virtualizer=850 loudness=900
+10-16 21:27:51.677 47234 47234 I CarAudio: runtime_apply mode=1 session=233 active=true state=3 player=234233174
+10-16 21:27:52.277 47234 47248 I Car7Native: PASS IJK audio preset 1 
+10-16 21:27:52.282 47234 47234 I CarAudio: applied mode=2 name=重低音 session=233 bass=700 virtualizer=150 loudness=300
+10-16 21:27:52.282 47234 47234 I CarAudio: runtime_apply mode=2 session=233 active=true state=3 player=234233174
+10-16 21:27:52.463 47234 49126 I GlEnhance: frame_stats seconds=2.0030208 sourceFps=23.963806 outputFps=59.410267 blended=47 intervalNs=41666756 active=true
+10-16 21:27:52.801 47234 49126 I GlEnhance: drawFrame #600 preset=10:动漫·清透 source=244 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:52.882 47234 47248 I Car7Native: PASS IJK audio preset 2 
+10-16 21:27:52.887 47234 47234 I CarAudio: applied mode=3 name=3D环绕 session=233 bass=450 virtualizer=1000 loudness=450
+10-16 21:27:52.887 47234 47234 I CarAudio: runtime_apply mode=3 session=233 active=true state=3 player=234233174
+10-16 21:27:53.488 47234 47248 I Car7Native: PASS IJK audio preset 3 
+10-16 21:27:53.491 47234 47234 I CarAudio: applied mode=4 name=HiFi session=233 bass=250 virtualizer=300 loudness=400
+10-16 21:27:53.491 47234 47234 I CarAudio: runtime_apply mode=4 session=233 active=true state=3 player=234233174
+10-16 21:27:54.092 47234 47248 I Car7Native: PASS IJK audio preset 4 
+10-16 21:27:54.097 47234 47234 I CarAudio: applied mode=5 name=人声 session=233 bass=0 virtualizer=50 loudness=750
+10-16 21:27:54.097 47234 47234 I CarAudio: runtime_apply mode=5 session=233 active=true state=3 player=234233174
+10-16 21:27:54.470 47234 49126 I GlEnhance: frame_stats seconds=2.0059888 sourceFps=24.426855 outputFps=59.322365 blended=49 intervalNs=41666567 active=true
+10-16 21:27:54.486 47234 49126 I GlEnhance: drawFrame #700 preset=10:动漫·清透 source=285 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:54.698 47234 47248 I Car7Native: PASS IJK audio preset 5 
+10-16 21:27:54.702 47234 47234 I CarAudio: applied mode=6 name=动漫·标准 session=233 bass=150 virtualizer=180 loudness=450
+10-16 21:27:54.702 47234 47234 I CarAudio: runtime_apply mode=6 session=233 active=true state=3 player=234233174
+10-16 21:27:55.302 47234 47248 I Car7Native: PASS IJK audio preset 6 
+10-16 21:27:55.308 47234 47234 I CarAudio: applied mode=7 name=动漫·剧场 session=233 bass=280 virtualizer=320 loudness=550
+10-16 21:27:55.308 47234 47234 I CarAudio: runtime_apply mode=7 session=233 active=true state=3 player=234233174
+10-16 21:27:55.909 47234 47248 I Car7Native: PASS IJK audio preset 7 
+10-16 21:27:55.914 47234 47234 I CarAudio: applied mode=8 name=动漫·对白 session=233 bass=0 virtualizer=80 loudness=650
+10-16 21:27:55.914 47234 47234 I CarAudio: runtime_apply mode=8 session=233 active=true state=3 player=234233174
+10-16 21:27:56.170 47234 49126 I GlEnhance: drawFrame #800 preset=10:动漫·清透 source=325 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:56.474 47234 49126 I GlEnhance: frame_stats seconds=2.0046318 sourceFps=23.944548 outputFps=59.362522 blended=48 intervalNs=41666567 active=true
+10-16 21:27:56.514 47234 47248 I Car7Native: PASS IJK audio preset 8 
+10-16 21:27:56.515 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:56.515 47234 47234 I GlEnhance: playback active=false interp=true
+10-16 21:27:56.965 47234 47234 I CarVideo: buffering end ignored state=4
+10-16 21:27:56.966 47234 47234 I CarVideo: rendering start ignored state=4
+10-16 21:27:56.966 47234 47248 I Car7Native: PASS IJK late callbacks keep explicit pause 
+10-16 21:27:56.971 47234 47234 I GlEnhance: runtime_config requested mode=0 sr=false interp=false
+10-16 21:27:56.971 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=4 player=234233174
+10-16 21:27:56.971 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=0 sr=false interp=false
+10-16 21:27:56.971 47234 49126 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=false sharp=1.25 interp=false maxAlpha=0.28
+10-16 21:27:57.471 47234 47248 I Car7Native: PASS IJK paused GL to Texture preserves state 
+10-16 21:27:57.471 47234 47248 I Car7Native: PASS IJK all-off is identity without SR or interpolation 
+10-16 21:27:57.478 47234 47234 I GlEnhance: runtime_config requested mode=8 sr=true interp=true
+10-16 21:27:57.478 47234 47234 I CarVideo: runtime_apply requestedMode=8 effectiveMode=8 hdrBypass=false sr=true interp=true state=4 player=234233174
+10-16 21:27:57.478 47234 49126 I GlEnhance: runtime_config applied (GL thread) mode=8 sr=true interp=true
+10-16 21:27:57.478 47234 49126 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:57.478 47234 49126 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:27:57.979 47234 47248 I Car7Native: PASS IJK paused Texture to GL preserves state 
+10-16 21:27:57.979 47234 47234 I GlEnhance: resume uses SurfaceTexture producer
+10-16 21:27:57.979 47234 47234 I CarAudio: runtime_apply mode=8 session=233 active=true state=3 player=234233174
+10-16 21:27:57.979 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:57.979 47234 47234 I GlEnhance: playback active=true interp=true
+10-16 21:27:57.979 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:27:57.989 47234 47248 I Car7Native: PASS IJK paused switch resumes 
+10-16 21:27:58.487 47234 49126 I GlEnhance: frame_stats seconds=2.0121443 sourceFps=6.9577513 outputFps=18.388344 blended=12 intervalNs=41668072 active=true
+10-16 21:27:59.245 47234 49126 I GlEnhance: drawFrame #900 preset=8:动漫·暗光 source=365 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:27:59.803 47234 47248 I Car7Native: PASS IJK after paused switch advancing decoder and source 
+10-16 21:27:59.819 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:27:59.819 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:27:59.830 47234 49927 I GlEnhance: FBO ping-pong released
+10-16 21:27:59.843 47234 49927 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:27:59.843 47234 49927 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:27:59.943 47234 47234 I GlEnhance: retired producer released; live=1
+10-16 21:27:59.943 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:28:00.640 47234 49927 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:28:00.640 47234 49927 I GlEnhance: output srRequested=true srActive=true interp=true viewport=2880x1620
+10-16 21:28:00.640 47234 49927 I GlEnhance: drawFrame #1 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=2880x1620
+10-16 21:28:00.657 47234 49927 I GlEnhance: drawFrame #2 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=2880x1620
+10-16 21:28:00.675 47234 49927 I GlEnhance: drawFrame #3 preset=8:动漫·暗光 source=2 fbo=true sr=true interp=true viewport=2880x1620
+10-16 21:28:01.320 47234 47248 I Car7Native: PASS IJK fullscreen active 
+10-16 21:28:02.310 47234 49927 I GlEnhance: drawFrame #100 preset=8:动漫·暗光 source=41 fbo=true sr=true interp=true viewport=2880x1620
+10-16 21:28:02.647 47234 49927 I GlEnhance: frame_stats seconds=2.0075612 sourceFps=24.407724 outputFps=59.774017 blended=47 intervalNs=41666756 active=true
+10-16 21:28:03.138 47234 47248 I Car7Native: PASS IJK fullscreen advancing decoder and source 
+10-16 21:28:03.491 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:28:03.492 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:28:03.501 47234 50091 I GlEnhance: FBO ping-pong released
+10-16 21:28:03.516 47234 50091 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:28:03.516 47234 50091 I GlEnhance: mode=8(动漫·暗光) sat=1.08 con=1.05 bri=-0.01 rgb=1.0,0.98,0.94 sr=true sharp=1.25 interp=true maxAlpha=0.28
+10-16 21:28:03.618 47234 47234 I GlEnhance: retired producer released; live=1
+10-16 21:28:03.618 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:28:04.306 47234 50091 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:28:04.307 47234 50091 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:28:04.307 47234 50091 I GlEnhance: drawFrame #1 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:04.323 47234 50091 I GlEnhance: drawFrame #2 preset=8:动漫·暗光 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:04.340 47234 50091 I GlEnhance: drawFrame #3 preset=8:动漫·暗光 source=2 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:04.692 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:28:04.692 47234 47234 I GlEnhance: playback active=false interp=true
+10-16 21:28:07.202 47234 47248 I Car7Native: PASS IJK background not continuous 
+10-16 21:28:07.278 47234 50091 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:28:07.278 47234 50091 I GlEnhance: frame_stats seconds=2.971981 sourceFps=3.364759 outputFps=8.748373 blended=8 intervalNs=41708333 active=false
+10-16 21:28:09.210 47234 47234 I GlEnhance: resume uses SurfaceTexture producer
+10-16 21:28:09.210 47234 47234 I CarAudio: runtime_apply mode=8 session=233 active=true state=3 player=234233174
+10-16 21:28:09.210 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:28:09.210 47234 47234 I GlEnhance: playback active=true interp=true
+10-16 21:28:09.211 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:28:09.222 47234 47248 I Car7Native: PASS IJK background resumes 
+10-16 21:28:09.278 47234 50091 I GlEnhance: frame_stats seconds=2.0004468 sourceFps=0.99977666 outputFps=2.99933 blended=1 intervalNs=41697749 active=true
+10-16 21:28:10.426 47234 50091 I GlEnhance: drawFrame #100 preset=8:动漫·暗光 source=38 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:11.034 47234 47248 I Car7Native: PASS IJK foreground window1 advancing decoder and source 
+10-16 21:28:11.286 47234 50091 I GlEnhance: frame_stats seconds=2.0076396 sourceFps=22.414381 outputFps=59.273586 blended=45 intervalNs=41666567 active=true
+10-16 21:28:12.110 47234 50091 I GlEnhance: drawFrame #200 preset=8:动漫·暗光 source=77 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:12.853 47234 47248 I Car7Native: PASS IJK foreground window2 advancing decoder and source 
+10-16 21:28:13.266 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:28:13.266 47234 47234 I GlEnhance: runtime_config requested mode=0 sr=false interp=false
+10-16 21:28:13.266 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=3 player=234233174
+10-16 21:28:13.266 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:28:13.266 47234 47234 I GlEnhance: runtime_config requested mode=1 sr=true interp=true
+10-16 21:28:13.266 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:28:13.267 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:28:13.267 47234 47234 I GlEnhance: runtime_config requested mode=0 sr=false interp=false
+10-16 21:28:13.267 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=3 player=234233174
+10-16 21:28:13.267 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:28:13.267 47234 47234 I GlEnhance: runtime_config requested mode=1 sr=true interp=true
+10-16 21:28:13.267 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:28:13.273 47234 50091 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:28:13.273 47234 50091 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:28:13.274 47234 50091 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:28:13.290 47234 50091 I GlEnhance: frame_stats seconds=2.0039065 sourceFps=23.953213 outputFps=59.38401 blended=47 intervalNs=41708333 active=true
+10-16 21:28:13.795 47234 50091 I GlEnhance: drawFrame #300 preset=1:臻彩 source=117 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:14.967 47234 47248 I Car7Native: PASS IJK rapid settings preserve decoder 
+10-16 21:28:15.295 47234 50091 I GlEnhance: frame_stats seconds=2.0050423 sourceFps=23.939644 outputFps=59.35037 blended=48 intervalNs=41666567 active=true
+10-16 21:28:15.480 47234 50091 I GlEnhance: drawFrame #400 preset=1:臻彩 source=158 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:16.778 47234 47248 I Car7Native: PASS IJK rapid settings advancing decoder and source 
+10-16 21:28:16.782 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:28:16.782 47234 47234 I GlEnhance: runtime_config requested mode=0 sr=false interp=false
+10-16 21:28:16.782 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=3 player=234233174
+10-16 21:28:16.793 47234 50091 I GlEnhance: runtime_config applied (GL thread) mode=0 sr=false interp=false
+10-16 21:28:16.793 47234 50091 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=false sharp=1.25 interp=false maxAlpha=0.28
+10-16 21:28:17.283 47234 47248 I Car7Native: PASS IJK playing GL to Texture no restart 
+10-16 21:28:17.288 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:28:17.288 47234 47234 I GlEnhance: runtime_config requested mode=1 sr=true interp=true
+10-16 21:28:17.288 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=3 player=234233174
+10-16 21:28:17.288 47234 50091 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:28:17.288 47234 50091 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:28:17.288 47234 50091 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:28:17.305 47234 50091 I GlEnhance: frame_stats seconds=2.0103884 sourceFps=24.3734 outputFps=51.731297 blended=36 intervalNs=41708333 active=true
+10-16 21:28:17.423 47234 50091 I GlEnhance: drawFrame #500 preset=1:臻彩 source=204 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:19.110 47234 50091 I GlEnhance: drawFrame #600 preset=1:臻彩 source=245 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:19.312 47234 50091 I GlEnhance: frame_stats seconds=2.0068913 sourceFps=23.91759 outputFps=59.29569 blended=48 intervalNs=41666675 active=true
+10-16 21:28:19.607 47234 47248 I Car7Native: PASS IJK final GL advancing decoder and source 
+10-16 21:28:19.608 47234 47234 I GlEnhance: player surface detached (main thread)
+10-16 21:28:19.608 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:28:19.609 47234 47234 I GlEnhance: producer surfaces released; live=0
+10-16 21:28:19.609 47234 47234 I GlEnhance: release requested source=257 outputs=629
+10-16 21:28:20.264 47234 47248 I Car7Native: PASS IJK release terminal producer empty 
+10-16 21:28:20.264 47234 47248 I Car7Native: PASS IJK repeated release idempotent 
+10-16 21:28:20.303 47234 50687 I GlEnhance: GL ready version=OpenGL ES 3.2 v334 R renderer=Adreno (TM) 640
+10-16 21:28:20.303 47234 50687 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:28:20.303 47234 50687 I GlEnhance: runtime_config applied (GL thread) mode=1 sr=true interp=true
+10-16 21:28:20.303 47234 50687 I GlEnhance: mode=1(臻彩) sat=1.35 con=1.12 bri=0.03 rgb=1.0,1.0,1.0 sr=true sharp=1.6 interp=true maxAlpha=0.28
+10-16 21:28:20.307 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:28:20.307 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:28:20.308 47234 47234 I CarVideo: runtime_apply requestedMode=1 effectiveMode=1 hdrBypass=false sr=true interp=true state=1 player=115914007
+10-16 21:28:20.318 47234 47234 I CarAudio: applied mode=8 name=动漫·对白 session=241 bass=0 virtualizer=80 loudness=650
+10-16 21:28:20.318 47234 47234 I CarAudio: runtime_apply mode=8 session=241 active=true state=2 player=115914007
+10-16 21:28:20.318 47234 47234 I GlEnhance: player surface bound (main thread)
+10-16 21:28:20.616 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:28:20.626 47234 50687 I GlEnhance: FBO ping-pong allocated 2x 640x360 RGBA8 bytes=1843200
+10-16 21:28:20.626 47234 47234 I CarAudio: runtime_apply mode=8 session=241 active=true state=3 player=115914007
+10-16 21:28:20.626 47234 47234 I GlEnhance: renderMode=CONTINUOUS_60HZ_MAX
+10-16 21:28:20.626 47234 47234 I GlEnhance: playback active=true interp=true
+10-16 21:28:20.626 47234 50687 I GlEnhance: output srRequested=true srActive=true interp=true viewport=1280x720
+10-16 21:28:20.626 47234 50687 I GlEnhance: drawFrame #1 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:20.626 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:28:20.626 47234 47234 I GlEnhance: setVideoSize 640x360
+10-16 21:28:20.641 47234 50687 I GlEnhance: drawFrame #2 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:20.658 47234 50687 I GlEnhance: drawFrame #3 preset=1:臻彩 source=1 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:21.028 47234 47248 I Car7Native: PASS IJK reentry plays 
+10-16 21:28:22.293 47234 50687 I GlEnhance: drawFrame #100 preset=1:臻彩 source=37 fbo=true sr=true interp=true viewport=1280x720
+10-16 21:28:22.630 47234 50687 I GlEnhance: frame_stats seconds=2.0047972 sourceFps=22.446161 outputFps=59.856426 blended=43 intervalNs=41666567 active=true
+10-16 21:28:22.833 47234 47248 I Car7Native: PASS IJK reentry advancing decoder and source 
+10-16 21:28:23.279 47234 47234 I GlEnhance: renderMode=WHEN_DIRTY
+10-16 21:28:23.279 47234 47234 I GlEnhance: runtime_config requested mode=0 sr=false interp=false
+10-16 21:28:23.279 47234 47234 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=3 player=115914007
+10-16 21:28:23.279 47234 47234 I GlEnhance: player surface detached (main thread)
+10-16 21:28:23.285 47234 50687 I GlEnhance: runtime_config applied (GL thread) mode=0 sr=false interp=false
+10-16 21:28:23.286 47234 50687 I GlEnhance: mode=0(原画) sat=1.0 con=1.0 bri=0.0 rgb=1.0,1.0,1.0 sr=false sharp=1.25 interp=false maxAlpha=0.28
+10-16 21:28:23.287 47234 47234 I GlEnhance: producer surfaces released; live=0
+10-16 21:28:23.287 47234 47234 I GlEnhance: release requested source=60 outputs=159
+10-16 21:28:24.094 47234 47248 I Car7Native: PASS IJK release during handoff cleans old producer 
+10-16 21:28:24.094 47234 47248 I Car7Native: PASS IJK pending handoff engine released 

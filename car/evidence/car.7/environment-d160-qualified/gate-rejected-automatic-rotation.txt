@@ -1,0 +1,8 @@
+Physical size: 1620x2880
+Physical density: 160
+rotation=free fixed=default auto=1 user=1
+    mCurrentOrientation=1
+    mCurrentDisplayRect=Rect(0, 0 - 2880, 1620)
+      Viewport INTERNAL: displayId=0, uniqueId=local:4619827820427265280, port=0, orientation=1, logicalFrame=[0, 0, 2880, 1620], physicalFrame=[0, 0, 2880, 1620], deviceSize=[2880, 1620], isActive=[1]
+  DisplayFrames w=2880 h=1620 r=1
+CAR_DISPLAY_FAIL: landscape rotation is not locked

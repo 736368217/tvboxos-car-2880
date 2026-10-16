@@ -31,11 +31,14 @@ import androidx.recyclerview.widget.DiffUtil;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.github.tvbox.osc.R;
-import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.base.App;
+import com.github.tvbox.osc.api.ApiConfig;
+import com.github.tvbox.osc.car.AudioEffectController;
+import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.bean.IJKCode;
 import com.github.tvbox.osc.bean.ParseBean;
 import com.github.tvbox.osc.bean.SourceBean;
+import com.github.tvbox.osc.player.MyVideoView;
 import com.github.tvbox.osc.server.ControlManager;
 import com.github.tvbox.osc.server.RemoteServer;
 import com.github.tvbox.osc.subtitle.widget.SimpleSubtitleView;
@@ -81,7 +84,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Locale;
 
+import xyz.doikki.videoplayer.controller.MediaPlayerControl;
 import xyz.doikki.videoplayer.player.VideoView;
+import xyz.doikki.videoplayer.render.VideoEnhancePreset;
 
 import static xyz.doikki.videoplayer.util.PlayerUtils.stringForTime;
 import static xyz.doikki.videoplayer.util.PlayerUtils.safeTimeMs;
@@ -113,6 +118,7 @@ public class VodController extends BaseController {
                     }
                     case 1002: { // 显示底部菜单
                         updateDanmuSearchUiBtn();
+                        updateCarEnhanceButtons();
                         hidePauseRoot();
                         mPlayTitle.setVisibility(GONE);
                         mBottomRoot.setVisibility(VISIBLE);
@@ -233,6 +239,11 @@ public class VodController extends BaseController {
     public TextView mPlayerSpeedBtn;
     TextView mPlayerBtn;
     TextView mPlayerIJKBtn;
+    TextView mCarVideoBtn;
+    TextView mCarSrBtn;
+    TextView mCarInterpBtn;
+    TextView mCarAudioBtn;
+    private MyVideoView mCarVideoView;
     TextView mPlayerRetry;
     TextView mPlayrefresh;
     public TextView mPlayerTimeStartEndText;
@@ -317,6 +328,41 @@ public class VodController extends BaseController {
     }
 
     @Override
+    public void setMediaPlayer(MediaPlayerControl mediaPlayer) {
+        // ControlWrapper exposes playback commands, not the concrete view it wraps.
+        mCarVideoView = mediaPlayer instanceof MyVideoView ? (MyVideoView) mediaPlayer : null;
+        super.setMediaPlayer(mediaPlayer);
+        updateCarEnhanceButtons();
+    }
+
+    private void updateCarEnhanceButtons() {
+        if (mCarVideoBtn != null) mCarVideoBtn.setText("画面·" + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
+        if (mCarSrBtn != null) mCarSrBtn.setText("超分·" + (CarEnhance.videoSrEnabled() ? "开" : "关"));
+        if (mCarInterpBtn != null) mCarInterpBtn.setText("补帧·" + (CarEnhance.videoInterpEnabled() ? "开" : "关"));
+        if (mCarAudioBtn != null) mCarAudioBtn.setText("音效·" + AudioEffectController.name(CarEnhance.audioMode()));
+    }
+
+    private void showCarVideoDialog() {
+        final SelectDialog<String> dialog = new SelectDialog<>(mActivity, R.layout.dialog_video_presets);
+        dialog.setTip("画面预设");
+        View cancel = dialog.findViewById(R.id.btnVideoPresetCancel);
+        if (cancel != null) cancel.setOnClickListener(v -> dialog.dismiss());
+        List<String> options = new ArrayList<>();
+        for (VideoEnhancePreset preset : VideoEnhancePreset.all()) options.add(preset.name + " · " + preset.description);
+        dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
+            @Override public void click(String value, int pos) {
+                CarEnhance.setVideoMode(pos);
+                CarEnhance.applyVideo(mCarVideoView);
+                updateCarEnhanceButtons();
+                dialog.dismiss();
+            }
+            @Override public String getDisplay(String value) { return value; }
+        }, SelectDialogAdapter.stringDiff, options, CarEnhance.videoMode());
+        dialog.show();
+    }
+
+
+    @Override
     protected void initView() {
         super.initView();
         mCurrentTime = findViewById(R.id.curr_time);
@@ -348,6 +394,30 @@ public class VodController extends BaseController {
         mPlayerSpeedBtn = findViewById(R.id.play_speed);
         mPlayerBtn = findViewById(R.id.play_player);
         mPlayerIJKBtn = findViewById(R.id.play_ijk);
+        mCarVideoBtn = findViewById(R.id.play_car_video);
+        mCarSrBtn = findViewById(R.id.play_car_sr);
+        mCarInterpBtn = findViewById(R.id.play_car_interp);
+        mCarAudioBtn = findViewById(R.id.play_car_audio);
+        updateCarEnhanceButtons();
+        mCarVideoBtn.setOnClickListener(v -> showCarVideoDialog());
+        mCarSrBtn.setOnClickListener(v -> {
+            CarEnhance.setVideoSrEnabled(!CarEnhance.videoSrEnabled());
+            CarEnhance.applyVideo(mCarVideoView);
+            updateCarEnhanceButtons();
+        });
+        mCarInterpBtn.setOnClickListener(v -> {
+            CarEnhance.setVideoInterpEnabled(!CarEnhance.videoInterpEnabled());
+            CarEnhance.applyVideo(mCarVideoView);
+            updateCarEnhanceButtons();
+        });
+        mCarAudioBtn.setOnClickListener(v -> {
+            int next = (CarEnhance.audioMode() + 1) % AudioEffectController.MODE_COUNT;
+            CarEnhance.setAudioMode(next);
+            CarEnhance.applyAudio(mCarVideoView);
+            updateCarEnhanceButtons();
+            CarEnhance.toast(getContext(), AudioEffectController.label(next));
+        });
+
         mPlayerTimeStartEndText = findViewById(R.id.play_time_start_end_text);
         mPlayerTimeStartBtn = findViewById(R.id.play_time_start);
         mPlayerTimeSkipBtn = findViewById(R.id.play_time_end);

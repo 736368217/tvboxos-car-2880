@@ -34,6 +34,8 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         SurfaceTexture.OnFrameAvailableListener {
     private static final String TAG = "GlEnhance";
     private static final long OUTPUT_INTERVAL_NS = 16_666_667L;
+    private static final long RELEASE_RETRY_DELAY_MS = 50L;
+    private static final long BIND_TIMEOUT_MS = 5_000L;
     private final MeasureHelper mMeasureHelper = new MeasureHelper();
     private final Handler mMain = new Handler(Looper.getMainLooper());
     private final AtomicBoolean mFrameAvailable = new AtomicBoolean();
@@ -51,10 +53,14 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private volatile AbstractPlayer mMediaPlayer;
     private volatile Surface mPlayerSurface;
     private volatile SurfaceTexture mSurfaceTexture;
-    private volatile VideoEnhancePreset mPreset;
-    private volatile boolean mSrEnabled;
-    private volatile boolean mInterpEnabled;
+    private volatile long mAttachGeneration;
+    private volatile boolean mBindingEnabled, mSurfaceCreationFailed;
+    private Runnable mOnBound, mOnFailure, mBindTimeout;
+    private volatile VideoEnhanceConfig mConfiguration;
+    private VideoEnhanceConfig mDrawConfiguration;
     private volatile boolean mPlaybackActive;
+    private volatile boolean mReleaseRequested;
+    private boolean mReleaseRetryScheduled;
     private volatile boolean mReleased;
     private volatile boolean mAttached;
     private volatile boolean mWindowVisible = true;
@@ -65,6 +71,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private volatile boolean mPostProcessSupported;
     private boolean mHasFrame;
     private boolean mHasPrevious;
+    private boolean mFboHasFrame;
     private int mColourProgram, mOutputProgram, mOesTexture;
     private int mFboWidth, mFboHeight, mFailedWidth, mFailedHeight;
     private int mCurrentIndex, mPreviousIndex;
@@ -80,9 +87,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     public GlEnhanceRenderView(Context context, int mode) { this(context, mode, false, false); }
     public GlEnhanceRenderView(Context context, int mode, boolean sr, boolean interp) {
         super(context);
-        mPreset = VideoEnhancePreset.forMode(mode);
-        mSrEnabled = sr;
-        mInterpEnabled = interp;
+        mConfiguration = new VideoEnhanceConfig(mode, sr, interp);
         setEGLContextClientVersion(2);
         setEGLConfigChooser(8, 8, 8, 8, 0, 0);
         setPreserveEGLContextOnPause(true);
@@ -91,26 +96,125 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     }
 
     @Override public void attachToPlayer(@NonNull AbstractPlayer player) {
-        mMediaPlayer = player;
-        resetFrameHistory();
-        bindSurfaceToPlayer();
+        attachToPlayer(player, null, null);
     }
+
+    /** A bounded, one-shot acknowledgement of the actual main-thread setSurface call. */
+    public void attachToPlayer(@NonNull AbstractPlayer player, Runnable onBound, Runnable onFailure) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mMain.post(() -> attachToPlayer(player, onBound, onFailure));
+            return;
+        }
+        if (mReleased || mReleaseRequested) {
+            if (onFailure != null) onFailure.run();
+            return;
+        }
+        if (onBound == null && onFailure == null && mBindTimeout != null && mMediaPlayer == player) {
+            bindSurfaceToPlayer();
+            return;
+        }
+        cancelPendingAttach();
+        mMediaPlayer = player;
+        mBindingEnabled = true;
+        mOnBound = onBound;
+        mOnFailure = onFailure;
+        final long generation = mAttachGeneration;
+        if (onBound != null || onFailure != null) {
+            mBindTimeout = () -> {
+                Log.e(TAG, "player surface bind timed out");
+                finishAttach(generation, false);
+            };
+            mMain.postDelayed(mBindTimeout, BIND_TIMEOUT_MS);
+        }
+        resetFrameHistory();
+        if (mSurfaceCreationFailed) finishAttach(generation, false);
+        else bindSurfaceToPlayer();
+    }
+
+    private AbstractPlayer mProducerResumePlayer;
+    private long mProducerResumeAtMs;
 
     private void bindSurfaceToPlayer() {
         final AbstractPlayer player = mMediaPlayer;
         final Surface surface = mPlayerSurface;
-        if (player == null || surface == null) return;
+        final long generation = mAttachGeneration;
+        if (player == null || surface == null || !mBindingEnabled) return;
         mMain.post(() -> {
-            if (mReleased || mMediaPlayer != player || mPlayerSurface != surface || !surface.isValid()) return;
-            try {
-                player.setSurface(surface);
-                synchronized (mProducerLock) {
-                    mBoundSurface = surface;
-                    releaseRetiredProducers();
+            Throwable failure = null;
+            synchronized (mProducerLock) {
+                if (mReleased || mReleaseRequested || !mBindingEnabled || generation != mAttachGeneration
+                        || mMediaPlayer != player || mPlayerSurface != surface) return;
+                if (mProducerResumePlayer == player) {
+                    long remaining = mProducerResumeAtMs - android.os.SystemClock.uptimeMillis();
+                    if (remaining > 0) { mMain.postDelayed(this::bindSurfaceToPlayer, remaining); return; }
                 }
+                try {
+                    if (!surface.isValid()) throw new IllegalStateException("Invalid GL producer surface");
+                    if (player instanceof xyz.doikki.videoplayer.ijk.IjkPlayer
+                            && mBoundSurface != null && mBoundSurface != surface && player.isPlaying()) {
+                        // Let MediaCodec stop dequeuing the old consumer before reconfiguration.
+                        // This is an output handoff, never a decoder/source restart or a seek.
+                        player.pause();
+                        mProducerResumePlayer = player;
+                        mProducerResumeAtMs = android.os.SystemClock.uptimeMillis() + 100L;
+                        mMain.postDelayed(this::bindSurfaceToPlayer, 100L);
+                        return;
+                    }
+                    player.setSurface(surface);
+                    mBoundSurface = surface;
+                    if (mProducerResumePlayer == player) {
+                        mProducerResumePlayer = null;
+                        if (mPlaybackActive && !mReleaseRequested && !mReleased) player.start();
+                    }
+                } catch (Throwable error) { failure = error; }
+                if (failure == null) {
+                    try { releaseRetiredProducers(); }
+                    catch (Throwable error) { Log.e(TAG, "retired producer cleanup failed", error); }
+                }
+            }
+            if (failure != null) {
+                Log.e(TAG, "player.setSurface failed", failure);
+                finishAttach(generation, false);
+            } else {
                 Log.i(TAG, "player surface bound (main thread)");
-            } catch (Throwable error) { Log.e(TAG, "player.setSurface failed", error); }
+                finishAttach(generation, true);
+            }
         });
+    }
+
+    private void finishAttach(long generation, boolean success) {
+        if (generation != mAttachGeneration) return;
+        Runnable callback = success ? mOnBound : mOnFailure;
+        clearAttachCallbacks();
+        if (!success) {
+            mBindingEnabled = false;
+            mAttachGeneration++;
+        }
+        if (callback != null) callback.run();
+    }
+
+    private void clearAttachCallbacks() {
+        if (mBindTimeout != null) mMain.removeCallbacks(mBindTimeout);
+        mOnBound = mOnFailure = mBindTimeout = null;
+    }
+
+    /** Invalidate queued binds without releasing a possibly decoder-owned producer. */
+    public void cancelPendingAttach() {
+        if (Looper.myLooper() != Looper.getMainLooper()) throw new IllegalStateException("Cancel requires main thread");
+        mAttachGeneration++;
+        mBindingEnabled = false;
+        clearAttachCallbacks();
+    }
+
+    /** Another renderer has successfully bound: release must never clear its new output. */
+    public void relinquishPlayer() {
+        cancelPendingAttach();
+        mMediaPlayer = null;
+        mProducerResumePlayer = null;
+        mProducerResumeAtMs = 0;
+        mPlaybackActive = false;
+        synchronized (mProducerLock) { mBoundSurface = null; }
+        updateRenderMode();
     }
 
     @Override public void setVideoSize(int width, int height) {
@@ -148,20 +252,38 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         resetFrameHistory();
         updateRenderMode();
         requestRender();
-        Log.i(TAG, "playback active=" + active + " interp=" + mInterpEnabled);
+        Log.i(TAG, "playback active=" + active + " interp=" + mConfiguration.interpolation);
     }
     public void resetFrameHistory() { mResetHistory.set(true); }
-    public boolean isEnhanceMode() { return mPreset.id != 0; }
+    public boolean isEnhanceMode() { return mConfiguration.preset.id != 0; }
     public void setVideoEnhanceMode(int mode) {
-        mPreset = VideoEnhancePreset.forMode(mode);
-        mResetHistory.set(true);
+        if (Looper.myLooper() != Looper.getMainLooper()) { mMain.post(() -> setVideoEnhanceMode(mode)); return; }
+        setVideoEnhancements(mode, mConfiguration.superResolution, mConfiguration.interpolation);
+    }
+    public void setVideoSrEnabled(boolean enabled) {
+        if (Looper.myLooper() != Looper.getMainLooper()) { mMain.post(() -> setVideoSrEnabled(enabled)); return; }
+        setVideoEnhancements(mConfiguration.preset.id, enabled, mConfiguration.interpolation);
+    }
+    public void setVideoInterpEnabled(boolean enabled) {
+        if (Looper.myLooper() != Looper.getMainLooper()) { mMain.post(() -> setVideoInterpEnabled(enabled)); return; }
+        setVideoEnhancements(mConfiguration.preset.id, mConfiguration.superResolution, enabled);
+    }
+    public void setVideoEnhancements(int mode, boolean sr, boolean interp) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mMain.post(() -> setVideoEnhancements(mode, sr, interp));
+            return;
+        }
+        VideoEnhanceConfig configuration = new VideoEnhanceConfig(mode, sr, interp);
+        if (mReleased || configuration.sameAs(mConfiguration)) return;
+        mConfiguration = configuration;
+        updateRenderMode();
         requestRender();
-        logConfiguration();
+        Log.i(TAG, "runtime_config requested " + configuration);
     }
 
     private boolean shouldAnimate() {
-        return mInterpEnabled && mPostProcessSupported && mPlaybackActive && mAttached
-                && mWindowVisible && !mViewPaused && !mReleased;
+        return mConfiguration.interpolation && mPostProcessSupported && mPlaybackActive && mAttached
+                && mWindowVisible && !mViewPaused && !mReleased && !mReleaseRequested;
     }
     private void updateRenderMode() {
         if (Looper.myLooper() != Looper.getMainLooper()) { mMain.post(this::updateRenderMode); return; }
@@ -209,39 +331,80 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             mMain.post(this::detachFromPlayer);
             return;
         }
+        tryDetachFromPlayer();
+    }
+
+    /** Final teardown retains the producer if the decoder rejects the detach. */
+    public boolean tryDetachFromPlayer() {
+        if (Looper.myLooper() != Looper.getMainLooper()) throw new IllegalStateException("Detach requires main thread");
+        cancelPendingAttach();
+        if (mReleased) return true;
         AbstractPlayer player = mMediaPlayer;
-        mMediaPlayer = null;
-        mPlaybackActive = false;
-        updateRenderMode();
         if (player != null) {
             try {
                 player.setSurface(null);
                 Log.i(TAG, "player surface detached (main thread)");
-            } catch (Throwable error) { Log.w(TAG, "player surface detach failed", error); }
+            } catch (Throwable error) {
+                Log.e(TAG, "player surface detach failed; retaining bound producer", error);
+                return false;
+            }
         }
-        synchronized (mProducerLock) { mBoundSurface = null; }
+        relinquishPlayer();
+        return true;
     }
 
     @Override public void release() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mMain.post(this::release);
+            return;
+        }
         if (mReleased) return;
-        mReleased = true;
-        if (Looper.myLooper() == Looper.getMainLooper()) finishRelease();
-        else mMain.post(this::finishRelease);
+        mReleaseRequested = true;
+        mPlaybackActive = false;
+        finishRelease();
     }
     private void finishRelease() {
-        detachFromPlayer();
-        // Wait for updateTexImage and the complete draw to finish before releasing its consumer.
+        if (mReleased) return;
+        updateRenderMode();
+        if (!tryDetachFromPlayer()) {
+            Log.e(TAG, "RELEASE_DEFERRED still-bound producer retained");
+            scheduleReleaseRetry();
+            return;
+        }
+        // mReleased is terminal only after the decoder no longer targets the producer.
+        mReleased = true;
         synchronized (mProducerLock) { releaseProducerSurfaces(); }
         try { queueEvent(this::releaseGlResources); }
         catch (Throwable error) { Log.i(TAG, "GL context already stopped; context owns remaining texture deletion"); }
         Log.i(TAG, "release requested source=" + mSourceFrames + " outputs=" + mOutputFrames);
     }
+    private void scheduleReleaseRetry() {
+        if (mReleaseRetryScheduled) return;
+        mReleaseRetryScheduled = true;
+        mMain.postDelayed(() -> {
+            mReleaseRetryScheduled = false;
+            if (mReleaseRequested && !mReleased) finishRelease();
+        }, RELEASE_RETRY_DELAY_MS);
+    }
+    public boolean isReleased() {
+        return mReleased;
+    }
 
     @Override public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        synchronized (mProducerLock) { createGlResources(); }
+        try {
+            synchronized (mProducerLock) {
+                mSurfaceCreationFailed = false;
+                createGlResources();
+            }
+        } catch (Throwable error) {
+            mSurfaceCreationFailed = true;
+            Log.e(TAG, "GL producer creation failed", error);
+            final long generation = mAttachGeneration;
+            mMain.post(() -> finishAttach(generation, false));
+        }
     }
     private void createGlResources() {
-        if (mReleased) return;
+        if (mReleased || mReleaseRequested) return;
         releaseGlResources();
         mDrawErrors = 0;
         mSourceFrames = mOutputFrames = mMixedOutputs = 0;
@@ -249,7 +412,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         mStatsSource = mStatsOutput = mStatsMixed = 0;
         mFailedWidth = mFailedHeight = 0;
         mColourProgram = VideoShaders.createProgram(VideoShaders.OES_VERTEX, VideoShaders.colourFragment(true));
-        if (mColourProgram == 0) { Log.e(TAG, "OES colour shader unavailable"); return; }
+        if (mColourProgram == 0) throw new IllegalStateException("OES colour shader unavailable");
         cPosition = GLES20.glGetAttribLocation(mColourProgram, "aPosition");
         cCoordinate = GLES20.glGetAttribLocation(mColourProgram, "aTexCoord");
         cMatrix = GLES20.glGetUniformLocation(mColourProgram, "uTexMatrix");
@@ -295,7 +458,17 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         if (mReleased || mColourProgram == 0) return;
         try {
             long now = System.nanoTime();
-            if (mResetHistory.getAndSet(false)) {
+            VideoEnhanceConfig configuration = mConfiguration;
+            boolean changed = !configuration.sameAs(mDrawConfiguration);
+            boolean reset = mResetHistory.getAndSet(false) || changed;
+            if (changed) {
+                mDrawConfiguration = configuration;
+                mLoggedSr = false;
+                mFboHasFrame = false;
+                Log.i(TAG, "runtime_config applied (GL thread) " + configuration);
+                logConfiguration(configuration);
+            }
+            if (reset) {
                 mTiming.reset();
                 mHasPrevious = false;
             }
@@ -315,41 +488,42 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             GLES20.glClearColor(0, 0, 0, 1);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
             if (!mHasFrame) return;
-            boolean postProcess = mPostProcessSupported && (mSrEnabled || mInterpEnabled);
+            boolean postProcess = mPostProcessSupported && (configuration.superResolution || configuration.interpolation);
             if (postProcess) {
                 int sw = mVideoWidth > 0 ? mVideoWidth : width;
                 int sh = mVideoHeight > 0 ? mVideoHeight : height;
                 boolean resized = mFboWidth != sw || mFboHeight != sh;
                 postProcess = ensureFrameBuffers(sw, sh);
                 if (postProcess) {
-                    if (fresh || resized) {
-                        boolean hadCurrent = !resized && mFboWidth > 0 && mSourceFrames > 1;
+                    if (fresh || resized || changed || !mFboHasFrame) {
+                        boolean hadCurrent = mFboHasFrame && !reset && !resized && fresh;
                         int oldIndex = mCurrentIndex;
                         mCurrentIndex = 1 - oldIndex;
                         mPreviousIndex = oldIndex;
-                        drawColour(mFbos[mCurrentIndex], sw, sh);
+                        drawColour(mFbos[mCurrentIndex], sw, sh, configuration.preset);
+                        mFboHasFrame = true;
                         mHasPrevious = hadCurrent;
                     }
-                    float alpha = mHasPrevious ? mTiming.blendAlpha(System.nanoTime(), mInterpEnabled, shouldAnimate()) : 0;
-                    boolean sr = VideoPostProcessPolicy.superResolutionActive(mSrEnabled,
+                    float alpha = mHasPrevious ? mTiming.blendAlpha(System.nanoTime(), configuration.interpolation, shouldAnimate()) : 0;
+                    boolean sr = VideoPostProcessPolicy.superResolutionActive(configuration.superResolution,
                             mVideoWidth, mVideoHeight, width, height);
-                    drawOutput(width, height, sr, alpha);
+                    drawOutput(width, height, sr, alpha, configuration.preset);
                     if (alpha > 0.001f) mMixedOutputs++;
                     if (!mLoggedSr || mLastSrActive != sr) {
                         mLoggedSr = true;
                         mLastSrActive = sr;
-                        Log.i(TAG, "output srRequested=" + mSrEnabled + " srActive=" + sr
-                                + " interp=" + mInterpEnabled + " viewport=" + width + "x" + height);
+                        Log.i(TAG, "output srRequested=" + configuration.superResolution + " srActive=" + sr
+                                + " interp=" + configuration.interpolation + " viewport=" + width + "x" + height);
                     }
                 }
             }
-            if (!postProcess) drawColour(0, width, height);
+            if (!postProcess) drawColour(0, width, height, configuration.preset);
             mOutputFrames++;
             mLastOutputNs = now;
             if (mOutputFrames <= 3 || mOutputFrames % 100 == 0) {
-                Log.i(TAG, "drawFrame #" + mOutputFrames + " preset=" + mPreset.id + ":" + mPreset.name
-                        + " source=" + mSourceFrames + " fbo=" + postProcess + " sr=" + mLastSrActive
-                        + " interp=" + mInterpEnabled + " viewport=" + width + "x" + height);
+                Log.i(TAG, "drawFrame #" + mOutputFrames + " preset=" + configuration.preset.id + ":" + configuration.preset.name
+                        + " source=" + mSourceFrames + " fbo=" + postProcess + " sr=" + (postProcess && mLastSrActive)
+                        + " interp=" + configuration.interpolation + " viewport=" + width + "x" + height);
             }
             logFrameStats(now);
         } catch (Throwable error) {
@@ -414,20 +588,19 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         mPostProcessSupported = false;
         updateRenderMode();
     }
-    private void drawColour(int framebuffer,int width,int height) {
+    private void drawColour(int framebuffer,int width,int height,VideoEnhancePreset p) {
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,framebuffer);
         GLES20.glViewport(0,0,width,height);
         GLES20.glUseProgram(mColourProgram);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,mOesTexture);
         GLES20.glUniformMatrix4fv(cMatrix,1,false,mTextureMatrix,0);
-        VideoEnhancePreset p=mPreset;
         GLES20.glUniform1f(cSat,p.saturation); GLES20.glUniform1f(cCon,p.contrast);
         GLES20.glUniform1f(cBri,p.brightness); GLES20.glUniform3f(cRgb,p.red,p.green,p.blue);
         drawQuad(cPosition,cCoordinate);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,0);
     }
-    private void drawOutput(int width,int height,boolean sr,float alpha) {
+    private void drawOutput(int width,int height,boolean sr,float alpha,VideoEnhancePreset preset) {
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,0);
         GLES20.glViewport(0,0,width,height);
         GLES20.glUseProgram(mOutputProgram);
@@ -436,7 +609,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,mFrameTextures[mHasPrevious?mPreviousIndex:mCurrentIndex]);
         GLES20.glUniform4f(oViewport,1f/mFboWidth,1f/mFboHeight,mFboWidth,mFboHeight);
-        GLES20.glUniform3f(oParams,sr?1f:0f,mPreset.sgsrSharpness,alpha);
+        GLES20.glUniform3f(oParams,sr?1f:0f,preset.sgsrSharpness,alpha);
         drawQuad(oPosition,oCoordinate);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,0);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -458,20 +631,29 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_MAG_FILTER,GLES20.GL_LINEAR);
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_WRAP_S,GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_WRAP_T,GLES20.GL_CLAMP_TO_EDGE);
-        SurfaceTexture texture=new SurfaceTexture(mOesTexture);
-        mSurfaceTexture=texture;
-        texture.setOnFrameAvailableListener(this,mMain);
-        if (mVideoWidth>0 && mVideoHeight>0) texture.setDefaultBufferSize(mVideoWidth,mVideoHeight);
+        SurfaceTexture texture = new SurfaceTexture(mOesTexture);
+        Surface surface = null;
+        try {
+            surface = new Surface(texture);
+            texture.setOnFrameAvailableListener(this, mMain);
+            if (mVideoWidth > 0 && mVideoHeight > 0) texture.setDefaultBufferSize(mVideoWidth, mVideoHeight);
+        } catch (Throwable error) {
+            if (surface != null) surface.release();
+            texture.release();
+            throw error;
+        }
+        mSurfaceTexture = texture;
+        mPlayerSurface = surface;
         mFrameAvailable.set(false);
-        mPlayerSurface=new Surface(texture);
-        mProducers.add(new ProducerSurface(texture, mPlayerSurface));
+        mProducers.add(new ProducerSurface(texture, surface));
         bindSurfaceToPlayer();
     }
-    private void logConfiguration() {
-        VideoEnhancePreset p=mPreset;
+    private void logConfiguration() { logConfiguration(mConfiguration); }
+    private void logConfiguration(VideoEnhanceConfig configuration) {
+        VideoEnhancePreset p=configuration.preset;
         Log.i(TAG,"mode="+p.id+"("+p.name+") sat="+p.saturation+" con="+p.contrast+" bri="+p.brightness
-                +" rgb="+p.red+","+p.green+","+p.blue+" sr="+mSrEnabled+" sharp="+p.sgsrSharpness
-                +" interp="+mInterpEnabled+" maxAlpha="+VideoPostProcessPolicy.MAX_BLEND_ALPHA);
+                +" rgb="+p.red+","+p.green+","+p.blue+" sr="+configuration.superResolution+" sharp="+p.sgsrSharpness
+                +" interp="+configuration.interpolation+" maxAlpha="+VideoPostProcessPolicy.MAX_BLEND_ALPHA);
     }
     private void logFrameStats(long now) {
         if (mStatsStartNs==0) { mStatsStartNs=now; return; }
@@ -487,7 +669,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         boolean allocated=mFbos[0]!=0 || mFrameTextures[0]!=0;
         GLES20.glDeleteFramebuffers(2,mFbos,0); GLES20.glDeleteTextures(2,mFrameTextures,0);
         mFbos[0]=mFbos[1]=mFrameTextures[0]=mFrameTextures[1]=0;
-        mFboWidth=mFboHeight=0; mHasPrevious=false;
+        mFboWidth=mFboHeight=0; mHasPrevious=false; mFboHasFrame=false;
         mTiming.reset();
         if (allocated) Log.i(TAG,"FBO ping-pong released");
     }

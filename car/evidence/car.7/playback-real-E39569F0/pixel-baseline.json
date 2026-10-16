@@ -1,0 +1,312 @@
+{
+  "candidate_sha256": "E39569F00375D074761C7D40EB14D1C9D40184CDA2BA32C8493338E1E9C3E880",
+  "pid": 28752,
+  "passed": 2,
+  "failed": 2,
+  "images": [
+    {
+      "image": "EXO-playing.png",
+      "pass": true,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            255,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            255,
+            255,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            0,
+            255
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            255,
+            0,
+            255
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            255,
+            255
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": true
+        }
+      ]
+    },
+    {
+      "image": "EXO-fullscreen.png",
+      "pass": true,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            255,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            255,
+            255,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            0,
+            255
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            255,
+            0,
+            255
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            255,
+            246
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": true
+        }
+      ]
+    },
+    {
+      "image": "IJK-playing.png",
+      "pass": false,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": false
+        }
+      ]
+    },
+    {
+      "image": "IJK-fullscreen.png",
+      "pass": false,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            132,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            0,
+            132,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            132,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            59,
+            0,
+            25
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            130,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": false
+        }
+      ]
+    }
+  ]
+}

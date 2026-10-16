@@ -2,16 +2,12 @@ package xyz.doikki.videoplayer.render;
 
 import android.content.Context;
 
-/** Snapshot all three independent settings before the render Surface is created. */
+/** Immutable initial configuration; the active view also accepts runtime changes. */
 public class GlEnhanceRenderViewFactory extends RenderViewFactory {
-    private final int mode;
-    private final boolean superResolution;
-    private final boolean interpolation;
+    private final VideoEnhanceConfig configuration;
 
     private GlEnhanceRenderViewFactory(int mode, boolean superResolution, boolean interpolation) {
-        this.mode = VideoEnhancePreset.forMode(mode).id;
-        this.superResolution = superResolution;
-        this.interpolation = interpolation;
+        configuration = new VideoEnhanceConfig(mode, superResolution, interpolation);
     }
 
     public static GlEnhanceRenderViewFactory create() {
@@ -26,8 +22,13 @@ public class GlEnhanceRenderViewFactory extends RenderViewFactory {
         return new GlEnhanceRenderViewFactory(mode, superResolution, interpolation);
     }
 
+    public VideoEnhanceConfig getConfiguration() {
+        return configuration;
+    }
+
     @Override
     public IRenderView createRenderView(Context context) {
-        return new GlEnhanceRenderView(context, mode, superResolution, interpolation);
+        return new GlEnhanceRenderView(context, configuration.preset.id,
+                configuration.superResolution, configuration.interpolation);
     }
 }

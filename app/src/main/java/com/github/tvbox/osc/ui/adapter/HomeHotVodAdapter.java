@@ -57,12 +57,22 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         helper.setText(R.id.tvName, item.name);
         ImageView ivThumb = helper.getView(R.id.ivThumb);
 
-        int newWidth = ImgUtil.defaultWidth;
-        int newHeight = ImgUtil.defaultHeight;
-        if (style != null) {
-            newWidth = defaultWidth;
-            newHeight = (int) (newWidth / style.ratio);
-        }
+        float ratio = style != null && style.ratio > 0 ? style.ratio
+                : (float) ImgUtil.defaultWidth / ImgUtil.defaultHeight;
+        int newWidth = style == null ? 190 : Math.min(340, defaultWidth);
+        int newHeight = Math.min(250, Math.round(newWidth / ratio));
+        newWidth = Math.round(newHeight * ratio);
+        ViewGroup frame = helper.getView(R.id.mItemFrame);
+        ViewGroup.LayoutParams frameParams = frame.getLayoutParams();
+        frameParams.width = AutoSizeUtils.mm2px(mContext, newWidth);
+        frameParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        frame.setLayoutParams(frameParams);
+        View poster = helper.getView(R.id.posterFrame);
+        ViewGroup.LayoutParams posterParams = poster.getLayoutParams();
+        posterParams.height = AutoSizeUtils.mm2px(mContext, newHeight);
+        poster.setLayoutParams(posterParams);
+        tvRate.setMaxWidth(AutoSizeUtils.mm2px(mContext, newWidth - 10));
+        tvNote.setMaxWidth(AutoSizeUtils.mm2px(mContext, newWidth - 10));
 
         String pic = item.pic == null ? "" : item.pic.trim();
         if (!TextUtils.isEmpty(pic)) {
@@ -74,18 +84,7 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         } else {
             ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
         }
-        applyStyleToImage(ivThumb);
+        helper.itemView.setContentDescription(item.name);
     }
 
-    private void applyStyleToImage(final ImageView ivThumb) {
-        if (style != null) {
-            ViewGroup container = (ViewGroup) ivThumb.getParent();
-            int width = defaultWidth;
-            int height = (int) (width / style.ratio);
-            ViewGroup.LayoutParams containerParams = container.getLayoutParams();
-            containerParams.height = AutoSizeUtils.mm2px(mContext, height);
-            containerParams.width = AutoSizeUtils.mm2px(mContext, width);
-            container.setLayoutParams(containerParams);
-        }
-    }
 }

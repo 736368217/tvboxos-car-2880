@@ -7,8 +7,8 @@
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:orientation="horizontal"
-    android:paddingLeft="@dimen/vs_20"
-    android:paddingRight="@dimen/vs_20">
+    android:paddingLeft="@dimen/vs_8"
+    android:paddingRight="@dimen/vs_8">
 
     <TextView
         android:id="@+id/tvTitle"
@@ -17,8 +17,10 @@
         android:layout_gravity="center"
         android:focusable="false"
         android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:textColor="@color/color_BBFFFFFF"
-        android:textSize="@dimen/ts_30" />
+        android:textSize="@dimen/ts_24" />
 
     <ImageView
         android:id="@+id/tvFilter"

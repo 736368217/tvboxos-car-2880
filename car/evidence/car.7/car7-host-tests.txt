@@ -1,0 +1,20 @@
+javac exit=0
+
+����: [options] δ�� -source 8 һ������������·��
+1 ������
+
+VideoEnhancePresetTest exit=0
+PASS: 11 presets, stable IDs, legacy migration, corrupt preference fallback, distinct immutable curves
+
+
+Car6PostProcessTest exit=0
+PASS: exact old/new audio and video curves, immutable data, linked SGSR sharpness, temporal cut/pause/seek, 4K policy and switches
+
+
+Car7RuntimeConfigTest exit=0
+PASS: 44 runtime configurations, 88 SDR/HDR cases, 1936 transition comparisons, independent switches and immutable publication
+
+
+com.github.tvbox.osc.car.BackNavPolicyHostTest exit=0
+PASS: 738 Back navigation policy checks
+

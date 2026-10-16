@@ -82,6 +82,7 @@ import me.jessyan.autosize.utils.AutoSizeUtils;
 
 public class HomeActivity extends BaseActivity {
     private LinearLayout topLayout;
+    private AnimatorSet topAnimator;
     private LinearLayout contentLayout;
     private TextView tvDate;
     private TextView tvName;
@@ -130,8 +131,9 @@ public class HomeActivity extends BaseActivity {
             // OnePlus devices may finish applying immersive mode after the first measure.
             // Re-apply the visible top state once the final display metrics are available.
             hideSysBar();
+            applyHomeSafeInsets();
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) topLayout.getLayoutParams();
-            params.topMargin = AutoSizeUtils.mm2px(HomeActivity.this, 10.0f);
+            params.topMargin = getResources().getDimensionPixelSize(R.dimen.car_top_padding);
             params.height = AutoSizeUtils.mm2px(HomeActivity.this, 50.0f);
             topLayout.setLayoutParams(params);
             topLayout.setAlpha(1.0f);
@@ -239,6 +241,17 @@ public class HomeActivity extends BaseActivity {
 
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
+                if (itemView == null || position < 0 || position >= fragments.size()) return;
+                if (currentSelected != position) {
+                    sortFocused = position;
+                    sortFocusView = itemView;
+                    currentView = itemView;
+                    sortChange = true;
+                    mHandler.removeCallbacks(mDataRunnable);
+                    mDataRunnable.run();
+                    mGridView.setSelectedPosition(position);
+                    return;
+                }
                 if (itemView != null && currentSelected == position) {
                     BaseLazyFragment baseLazyFragment = fragments.get(currentSelected);
                     if ((baseLazyFragment instanceof GridFragment) && !sortAdapter.getItem(position).filters.isEmpty()) {// 弹出筛选
@@ -768,57 +781,36 @@ public class HomeActivity extends BaseActivity {
 
     byte topHide = 0;
 
+    private void applyHomeSafeInsets() {
+        int side = getResources().getDimensionPixelSize(R.dimen.car_side_padding);
+        topLayout.setPadding(side, 0, side, 0);
+        int tabSide = side + getResources().getDimensionPixelSize(R.dimen.vs_10);
+        mGridView.setPadding(tabSide, mGridView.getPaddingTop(), tabSide, mGridView.getPaddingBottom());
+        mGridView.setClipToPadding(true);
+    }
+
     private void changeTop(boolean hide) {
-        ViewObj viewObj = new ViewObj(topLayout, (ViewGroup.MarginLayoutParams) topLayout.getLayoutParams());
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                topHide = (byte) (hide ? 1 : 0);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        if (hide && topHide == 0) {
-            animatorSet.playTogether(ObjectAnimator.ofObject(viewObj, "marginTop", new IntEvaluator(),
-                            AutoSizeUtils.mm2px(this.mContext, 10.0f),
-                            AutoSizeUtils.mm2px(this.mContext, 0.0f)),
-                    ObjectAnimator.ofObject(viewObj, "height", new IntEvaluator(),
-                            AutoSizeUtils.mm2px(this.mContext, 50.0f),
-                            AutoSizeUtils.mm2px(this.mContext, 1.0f)),
-                    ObjectAnimator.ofFloat(this.topLayout, "alpha", 1.0f, 0.0f));
-            animatorSet.setDuration(200);
-            animatorSet.start();
-            return;
-        }
-        if (!hide && topHide == 1) {
-            animatorSet.playTogether(ObjectAnimator.ofObject(viewObj, "marginTop", new IntEvaluator(),
-                            AutoSizeUtils.mm2px(this.mContext, 0.0f),
-                            AutoSizeUtils.mm2px(this.mContext, 10.0f)),
-                    ObjectAnimator.ofObject(viewObj, "height", new IntEvaluator(),
-                            AutoSizeUtils.mm2px(this.mContext, 1.0f),
-                            AutoSizeUtils.mm2px(this.mContext, 50.0f)),
-                    ObjectAnimator.ofFloat(this.topLayout, "alpha", 0.0f, 1.0f));
-            animatorSet.setDuration(200);
-            animatorSet.start();
-        }
+        if ((hide && topHide == 1) || (!hide && topHide == 0)) return;
+        if (topAnimator != null) topAnimator.cancel();
+        applyHomeSafeInsets();
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) topLayout.getLayoutParams();
+        params.topMargin = getResources().getDimensionPixelSize(R.dimen.car_top_padding);
+        topLayout.setLayoutParams(params);
+        topHide = (byte) (hide ? 1 : 0);
+        tvName.setFocusable(!hide);
+        int targetHeight = hide ? 1 : getResources().getDimensionPixelSize(R.dimen.vs_50);
+        ViewObj viewObj = new ViewObj(topLayout, params);
+        topAnimator = new AnimatorSet();
+        topAnimator.playTogether(ObjectAnimator.ofObject(viewObj, "height", new IntEvaluator(),
+                        topLayout.getHeight(), targetHeight),
+                ObjectAnimator.ofFloat(topLayout, "alpha", topLayout.getAlpha(), hide ? 0f : 1f));
+        topAnimator.setDuration(200);
+        topAnimator.start();
     }
 
     @Override
     protected void onDestroy() {
+        if (topAnimator != null) topAnimator.cancel();
         dismissHomeDialogs();
         mHandler.removeCallbacksAndMessages(null);
         super.onDestroy();

@@ -1,6 +1,9 @@
 package com.github.tvbox.osc.car;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.github.tvbox.osc.player.MyVideoView;
@@ -19,14 +22,15 @@ import xyz.doikki.videoplayer.render.VideoPostProcessPolicy;
  *     chain of {@link AudioEffectController}, attached to the running playback engine's audio
  *     session id. Only the EXO and IJK engines expose one; the system player is skipped.</li>
  *     <li><b>臻彩 (GPU colour grading)</b>: the GL render view {@code GlEnhanceRenderView} that
- *     grades saturation/contrast/brightness on the GPU. It is selected per playback (before the
- *     player starts) and is forced off for HDR/Dolby Vision tracks, which must not be graded.</li>
+ *     grades saturation/contrast/brightness on the GPU. It can switch on the current playback;
+ *     HDR/Dolby Vision tracks always bypass colour grading.</li>
  * </ul>
  *
  * Preference keys: {@link HawkConfig#HIFI_AUDIO} (int preset, default 0 = off) and
  * {@link HawkConfig#VIDEO_ENHANCE} (stable preset ID; old Boolean/0/1 values are retained).
  */
 public final class CarEnhance {
+    private static final Handler MAIN = new Handler(Looper.getMainLooper());
 
     private CarEnhance() {
     }
@@ -38,7 +42,7 @@ public final class CarEnhance {
                 Hawk.get(HawkConfig.HIFI_AUDIO, AudioEffectController.MODE_OFF));
     }
 
-    /** Persist the preset; takes effect on the current playback (see {@link #applyAudio}). */
+    /** Persist the preset; call applyAudio(view) to update an active session. */
     public static void setAudioMode(int mode) {
         Hawk.put(HawkConfig.HIFI_AUDIO, mode);
     }
@@ -49,15 +53,16 @@ public final class CarEnhance {
      */
     public static void applyAudio(MyVideoView view) {
         if (view == null) return;
-        int mode = audioMode();
-        if (mode == AudioEffectController.MODE_OFF) {
-            AudioEffectController.release();
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            MAIN.post(() -> applyAudio(view));
             return;
         }
+        int mode = audioMode();
         int session = view.getAudioSessionId();
-        if (session > 0) {
-            AudioEffectController.apply(mode, session);
-        }
+        AudioEffectController.apply(mode, session);
+        Log.i("CarAudio", "runtime_apply mode=" + mode + " session=" + session
+                + " active=" + AudioEffectController.isActive() + " state=" + view.getCurrentPlayState()
+                + " player=" + System.identityHashCode(view.getMediaPlayer()));
     }
 
     public static void releaseAudio() {
@@ -96,6 +101,11 @@ public final class CarEnhance {
 
     public static void setVideoInterpEnabled(boolean enabled) {
         Hawk.put(HawkConfig.VIDEO_INTERP, enabled ? 1 : 0);
+    }
+
+    /** Apply all independent persisted video settings to this decoder, including HDR bypass. */
+    public static void applyVideo(MyVideoView view) {
+        if (view != null) view.setVideoEnhancements(videoMode(), videoSrEnabled(), videoInterpEnabled());
     }
 
     /** HDR colour grading is disabled in prepared(); spatial/temporal switches remain independent. */

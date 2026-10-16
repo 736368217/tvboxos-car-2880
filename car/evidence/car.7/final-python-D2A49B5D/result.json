@@ -1,0 +1,84 @@
+{
+  "passed": 12,
+  "failed": 1,
+  "events": [
+    {
+      "pass": true,
+      "test": "python-transport-form",
+      "detail": "",
+      "at": 1792157437515
+    },
+    {
+      "pass": true,
+      "test": "python-transport-binary_post",
+      "detail": "",
+      "at": 1792157437515
+    },
+    {
+      "pass": true,
+      "test": "python-transport-binary_response",
+      "detail": "",
+      "at": 1792157437515
+    },
+    {
+      "pass": true,
+      "test": "python-transport-redirect_cookies",
+      "detail": "",
+      "at": 1792157437515
+    },
+    {
+      "pass": true,
+      "test": "python-transport-response_contract",
+      "detail": "",
+      "at": 1792157437515
+    },
+    {
+      "pass": true,
+      "test": "python-transport-real-https",
+      "detail": "",
+      "at": 1792157437515
+    },
+    {
+      "pass": true,
+      "test": "real-site-py_douban",
+      "detail": "{\"key\":\"py_douban\",\"phases\":[{\"phase\":\"load_import_init\",\"ok\":true,\"elapsed_ms\":1215},{\"phase\":\"home\",\"ok\":true,\"elapsed_ms\":20},{\"phase\":\"category\",\"ok\":true,\"elapsed_ms\":543}],\"load_success\":true,\"categories\":10,\"home_items\":0,\"category_items\":20}",
+      "at": 1792157437516
+    },
+    {
+      "pass": false,
+      "test": "real-site-py_maple",
+      "detail": "{\"key\":\"py_maple\",\"phases\":[{\"phase\":\"load_import_init\",\"ok\":true,\"elapsed_ms\":2687},{\"phase\":\"home\",\"ok\":true,\"elapsed_ms\":6},{\"phase\":\"category\",\"ok\":true,\"elapsed_ms\":649},{\"phase\":\"search\",\"ok\":true,\"elapsed_ms\":1238}],\"load_success\":true,\"categories\":8,\"home_items\":0,\"category_items\":0,\"search_items\":0}",
+      "at": 1792157437516
+    },
+    {
+      "pass": true,
+      "test": "real-site-py_juzong",
+      "detail": "{\"key\":\"py_juzong\",\"phases\":[{\"phase\":\"load_import_init\",\"ok\":true,\"elapsed_ms\":1952},{\"phase\":\"home\",\"ok\":true,\"elapsed_ms\":1432},{\"phase\":\"category\",\"ok\":true,\"elapsed_ms\":863},{\"phase\":\"detail\",\"ok\":true,\"elapsed_ms\":444},{\"phase\":\"player\",\"ok\":true,\"elapsed_ms\":384},{\"phase\":\"search\",\"ok\":true,\"elapsed_ms\":1399}],\"load_success\":true,\"categories\":18,\"home_items\":30,\"category_items\":42,\"detail_items\":1,\"player_url_present\":true,\"player_parse\":1,\"player_scheme\":\"https\",\"search_items\":12}",
+      "at": 1792157437516
+    },
+    {
+      "pass": true,
+      "test": "real-site-py_apples",
+      "detail": "{\"key\":\"py_apples\",\"phases\":[{\"phase\":\"load_import_init\",\"ok\":true,\"elapsed_ms\":1479},{\"phase\":\"home\",\"ok\":true,\"elapsed_ms\":2},{\"phase\":\"category\",\"ok\":true,\"elapsed_ms\":86},{\"phase\":\"detail\",\"ok\":true,\"elapsed_ms\":57},{\"phase\":\"player\",\"ok\":true,\"elapsed_ms\":308},{\"phase\":\"search\",\"ok\":true,\"elapsed_ms\":112}],\"load_success\":true,\"categories\":7,\"home_items\":0,\"category_items\":21,\"detail_items\":1,\"player_url_present\":true,\"player_parse\":0,\"player_scheme\":\"https\",\"search_items\":20}",
+      "at": 1792157437516
+    },
+    {
+      "pass": true,
+      "test": "real-site-py_guazi",
+      "detail": "{\"key\":\"py_guazi\",\"phases\":[{\"phase\":\"load_import_init\",\"ok\":true,\"elapsed_ms\":1922},{\"phase\":\"home\",\"ok\":true,\"elapsed_ms\":3},{\"phase\":\"category\",\"ok\":true,\"elapsed_ms\":6591},{\"phase\":\"detail\",\"ok\":true,\"elapsed_ms\":6175},{\"phase\":\"player\",\"ok\":true,\"elapsed_ms\":393},{\"phase\":\"search\",\"ok\":true,\"elapsed_ms\":2188}],\"load_success\":true,\"categories\":5,\"home_items\":0,\"category_items\":30,\"detail_items\":1,\"player_url_present\":true,\"player_parse\":0,\"player_scheme\":\"https\",\"search_items\":15}",
+      "at": 1792157437516
+    },
+    {
+      "pass": true,
+      "test": "python-probe-finished",
+      "detail": "",
+      "at": 1792157437516
+    },
+    {
+      "pass": true,
+      "test": "python-real-EXO-playback",
+      "detail": "",
+      "at": 1792157459184
+    }
+  ]
+}

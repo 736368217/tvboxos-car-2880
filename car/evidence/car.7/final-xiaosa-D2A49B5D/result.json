@@ -1,0 +1,84 @@
+{
+  "passed": 9,
+  "failed": 4,
+  "events": [
+    {
+      "pass": true,
+      "test": "subscription parsed site count",
+      "detail": "unique_sites=108",
+      "at": 1792157611824
+    },
+    {
+      "pass": true,
+      "test": "subscription-热播影视-home",
+      "detail": "",
+      "at": 1792157611914
+    },
+    {
+      "pass": true,
+      "test": "subscription-热播影视-category",
+      "detail": "",
+      "at": 1792157612000
+    },
+    {
+      "pass": true,
+      "test": "subscription-热播影视-detail",
+      "detail": "",
+      "at": 1792157612195
+    },
+    {
+      "pass": false,
+      "test": "subscription-热播影视-search",
+      "detail": "",
+      "at": 1792157612266
+    },
+    {
+      "pass": true,
+      "test": "subscription-枫叶影视-home",
+      "detail": "",
+      "at": 1792157614391
+    },
+    {
+      "pass": false,
+      "test": "subscription-枫叶影视-category",
+      "detail": "",
+      "at": 1792157614649
+    },
+    {
+      "pass": true,
+      "test": "subscription-枫叶影视-search",
+      "detail": "",
+      "at": 1792157615285
+    },
+    {
+      "pass": true,
+      "test": "subscription-爱动漫-home",
+      "detail": "",
+      "at": 1792157620444
+    },
+    {
+      "pass": true,
+      "test": "subscription-爱动漫-category",
+      "detail": "",
+      "at": 1792157628052
+    },
+    {
+      "pass": true,
+      "test": "subscription-爱动漫-detail",
+      "detail": "",
+      "at": 1792157629704
+    },
+    {
+      "pass": false,
+      "test": "subscription-爱动漫",
+      "detail": "TimeoutException",
+      "at": 1792157659708
+    },
+    {
+      "pass": false,
+      "test": "subscription",
+      "detail": "java.lang.Exception: Spider timeout; aborting outstanding work\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.subscriptionChecks(Car7Acceptance.java:148)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.$r8$lambda$SAuiog1Z1BkC01t9eKzh-CMRVRU(Unknown Source:0)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance$$ExternalSyntheticLambda2.run(Unknown Source:2)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.section(Car7Acceptance.java:385)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.onStart(Car7Acceptance.java:80)\n\tat android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2606)\n",
+      "at": 1792157659709
+    }
+  ]
+}

@@ -22,11 +22,13 @@ public class SelectDialog<T> extends BaseDialog {
     public SelectDialog(@NonNull @NotNull Context context) {
         super(context);
         setContentView(R.layout.dialog_select);
+        enableSelectionDismissal(R.id.cl_root);
     }
 
     public SelectDialog(@NonNull @NotNull Context context, int resId) {
         super(context);
         setContentView(resId);
+        enableSelectionDismissal(R.id.cl_root);
     }
 
     @Override

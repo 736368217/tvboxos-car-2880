@@ -1,0 +1,58 @@
+10-16 19:00:55.586 10110 10124 I Car7Native: PASS cold-start ball has car-scale hit box width=243 token=3.375
+10-16 19:00:56.245 10110 10124 I Car7Native: PASS home header safe top>=90 
+10-16 19:00:56.245 10110 10124 I Car7Native: PASS home header safe left>=79 
+10-16 19:00:56.245 10110 10124 I Car7Native: PASS home setting complete inside safe right 
+10-16 19:00:57.790 10110 10124 I Car7Native: PASS category horizontal viewport items=9 overflow=false firstBefore=0 firstAfter=0
+10-16 19:00:57.790 10110 10124 I Car7Native: PASS last category reachable 
+10-16 19:00:59.891 10110 10124 I Car7Native: PASS category touch selects page 
+10-16 19:00:59.891 10110 10124 I Car7Native: PASS collapsed category top respects safe inset 
+10-16 19:01:01.390 10110 10124 I Car7Native: PASS category back returns home 
+10-16 19:01:01.390 10110 10124 I Car7Native: PASS home header restored safely 
+10-16 19:01:10.073 10110 10124 I Car7Native: PASS last recommendation reachable 
+10-16 19:01:10.073 10110 10124 I Car7Native: PASS last card safe right 
+10-16 19:01:10.073 10110 10124 I Car7Native: PASS recommendation title independent full height 
+10-16 19:01:12.254 10110 10124 I Car7Native: PASS home root ball never exits 
+10-16 19:01:12.419 10110 10124 I Car7Native: PASS root hide removes ball hit target 
+10-16 19:01:12.583 10110 10124 I Car7Native: PASS root hide disabled restores ball 
+10-16 19:01:14.317 10110 10124 I Car7Native: PASS standard ball 72dp hit box 
+10-16 19:01:14.317 10110 10124 I Car7Native: PASS standard ball 56dp visual 
+10-16 19:01:14.574 10110 10124 I Car7Native: PASS native size switch updates immediately 
+10-16 19:01:15.752 10110 10124 I Car7Native: PASS dragging ball uses1.08 scale 
+10-16 19:01:16.258 10110 10124 I Car7Native: PASS ball drag docks right 
+10-16 19:01:16.258 10110 10124 I Car7Native: PASS ball normalized x persisted 
+10-16 19:01:16.258 10110 10124 I Car7Native: PASS ball dock remains in safe bounds 
+10-16 19:01:21.070 10110 10124 I Car7Native: PASS idle alpha becomes .38 
+10-16 19:01:21.070 10110 10124 I Car7Native: PASS idle is stable relative to dock 
+10-16 19:01:21.730 10110 10124 I Car7Native: PASS blank host passes original DOWN and UP 
+10-16 19:01:21.730 10110 10124 I Car7Native: PASS page touch wakes ball in 120ms 
+10-16 19:01:22.988 10110 10124 I Car7Native: PASS advanced ball back finishes one page 
+10-16 19:01:23.823 10110 10124 I Car7Native: PASS ball y normalization survives page change 
+10-16 19:01:23.823 10110 10124 I Car7Native: PASS ball dock survives page change 
+10-16 19:01:24.150 10110 10124 I Car7Native: PASS disable removes decor host 
+10-16 19:01:24.150 10110 10124 I Car7Native: PASS disabled host is disposed 
+10-16 19:01:24.480 10110 10124 I Car7Native: PASS dual mode keeps both controls 
+10-16 19:01:24.974 10110 10124 I Car7Native: PASS edge-only hides ball 
+10-16 19:01:25.201 10110 10124 I Car7Native: PASS edge tap never returns 
+10-16 19:01:25.857 10110 10124 I Car7Native: PASS subthreshold edge pull never returns 
+10-16 19:01:25.872 10110 10124 I Car7Native: PASS edge arms beyond 48dp 
+10-16 19:01:26.175 10110 10124 I Car7Native: PASS teardrop remains armed at capture skin=teardrop pull=39.93118 progress=1.0
+10-16 19:01:26.746 10110 10124 I Car7Native: PASS edge pull reversal cancels 
+10-16 19:01:26.996 10110 10124 I Car7Native: PASS edge ACTION_CANCEL never returns 
+10-16 19:01:27.680 10110 10124 I Car7Native: PASS edge vertical gesture rejected 
+10-16 19:01:28.398 10110 10124 I Car7Native: PASS 400ms edge long press moves height 
+10-16 19:01:28.398 10110 10124 I Car7Native: PASS edge height independent from ball 
+10-16 19:01:29.112 10110 10124 I Car7Native: PASS cancelled edge reposition restores height 
+10-16 19:01:29.112 10110 10124 I Car7Native: PASS cancelled reposition does not persist 
+10-16 19:01:29.275 10110 10124 I Car7Native: PASS capsule skin applies immediately 
+10-16 19:01:30.088 10110 10124 I Car7Native: PASS armed edge release navigates one level 
+10-16 19:01:31.106 10110 10124 I Car7Native: PASS edge height survives page change 
+10-16 19:01:32.159 10110 10124 I Car7Native: PASS right edge pull navigates 
+10-16 19:01:33.334 10110 10124 I Car7Native: PASS both edge handles enabled 
+10-16 19:01:34.754 10110 10124 I Car7Native: PASS API inside panel tap does not cancel 
+10-16 19:01:34.880 10110 10124 I Car7Native: PASS outside drag does not cancel 
+10-16 19:01:35.109 10110 10124 I Car7Native: PASS outside drag returning to origin does not cancel 
+10-16 19:01:35.219 10110 10124 I Car7Native: PASS outside CANCEL keeps dialog 
+10-16 19:01:35.669 10110 10124 I Car7Native: PASS outside tap cancels API dialog 
+10-16 19:01:35.669 10110 10124 I Car7Native: PASS API cancellation does not save input 
+10-16 19:01:36.071 10110 10124 I Car7Native: PASS confirmation outside cancel runs cancel only 
+10-16 19:01:36.436 10110 10124 I Car7Native: PASS system Back cancels rather than confirms 

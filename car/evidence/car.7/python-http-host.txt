@@ -1,0 +1,26 @@
+plugin downloaded spider.py
+test_redirect_cycle (__main__.DownloadTests.test_redirect_cycle) ... ok
+test_relative_redirect (__main__.DownloadTests.test_relative_redirect) ... ok
+test_success_and_invalid_preserve_old_cache (__main__.DownloadTests.test_success_and_invalid_preserve_old_cache) ... ok
+test_binary_round_trip (__main__.HttpTests.test_binary_round_trip) ... ok
+test_duplicate_cookie_and_domain_policy (__main__.HttpTests.test_duplicate_cookie_and_domain_policy) ... ok
+test_error_status (__main__.HttpTests.test_error_status) ... ok
+test_form_and_query (__main__.HttpTests.test_form_and_query) ... ok
+test_install_and_native_success_or_fallback (__main__.HttpTests.test_install_and_native_success_or_fallback) ... ok
+test_json (__main__.HttpTests.test_json) ... ok
+test_no_session_adapter_mutation (__main__.HttpTests.test_no_session_adapter_mutation) ... ok
+test_redirect_disabled (__main__.HttpTests.test_redirect_disabled) ... ok
+test_redirect_limit (__main__.HttpTests.test_redirect_limit) ... ok
+test_redirect_post_302_becomes_get (__main__.HttpTests.test_redirect_post_302_becomes_get) ... ok
+test_redirect_post_307_keeps_form (__main__.HttpTests.test_redirect_post_307_keeps_form) ... ok
+test_relative_redirect_cookie_and_history (__main__.HttpTests.test_relative_redirect_cookie_and_history) ... ok
+test_request_cookies_and_session_headers (__main__.HttpTests.test_request_cookies_and_session_headers) ... ok
+test_response_contract (__main__.HttpTests.test_response_contract) ... ok
+test_timeout_none_and_validation (__main__.HttpTests.test_timeout_none_and_validation) ... ok
+test_timeout_tuple (__main__.HttpTests.test_timeout_tuple) ... ok
+test_transport_timeout (__main__.HttpTests.test_transport_timeout) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.059s
+
+OK

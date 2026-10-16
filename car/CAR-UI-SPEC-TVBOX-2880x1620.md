@@ -1,17 +1,17 @@
 # 车机 UI 开发规范（基于 TVBoxOS 架构 · 2880×1620 / 17.3"）
 
-> **状态：草案（DRAFT，未生效）**
+> **状态：car.7 开发生效规范，运行验收结果单独记录。**
 >
-> - 本文件**不是** `AGENTS.md`、**不是** `.agents/*.md`，不会被任何 AI/Agent 自动加载或默默遵守。
-> - **生效方式**：在对话中明确说出「按 `CAR-UI-SPEC-TVBOX-2880x1620` 开发」，本文件即作为该任务的核心开发与验收基准。
-> - **设计来源**：以开源车载/TV 标杆项目 `q215613905/TVBoxOS`（AndroidAutoSize + Subunits.MM 体系）为技术基准，吸收畅流（畅☁流）的纯物理尺寸控制优点，并深度融入**17.3 英寸车载强光视距与上下系统组件避让**等车机人机工程学（Car HMI）。
+> - 适用 TVBoxOS 车机版本；既有 1280x720 / AndroidAutoSize MM 架构保留。
+> - car.7 更新：背景与内容全屏铺满，安全带只限制操作热区，不再强制整个根布局留空。
+> - 返回交互以用户提供的 `ivi_in_app_back_navigation_spec.md` 为依据；TVBox 的首页防退出及闲置时间兼容规则见本文件补充条款。
 
 ---
 
 ## 0. 核心架构原则
 
-1. **借道 `mm` 原生声明**：彻底弃用容易缩小的 `dp` 和 `sp`，全面使用 Android 原生支持的 `mm`（毫米）作为 XML 布局与字号单位。
-2. **基准画布 1280×720（16:9）**：以车载/TV 工业成熟的 720P 为设计基准，天然 16:9 与目标屏（2880×1620）实现 **2.25 倍绝对无损等比缩放**。
+1. **保留项目的设计单位**：XML `mm` 由 AndroidAutoSize 的 `xdpi` 映射为设计坐标，不是屏幕真实物理毫米；无需修改车机系统 DPI。
+2. **基准画布 1280x720（16:9）**：2880x1620 全屏时设计单位约为 2.25px。实际值必须通过最终 APK 的原生节点和截图核对。
 3. **保留 Android 原生生态**：100% 采用标准 XML、`ConstraintLayout`、`TvRecyclerView`，享受原生视图回收、动画与**方向盘/旋钮焦点导航**。
 4. **上下系统组件绝对避让**：顶部状态栏区与底部车控/Dock 栏区严禁放置任何可交互按钮，保障行车安全与盲操防挡。
 
@@ -58,24 +58,26 @@
 
 | 区域 | XML 尺寸 (`mm`) | 屏幕像素 (`px`) | 物理高度 (`mm`) | 规范要求 |
 |---|---|---|---|---|
-| **顶部避让禁区 (Top Strip)** | **0 ~ 40 mm** | **0 ~ 90 px** | 0 ~ 12.0 mm | **严禁放置任何可点击控件**（返回键、搜索键、Tab 均须下移至 40mm 之下）。仅允许背景色延伸或居中无点击纯文本。 |
-| **底部避让禁区 (Bottom Strip)** | **底边算起 55 mm** | **底边算起 124 px** | 16.5 mm | **严禁放置任何可点击控件**（播放控制条、分类按钮、底栏 Tab 严禁贴底）。 |
-| **左右安全边距** | **各 35 mm** | **各 78.7 px** | 10.5 mm | 防车机圆角与外边框遮挡，内容区左右缩进。 |
+| **顶部避让禁区 (Top Strip)** | **0 ~ 40 mm** | **0 ~ 90 px** | 0 ~ 12.0 mm | 不放按钮、Tab 或手势起始热区；允许壁纸、视频、海报背景及非交互信息连续延伸。 |
+| **底部避让禁区 (Bottom Strip)** | **底边算起 55 mm** | **底边算起 124 px** | 16.5 mm | 不放可操作控制；视频、壁纸和非交互内容继续绘制，不添加纯黑占位条。 |
+| **左右安全边距** | **各 35 mm** | **各 78.7 px** | 10.5 mm | 常规按钮与可点击卡片留在安全范围；滚动容器预留首尾留量。 |
 
-### 2.3 根布局落地标准
-所有 Activity 的 XML 根布局或公共模板（如 `layout_base_activity.xml`）必须设置安全 Padding：
+### 2.3 背景与热区分离
+根布局铺满窗口，不统一加四边安全 Padding。壁纸由窗口完整绘制，根布局不得用不透明色覆盖壁纸形成空带。仅操作层应用安全 Margin / Padding：
 ```xml
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingTop="40mm"
-    android:paddingBottom="55mm"
-    android:paddingLeft="35mm"
-    android:paddingRight="35mm"
-    android:clipToPadding="false"
-    android:orientation="vertical">
-    <!-- 具体内容区 -->
-</LinearLayout>
+    android:layout_height="match_parent">
+    <!-- 视频或图片层铺满；不添加黑色占位条。 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="40mm"
+        android:paddingBottom="55mm"
+        android:paddingLeft="35mm"
+        android:paddingRight="35mm"
+        android:orientation="vertical" />
+</FrameLayout>
 ```
 
 ---
@@ -297,20 +299,34 @@ AutoSizeConfig.getInstance().setCustomFragment(true).getUnitsManager()
 
 ## 9. 验收规范（真机 / 模拟器标准作业程序）
 
-### 9.1 ADB 自动化截屏与尺寸验证
-```powershell
-$adb = "C:\Users\WIN10\AppData\Local\Android\Sdk\platform-tools\adb.exe"
-$s   = "<设备序列号>"
+### 9.1 MuMu 显示链路验收门槛
 
-# 1. 验证目标分辨率基线
-& $adb -s $s shell wm size
-# 期望：Physical size: 2880x1620 (或 Override size: 2880x1620)
+模拟器操作必须先通过全局实例池的租约检查，并全部经 `hawchou.mumu-player` 插件执行。MuMu 配置必须是 `resolution_mode=custom`、宽 2880、高 1620、dpi 160，host 静音开启。
 
-# 2. 启动并获取原生分辨率截图
-& $adb -s $s shell am start -W -n <包名>/.MainActivity
-Start-Sleep -Seconds 3
-cmd /c "`"$adb`" -s $s exec-out screencap -p > check-car-2880.png"
+**不能只检查截图宽高或 `wm size` 的 Override 值。** 2026-10-16 曾出现截图为 2880x1620、底层却仍按竖屏缩放到 `Rect(0,984 - 1620,1895)` 的无效状态；该状态不得用于车机验收。
+
+在已持有租约的实例中，通过 `mumu_shell` 的系统 namespace 执行：
+
+```sh
+wm size reset
+wm density reset
+wm scaling auto
+settings put system accelerometer_rotation 0
+settings put system user_rotation 1
+wm user-rotation lock 1
+wm fixed-to-user-rotation enabled
 ```
+
+以上仅用于已配置 physical density 160 的模拟器，禁止对真实车机执行 DPI 或尺寸修改。自然方向报告 `Physical size: 1620x2880` 本身不代表失败，必须同时满足下列条件：
+
+- 没有手工 `Override size`；系统旋转是横屏，`mCurrentOrientation=1`。
+- `dumpsys display` 的 `mCurrentDisplayRect=Rect(0,0 - 2880,1620)`，画面完整铺满。
+- `dumpsys input` 的逻辑与物理 viewport 均为 `[0,0,2880,1620]`，`deviceSize=[2880,1620]`，不存在缩放或偏移。
+- `dumpsys window displays` 的 `cur`、`app`、`DisplayFrames` 均为 2880x1620；应用配置为 `land`、`160dpi`。
+- 桌面、应用原生 PNG 均为 2880x1620，重启实例后重新检查仍满足上述条件。
+
+MuMu 6.8.7.0 实测会在实例重启后将旋转锁恢复为 `free/default`，即使桌面仍恰好横屏。因此每次启动后都要重新锁定，再运行只读门禁 `car/tests/verify_car_display.sh`；只有输出 `CAR_DISPLAY_PASS` 才能开始验收。锁定不持久不得被写成重启后配置全通过。
+真实车机可用 ADB 只读采集同类信息与截图；模拟器不能代替 OEM 窗口管理或真实硬件性能验收。
 
 ### 9.2 图像像素验收核对标尺
 
@@ -326,10 +342,32 @@ cmd /c "`"$adb`" -s $s exec-out screencap -p > check-car-2880.png"
 
 ## 10. 生效与协作流程
 
-1. **默认状态**：本文档存盘为草稿，任何通用 Agent 不会自动套用此规则。
+1. **当前状态**：本规范已由用户要求启用，适用于 car.7 及后续车机版；不是待激活草稿。
 2. **激活口令**：当用户明确下达：
    > 「按 `CAR-UI-SPEC-TVBOX-2880x1620` 开发」
    > 或
    > 「采用 TVBoxOS 规范改造当前项目」
    AI 必须严格执行本文件 §2 的上下避让禁区、§3 的 mm 转换引擎与 §4 的尺寸数值表。
 3. **后续调优留档**：如果实车上下一条的物理遮挡高度有细微变动，只需在 §2.2 中修改 `40mm` 与 `55mm` 的基准值，全应用通过 `dimens.xml` 自动全局重算生效。
+
+## 11. car.7 返回与触摸适配
+
+- 模式：悬浮球、边缘拉出、双模共存。应用内 View 挂载到 Activity decor；不用系统悬浮窗、无障碍或新增权限。
+- 悬浮球采用原稿56/64、72/80的参考单位比例，而非直接使用Android dp。按 `BACK-CAR-SCALE.md` 适配后，2880x1620窗口的标准可视球为189px、热区243px，大号216/270px；8参考单位拖拽阈值同尺度换算。保留速度辅助选边、0.75/400弹簧、闲置alpha0.38、外移35%与120ms唤醒。
+- TVBox 兼容：保留 `inapp_back` 总开关和 `hide_seconds` 的常驻/4/6/8 秒选择，默认 4 秒；因此不采用蓝图固定 3 秒。首页根状态保留防退出，轻点只提示，绝不由组件退出应用。
+- 边缘胶囊按同一参考单位缩放：本车屏导引条20.25x256.5px，局部热区94.5x405px，实际拉动162px就绪。保留横向优势1.5和 `72*tanh(rawDx/120)` 的参考单位阻尼；抬手返回，短拉、轻点和CANCEL不返回。水滴轮廓按原SVG比例展开、跨度上限160参考单位；胶囊独立布局文字与圆形箭头钮。
+- 长按 400ms 调整胶囊高度，独立于球的位置保存。支持左、右或双侧；旋转后归一化坐标重新夹紧；销毁时清理动画和回调。
+- 返回组件的视觉和手势使用车机窗口参考单位比例，普通安全边界仍取原生dp下限与车机MM操作边距的较大值，不修改整机DPI。该适配有意修正原稿在本车屏上过小的原始dp尺寸；原稿保持不变，差异与占屏比例见 `BACK-CAR-SCALE.md`。最终尺寸与图形必须在d160实测，d240只作补充对照。
+- 空白透传；仅组件本身和局部胶囊热区处理事件，不占整条边缘。Dialog 属于独立窗口，通过自身外点取消，不能宣称 decor Z 值能跨窗口覆盖。
+- 首页快捷入口使用水平滚动容器；分类点击必须能切页，不能只响应焦点。推荐标题独立于海报底部，双行固定区域并可滚到最后一列。
+
+## 12. car.7 验收基线
+
+- 主环境：2880x1620、density 160；density 240 仅作不劣化对照，不代替实机等效环境。不得修改真实车机 DPI。
+- 必须先通过 §9.1 的显示链路门槛；PNG 宽高或 `wm size` 覆盖值不能单独证明环境合格。旧的竖屏承载横屏缩放状态证据只作排查，不计入最终通过。
+- 证据绑定最终 APK 的 SHA-256 和实际安装 versionCode/name。构建成功、插件安装返回成功、截图存在均不等于功能通过。
+- 检查按钮 bbox 不进入上下安全带；背景连续到窗口边缘；最右入口、最后卡片及其双行标题可达；横拖不触发返回。
+- 检查球拖动/吸边/闲置/唤醒/跨页持久化；边缘短拉、达阈值、反悔取消、长按移位、局部外区透传及双模切换。
+- 弹窗内点击不误取消，外部轻点取消且不保存输入、不执行确认；CANCEL 不派发返回或确认。
+- 当前视频切换画面、SR、补帧和音效后立即观察当前 renderer/session；覆盖全关与重新开启、暂停和 EXO/IJK 前后台恢复。
+- 如未执行 500 次跳转内存测试、真实车机性能测试或全部 context-loss 注入，报告中明确未覆盖，不将静态实现写作实测通过。

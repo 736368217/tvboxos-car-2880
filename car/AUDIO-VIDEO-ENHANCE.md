@@ -1,4 +1,4 @@
-# 音频与视频增强技术说明（car.6）
+# 音频与视频增强技术说明（car.7）
 
 ## 设置与兼容性
 
@@ -7,11 +7,11 @@ car.6 保留 Python ARM32＋ARM64 flavor、Java/JAR、QuickJS 和既有车机修
 | 设置 | 偏好键 | 默认 | 生效 |
 |---|---|---|---|
 | 9 档音效 | `hifi_audio` | 0 关闭 | 当前或下次内部 EXO/IJK 音频会话 |
-| 11 档画面 | `video_enhance` | 0 原画 | 下次播放 |
-| SGSR1 超分 | `video_sr` | 开启 | 下次播放 |
-| 时域平滑补帧 | `video_interp` | 开启 | 下次播放 |
+| 11 档画面 | `video_enhance` | 0 原画 | 当前内部播放器；无活动播放时保存给下次 |
+| SGSR1 超分 | `video_sr` | 开启 | 当前内部播放器；独立生效 |
+| 时域平滑补帧 | `video_interp` | 开启 | 当前内部播放器；独立生效 |
 
-预设采用不可变参数表。旧 Boolean、数字与字符串偏好可读取；损坏预设回退 0。两个新开关独立解析和持久化，任何调色／SR／补帧启用时选统一 GL 渲染器；原画＋全部关闭时回普通渲染器。
+预设采用不可变参数表。旧Boolean、数字与字符串偏好可读取，损坏预设回退0。SR/补帧独立持久化。EXO在任一增强开启时选GL，全关时使用Texture；IJK固定保留OES消费者，全关时恒等直通且无FBO/SR/持续补帧，避免运行中重配硬解消费者。
 
 ## 9 档音效
 
@@ -94,3 +94,20 @@ FBO 分配或输出 shader 失败时记录 `POSTPROCESS_FALLBACK`，关闭持续
 HDR／DoVi 检测后使用恒等调色，保留独立 SR／补帧开关。EXO 读取颜色元数据，IJK 主要依赖 codec 名启发式；RGBA8 FBO 不保证端到端 10-bit HDR 精度。本轮未用 HDR 片源验收。
 
 内部 EXO／IJK 已运行验证；外部播放器与现有直播基类不属于本轮完整音效／后处理链验收。真实 SA8295P <2ms 耗时、长期温升功耗、OEM 全屏与 ARM32 运行仍需对应硬件证据。完整结果见 [TEST-REPORT.md](TEST-REPORT.md)。
+
+## car.7 车机快捷控制
+
+car.7 保持 SGSR1、时域策略和9/11档参数表，新增不可变运行配置，并将设置应用到当前实际 MyVideoView、decoder 和音频 session：
+
+- 主设置页进入 `画面与音效高级功能` 二级页，可配置音效、画面、`video_sr`、`video_interp` 和返回交互。
+- 点播播放页 `player_vod_control_view.xml` 的横向控制组新增 `play_car_video`、`play_car_sr`、`play_car_interp`、`play_car_audio`。
+- 画面按钮打开同一11档选择器；SR/补帧写入独立偏好并立即调用当前视频配置，音效按0→8循环并应用到当前session。无活动播放时保存给下次使用。
+- 这些快捷按钮受播放控制栏自身的显示/隐藏和锁定状态管理，不能在播放器未显示控制栏时覆盖视频。
+
+## car.7 返回与安全区 UI
+
+返回入口是Activity decor内普通View，无SYSTEM_ALERT_WINDOW或无障碍权限。模式为floating/edge/both。标准视觉/热区为189/243px，大号216/270px；参考单位通过窗口尺寸换算，详见BACK-CAR-SCALE.md。边缘短拉、反悔、CANCEL不返回，水滴/胶囊分别绘制文字和箭头。
+
+车机背景/视频铺满窗口；普通控件保留侧79、顶90、底124px的安全操作区。弹窗按完整触摸序列判定，外拖、多指、CANCEL不会提交或误取消。
+
+最终D2A通过95项当前实例/迟到暂停回调/快速设置/全屏前后台/释放重进检查；像素八图7/8，唯一失败IJK硬解全屏。IJK初始、前台恢复、重进及EXO正常，软解对照正常。正式发布暂缓，私有草稿保留该缺陷。没有强制注入detach失败和暂停EGL context-loss；完整证据见TEST-REPORT-car.7.md。

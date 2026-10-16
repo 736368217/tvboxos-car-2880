@@ -1,0 +1,35 @@
+[
+  {
+    "check": "resource_xml",
+    "files": 164,
+    "exit": 0
+  },
+  {
+    "check": "git_diff_whitespace",
+    "exit": 0
+  },
+  {
+    "check": "host_javac_java8",
+    "exit": 0
+  },
+  {
+    "check": "VideoEnhancePresetTest",
+    "exit": 0,
+    "stdout": "PASS: 11 presets, stable IDs, legacy migration, corrupt preference fallback, distinct immutable curves"
+  },
+  {
+    "check": "Car6PostProcessTest",
+    "exit": 0,
+    "stdout": "PASS: exact old/new audio and video curves, immutable data, linked SGSR sharpness, temporal cut/pause/seek, 4K policy and switches"
+  },
+  {
+    "check": "Car7RuntimeConfigTest",
+    "exit": 0,
+    "stdout": "PASS: 44 runtime configurations, 88 SDR/HDR cases, 1936 transition comparisons, independent switches and immutable publication"
+  },
+  {
+    "check": "com.github.tvbox.osc.car.BackNavPolicyHostTest",
+    "exit": 0,
+    "stdout": "PASS: 738 Back navigation policy checks"
+  }
+]

@@ -68,7 +68,25 @@ public class HawkConfig {
     public static final String DANMU_API = "danmu_api";
     // Car edition: in-app floating Back button (shown on every page, no accessibility needed).
     public static final String IN_APP_BACK = "inapp_back"; // default true
-    public static final String BACK_HIDE_SECONDS = "hide_seconds"; // 4/6/8, 0 = 常显
+    public static final String BACK_HIDE_SECONDS = "hide_seconds"; // 4/6/8, 0 = always visible
+    // Car.7 Back: positions are normalized to 0..10000 within the current safe bounds.
+    public static final String BACK_MODE = "inapp_back_mode"; // default floating
+    public static final String BACK_POSITION_X = "inapp_back_x";
+    public static final String BACK_POSITION_Y = "inapp_back_y";
+    public static final String BACK_EDGE_POSITION_Y = "inapp_back_edge_y";
+    public static final String BACK_SIDE = "inapp_back_side"; // initial ball dock / active edge(s)
+    public static final String BACK_MODE_FLOATING = "floating";
+    public static final String BACK_MODE_EDGE = "edge";
+    public static final String BACK_MODE_BOTH = "both";
+    public static final String BACK_SIDE_LEFT = "left";
+    public static final String BACK_SIDE_RIGHT = "right";
+    public static final String BACK_SIDE_BOTH = "both";
+    public static final String BACK_LARGE = "inapp_back_large"; // reference SVG tokens: 56/72 or64/80, scaled for car viewport
+    public static final String BACK_HAPTIC = "inapp_back_haptic"; // default true
+    public static final String BACK_HIDE_ON_ROOT = "inapp_back_hide_on_root"; // default false
+    public static final String BACK_EDGE_SKIN = "inapp_back_edge_skin";
+    public static final String BACK_SKIN_TEARDROP = "teardrop";
+    public static final String BACK_SKIN_CAPSULE = "capsule";
     // Car edition: audio IDs 0..8 and stable SDR preset IDs (car.5 IDs remain unchanged).
     public static final String HIFI_AUDIO = "hifi_audio"; // default 0
     public static final String VIDEO_ENHANCE = "video_enhance"; // 0 original, 1 臻彩, 8..10 anime

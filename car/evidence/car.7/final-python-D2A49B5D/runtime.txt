@@ -1,0 +1,31 @@
+--------- beginning of main
+10-16 21:30:37.515 51004 51018 I Car7Native: PASS python-transport-form 
+10-16 21:30:37.515 51004 51018 I Car7Native: PASS python-transport-binary_post 
+10-16 21:30:37.515 51004 51018 I Car7Native: PASS python-transport-binary_response 
+10-16 21:30:37.515 51004 51018 I Car7Native: PASS python-transport-redirect_cookies 
+10-16 21:30:37.515 51004 51018 I Car7Native: PASS python-transport-response_contract 
+10-16 21:30:37.515 51004 51018 I Car7Native: PASS python-transport-real-https 
+10-16 21:30:37.516 51004 51018 I Car7Native: PASS real-site-py_douban {"key":"py_douban","phases":[{"phase":"load_import_init","ok":true,"elapsed_ms":1215},{"phase":"home","ok":true,"elapsed_ms":20},{"phase":"category","ok":true,"elapsed_ms":543}],"load_success":true,"categories":10,"home_items":0,"category_items":20}
+10-16 21:30:37.516 51004 51018 I Car7Native: FAIL real-site-py_maple {"key":"py_maple","phases":[{"phase":"load_import_init","ok":true,"elapsed_ms":2687},{"phase":"home","ok":true,"elapsed_ms":6},{"phase":"category","ok":true,"elapsed_ms":649},{"phase":"search","ok":true,"elapsed_ms":1238}],"load_success":true,"categories":8,"home_items":0,"category_items":0,"search_items":0}
+10-16 21:30:37.516 51004 51018 I Car7Native: PASS real-site-py_juzong {"key":"py_juzong","phases":[{"phase":"load_import_init","ok":true,"elapsed_ms":1952},{"phase":"home","ok":true,"elapsed_ms":1432},{"phase":"category","ok":true,"elapsed_ms":863},{"phase":"detail","ok":true,"elapsed_ms":444},{"phase":"player","ok":true,"elapsed_ms":384},{"phase":"search","ok":true,"elapsed_ms":1399}],"load_success":true,"categories":18,"home_items":30,"category_items":42,"detail_items":1,"player_url_present":true,"player_parse":1,"player_scheme":"https","search_items":12}
+10-16 21:30:37.516 51004 51018 I Car7Native: PASS real-site-py_apples {"key":"py_apples","phases":[{"phase":"load_import_init","ok":true,"elapsed_ms":1479},{"phase":"home","ok":true,"elapsed_ms":2},{"phase":"category","ok":true,"elapsed_ms":86},{"phase":"detail","ok":true,"elapsed_ms":57},{"phase":"player","ok":true,"elapsed_ms":308},{"phase":"search","ok":true,"elapsed_ms":112}],"load_success":true,"categories":7,"home_items":0,"category_items":21,"detail_items":1,"player_url_present":true,"player_parse":0,"player_scheme":"https","search_items":20}
+10-16 21:30:37.516 51004 51018 I Car7Native: PASS real-site-py_guazi {"key":"py_guazi","phases":[{"phase":"load_import_init","ok":true,"elapsed_ms":1922},{"phase":"home","ok":true,"elapsed_ms":3},{"phase":"category","ok":true,"elapsed_ms":6591},{"phase":"detail","ok":true,"elapsed_ms":6175},{"phase":"player","ok":true,"elapsed_ms":393},{"phase":"search","ok":true,"elapsed_ms":2188}],"load_success":true,"categories":5,"home_items":0,"category_items":30,"detail_items":1,"player_url_present":true,"player_parse":0,"player_scheme":"https","search_items":15}
+10-16 21:30:37.516 51004 51018 I Car7Native: PASS python-probe-finished 
+10-16 21:30:40.053 51004 51167 I JarLoader: echo-load Init.init success
+10-16 21:30:40.053 51004 51167 I JarLoader: load success key=main, file=/data/user/0/com.github.tvbox.osc.jun/files/csp/1b083ab4277cd89f8b9f081c112edbea.jar
+10-16 21:30:40.124 51004 51181 I JarLoader: getSpider success key=main豆瓣
+10-16 21:30:40.124 51004 51127 I JarLoader: getSpider success key=main本地
+10-16 21:30:40.125 51004 51127 I JarLoader: getSpider success key=main热播影视
+10-16 21:30:40.125 51004 51127 I JarLoader: getSpider success key=main一起影视
+10-16 21:30:40.126 51004 51127 I JarLoader: getSpider success key=main番茄影视
+10-16 21:30:40.127 51004 51127 I JarLoader: getSpider success key=main咕噜
+10-16 21:30:40.128 51004 51127 I JarLoader: getSpider success key=main布布
+10-16 21:30:40.129 51004 51127 I JarLoader: getSpider success key=main马猴影视
+10-16 21:30:40.130 51004 51127 I JarLoader: getSpider success key=main韩圈
+10-16 21:30:40.211 51004 51127 I JarLoader: getSpider success key=main哔哩视频
+10-16 21:30:40.211 51004 51127 I JarLoader: getSpider success key=main三六零
+10-16 21:30:56.392 51004 51004 I CarVideo: runtime_config TextureRenderView mode=0 sr=false interp=false
+10-16 21:30:56.392 51004 51004 I CarVideo: runtime_apply requestedMode=0 effectiveMode=0 hdrBypass=false sr=false interp=false state=1 player=213754796
+10-16 21:30:56.393 51004 51004 I CarAudio: runtime_apply mode=0 session=249 active=false state=2 player=213754796
+10-16 21:30:56.393 51004 51004 I CarAudio: runtime_apply mode=0 session=249 active=false state=3 player=213754796
+10-16 21:30:59.184 51004 51018 I Car7Native: PASS python-real-EXO-playback 

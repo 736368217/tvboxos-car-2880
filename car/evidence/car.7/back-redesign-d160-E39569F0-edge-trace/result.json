@@ -1,0 +1,354 @@
+{
+  "passed": 58,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "cold-start ball has car-scale hit box",
+      "detail": "width=243 token=3.375",
+      "at": 1792148455586
+    },
+    {
+      "pass": true,
+      "test": "home header safe top>=90",
+      "detail": "",
+      "at": 1792148456245
+    },
+    {
+      "pass": true,
+      "test": "home header safe left>=79",
+      "detail": "",
+      "at": 1792148456245
+    },
+    {
+      "pass": true,
+      "test": "home setting complete inside safe right",
+      "detail": "",
+      "at": 1792148456245
+    },
+    {
+      "pass": true,
+      "test": "category horizontal viewport",
+      "detail": "items=9 overflow=false firstBefore=0 firstAfter=0",
+      "at": 1792148457790
+    },
+    {
+      "pass": true,
+      "test": "last category reachable",
+      "detail": "",
+      "at": 1792148457790
+    },
+    {
+      "pass": true,
+      "test": "category touch selects page",
+      "detail": "",
+      "at": 1792148459891
+    },
+    {
+      "pass": true,
+      "test": "collapsed category top respects safe inset",
+      "detail": "",
+      "at": 1792148459891
+    },
+    {
+      "pass": true,
+      "test": "category back returns home",
+      "detail": "",
+      "at": 1792148461390
+    },
+    {
+      "pass": true,
+      "test": "home header restored safely",
+      "detail": "",
+      "at": 1792148461390
+    },
+    {
+      "pass": true,
+      "test": "last recommendation reachable",
+      "detail": "",
+      "at": 1792148470073
+    },
+    {
+      "pass": true,
+      "test": "last card safe right",
+      "detail": "",
+      "at": 1792148470073
+    },
+    {
+      "pass": true,
+      "test": "recommendation title independent full height",
+      "detail": "",
+      "at": 1792148470073
+    },
+    {
+      "pass": true,
+      "test": "home root ball never exits",
+      "detail": "",
+      "at": 1792148472254
+    },
+    {
+      "pass": true,
+      "test": "root hide removes ball hit target",
+      "detail": "",
+      "at": 1792148472419
+    },
+    {
+      "pass": true,
+      "test": "root hide disabled restores ball",
+      "detail": "",
+      "at": 1792148472583
+    },
+    {
+      "pass": true,
+      "test": "standard ball 72dp hit box",
+      "detail": "",
+      "at": 1792148474317
+    },
+    {
+      "pass": true,
+      "test": "standard ball 56dp visual",
+      "detail": "",
+      "at": 1792148474317
+    },
+    {
+      "pass": true,
+      "test": "native size switch updates immediately",
+      "detail": "",
+      "at": 1792148474574
+    },
+    {
+      "pass": true,
+      "test": "dragging ball uses1.08 scale",
+      "detail": "",
+      "at": 1792148475752
+    },
+    {
+      "pass": true,
+      "test": "ball drag docks right",
+      "detail": "",
+      "at": 1792148476258
+    },
+    {
+      "pass": true,
+      "test": "ball normalized x persisted",
+      "detail": "",
+      "at": 1792148476258
+    },
+    {
+      "pass": true,
+      "test": "ball dock remains in safe bounds",
+      "detail": "",
+      "at": 1792148476258
+    },
+    {
+      "pass": true,
+      "test": "idle alpha becomes .38",
+      "detail": "",
+      "at": 1792148481070
+    },
+    {
+      "pass": true,
+      "test": "idle is stable relative to dock",
+      "detail": "",
+      "at": 1792148481070
+    },
+    {
+      "pass": true,
+      "test": "blank host passes original DOWN and UP",
+      "detail": "",
+      "at": 1792148481730
+    },
+    {
+      "pass": true,
+      "test": "page touch wakes ball in 120ms",
+      "detail": "",
+      "at": 1792148481730
+    },
+    {
+      "pass": true,
+      "test": "advanced ball back finishes one page",
+      "detail": "",
+      "at": 1792148482988
+    },
+    {
+      "pass": true,
+      "test": "ball y normalization survives page change",
+      "detail": "",
+      "at": 1792148483823
+    },
+    {
+      "pass": true,
+      "test": "ball dock survives page change",
+      "detail": "",
+      "at": 1792148483823
+    },
+    {
+      "pass": true,
+      "test": "disable removes decor host",
+      "detail": "",
+      "at": 1792148484150
+    },
+    {
+      "pass": true,
+      "test": "disabled host is disposed",
+      "detail": "",
+      "at": 1792148484150
+    },
+    {
+      "pass": true,
+      "test": "dual mode keeps both controls",
+      "detail": "",
+      "at": 1792148484480
+    },
+    {
+      "pass": true,
+      "test": "edge-only hides ball",
+      "detail": "",
+      "at": 1792148484974
+    },
+    {
+      "pass": true,
+      "test": "edge tap never returns",
+      "detail": "",
+      "at": 1792148485201
+    },
+    {
+      "pass": true,
+      "test": "subthreshold edge pull never returns",
+      "detail": "",
+      "at": 1792148485857
+    },
+    {
+      "pass": true,
+      "test": "edge arms beyond 48dp",
+      "detail": "",
+      "at": 1792148485872
+    },
+    {
+      "pass": true,
+      "test": "teardrop remains armed at capture",
+      "detail": "skin=teardrop pull=39.93118 progress=1.0",
+      "at": 1792148486174
+    },
+    {
+      "pass": true,
+      "test": "edge pull reversal cancels",
+      "detail": "",
+      "at": 1792148486746
+    },
+    {
+      "pass": true,
+      "test": "edge ACTION_CANCEL never returns",
+      "detail": "",
+      "at": 1792148486996
+    },
+    {
+      "pass": true,
+      "test": "edge vertical gesture rejected",
+      "detail": "",
+      "at": 1792148487680
+    },
+    {
+      "pass": true,
+      "test": "400ms edge long press moves height",
+      "detail": "",
+      "at": 1792148488398
+    },
+    {
+      "pass": true,
+      "test": "edge height independent from ball",
+      "detail": "",
+      "at": 1792148488398
+    },
+    {
+      "pass": true,
+      "test": "cancelled edge reposition restores height",
+      "detail": "",
+      "at": 1792148489112
+    },
+    {
+      "pass": true,
+      "test": "cancelled reposition does not persist",
+      "detail": "",
+      "at": 1792148489112
+    },
+    {
+      "pass": true,
+      "test": "capsule skin applies immediately",
+      "detail": "",
+      "at": 1792148489275
+    },
+    {
+      "pass": true,
+      "test": "armed edge release navigates one level",
+      "detail": "",
+      "at": 1792148490088
+    },
+    {
+      "pass": true,
+      "test": "edge height survives page change",
+      "detail": "",
+      "at": 1792148491106
+    },
+    {
+      "pass": true,
+      "test": "right edge pull navigates",
+      "detail": "",
+      "at": 1792148492159
+    },
+    {
+      "pass": true,
+      "test": "both edge handles enabled",
+      "detail": "",
+      "at": 1792148493334
+    },
+    {
+      "pass": true,
+      "test": "API inside panel tap does not cancel",
+      "detail": "",
+      "at": 1792148494754
+    },
+    {
+      "pass": true,
+      "test": "outside drag does not cancel",
+      "detail": "",
+      "at": 1792148494880
+    },
+    {
+      "pass": true,
+      "test": "outside drag returning to origin does not cancel",
+      "detail": "",
+      "at": 1792148495109
+    },
+    {
+      "pass": true,
+      "test": "outside CANCEL keeps dialog",
+      "detail": "",
+      "at": 1792148495219
+    },
+    {
+      "pass": true,
+      "test": "outside tap cancels API dialog",
+      "detail": "",
+      "at": 1792148495669
+    },
+    {
+      "pass": true,
+      "test": "API cancellation does not save input",
+      "detail": "",
+      "at": 1792148495669
+    },
+    {
+      "pass": true,
+      "test": "confirmation outside cancel runs cancel only",
+      "detail": "",
+      "at": 1792148496071
+    },
+    {
+      "pass": true,
+      "test": "system Back cancels rather than confirms",
+      "detail": "",
+      "at": 1792148496436
+    }
+  ]
+}

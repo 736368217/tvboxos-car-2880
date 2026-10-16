@@ -2,8 +2,11 @@ package com.github.tvbox.osc.player;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -18,6 +21,7 @@ import master.flame.danmaku.danmaku.model.DanmakuTimer;
 import master.flame.danmaku.ui.widget.DanmakuView;
 import xyz.doikki.videoplayer.player.AbstractPlayer;
 import xyz.doikki.videoplayer.player.VideoView;
+import xyz.doikki.videoplayer.render.VideoEnhanceConfig;
 
 public class MyVideoView extends VideoView implements DrawHandler.Callback {
     public interface DanmuSeekListener {
@@ -27,6 +31,7 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
     private DanmakuView danmuView;
     private ImageView artworkView;
     private DanmuSeekListener danmuSeekListener;
+    private final Handler mEnhanceMain = new Handler(Looper.getMainLooper());
 
 
     public MyVideoView(@NonNull Context context) {
@@ -172,33 +177,40 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
                 danmuView.start(getCurrentPosition());
             }
         });
-        // Track metadata is available now: HDR always keeps an identity colour transform.
-        int mode = CarEnhance.videoMode();
-        if (isHdrVideo()) {
-            setVideoEnhanceMode(0);
-            if (mode != 0) CarEnhance.toast(getContext(), "HDR 视频已自动关闭画面调色");
-        } else {
-            setVideoEnhanceMode(mode);
+        CarEnhance.applyVideo(this);
+        if (isHdrVideo() && CarEnhance.videoMode() != 0) {
+            CarEnhance.toast(getContext(), "HDR 视频已自动关闭画面调色");
         }
         CarEnhance.applyAudio(this);
-        if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
-            ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).setPlaybackActive(isPlaying());
-        }
     }
 
-    /**
-     * Car edition: turn the GPU colour grading on/off on the active render view. Texture and surface
-     * render views do not implement it, so this is a safe no-op unless 臻彩 is in use.
-     */
-    public void setVideoEnhanceMode(int mode) {
-        if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
-            ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).setVideoEnhanceMode(mode);
+    @Override
+    public void onPrepared() {
+        // Real track metadata is now available, including for controllers without a prepared hook.
+        CarEnhance.applyVideo(this);
+        super.onPrepared();
+    }
+
+    @Override
+    public void setVideoEnhancements(int mode, boolean sr, boolean interp) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mEnhanceMain.post(() -> setVideoEnhancements(mode, sr, interp));
+            return;
         }
+        boolean hdr = isHdrVideo();
+        VideoEnhanceConfig configuration = new VideoEnhanceConfig(mode, sr, interp).forHdr(hdr);
+        super.setVideoEnhancements(configuration.preset.id, configuration.superResolution, configuration.interpolation);
+        Log.i("CarVideo", "runtime_apply requestedMode=" + mode + " effectiveMode=" + configuration.preset.id
+                + " hdrBypass=" + hdr + " sr=" + sr + " interp=" + interp
+                + " state=" + getCurrentPlayState() + " player=" + System.identityHashCode(mMediaPlayer));
     }
 
     @Override
     protected void setPlayState(int state) {
         super.setPlayState(state);
+        if (state == STATE_PREPARED || state == STATE_PLAYING || state == STATE_BUFFERED) {
+            CarEnhance.applyAudio(this);
+        }
         if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
             boolean active = state == STATE_PLAYING || (state == STATE_BUFFERED && isPlaying());
             ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).setPlaybackActive(active);

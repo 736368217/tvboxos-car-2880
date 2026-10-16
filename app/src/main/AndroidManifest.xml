@@ -95,6 +95,11 @@
             android:resizeableActivity="true"
             android:screenOrientation="sensorLandscape" />
         <activity
+            android:name=".ui.activity.CarAdvancedActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density|uiMode|keyboardHidden|fontScale"
+            android:resizeableActivity="true"
+            android:screenOrientation="sensorLandscape" />
+        <activity
             android:name=".ui.activity.HistoryActivity"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density|uiMode|keyboardHidden|fontScale"
             android:resizeableActivity="true"

@@ -742,6 +742,7 @@ public class ApiConfig {
     private void parseJson(String apiUrl, String jsonStr) {
         resetConfigData();
         JsonObject infoJson = gson.fromJson(jsonStr, JsonObject.class);
+        pyLoader.setConfig(jsonStr);
         // spider
         spider = DefaultConfig.safeJsonString(infoJson, "spider", "");
         jarCache = DefaultConfig.safeJsonString(infoJson, "jarCache", "true");
@@ -1486,6 +1487,9 @@ public class ApiConfig {
                 int eligibleCount = 0;
                 for (SourceBean source : sources) {
                     if (source == null || source.getType() != 3 || !source.isSearchable()) continue;
+                    // Python initialization owns one Chaquopy interpreter. Do not let background
+                    // search warming hold the global loader lock before the foreground source loads.
+                    if (source.getApi() != null && source.getApi().toLowerCase().contains(".py")) continue;
                     if (home != null && TextUtils.equals(home.getKey(), source.getKey())) continue;
                     // 同类 Spider 可能通过静态状态保存 ext，不能在后台预热时交替初始化。
                     if (sharedSpiderApis.contains(source.getJar() + "|" + source.getApi())) continue;

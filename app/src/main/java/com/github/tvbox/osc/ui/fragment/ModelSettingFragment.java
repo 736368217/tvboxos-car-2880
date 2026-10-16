@@ -22,13 +22,12 @@ import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.api.DanmakuApi;
 import com.github.tvbox.osc.base.BaseActivity;
 import com.github.tvbox.osc.base.BaseLazyFragment;
-import com.github.tvbox.osc.car.AudioEffectController;
-import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.bean.IJKCode;
 import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.event.RefreshEvent;
 import com.github.tvbox.osc.ui.activity.LocalFileActivity;
+import com.github.tvbox.osc.ui.activity.CarAdvancedActivity;
 import com.github.tvbox.osc.ui.activity.SettingActivity;
 import com.github.tvbox.osc.ui.adapter.ApiHistoryDialogAdapter;
 import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter;
@@ -70,7 +69,6 @@ import java.util.List;
 import okhttp3.HttpUrl;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
-import xyz.doikki.videoplayer.render.VideoEnhancePreset;
 /**
  * @author pj567
  * @date :2020/12/23
@@ -108,10 +106,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvDanmuApiText;
     private TextView tvCarBack;
     private TextView tvCarBackHide;
-    private TextView tvCarAudio;
-    private TextView tvCarVideoEnhance;
-    private TextView tvCarVideoSr;
-    private TextView tvCarVideoInterp;
 
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
@@ -124,6 +118,13 @@ public class ModelSettingFragment extends BaseLazyFragment {
     @Override
     protected int getLayoutResID() {
         return R.layout.fragment_model;
+    }
+
+    @Override
+    protected void onFragmentResume() {
+        super.onFragmentResume();
+        if (tvCarBack != null) tvCarBack.setText(InAppBackButton.isEnabled() ? "开启" : "关闭");
+        if (tvCarBackHide != null) tvCarBackHide.setText(carBackHideName(InAppBackButton.getHideSeconds()));
     }
 
     @Override
@@ -174,14 +175,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvCarBack.setText(Hawk.get(HawkConfig.IN_APP_BACK, true) ? "开启" : "关闭");
         tvCarBackHide = findViewById(R.id.tvCarBackHide);
         tvCarBackHide.setText(carBackHideName(Hawk.get(HawkConfig.BACK_HIDE_SECONDS, 4)));
-        tvCarAudio = findViewById(R.id.tvCarAudio);
-        tvCarAudio.setText(AudioEffectController.name(CarEnhance.audioMode()));
-        tvCarVideoEnhance = findViewById(R.id.tvCarVideoEnhance);
-        tvCarVideoEnhance.setText(VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
-        tvCarVideoSr = findViewById(R.id.tvCarVideoSr);
-        tvCarVideoSr.setText(CarEnhance.videoSrEnabled() ? "开启" : "关闭");
-        tvCarVideoInterp = findViewById(R.id.tvCarVideoInterp);
-        tvCarVideoInterp.setText(CarEnhance.videoInterpEnabled() ? "开启" : "关闭");
         tvSearchView.setText(getSearchView(Hawk.get(HawkConfig.SEARCH_VIEW, 0)));
         tvHomeApi.setText(ApiConfig.get().getHomeSourceBean().getName());
         tvScale.setText(PlayerHelper.getScaleName(Hawk.get(HawkConfig.PLAY_SCALE, 0)));
@@ -825,16 +818,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                boolean show = !Hawk.get(HawkConfig.IN_APP_BACK, true);
-                Hawk.put(HawkConfig.IN_APP_BACK, show);
+                boolean show = !InAppBackButton.isEnabled();
+                InAppBackButton.setEnabled(getActivity(), show);
                 tvCarBack.setText(show ? "开启" : "关闭");
-                if (getActivity() != null) {
-                    if (show) {
-                        InAppBackButton.attach(getActivity());
-                    } else {
-                        InAppBackButton.release(getActivity());
-                    }
-                }
             }
         });
 
@@ -842,79 +828,21 @@ public class ModelSettingFragment extends BaseLazyFragment {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                int seconds = Hawk.get(HawkConfig.BACK_HIDE_SECONDS, 4);
+                int seconds = InAppBackButton.getHideSeconds();
                 int next = seconds == 4 ? 6 : seconds == 6 ? 8 : seconds == 8 ? 0 : 4;
-                Hawk.put(HawkConfig.BACK_HIDE_SECONDS, next);
+                InAppBackButton.setHideSeconds(getActivity(), next);
                 tvCarBackHide.setText(carBackHideName(next));
-                if (getActivity() != null) InAppBackButton.attach(getActivity());
             }
         });
 
-        // Car edition: 音效 — cycle the six presets; applies to the running playback immediately.
-        findViewById(R.id.llCarAudio).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.llCarAdvanced).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                int next = (CarEnhance.audioMode() + 1) % AudioEffectController.MODE_COUNT;
-                CarEnhance.setAudioMode(next);
-                tvCarAudio.setText(AudioEffectController.name(next));
-                CarEnhance.toast(getContext(), AudioEffectController.label(next));
-                if (getActivity() != null && getActivity() instanceof BaseActivity) {
-                    android.view.View play = null;
-                    try {
-                        play = getActivity().findViewById(R.id.mVideoView);
-                    } catch (Throwable ignored) {
-                    }
-                    if (play instanceof com.github.tvbox.osc.player.MyVideoView) {
-                        CarEnhance.applyAudio((com.github.tvbox.osc.player.MyVideoView) play);
-                    }
-                }
+                startActivity(new Intent(mActivity, CarAdvancedActivity.class));
             }
         });
 
-        findViewById(R.id.llCarVideoEnhance).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                SelectDialog<String> dialog = new SelectDialog<>(mActivity, R.layout.dialog_video_presets);
-                dialog.setTip("画面预设 · 下次播放生效");
-                dialog.findViewById(R.id.btnVideoPresetCancel).setOnClickListener(button -> dialog.dismiss());
-                List<String> options = new ArrayList<>();
-                for (VideoEnhancePreset preset : VideoEnhancePreset.all()) {
-                    options.add(preset.name + " · " + preset.description);
-                }
-                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
-                    @Override
-                    public void click(String value, int pos) {
-                        CarEnhance.setVideoMode(pos);
-                        tvCarVideoEnhance.setText(VideoEnhancePreset.forMode(pos).name);
-                        dialog.dismiss();
-                        CarEnhance.toast(getContext(), "画面预设：" + VideoEnhancePreset.forMode(pos).name + "（下次播放生效）");
-                    }
-
-                    @Override
-                    public String getDisplay(String value) {
-                        return value;
-                    }
-                }, SelectDialogAdapter.stringDiff, options, CarEnhance.videoMode());
-                dialog.show();
-            }
-        });
-
-        findViewById(R.id.llCarVideoSr).setOnClickListener(v -> {
-            FastClickCheckUtil.check(v);
-            boolean enabled = !CarEnhance.videoSrEnabled();
-            CarEnhance.setVideoSrEnabled(enabled);
-            tvCarVideoSr.setText(enabled ? "开启" : "关闭");
-            CarEnhance.toast(getContext(), "SGSR1 超分：" + (enabled ? "开启" : "关闭") + "（下次播放生效）");
-        });
-        findViewById(R.id.llCarVideoInterp).setOnClickListener(v -> {
-            FastClickCheckUtil.check(v);
-            boolean enabled = !CarEnhance.videoInterpEnabled();
-            CarEnhance.setVideoInterpEnabled(enabled);
-            tvCarVideoInterp.setText(enabled ? "开启" : "关闭");
-            CarEnhance.toast(getContext(), "60Hz 时域平滑补帧：" + (enabled ? "开启" : "关闭") + "（下次播放生效）");
-        });
 
         //下次进入
         findViewById(R.id.tvHomeLive).setOnClickListener(new View.OnClickListener() {

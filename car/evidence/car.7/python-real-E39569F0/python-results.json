@@ -1,0 +1,189 @@
+{
+  "transport": {
+    "form": true,
+    "binary_post": true,
+    "binary_response": true,
+    "redirect_cookies": true,
+    "response_contract": true,
+    "real_https_status": 200,
+    "real_https_bytes": 17227,
+    "real_https_sha256": "7d818a41115def8e4da69ef2c7dbaa47b4228f1e781f862d0af10979a3c5d033"
+  },
+  "sites": [
+    {
+      "key": "py_douban",
+      "phases": [
+        {
+          "phase": "load_import_init",
+          "ok": true,
+          "elapsed_ms": 933
+        },
+        {
+          "phase": "home",
+          "ok": true,
+          "elapsed_ms": 13
+        },
+        {
+          "phase": "category",
+          "ok": true,
+          "elapsed_ms": 415
+        }
+      ],
+      "load_success": true,
+      "categories": 10,
+      "home_items": 0,
+      "category_items": 20
+    },
+    {
+      "key": "py_maple",
+      "phases": [
+        {
+          "phase": "load_import_init",
+          "ok": true,
+          "elapsed_ms": 2740
+        },
+        {
+          "phase": "home",
+          "ok": true,
+          "elapsed_ms": 4
+        },
+        {
+          "phase": "category",
+          "ok": true,
+          "elapsed_ms": 1375
+        },
+        {
+          "phase": "detail",
+          "ok": true,
+          "elapsed_ms": 1256
+        },
+        {
+          "phase": "search",
+          "ok": true,
+          "elapsed_ms": 1109
+        }
+      ],
+      "load_success": true,
+      "categories": 8,
+      "home_items": 0,
+      "category_items": 24,
+      "detail_items": 1,
+      "search_items": 7
+    },
+    {
+      "key": "py_juzong",
+      "phases": [
+        {
+          "phase": "load_import_init",
+          "ok": true,
+          "elapsed_ms": 784
+        },
+        {
+          "phase": "home",
+          "ok": true,
+          "elapsed_ms": 945
+        },
+        {
+          "phase": "category",
+          "ok": true,
+          "elapsed_ms": 878
+        },
+        {
+          "phase": "detail",
+          "ok": true,
+          "elapsed_ms": 469
+        },
+        {
+          "phase": "search",
+          "ok": true,
+          "elapsed_ms": 1747
+        }
+      ],
+      "load_success": true,
+      "categories": 18,
+      "home_items": 30,
+      "category_items": 42,
+      "detail_items": 1,
+      "search_items": 12
+    },
+    {
+      "key": "py_apples",
+      "phases": [
+        {
+          "phase": "load_import_init",
+          "ok": true,
+          "elapsed_ms": 1133
+        },
+        {
+          "phase": "home",
+          "ok": true,
+          "elapsed_ms": 2
+        },
+        {
+          "phase": "category",
+          "ok": true,
+          "elapsed_ms": 74
+        },
+        {
+          "phase": "detail",
+          "ok": true,
+          "elapsed_ms": 51
+        },
+        {
+          "phase": "search",
+          "ok": true,
+          "elapsed_ms": 102
+        }
+      ],
+      "load_success": true,
+      "categories": 7,
+      "home_items": 0,
+      "category_items": 21,
+      "detail_items": 1,
+      "search_items": 20
+    },
+    {
+      "key": "py_guazi",
+      "phases": [
+        {
+          "phase": "load_import_init",
+          "ok": true,
+          "elapsed_ms": 866
+        },
+        {
+          "phase": "home",
+          "ok": true,
+          "elapsed_ms": 2
+        },
+        {
+          "phase": "category",
+          "ok": true,
+          "elapsed_ms": 3997
+        },
+        {
+          "phase": "detail",
+          "ok": true,
+          "elapsed_ms": 774
+        },
+        {
+          "phase": "search",
+          "ok": true,
+          "elapsed_ms": 440
+        }
+      ],
+      "load_success": true,
+      "categories": 5,
+      "home_items": 0,
+      "category_items": 30,
+      "detail_items": 1,
+      "search_items": 15
+    }
+  ],
+  "started": 1792149858.0307896,
+  "subscription": {
+    "url": "https://clun.top/box.json",
+    "sites": 97,
+    "python_sites": 44
+  },
+  "finished": 1792149880.67894
+}

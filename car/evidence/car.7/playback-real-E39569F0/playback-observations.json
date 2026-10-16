@@ -1,0 +1,114 @@
+[
+  {
+    "stage": "EXO initial GL",
+    "source_before": 12,
+    "source_after": 56,
+    "position_before": 653,
+    "position_after": 2474,
+    "state": 3
+  },
+  {
+    "stage": "EXO after paused switch",
+    "source_before": 1,
+    "source_after": 43,
+    "position_before": 13894,
+    "position_after": 15724,
+    "state": 3
+  },
+  {
+    "stage": "EXO fullscreen",
+    "source_before": 36,
+    "source_after": 79,
+    "position_before": 17249,
+    "position_after": 19054,
+    "state": 3
+  },
+  {
+    "stage": "EXO foreground window1",
+    "source_before": 30,
+    "source_after": 73,
+    "position_before": 20571,
+    "position_after": 22376,
+    "state": 3
+  },
+  {
+    "stage": "EXO foreground window2",
+    "source_before": 74,
+    "source_after": 117,
+    "position_before": 22396,
+    "position_after": 24201,
+    "state": 3
+  },
+  {
+    "stage": "EXO final GL",
+    "source_before": 13,
+    "source_after": 56,
+    "position_before": 25236,
+    "position_after": 27044,
+    "state": 3
+  },
+  {
+    "stage": "EXO reentry",
+    "source_before": 6,
+    "source_after": 49,
+    "position_before": 206,
+    "position_after": 2010,
+    "state": 3
+  },
+  {
+    "stage": "IJK initial GL",
+    "source_before": 0,
+    "source_after": 37,
+    "position_before": 751,
+    "position_after": 2563,
+    "state": 3
+  },
+  {
+    "stage": "IJK after paused switch",
+    "source_before": 0,
+    "source_after": 26,
+    "position_before": 14049,
+    "position_after": 15849,
+    "state": 3
+  },
+  {
+    "stage": "IJK fullscreen",
+    "source_before": 18,
+    "source_after": 61,
+    "position_before": 17380,
+    "position_after": 19180,
+    "state": 3
+  },
+  {
+    "stage": "IJK foreground window1",
+    "source_before": 11,
+    "source_after": 51,
+    "position_before": 20733,
+    "position_after": 22439,
+    "state": 3
+  },
+  {
+    "stage": "IJK foreground window2",
+    "source_before": 51,
+    "source_after": 95,
+    "position_before": 22456,
+    "position_after": 24258,
+    "state": 3
+  },
+  {
+    "stage": "IJK final GL",
+    "source_before": 0,
+    "source_after": 32,
+    "position_before": 25289,
+    "position_after": 27081,
+    "state": 3
+  },
+  {
+    "stage": "IJK reentry",
+    "source_before": 3,
+    "source_after": 47,
+    "position_before": 117,
+    "position_after": 1916,
+    "state": 3
+  }
+]

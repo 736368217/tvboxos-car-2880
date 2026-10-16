@@ -1,0 +1,22 @@
+{
+  "status": "candidate_with_known_blocker",
+  "deliveryReady": true,
+  "releaseReady": false,
+  "candidateSha256": "D2A49B5DA2B0371CF3C84CCDAC6C5753EF649721639434FB21955F4054A30803",
+  "apkBytes": 52668696,
+  "versionCode": 8,
+  "versionName": "1.0.0-car.7",
+  "package": "com.github.tvbox.osc.jun",
+  "label": "TVBox",
+  "emulator": {"version":"6.8.4.0","android":"15","instance":1,"display":[2880,1620],"density":160,"rotation":1,"overrides":false,"muted":true},
+  "python": {"pid":51004,"passed":12,"failed":1,"failedSite":"py_maple","failure":"category and search returned empty lists after successful load","evidence":"final-python-D2A49B5D","remotePlayback":{"site":"py_apples","engine":"EXO","size":[1280,720],"state":3,"positionsMs":[243,2761]}},
+  "ui": {"pid":51576,"passed":58,"failed":0,"evidence":"final-ui-D2A49B5D"},
+  "playback": {"pid":47234,"passed":95,"failed":0,"evidence":"final-playback-D2A49B5D","pixelPass":7,"pixelFail":1,"pixelFailure":"IJK hardware decode fullscreen green/block corruption; EXO all4 and IJK initial/foreground/reentry pass"},
+  "xiaosa": {"pid":51918,"passed":9,"failed":4,"evidence":"final-xiaosa-D2A49B5D","limitations":["hot-app search empty","maple category empty","aidongman search bounded timeout and probe abort"]},
+  "static": {"v1":true,"v2":true,"v3":true,"zipalign":true,"manifest":true,"pythonAbis":["armeabi-v7a","arm64-v8a"],"chaquopyAndQuickJsBothAbis":true},
+  "host": {"pythonHttpTests":20,"xml":164,"backPolicyChecks":738,"videoPresets":11,"runtimeConfigs":44,"sdrHdrCases":88,"transitionComparisons":1936,"allExitZero":true},
+  "registry": {"tvboxosIdentity":"occupied","globalChecker":"blocked by unrelated unregistered com.carhd.fileopener"},
+  "cleanup": {"preferencesRestoredAndCompared":true,"testPackageRemoved":true,"restoredStartupPid":52210,"fatalCount":0,"leaseReleased":true,"mainAppPreserved":true,"ownPaintClosed":true,"otherInstancesUntouched":true},
+  "remainingBlockers": ["IJK hardware decode fullscreen pixel failure"],
+  "notClaimed": ["all44PythonSites","allExternalPlaybackLines","realHeadUnitOemFullscreen","sa8295pPerformance","stable60fps","hdrDovi","arm32Runtime","forcedDetachFailure","pausedEglContextLoss"]
+}

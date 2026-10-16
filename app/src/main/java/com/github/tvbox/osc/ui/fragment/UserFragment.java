@@ -89,26 +89,20 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     @Override
     protected void onFragmentResume() {
         super.onFragmentResume();
-        if (Hawk.get(HawkConfig.HOME_REC_STYLE, false)) {
-            tvHotList.setVisibility(View.VISIBLE);
-            tvHotList.setHasFixedSize(true);
-            int spanCount = 5;
-            if(style!=null && Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 1)spanCount=ImgUtil.spanCountByStyle(style,spanCount);
-            tvHotList.setLayoutManager(new V7GridLayoutManager(this.mContext, spanCount));
-            int paddingLeft = -tvHotList.mHorizontalSpacingWithMargins / 2 + getResources().getDimensionPixelSize(R.dimen.vs_6);
-            int paddingTop = getResources().getDimensionPixelSize(R.dimen.vs_20);
-            int paddingRight = -tvHotList.mHorizontalSpacingWithMargins / 2 + getResources().getDimensionPixelSize(R.dimen.vs_6);
-            int paddingBottom = getResources().getDimensionPixelSize(R.dimen.vs_20);
-            tvHotList.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        } else {
-            tvHotList.setVisibility(View.VISIBLE);
-            tvHotList.setLayoutManager(new V7LinearLayoutManager(this.mContext, V7LinearLayoutManager.HORIZONTAL, false));
-            int paddingLeft = -tvHotList.mHorizontalSpacingWithMargins / 2 + getResources().getDimensionPixelSize(R.dimen.vs_6);
-            int paddingTop = getResources().getDimensionPixelSize(R.dimen.vs_20);
-            int paddingRight = -tvHotList.mHorizontalSpacingWithMargins / 2 + getResources().getDimensionPixelSize(R.dimen.vs_6);
-            int paddingBottom = getResources().getDimensionPixelSize(R.dimen.vs_20);
-            tvHotList.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+        boolean grid = Hawk.get(HawkConfig.HOME_REC_STYLE, false);
+        tvHotList.setVisibility(View.VISIBLE);
+        tvHotList.setHasFixedSize(false);
+        int spanCount = 5;
+        if (style != null && Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 1) {
+            spanCount = ImgUtil.spanCountByStyle(style, spanCount);
         }
+        tvHotList.setLayoutManager(grid
+                ? new V7GridLayoutManager(mContext, spanCount)
+                : new V7LinearLayoutManager(mContext, V7LinearLayoutManager.HORIZONTAL, false));
+        int side = getResources().getDimensionPixelSize(R.dimen.car_side_padding);
+        tvHotList.setPadding(side, getResources().getDimensionPixelSize(R.dimen.vs_10),
+                side, getResources().getDimensionPixelSize(R.dimen.car_bottom_padding));
+        tvHotList.setClipToPadding(true);
         if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 2) {
             List<VodInfo> allVodRecord = RoomDataManger.getAllVodRecord(20);
             List<Movie.Video> vodList = new ArrayList<>();

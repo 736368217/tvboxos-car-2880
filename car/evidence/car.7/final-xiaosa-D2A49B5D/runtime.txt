@@ -1,0 +1,36 @@
+--------- beginning of main
+10-16 21:33:16.183 51918 51989 I JarLoader: echo-load Init.init success
+10-16 21:33:16.183 51918 51989 I JarLoader: load success key=main, file=/data/user/0/com.github.tvbox.osc.jun/files/csp/71d7c115dfaf9e0c4d87ec428fb219f4.jar
+10-16 21:33:16.263 51918 52002 I JarLoader: getSpider success key=main豆瓣
+10-16 21:33:16.266 51918 51945 I JarLoader: getSpider success key=main本地
+10-16 21:33:16.267 51918 51945 I JarLoader: getSpider success key=main热播影视
+10-16 21:33:16.267 51918 51945 I JarLoader: getSpider success key=main一起影视
+10-16 21:33:16.267 51918 51945 I JarLoader: getSpider success key=main番茄影视
+10-16 21:33:16.268 51918 51945 I JarLoader: getSpider success key=main咕噜
+10-16 21:33:16.269 51918 51945 I JarLoader: getSpider success key=main布布
+10-16 21:33:16.270 51918 51945 I JarLoader: getSpider success key=main马猴影视
+10-16 21:33:16.274 51918 51945 I JarLoader: getSpider success key=main韩圈
+10-16 21:33:16.377 51918 51945 I JarLoader: getSpider success key=main哔哩视频
+10-16 21:33:16.378 51918 51945 I JarLoader: getSpider success key=main三六零
+10-16 21:33:31.824 51918 51932 I Car7Native: PASS subscription parsed site count unique_sites=108
+10-16 21:33:31.825 51918 52040 I JarLoader: getSpider cached key=main热播影视
+10-16 21:33:31.914 51918 51932 I Car7Native: PASS subscription-热播影视-home 
+10-16 21:33:32.000 51918 51932 I Car7Native: PASS subscription-热播影视-category 
+10-16 21:33:32.195 51918 51932 I Car7Native: PASS subscription-热播影视-detail 
+10-16 21:33:32.266 51918 51932 I Car7Native: FAIL subscription-热播影视-search 
+10-16 21:33:34.388 51918 52054 I JarLoader: getSpider success key=main枫叶影视
+10-16 21:33:34.391 51918 51932 I Car7Native: PASS subscription-枫叶影视-home 
+10-16 21:33:34.649 51918 51932 I Car7Native: FAIL subscription-枫叶影视-category 
+10-16 21:33:35.285 51918 51932 I Car7Native: PASS subscription-枫叶影视-search 
+10-16 21:33:35.286 51918 52074 I JSLoader: echo-getSpider load
+10-16 21:33:40.444 51918 51932 I Car7Native: PASS subscription-爱动漫-home 
+10-16 21:33:48.052 51918 51932 I Car7Native: PASS subscription-爱动漫-category 
+10-16 21:33:49.704 51918 51932 I Car7Native: PASS subscription-爱动漫-detail 
+10-16 21:34:19.708 51918 51932 I Car7Native: FAIL subscription-爱动漫 TimeoutException
+10-16 21:34:19.709 51918 51932 I Car7Native: FAIL subscription java.lang.Exception: Spider timeout; aborting outstanding work
+10-16 21:34:19.709 51918 51932 I Car7Native: 	at com.github.tvbox.osc.car7.test.Car7Acceptance.subscriptionChecks(Car7Acceptance.java:148)
+10-16 21:34:19.709 51918 51932 I Car7Native: 	at com.github.tvbox.osc.car7.test.Car7Acceptance.$r8$lambda$SAuiog1Z1BkC01t9eKzh-CMRVRU(Unknown Source:0)
+10-16 21:34:19.709 51918 51932 I Car7Native: 	at com.github.tvbox.osc.car7.test.Car7Acceptance$$ExternalSyntheticLambda2.run(Unknown Source:2)
+10-16 21:34:19.709 51918 51932 I Car7Native: 	at com.github.tvbox.osc.car7.test.Car7Acceptance.section(Car7Acceptance.java:385)
+10-16 21:34:19.709 51918 51932 I Car7Native: 	at com.github.tvbox.osc.car7.test.Car7Acceptance.onStart(Car7Acceptance.java:80)
+10-16 21:34:19.709 51918 51932 I Car7Native: 	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2606)

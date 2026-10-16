@@ -1,0 +1,5 @@
+{
+  "requested_codec": "硬解码",
+  "actual_codec": "硬解码",
+  "options": "{4|opensles=0, 4|framedrop=1, 4|soundtouch=1, 4|start-on-prepared=1, 1|http-detect-rangeupport=0, 1|fflags=fastseek, 2|skip_loop_filter=48, 4|reconnect=1, 4|enable-accurate-seek=0, 4|mediacodec=1, 4|mediacodec-all-videos=1, 4|mediacodec-auto-rotate=1, 4|mediacodec-handle-resolution-change=1, 4|mediacodec-hevc=1, 4|max-buffer-size=15728640}"
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "key": "热播影视",
+    "runtime": "JAR",
+    "categories": 10,
+    "category_items": 12,
+    "detail_items": 1,
+    "search_items": 0,
+    "elapsed_ms": 441
+  },
+  {
+    "key": "枫叶影视",
+    "runtime": "JAR",
+    "categories": 8,
+    "category_items": 0,
+    "search_items": 7,
+    "elapsed_ms": 3018
+  },
+  {
+    "key": "爱动漫",
+    "runtime": "QuickJS",
+    "categories": 6,
+    "category_items": 48,
+    "detail_items": 1,
+    "error_class": "TimeoutException",
+    "elapsed_ms": 44423
+  }
+]

@@ -1,0 +1,616 @@
+{
+  "candidate_sha256": "FABBBC0F99D0D02EDCF1A9B4304D3302894B9CB28FCD872A65D12580BB0C38F8",
+  "pid": 39553,
+  "passed": 6,
+  "failed": 2,
+  "images": [
+    {
+      "image": "EXO-playing.png",
+      "pass": true,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            255,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            255,
+            255,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            0,
+            255
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            255,
+            0,
+            255
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            255,
+            255
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": true
+        }
+      ]
+    },
+    {
+      "image": "EXO-fullscreen.png",
+      "pass": true,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            255,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            255,
+            255,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            161,
+            185,
+            93
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            255,
+            0,
+            255
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            255,
+            246
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": true
+        }
+      ]
+    },
+    {
+      "image": "EXO-foreground.png",
+      "pass": true,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            255,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            255,
+            255,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            0,
+            255
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            255,
+            0,
+            255
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            255,
+            246
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": true
+        }
+      ]
+    },
+    {
+      "image": "EXO-reentry.png",
+      "pass": true,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            255,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            255,
+            255,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            0,
+            255
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            255,
+            0,
+            255
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            255,
+            255
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": true
+        }
+      ]
+    },
+    {
+      "image": "IJK-playing.png",
+      "pass": false,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            157,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": false
+        }
+      ]
+    },
+    {
+      "image": "IJK-fullscreen.png",
+      "pass": false,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            132,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            0,
+            132,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            132,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            0,
+            162,
+            0
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": false
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            128,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": false
+        }
+      ]
+    },
+    {
+      "image": "IJK-foreground.png",
+      "pass": true,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            255,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            255,
+            255,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            0,
+            255
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            255,
+            0,
+            255
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            255,
+            246
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": true
+        }
+      ]
+    },
+    {
+      "image": "IJK-reentry.png",
+      "pass": true,
+      "samples": [
+        {
+          "x_fraction": 0.24,
+          "rgb_median": [
+            0,
+            255,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.41,
+          "rgb_median": [
+            255,
+            255,
+            0
+          ],
+          "expected": [
+            1,
+            1,
+            0
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.58,
+          "rgb_median": [
+            0,
+            0,
+            255
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.75,
+          "rgb_median": [
+            255,
+            11,
+            255
+          ],
+          "expected": [
+            1,
+            0,
+            1
+          ],
+          "pass": true
+        },
+        {
+          "x_fraction": 0.91,
+          "rgb_median": [
+            0,
+            255,
+            255
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ],
+          "pass": true
+        }
+      ]
+    }
+  ]
+}

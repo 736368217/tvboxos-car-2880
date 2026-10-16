@@ -1,0 +1,16 @@
+{
+  "api_status": 200,
+  "api_bytes": 28993,
+  "sites": 109,
+  "jar_url": "https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/spider.jar",
+  "jar_status": 200,
+  "jar_bytes": 1863956,
+  "jar_content_type": "application/octet-stream",
+  "jar_final_url": "https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/spider.jar",
+  "declared_md5": "bca2498f2d40c694b285471062748cf0",
+  "downloaded_md5": "bca2498f2d40c694b285471062748cf0",
+  "jar_sha256": "6ad6b42e7a97ac53b204ece93f0b263382f98b4dcaff3f8da2fc072ede9660bf",
+  "dex_entries": [
+    "classes.dex"
+  ]
+}

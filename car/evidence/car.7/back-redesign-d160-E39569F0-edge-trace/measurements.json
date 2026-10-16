@@ -1,0 +1,133 @@
+{
+  "status": "native_geometry_and_gestures_passed_visual_review_pending",
+  "apkSha256": "E39569F00375D074761C7D40EB14D1C9D40184CDA2BA32C8493338E1E9C3E880",
+  "pid": 10110,
+  "tag": "visual-d160-E39569F0-edge-trace",
+  "nativeTests": {
+    "passed": 58,
+    "failed": 0
+  },
+  "stages": {
+    "home-initial": {
+      "node": {
+        "class": "androidx.base.gl",
+        "id": -1,
+        "x": 79,
+        "y": 329,
+        "w": 243,
+        "h": 243,
+        "alpha": 0.8999999761581421,
+        "clickable": true,
+        "description": "应用内返回"
+      },
+      "largestCyanComponent": {
+        "area": 5658,
+        "bbox": [
+          27,
+          27,
+          216,
+          216
+        ],
+        "width": 189,
+        "height": 189
+      },
+      "visualHeightPercent": 11.666666666666666,
+      "hitHeightPercent": 15.0
+    },
+    "ball-large": {
+      "node": {
+        "class": "androidx.base.gl",
+        "id": -1,
+        "x": 79,
+        "y": 323,
+        "w": 270,
+        "h": 270,
+        "alpha": 0.8999999761581421,
+        "clickable": true,
+        "description": "应用内返回"
+      },
+      "largestCyanComponent": {
+        "area": 6527,
+        "bbox": [
+          27,
+          27,
+          243,
+          243
+        ],
+        "width": 216,
+        "height": 216
+      },
+      "visualHeightPercent": 13.333333333333334,
+      "hitHeightPercent": 16.666666666666668
+    },
+    "ball-right-dock": {
+      "node": {
+        "class": "androidx.base.gl",
+        "id": -1,
+        "x": 2558,
+        "y": 328,
+        "w": 243,
+        "h": 243,
+        "alpha": 0.8999999761581421,
+        "clickable": true,
+        "description": "应用内返回"
+      },
+      "largestCyanComponent": {
+        "area": 5681,
+        "bbox": [
+          27,
+          27,
+          216,
+          216
+        ],
+        "width": 189,
+        "height": 189
+      },
+      "visualHeightPercent": 11.666666666666666,
+      "hitHeightPercent": 15.0
+    },
+    "edge-armed-teardrop": {
+      "bluePixelArea": 16433,
+      "blueBoundsInLeftRegion": [
+        0,
+        241,
+        139,
+        572
+      ],
+      "note": "Pixel presence/geometry only; not a visual-fidelity verdict."
+    },
+    "edge-armed-capsule": {
+      "bluePixelArea": 15558,
+      "blueBoundsInLeftRegion": [
+        0,
+        751,
+        328,
+        1007
+      ],
+      "note": "Pixel presence/geometry only; not a visual-fidelity verdict."
+    }
+  },
+  "idle": {
+    "node": {
+      "class": "androidx.base.gl",
+      "id": -1,
+      "x": 2624,
+      "y": 328,
+      "w": 243,
+      "h": 243,
+      "alpha": 0.3799999952316284,
+      "clickable": true,
+      "description": "应用内返回"
+    },
+    "outwardShiftPx": 66
+  },
+  "draggingAmberBoundsPx": [
+    203,
+    203
+  ],
+  "observedFatalErrors": [],
+  "remaining": [
+    "Pixel and native gesture checks passed; screenshot visual inspection pending.",
+    "Full car.7 playback/lifecycle acceptance and release work are not completed."
+  ]
+}

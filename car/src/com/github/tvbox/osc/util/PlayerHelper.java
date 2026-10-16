@@ -86,8 +86,8 @@ public class PlayerHelper {
                 renderViewFactory = SurfaceRenderViewFactory.create();
                 break;
         }
-        // Any enabled colour/spatial/temporal feature uses the same renderer for EXO and IJK.
-        if (CarEnhance.useEnhanceRenderView(videoView)) {
+        // Keep IJK's decoder consumer stable even when effects are off (identity OES).
+        if (playerType == 1 || CarEnhance.useEnhanceRenderView(videoView)) {
             renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode(),
                     CarEnhance.videoSrEnabled(), CarEnhance.videoInterpEnabled());
         }
@@ -138,8 +138,8 @@ public class PlayerHelper {
                 renderViewFactory = SurfaceRenderViewFactory.create();
                 break;
         }
-        // Any enabled colour/spatial/temporal feature uses the same renderer for EXO and IJK.
-        if (CarEnhance.useEnhanceRenderView(videoView)) {
+        // Keep IJK's decoder consumer stable even when effects are off (identity OES).
+        if (playType == 1 || CarEnhance.useEnhanceRenderView(videoView)) {
             renderViewFactory = GlEnhanceRenderViewFactory.create(CarEnhance.videoMode(),
                     CarEnhance.videoSrEnabled(), CarEnhance.videoInterpEnabled());
         }
