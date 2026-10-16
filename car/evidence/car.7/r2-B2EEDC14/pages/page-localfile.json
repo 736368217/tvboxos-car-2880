@@ -1,0 +1,176 @@
+[
+  {
+    "class": "com.android.internal.policy.DecorView",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.FrameLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.FitWindowsLinearLayout",
+    "id": 2131361844,
+    "resource": "action_bar_root",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.ContentFrameLayout",
+    "id": 16908290,
+    "resource": "content",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.FrameLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 90,
+    "y": 90,
+    "w": 2700,
+    "h": 1406,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362516,
+    "resource": "tvTitle",
+    "x": 90,
+    "y": 90,
+    "w": 2700,
+    "h": 90,
+    "alpha": 1,
+    "clickable": false,
+    "text": "选择点播配置文件"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362492,
+    "resource": "tvPath",
+    "x": 90,
+    "y": 203,
+    "w": 2700,
+    "h": 61,
+    "alpha": 1,
+    "clickable": false,
+    "text": "\/storage\/emulated\/0\/TVBox"
+  },
+  {
+    "class": "com.owen.tvrecyclerview.widget.TvRecyclerView",
+    "id": 2131362046,
+    "resource": "fileList",
+    "x": 90,
+    "y": 309,
+    "w": 2700,
+    "h": 1187,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 90,
+    "y": 309,
+    "w": 2700,
+    "h": 135,
+    "alpha": 1,
+    "clickable": true
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362517,
+    "resource": "tvType",
+    "x": 135,
+    "y": 309,
+    "w": 180,
+    "h": 135,
+    "alpha": 1,
+    "clickable": false,
+    "text": "目录"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362487,
+    "resource": "tvName",
+    "x": 315,
+    "y": 309,
+    "w": 1935,
+    "h": 135,
+    "alpha": 1,
+    "clickable": false,
+    "text": ".."
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362480,
+    "resource": "tvInfo",
+    "x": 2250,
+    "y": 309,
+    "w": 495,
+    "h": 135,
+    "alpha": 1,
+    "clickable": false,
+    "text": "进入"
+  },
+  {
+    "class": "androidx.base.uq",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.base.gl",
+    "id": -1,
+    "x": 79,
+    "y": 695,
+    "w": 243,
+    "h": 243,
+    "alpha": 0.8999999761581421,
+    "clickable": true,
+    "description": "应用内返回"
+  }
+]

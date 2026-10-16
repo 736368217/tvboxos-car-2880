@@ -1,0 +1,9 @@
+{
+  "spider": "",
+  "sites": [
+    {"key": "car7_ui", "name": "车机界面验收（本地素材）", "type": 3, "api": "http://127.0.0.1:9978/file/TVBoxCar5/car7_ui_probe.js", "searchable": 1, "quickSearch": 1}
+  ],
+  "parses": [],
+  "flags": [],
+  "lives": [{"name": "本地直播验收", "type": 0, "url": "http://127.0.0.1:9978/file/TVBoxCar5/car7-live.m3u"}]
+}

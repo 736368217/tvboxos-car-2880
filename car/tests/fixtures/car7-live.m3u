@@ -1,0 +1,5 @@
+#EXTM3U
+#EXTINF:-1 group-title="本地验收",动态图频道 01
+http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4
+#EXTINF:-1 group-title="本地验收",动态图频道 02
+http://127.0.0.1:9978/file/TVBoxCar5/motion.mp4

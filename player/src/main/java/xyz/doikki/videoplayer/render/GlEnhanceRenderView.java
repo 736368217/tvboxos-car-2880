@@ -24,6 +24,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
 import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.egl.EGLDisplay;
+import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL10;
 
 import xyz.doikki.videoplayer.player.AbstractPlayer;
@@ -49,10 +53,12 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private final Object mProducerLock = new Object();
     private final ArrayList<ProducerSurface> mProducers = new ArrayList<>();
     private Surface mBoundSurface;
+    private AbstractPlayer mBoundPlayer;
 
     private volatile AbstractPlayer mMediaPlayer;
     private volatile Surface mPlayerSurface;
     private volatile SurfaceTexture mSurfaceTexture;
+    private boolean mProducerDetached;
     private volatile long mAttachGeneration;
     private volatile boolean mBindingEnabled, mSurfaceCreationFailed;
     private Runnable mOnBound, mOnFailure, mBindTimeout;
@@ -91,8 +97,62 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         setEGLContextClientVersion(2);
         setEGLConfigChooser(8, 8, 8, 8, 0, 0);
         setPreserveEGLContextOnPause(true);
+        setEGLContextFactory(new ProducerContextFactory());
         setRenderer(this);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
+    }
+
+    /** GLSurfaceView stops its GLThread when reparented, even with preserve-on-pause.
+     * Detach the consumer while the old context is still alive so MediaCodec keeps
+     * the same BufferQueue and output Surface across preview/fullscreen transitions.
+     */
+    private final class ProducerContextFactory implements EGLContextFactory {
+        private EGLConfig mConfig;
+
+        @Override public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig config) {
+            mConfig = config;
+            return egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT,
+                    new int[]{0x3098, 2, EGL10.EGL_NONE});
+        }
+
+        @Override public void destroyContext(EGL10 egl, EGLDisplay display, EGLContext context) {
+            // EglHelper unbinds its window before this callback. A 1x1 pbuffer lets
+            // SurfaceTexture detach and GL deletion run on the owning context.
+            EGLSurface pbuffer = egl.eglCreatePbufferSurface(display, mConfig,
+                    new int[]{EGL10.EGL_WIDTH, 1, EGL10.EGL_HEIGHT, 1, EGL10.EGL_NONE});
+            boolean current = pbuffer != null && pbuffer != EGL10.EGL_NO_SURFACE
+                    && egl.eglMakeCurrent(display, pbuffer, pbuffer, context);
+            try {
+                synchronized (mProducerLock) {
+                    if (current) {
+                        if (mSurfaceTexture != null && !mReleased && !mReleaseRequested) {
+                            try {
+                                mSurfaceTexture.detachFromGLContext();
+                                mProducerDetached = true;
+                                mOesTexture = 0; // detach deletes the old OES name.
+                                Log.i(TAG, "producer context detached; surface="
+                                        + System.identityHashCode(mPlayerSurface));
+                            } catch (RuntimeException error) {
+                                Log.e(TAG, "PRODUCER_PRESERVE_FAILED texture detach", error);
+                            }
+                        }
+                        releaseGlResources();
+                    } else {
+                        Log.e(TAG, "PRODUCER_PRESERVE_FAILED pbuffer current error=" + egl.eglGetError());
+                        // Names belonged to this dying context, never delete them in its successor.
+                        mOesTexture = mColourProgram = mOutputProgram = 0;
+                        mFbos[0] = mFbos[1] = mFrameTextures[0] = mFrameTextures[1] = 0;
+                        mFboWidth = mFboHeight = 0;
+                        mHasFrame = mHasPrevious = mFboHasFrame = false;
+                    }
+                }
+            } finally {
+                if (current) egl.eglMakeCurrent(display, EGL10.EGL_NO_SURFACE,
+                        EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+                if (pbuffer != null && pbuffer != EGL10.EGL_NO_SURFACE) egl.eglDestroySurface(display, pbuffer);
+                egl.eglDestroyContext(display, context);
+            }
+        }
     }
 
     @Override public void attachToPlayer(@NonNull AbstractPlayer player) {
@@ -160,8 +220,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                         mMain.postDelayed(this::bindSurfaceToPlayer, 100L);
                         return;
                     }
-                    player.setSurface(surface);
+                    // A new EGL window/context does not require a new decoder output.
+                    if (mBoundSurface != surface || mBoundPlayer != player) player.setSurface(surface);
                     mBoundSurface = surface;
+                    mBoundPlayer = player;
                     if (mProducerResumePlayer == player) {
                         mProducerResumePlayer = null;
                         if (mPlaybackActive && !mReleaseRequested && !mReleased) player.start();
@@ -213,7 +275,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         mProducerResumePlayer = null;
         mProducerResumeAtMs = 0;
         mPlaybackActive = false;
-        synchronized (mProducerLock) { mBoundSurface = null; }
+        synchronized (mProducerLock) { mBoundSurface = null; mBoundPlayer = null; }
         updateRenderMode();
     }
 
@@ -624,13 +686,20 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         GLES20.glDisableVertexAttribArray(position); GLES20.glDisableVertexAttribArray(coordinate);
     }
     private void createProducerSurface() {
-        int[] textures=new int[1];
-        GLES20.glGenTextures(1,textures,0); mOesTexture=textures[0];
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,mOesTexture);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_MIN_FILTER,GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_MAG_FILTER,GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_WRAP_S,GLES20.GL_CLAMP_TO_EDGE);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,GLES20.GL_TEXTURE_WRAP_T,GLES20.GL_CLAMP_TO_EDGE);
+        int[] textures = new int[1];
+        GLES20.glGenTextures(1, textures, 0);
+        mOesTexture = textures[0];
+        if (mSurfaceTexture != null && mProducerDetached) {
+            // attachToGLContext creates the OES object; do not bind this name beforehand.
+            mSurfaceTexture.attachToGLContext(mOesTexture);
+            mProducerDetached = false;
+            configureProducerTexture();
+            mFrameAvailable.set(true);
+            Log.i(TAG, "producer context attached; surface=" + System.identityHashCode(mPlayerSurface));
+            bindSurfaceToPlayer();
+            return;
+        }
+        configureProducerTexture();
         SurfaceTexture texture = new SurfaceTexture(mOesTexture);
         Surface surface = null;
         try {
@@ -642,11 +711,20 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             texture.release();
             throw error;
         }
+        if (mSurfaceTexture != null) Log.e(TAG, "PRODUCER_RECREATED context migration unavailable");
         mSurfaceTexture = texture;
         mPlayerSurface = surface;
+        mProducerDetached = false;
         mFrameAvailable.set(false);
         mProducers.add(new ProducerSurface(texture, surface));
         bindSurfaceToPlayer();
+    }
+    private void configureProducerTexture() {
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mOesTexture);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
     }
     private void logConfiguration() { logConfiguration(mConfiguration); }
     private void logConfiguration(VideoEnhanceConfig configuration) {
@@ -703,6 +781,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         for (ProducerSurface producer : mProducers) producer.release();
         mProducers.clear();
         mPlayerSurface = mBoundSurface = null;
+        mBoundPlayer = null;
         mSurfaceTexture = null;
         mFrameAvailable.set(false);
         Log.i(TAG, "producer surfaces released; live=0");

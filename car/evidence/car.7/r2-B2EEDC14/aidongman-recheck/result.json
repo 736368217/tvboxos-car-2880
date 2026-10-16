@@ -1,0 +1,36 @@
+{
+  "passed": 4,
+  "failed": 1,
+  "events": [
+    {
+      "pass": true,
+      "test": "subscription parsed sites",
+      "detail": "unique_sites=108",
+      "at": 1792165927702
+    },
+    {
+      "pass": true,
+      "test": "subscription-爱动漫-home",
+      "detail": "",
+      "at": 1792165929447
+    },
+    {
+      "pass": true,
+      "test": "subscription-爱动漫-category",
+      "detail": "",
+      "at": 1792165931313
+    },
+    {
+      "pass": true,
+      "test": "subscription-爱动漫-detail",
+      "detail": "",
+      "at": 1792165932482
+    },
+    {
+      "pass": false,
+      "test": "subscription-爱动漫",
+      "detail": "ExecutionException",
+      "at": 1792165962484
+    }
+  ]
+}

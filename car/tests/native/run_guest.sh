@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # Run through the MuMu plugin after the host pool lease check and env.sh wrapper.
-# args: mode tag expected_apk_sha256 shared_output_directory [api_url] [home_site]
+# args: mode tag expected_apk_sha256 shared_output_directory [api_url] [home_site] [sites]
 set -eu
 mode=$1
 tag=$2
@@ -8,6 +8,7 @@ expected=$3
 out=$4
 api=${5:-}
 home_site=${6:-py_juzong}
+sites=${7:-}
 pkg=com.github.tvbox.osc.jun
 case "$tag" in *[!a-zA-Z0-9_.-]*|'') echo INVALID_TAG; exit 3;; esac
 /system/bin/sh "$out/verify_car_display.sh" || exit 42
@@ -19,11 +20,10 @@ settings put system volume_music 0
 settings put system sound_effects_enabled 0
 cmd media_session volume --stream 3 --set 0 >/dev/null 2>&1 || true
 logcat -c
-if test -n "$api"; then
-  am instrument --no-hidden-api-checks -w -e tag "$tag" -e mode "$mode" -e api "$api" -e homeSite "$home_site" com.github.tvbox.osc.car7.test/com.github.tvbox.osc.car7.test.Car7Acceptance > "$out/car7-native-$tag.txt" 2>&1
-else
-  am instrument --no-hidden-api-checks -w -e tag "$tag" -e mode "$mode" com.github.tvbox.osc.car7.test/com.github.tvbox.osc.car7.test.Car7Acceptance > "$out/car7-native-$tag.txt" 2>&1
-fi
+set -- --no-hidden-api-checks -w -e tag "$tag" -e mode "$mode"
+if test -n "$api"; then set -- "$@" -e api "$api" -e homeSite "$home_site"; fi
+if test -n "$sites"; then set -- "$@" -e sites "$sites"; fi
+am instrument "$@" com.github.tvbox.osc.car7.test/com.github.tvbox.osc.car7.test.Car7Acceptance > "$out/car7-native-$tag.txt" 2>&1
 mkdir -p "$out/car7-native-$tag"
 cp -r "/data/data/$pkg/files/car7-native-evidence/$tag/." "$out/car7-native-$tag/"
 # Only target test/result and renderer diagnostics; never remote bodies/headers.

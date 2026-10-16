@@ -1,0 +1,139 @@
+[
+  {
+    "class": "com.android.internal.policy.DecorView",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.FrameLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.FitWindowsLinearLayout",
+    "id": 2131361844,
+    "resource": "action_bar_root",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.ContentFrameLayout",
+    "id": 16908290,
+    "resource": "content",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 248,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": -1,
+    "x": 113,
+    "y": 90,
+    "w": 231,
+    "h": 113,
+    "alpha": 1,
+    "clickable": false,
+    "text": "收藏夹"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatImageView",
+    "id": 2131362458,
+    "resource": "tvDelete",
+    "x": 2472,
+    "y": 90,
+    "w": 113,
+    "h": 113,
+    "alpha": 1,
+    "clickable": true
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatImageView",
+    "id": 2131362452,
+    "resource": "tvClear",
+    "x": 2631,
+    "y": 90,
+    "w": 113,
+    "h": 113,
+    "alpha": 1,
+    "clickable": true
+  },
+  {
+    "class": "com.owen.tvrecyclerview.widget.TvRecyclerView",
+    "id": 2131362193,
+    "resource": "mGridView",
+    "x": 0,
+    "y": 248,
+    "w": 2880,
+    "h": 1372,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.base.uq",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.base.gl",
+    "id": -1,
+    "x": 79,
+    "y": 695,
+    "w": 243,
+    "h": 243,
+    "alpha": 0.8999999761581421,
+    "clickable": true,
+    "description": "应用内返回"
+  }
+]

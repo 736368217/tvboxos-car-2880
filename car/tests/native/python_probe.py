@@ -84,6 +84,53 @@ finally:
     save()
 
 loader = PythonLoader.getInstance()
+original_request = requests.sessions.Session.request
+observation = None
+
+def diagnostic_request(session, method, url, *args, **kwargs):
+    started = time.monotonic()
+    info = {"method": str(method).upper()}
+    try:
+        response = original_request(session, method, url, *args, **kwargs)
+        # No headers, cookies, credentials, full URLs or remote bodies enter evidence.
+        payload = response.content
+        text = response.text
+        info.update(status=response.status_code, bytes=len(payload),
+                    sha256=hashlib.sha256(payload).hexdigest(),
+                    security_verify="系统安全验证" in text or "验证后继续" in text,
+                    module_items=text.count('module-item'), public_list_items=text.count('public-list-exp'),
+                    detail_links=text.count('/detail/'))
+        info["phase"] = observation["phases"][-1]["phase"] if observation and observation.get("phases") else "config"
+        info["mime"] = response.headers.get("Content-Type", "").split(";", 1)[0]
+        info["content_encoding"] = response.headers.get("Content-Encoding", "")
+        info["gzip_magic"] = payload.startswith(b'\x1f\x8b')
+        info["looks_html"] = "<html" in text.lower() or "<!doctype" in text.lower()
+        info["access_denied"] = any(s in text.lower() for s in ("forbidden", "access denied", "captcha", "restricted"))
+        info["server_error_page"] = any(s in text.lower() for s in ("404 not found", "403 forbidden", "502 bad gateway", "503 service unavailable"))
+        info["error_404"] = "404 not found" in text.lower()
+        info["error_403"] = "403 forbidden" in text.lower()
+        info["nginx_marker"] = "nginx" in text.lower()
+        if observation and observation.get("key") == "py_maple" and 0 < len(payload) < 512:
+            with requests.Session() as alternate_session:
+                alternate = java_request(alternate_session, method, url, kwargs)
+                alt_text = alternate.text
+                info["java_comparison"] = {"status": alternate.status_code, "bytes": len(alternate.content),
+                    "sha256": hashlib.sha256(alternate.content).hexdigest(),
+                    "module_items": alt_text.count("module-item"), "public_list_items": alt_text.count("public-list-exp"),
+                    "detail_links": alt_text.count("/detail/")}
+                alternate.close()
+        return response
+    except Exception as error:
+        info["error_class"] = type(error).__name__
+        raise
+    finally:
+        info["elapsed_ms"] = int((time.monotonic() - started) * 1000)
+        if observation is not None:
+            records = observation.setdefault("http", [])
+            if len(records) < 100:
+                records.append(info)
+
+requests.sessions.Session.request = diagnostic_request
 executor = ThreadPoolExecutor(max_workers=1)
 try:
     config_url = "https://clun.top/box.json"
@@ -92,7 +139,8 @@ try:
         config = response.json()
     config_sites = config.get("sites", [])
     RESULT["subscription"] = {"url": config_url, "sites": len(config_sites),
-        "python_sites": sum(1 for site in config_sites if ".py" in site.get("api", ""))}
+        "python_sites": sum(1 for site in config_sites if ".py" in site.get("api", "")),
+        "config_sha256": hashlib.sha256(json.dumps(config, sort_keys=True, ensure_ascii=False).encode()).hexdigest()}
     by_key = {site.get("key"): site for site in config_sites}
     for key in SITE_KEYS:
         site = by_key.get(key)
@@ -100,6 +148,7 @@ try:
             RESULT["sites"].append({"key": key, "stage": "config", "error": "missing"})
             continue
         observation = {"key": key, "phases": []}
+        videos = []
         RESULT["sites"].append(observation)
         api = urljoin(config_url, site["api"])
         ext = site.get("ext", "")
@@ -134,6 +183,15 @@ try:
             save()
             continue
         observation["load_success"] = True
+        for alias, script_path in app.gParam.get("SpiderPath", {}).items():
+            if alias == key or alias == api.rsplit("/", 1)[-1].split(".")[0]:
+                try:
+                    with open(script_path, "rb") as script:
+                        payload = script.read()
+                    observation["script_sha256"] = hashlib.sha256(payload).hexdigest()
+                    observation["script_bytes"] = len(payload)
+                except OSError:
+                    observation["script_snapshot_unavailable"] = True
         home = phase("home", lambda: json.loads(str(spider.homeContent(True))))
         if not isinstance(home, dict):
             continue
@@ -142,6 +200,7 @@ try:
         observation["home_items"] = len(home.get("list") or [])
         if classes:
             tid = str(classes[0].get("type_id", ""))
+            observation["category_tid"] = tid
             category = phase("category", lambda: json.loads(str(spider.categoryContent(tid, "1", True, HashMap()))))
             if isinstance(category, dict):
                 videos = category.get("list") or []
@@ -179,10 +238,25 @@ try:
             search = phase("search", lambda: json.loads(str(spider.searchContent("\u6f5c\u4f0f", False))))
             if isinstance(search, dict):
                 observation["search_items"] = len(search.get("list") or [])
+        if key == "py_maple":
+            observation["alternate_categories"] = []
+            for candidate in classes[3:5]:
+                alt_tid = str(candidate.get("type_id", ""))
+                alternate = phase("category_alternate", lambda: json.loads(str(spider.categoryContent(alt_tid, "1", True, HashMap()))))
+                observation["alternate_categories"].append({"tid": alt_tid, "items": len((alternate or {}).get("list") or [])})
+        if videos and key != "py_douban":
+            positive_title = str(videos[0].get("vod_name", ""))
+            if positive_title:
+                positive = phase("search_positive", lambda: json.loads(str(spider.searchContent(positive_title, False))))
+                matches = (positive or {}).get("list") or []
+                observation["positive_search_items"] = len(matches)
+                observation["positive_search_matches_known_id"] = any(str(v.get("vod_id")) == str(videos[0].get("vod_id")) for v in matches)
+                observation["positive_search_matches_known_title"] = any(str(v.get("vod_name", "")).strip() == positive_title.strip() for v in matches)
         save()
 except Exception as error:
     RESULT["probe_error"] = type(error).__name__
 finally:
+    requests.sessions.Session.request = original_request
     executor.shutdown(wait=False)
     RESULT["finished"] = time.time()
     save()

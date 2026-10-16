@@ -1,0 +1,11 @@
+{
+  "exit": 0,
+  "elapsed_seconds": 114.91,
+  "tasks": [
+    ":app:compileJavaReleaseJavaWithJavac",
+    ":app:assemblePythonRelease"
+  ],
+  "apk": "C:\\Users\\WIN10\\Downloads\\pi\\apk\\tvbox-os-src\\app\\build\\outputs\\apk\\python\\release\\TVBox_release-python.apk",
+  "bytes": 52567483,
+  "unsigned_sha256": "C1DE1F340D164A7D672FC6A91B73DA70C47D33FBBB49901764B0CCE2546D2B5B"
+}

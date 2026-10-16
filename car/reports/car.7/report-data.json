@@ -1,0 +1,50 @@
+{
+  "title": "TVBox 车机版 car.7 功能修复与逐页验收报告",
+  "subtitle": "r2 候选 · 2880×1620 / 160 dpi · 22 张原生页面与状态截图",
+  "status": "应用端改动已实现，本地功能门禁通过；远端站点仍有失败记录。本次交付为 r2 候选，不宣称所有订阅源已经全部正常，也未自动替换 GitHub 正式版本或旧草稿标签。",
+  "apk_sha256": "B2EEDC14021696467C3E21412208BEDA9CA3FC78F173FFFFF56F970BD77AA8C1",
+  "pages_file": "pages.json",
+  "contents_label": "页面目录",
+  "summary": [
+    "本报告先说明本次完成的应用功能，再逐页展示截图与修改重点。所有页面截图来自同一最终候选 APK；黄框和编号是报告后加标注，不是应用中的装饰或控件。",
+    "交付包：TVBox-1.0.0-car.7-r2-python-signed.apk，52,676,888 字节。实际包名 com.github.tvbox.osc.jun，标签 TVBox，versionCode=8，versionName=1.0.0-car.7；r2 是产物修订号，不是伪造新的内部版本名。",
+    "car.7 功能：主页/分类布局与两行标题、双模应用内返回、播放器四个快捷入口、车机高级设置、Python Requests→Android OkHttp 兼容传输与原子下载。截图中的 car.7 标记表示本版累计功能。",
+    "r2 重点修复：IJK 硬解全屏绿块；QuickJS Promise 与回调共用执行器时的互等；搜索会话、每站超时与取消隔离；详情页应用内返回误走遥控器焦点分支。",
+    "页面与直播展示使用本地长标题素材、自制动态图和本地 M3U，目的是稳定复现布局、交互与像素效果，不把测试卡片冒充远端内容。真实 Python 站点及实际网络视频播放另行验收。",
+    "模拟器已通过显示与输入矩形门禁：实际逻辑/物理窗口均为 2880×1620，密度 160，固定横屏，无尺寸/密度覆盖。真实车机 OEM 全屏策略、持续高负载、扬声器音质仍须实机确认。"
+  ],
+  "verification_title": "验收结果与实现重点",
+  "checks": [
+    {"name": "最终产物与身份", "result": "通过", "detail": "完整 Gradle 构建成功；zipalign、签名验证、manifest/badging 和 Python 双 ARM ABI 检查通过；设备每轮均校验已安装 base.apk 的 SHA。原包名和 TVBox 标签未改变。"},
+    {"name": "包名台账", "result": "TVBox r2 已登记；全局扫描有无关项目错误", "detail": "登记保留 com.github.tvbox.osc.jun / tvboxos-car 归属，新增 r2 实际路径与摘要。完整检查脚本因其他项目 com.carhd.fileopener 未登记而退出 1；未修改其他项目归属，不把全局检查写成全部通过。"},
+    {"name": "EXO / IJK 状态与生命周期", "result": "101 通过 / 0 失败", "detail": "覆盖初始播放、增强开关、全屏进入/退出、前后台恢复和重新进入。IJK 在 prepare 之前建立稳定 GL consumer；关闭增强时采用 identity OES passthrough，不执行超分/时域处理的 FBO 链。"},
+    {"name": "客观像素门禁", "result": "8 通过 / 0 失败", "detail": "EXO 与 IJK 的初始、全屏、前台恢复、重新进入共八张 2880×1620 图均通过五个色条采样的 RGB 中位数门禁；旧候选的 IJK 全屏失败已在最终 SHA 上修复。"},
+    {"name": "页面与播放快捷入口", "result": "49 通过 / 0 失败", "detail": "覆盖所有实际 Activity、分类子页、预览/全屏、四个播放入口的真实点击与保存值/renderer/session、设置选项和逐级返回。详情页现在先退出全屏，再一击离开详情，不多消耗一次点击移动焦点。"},
+    {"name": "基础 UI 与双模返回", "result": "58 通过 / 0 失败", "detail": "验证横向分类与推荐末项可达、标题高度、243 px 返回热区、拖动磁吸、位置持久化、空闲与触摸唤醒、水滴/胶囊、阈值取消、CANCEL 和弹窗外触摸关闭。首页根状态不会被悬浮球直接退出。"},
+    {"name": "QuickJS Android 运行时", "result": "14 通过 / 0 失败", "detail": "同步、Promise、链式 timer、异步 HTTP、对象快照、参数转换、reject/throw、请求超时、中断与恢复均通过。Promise 等待移到调用线程；JS 执行器继续处理回调；30 秒总截止后取消该调用的网络和 timer，并释放 native 引用。"},
+    {"name": "35 站搜索压力", "result": "12 通过 / 0 失败（补跑）", "detail": "32 个慢站超过 API35 的 24 工作者上限；普通与快速搜索均完成收敛并显示尾站，空结果/无效结果也能结算，退出后活动工作停止。初轮工具读取被 R8 内联的 getter 失败；改为映射后的字段读取，同一产品 APK 补跑通过。"},
+    {"name": "宿主回归", "result": "通过", "detail": "164 XML、11 预设、44 运行配置、88 SDR/HDR 场景、1936 状态比较、738 返回策略断言、1237 搜索会话断言、真实 OkHttp 取消隔离、QuickJS 等待契约、20 项 Python HTTP 测试均退出 0。两种产品 flavor 的 Java 编译均通过。"},
+    {"name": "真实 Python 站点", "result": "12 通过 / 1 失败", "detail": "clun 配置本轮有 97 站、44 Python 站。豆瓣分类 20、剧踪 42、苹果 21、瓜子 30 项；枫叶为空，保留失败。苹果直链实际 EXO 播放为 1280×720，位置 162→2680 ms，state=3。"},
+    {"name": "产品 ApiConfig→Python 链路", "result": "12 通过 / 1 失败", "detail": "剧踪、苹果、瓜子的加载、分类、详情经过产品调用链验证。苹果/瓜子的已知条目阳性搜索通过；剧踪“潜伏”返回 12 项，但本轮首个分类条目的完整片名搜索未命中，未把该项改写成通过。"},
+    {"name": "xiaosa JAR / QuickJS", "result": "10 通过 / 2 失败；爱动漫单站复核 4 通过 / 1 失败", "detail": "热播 JAR 分类 12、详情 1、已知片名搜索 1 项；枫叶 JAR 搜索有 7 项但首分类为空；爱动漫 QuickJS 分类 48、详情 1，但搜索在 30 秒截止内未完成，根因链到 TimeoutException。保留订阅和 Spider 地址，未置空、屏蔽自杀或伪造数据。"},
+    {"name": "测试后恢复", "result": "通过", "detail": "原 Hawk2.xml 在启动前与私有原备份 cmp 一致；验收包已卸载。恢复后的干净启动 PID 20439→20439、FATAL=0、已安装 SHA 不变。实例 0 租约已释放并关机，MuMu 主程序保留。未将偏好或密钥文件复制进报告。"},
+    {"name": "崩溃与 producer 诊断", "result": "本轮过滤日志未见对应异常", "detail": "完成轮次的 AndroidRuntime 过滤中 FATAL EXCEPTION=0；渲染日志中 PRODUCER_PRESERVE_FAILED / PRODUCER_RECREATED=0。每轮会重启 instrumentation 进程，PID 不要求跨轮相同；播放生命周期断言要求该轮内稳定。"}
+  ],
+  "limits_title": "仍需区分的限制与失败",
+  "limitations": [
+    "枫叶 Python：内容请求的 HTTP 状态为 200，但正文是 138 字节、带 403 Forbidden 特征的 HTML；原生 Requests 与 Java OkHttp 的长度和摘要一致，且没有内容卡片。这是已确证的站点内容响应问题，不应通过强制把 HTTP 200 当成功、替换假列表或改订阅来掩盖。",
+    "剧踪已知片名未命中、xiaosa 枫叶首分类为空：这些源特定结果没有达到内容阳性断言。不能由通用 HTTP/JS 测试通过推导为所有站点内容都正常。",
+    "爱动漫搜索：首页分类和详情正常，搜索 Promise 在时限内未完成。已验证应用会按截止结束等待，而不是原先让同一执行器互等；仍不能据此断言该远端脚本或服务端已完全兼容。",
+    "时域平滑使用已实现的 GPU 时域处理，不等同于有独立运动估计芯片的硬件 MEMC；音效是当前 Android audio session 的效果预设，不承诺改变车机 DAC 或硬件音频能力。",
+    "屏幕截图与触控矩形是模拟器证据，不替代 17.3 英寸真实车机的 OEM 白名单、物理可达性、长期 GPU 温度/功耗和音质验收。布局安全 token 与原生像素位置均已记录，没有以截图尺寸冒充真实物理毫米标定。",
+    "本次保留旧 GitHub 正式版和既有 car.7 草稿/标签。r2 是独立候选产物；没有自动发布一个“所有远端站点全绿”的正式版本。"
+  ],
+  "evidence_title": "交付与证据索引",
+  "evidence": [
+    "安装包：tvbox-os-car/TVBox-1.0.0-car.7-r2-python-signed.apk。",
+    "最终原生证据：tvbox-os-src/car/evidence/car.7/r2-B2EEDC14/。目录中保留 identity、result、原始 PNG、原生节点与远端安全诊断计数；无 keystore、Spider JAR 或原始远端响应正文。",
+    "像素数据：car/evidence/car.7/r2-B2EEDC14/pixels.json；远端播放：python/python-playback.json；爱动漫根因：aidongman-recheck/subscription-results.json。",
+    "可复现入口：car/tests/native/build_native.py、run_guest.sh、verify_car_display.sh、verify_car7_pixels.py；搜索素材由 build_search_fixture.py 生成到会话 scratch，不写入生产包。",
+    "报告数据与生成器：car/reports/car.7/{report-data,pages}.json、car/tools/generate_car7_report.py。Word 和单文件 HTML 均内嵌本报告所有截图。"
+  ]
+}

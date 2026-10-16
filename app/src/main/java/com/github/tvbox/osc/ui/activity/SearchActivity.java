@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -25,7 +27,6 @@ import android.widget.Toast;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.github.catvod.crawler.JsLoader;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.base.BaseActivity;
@@ -43,6 +44,7 @@ import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.HistoryHelper;
 import com.github.tvbox.osc.util.SearchHelper;
+import com.github.tvbox.osc.util.LOG;
 import com.github.tvbox.osc.viewmodel.SourceViewModel;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -67,13 +69,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -84,7 +80,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SearchActivity extends BaseActivity {
     private static final String HOT_SEARCH_URL = "https://movie.douban.com/j/search_subjects?type=tv&tag=%E7%83%AD%E9%97%A8&sort=recommend&page_limit=20&page_start=0";
     private static final int SEARCH_THREAD_COUNT = 6;
-    private static final int SEARCH_MAX_THREAD_COUNT = Build.VERSION.SDK_INT >= 35 ? 24 : Build.VERSION.SDK_INT >= 30 ? 18 : 12;
+    private static final int SEARCH_PUMP_SECONDS = 2;
     private static final int SEARCH_NEXT_BATCH_SECONDS = 3;
     private static final int SEARCH_SITE_TIMEOUT_SECONDS = 15;
     private static final String[] DEFAULT_HOT_WORDS = {
@@ -763,80 +759,62 @@ public class SearchActivity extends BaseActivity {
         searchResult();
     }
 
-    private ExecutorService searchExecutorService = null;
-    private ScheduledExecutorService searchTimeoutExecutor = null;
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private AtomicInteger allRunCount = new AtomicInteger(0);
     private final Set<String> pendingSearchKeys = Collections.synchronizedSet(new HashSet<String>());
     private final List<SearchTask> waitingSearchTasks = Collections.synchronizedList(new ArrayList<SearchTask>());
     private final Set<String> startedSearchKeys = Collections.synchronizedSet(new HashSet<String>());
     private final Set<String> releasedSearchKeys = Collections.synchronizedSet(new HashSet<String>());
-    private final AtomicInteger searchTokenSeq = new AtomicInteger(0);
     private final AtomicInteger totalSearchCount = new AtomicInteger(0);
-    private String currentSearchToken = "";
+    private volatile String currentSearchToken = "";
     private boolean searchPaused = false;
     private final List<Movie.Video> detailFallbackSearchResults = new ArrayList<>();
     private final List<List<Movie.Video>> folderHistory = new ArrayList<>();
     private boolean folderLoading;
 
     private void searchResult() {
-        try {
-            if (searchExecutorService != null) {
-                searchExecutorService.shutdownNow();
-                searchExecutorService = null;
-                JsLoader.stopAll();
-            }
-            if (searchTimeoutExecutor != null) {
-                searchTimeoutExecutor.shutdownNow();
-                searchTimeoutExecutor = null;
-            }
-        } catch (Throwable th) {
-            th.printStackTrace();
-        } finally {
-            searchAdapter.setNewData(new ArrayList<>());
-            allRunCount.set(0);
-            pendingSearchKeys.clear();
-            waitingSearchTasks.clear();
-            startedSearchKeys.clear();
-            releasedSearchKeys.clear();
-            highMatchVods.clear();
-            detailFallbackSearchResults.clear();
-            folderHistory.clear();
-            showHighMatchResults = false;
-            totalSearchCount.set(0);
-            currentSearchToken = String.valueOf(searchTokenSeq.incrementAndGet());
-            searchPaused = false;
-        }
+        cancel();
+        searchAdapter.setNewData(new ArrayList<>());
+        allRunCount.set(0);
+        pendingSearchKeys.clear();
+        waitingSearchTasks.clear();
+        startedSearchKeys.clear();
+        releasedSearchKeys.clear();
+        highMatchVods.clear();
+        detailFallbackSearchResults.clear();
+        folderHistory.clear();
+        showHighMatchResults = false;
+        totalSearchCount.set(0);
+        currentSearchToken = sourceViewModel.beginSearches();
+        searchPaused = false;
         List<SourceBean> searchRequestList = new ArrayList<>();
         searchRequestList.addAll(ApiConfig.get().getSourceBeanList());
         SourceBean home = ApiConfig.get().getHomeSourceBean();
         searchRequestList.remove(home);
-        searchRequestList.add(0, home);
+        if (home != null) searchRequestList.add(0, home);
 
         ArrayList<SearchTask> searchTasks = new ArrayList<>();
         for (SourceBean bean : searchRequestList) {
-            if (!bean.isSearchable()) {
-                continue;
-            }
-            if (mCheckSources != null && !mCheckSources.containsKey(bean.getKey())) {
-                continue;
-            }
+            if (bean == null || !bean.isSearchable()) continue;
+            if (mCheckSources != null && !mCheckSources.containsKey(bean.getKey())) continue;
             searchTasks.add(new SearchTask(bean.getKey(), searchTitle, currentSearchToken, isBlockingSearchSource(bean)));
         }
-        if (searchTasks.size() <= 0) {
+        if (searchTasks.isEmpty()) {
             Toast.makeText(mContext, "没有指定搜索源", Toast.LENGTH_SHORT).show();
             showEmpty();
+            cancel();
             return;
         }
-        for (SearchTask task : searchTasks) {
-            pendingSearchKeys.add(task.sourceKey);
-        }
+        for (SearchTask task : searchTasks) pendingSearchKeys.add(task.sourceKey);
         allRunCount.set(searchTasks.size());
         totalSearchCount.set(searchTasks.size());
-        searchExecutorService = createSearchExecutor();
-        searchTimeoutExecutor = Executors.newSingleThreadScheduledExecutor();
-        startFastSearchTasks(searchTasks);
+        // Keep ordinary HTTP sources independent of slow blocking Spider workers.
+        for (SearchTask task : searchTasks) {
+            if (!task.blocking && startedSearchKeys.add(task.sourceKey)) submitSearchTask(task);
+        }
         waitingSearchTasks.addAll(searchTasks);
         startNextSearchBatch(currentSearchToken);
+        startSearchPump(currentSearchToken);
     }
 
     private boolean matchSearchResult(String name, String searchTitle) {
@@ -931,52 +909,48 @@ public class SearchActivity extends BaseActivity {
     }
 
     private void scheduleSearchAdvance(final String sourceKey, final String searchToken) {
-        if (searchTimeoutExecutor == null) return;
-        searchTimeoutExecutor.schedule(new Runnable() {
+        searchHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (!isCurrentSearchToken(searchToken)) return;
                 if (isSearchPending(sourceKey, searchToken) && releaseSearchSlot(sourceKey, searchToken)) {
                     startNextSearchTask(searchToken);
                 }
             }
-        }, SEARCH_NEXT_BATCH_SECONDS, TimeUnit.SECONDS);
+        }, SEARCH_NEXT_BATCH_SECONDS * 1000L);
+    }
+
+    private void startSearchPump(final String searchToken) {
+        searchHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isCurrentSearchToken(searchToken) || allRunCount.get() <= 0) return;
+                if (!waitingSearchTasks.isEmpty()) startNextSearchBatch(searchToken);
+                if (isCurrentSearchToken(searchToken)) searchHandler.postDelayed(this, SEARCH_PUMP_SECONDS * 1000L);
+            }
+        }, SEARCH_PUMP_SECONDS * 1000L);
     }
 
     private void scheduleSearchTimeout(final String sourceKey, final String searchToken) {
-        if (searchTimeoutExecutor == null) return;
-        searchTimeoutExecutor.schedule(new Runnable() {
+        searchHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (!isCurrentSearchToken(searchToken)) return;
                 if (markSearchFinished(sourceKey, searchToken)) {
+                    sourceViewModel.cancelSearchSource(searchToken, sourceKey);
+                    LOG.i("search outcome=timeout");
                     releaseSearchSlotAndStartNext(sourceKey, searchToken);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            finishSearchIfDone();
-                        }
-                    });
+                    finishSearchIfDone();
                 }
             }
-        }, SEARCH_SITE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        }, SEARCH_SITE_TIMEOUT_SECONDS * 1000L);
     }
 
     private boolean submitSearchTask(SearchTask task) {
         if (!isSearchPending(task.sourceKey, task.searchToken)) return false;
-        if (searchExecutorService == null || searchExecutorService.isShutdown()) return false;
-        try {
-            searchExecutorService.execute(task);
-        } catch (RejectedExecutionException e) {
-            return false;
-        }
+        FutureTask<Void> future = new FutureTask<>(task, null);
+        if (!sourceViewModel.submitSearchTask(task.searchToken, task.sourceKey, future, task.blocking)) return false;
         scheduleSearchAdvance(task.sourceKey, task.searchToken);
         scheduleSearchTimeout(task.sourceKey, task.searchToken);
         return true;
-    }
-
-    private ExecutorService createSearchExecutor() {
-        return new ThreadPoolExecutor(0, SEARCH_MAX_THREAD_COUNT, 30L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
     }
 
     private void startNextSearchBatch(String searchToken) {
@@ -995,8 +969,10 @@ public class SearchActivity extends BaseActivity {
         }
         if (!submitSearchTask(task)) {
             startedSearchKeys.remove(task.sourceKey);
-            synchronized (waitingSearchTasks) {
-                waitingSearchTasks.add(0, task);
+            if (isSearchPending(task.sourceKey, task.searchToken)) {
+                synchronized (waitingSearchTasks) {
+                    waitingSearchTasks.add(0, task);
+                }
             }
             return false;
         }
@@ -1007,7 +983,8 @@ public class SearchActivity extends BaseActivity {
         synchronized (waitingSearchTasks) {
             while (!waitingSearchTasks.isEmpty()) {
                 SearchTask task = waitingSearchTasks.remove(0);
-                if (!isSearchPending(task.sourceKey, searchToken) || !startedSearchKeys.add(task.sourceKey)) {
+                if (!TextUtils.equals(task.searchToken, searchToken)
+                        || !isSearchPending(task.sourceKey, searchToken) || !startedSearchKeys.add(task.sourceKey)) {
                     continue;
                 }
                 return task;
@@ -1026,7 +1003,7 @@ public class SearchActivity extends BaseActivity {
             finishSearchIfDone();
             return;
         }
-        currentSearchToken = String.valueOf(searchTokenSeq.incrementAndGet());
+        currentSearchToken = sourceViewModel.beginSearches();
         waitingSearchTasks.clear();
         startedSearchKeys.clear();
         releasedSearchKeys.clear();
@@ -1034,34 +1011,13 @@ public class SearchActivity extends BaseActivity {
             SourceBean bean = ApiConfig.get().getSource(sourceKey);
             waitingSearchTasks.add(new SearchTask(sourceKey, searchTitle, currentSearchToken, isBlockingSearchSource(bean)));
         }
-        if (searchExecutorService == null || searchExecutorService.isShutdown()) {
-            searchExecutorService = createSearchExecutor();
-        }
-        if (searchTimeoutExecutor == null || searchTimeoutExecutor.isShutdown()) {
-            searchTimeoutExecutor = Executors.newSingleThreadScheduledExecutor();
-        }
         startNextSearchBatch(currentSearchToken);
+        startSearchPump(currentSearchToken);
     }
 
     private void pauseSearchTasks() {
-        try {
-            if (searchExecutorService != null) {
-                searchExecutorService.shutdownNow();
-                searchExecutorService = null;
-                JsLoader.stopAll();
-            }
-            if (searchTimeoutExecutor != null) {
-                searchTimeoutExecutor.shutdownNow();
-                searchTimeoutExecutor = null;
-            }
-            searchPaused = allRunCount.get() > 0;
-            if (searchPaused) {
-                cancel();
-                currentSearchToken = "";
-            }
-        } catch (Throwable th) {
-            th.printStackTrace();
-        }
+        searchPaused = allRunCount.get() > 0;
+        cancel();
     }
 
     private boolean isCurrentSearchResult(AbsXml absXml) {
@@ -1108,29 +1064,6 @@ public class SearchActivity extends BaseActivity {
         return bean == null || bean.getType() == 3;
     }
 
-    private void startFastSearchTasks(List<SearchTask> tasks) {
-        for (SearchTask task : tasks) {
-            if (task.blocking) {
-                continue;
-            }
-            if (startedSearchKeys.add(task.sourceKey)) {
-                submitDirectSearchTask(task);
-            }
-        }
-    }
-
-    private void submitDirectSearchTask(SearchTask task) {
-        if (!isSearchPending(task.sourceKey, task.searchToken)) return;
-        scheduleSearchTimeout(task.sourceKey, task.searchToken);
-        try {
-            sourceViewModel.getSearch(task.sourceKey, task.title, task.searchToken);
-        } catch (Throwable th) {
-            th.printStackTrace();
-            if (markSearchFinished(task.sourceKey, task.searchToken)) {
-                finishSearchIfDone();
-            }
-        }
-    }
 
     private List<String> getPendingSearchKeys() {
         synchronized (pendingSearchKeys) {
@@ -1145,10 +1078,6 @@ public class SearchActivity extends BaseActivity {
             showEmpty();
         }
         cancel();
-        if (searchTimeoutExecutor != null) {
-            searchTimeoutExecutor.shutdownNow();
-            searchTimeoutExecutor = null;
-        }
     }
 
     private class SearchTask implements Runnable {
@@ -1166,46 +1095,45 @@ public class SearchActivity extends BaseActivity {
 
         @Override
         public void run() {
-            if (!isSearchPending(sourceKey, searchToken)) return;
+            if (!isSearchPending(sourceKey, searchToken) || Thread.currentThread().isInterrupted()) return;
             try {
                 sourceViewModel.getSearch(sourceKey, title, searchToken);
-            } catch (Throwable th) {
-                th.printStackTrace();
-                if (markSearchFinished(sourceKey, searchToken)) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
+            } catch (Throwable error) {
+                LOG.i("search outcome=worker_error");
+                searchHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (markSearchFinished(sourceKey, searchToken)) {
+                            sourceViewModel.cancelSearchSource(searchToken, sourceKey);
+                            releaseSearchSlotAndStartNext(sourceKey, searchToken);
                             finishSearchIfDone();
                         }
-                    });
-                }
+                    }
+                });
             }
         }
     }
 
 
     private void cancel() {
-        OkGo.getInstance().cancelTag("search");
+        String token = currentSearchToken;
+        currentSearchToken = ""; // Invalidate delivery before cancelling workers and transports.
+        searchHandler.removeCallbacksAndMessages(null);
+        sourceViewModel.cancelSearches(token);
+        waitingSearchTasks.clear();
+    }
+
+    @Override
+    protected void onPause() {
+        pauseSearchTasks();
+        super.onPause();
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         cancel();
-        try {
-            if (searchExecutorService != null) {
-                searchExecutorService.shutdownNow();
-                searchExecutorService = null;
-                JsLoader.stopAll();
-            }
-            if (searchTimeoutExecutor != null) {
-                searchTimeoutExecutor.shutdownNow();
-                searchTimeoutExecutor = null;
-            }
-        } catch (Throwable th) {
-            th.printStackTrace();
-        }
         EventBus.getDefault().unregister(this);
+        super.onDestroy();
     }
 
     private void hiddenImm()

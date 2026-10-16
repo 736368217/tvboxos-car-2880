@@ -1,0 +1,33 @@
+[
+  {
+    "key": "热播影视",
+    "runtime": "JAR",
+    "categories": 10,
+    "category_tid": "10",
+    "category_items": 12,
+    "detail_items": 1,
+    "search_items": 0,
+    "positive_search_items": 1,
+    "positive_search_known_item": true,
+    "elapsed_ms": 440
+  },
+  {
+    "key": "枫叶影视",
+    "runtime": "JAR",
+    "categories": 8,
+    "category_tid": "\/label\/qq",
+    "category_items": 0,
+    "search_items": 7,
+    "elapsed_ms": 3879
+  },
+  {
+    "key": "爱动漫",
+    "runtime": "QuickJS",
+    "categories": 6,
+    "category_tid": "2",
+    "category_items": 48,
+    "detail_items": 1,
+    "error_class": "ExecutionException",
+    "elapsed_ms": 41982
+  }
+]

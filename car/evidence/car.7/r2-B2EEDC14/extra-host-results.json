@@ -1,0 +1,32 @@
+[
+  {
+    "check": "compile",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "\ufffd\ufffd\ufffd\ufffd: [options] \u03b4\ufffd\ufffd -source 8 \u04bb\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\u00b7\ufffd\ufffd\n1 \ufffd\ufffd\ufffd\ufffd\ufffd\ufffd"
+  },
+  {
+    "check": "Car7SearchSessionTest",
+    "exit": 0,
+    "stdout": "PASS Car7SearchSessionTest assertions=1237",
+    "stderr": ""
+  },
+  {
+    "check": "Car7SearchHttpScopeTest",
+    "exit": 0,
+    "stdout": "PASS Car7SearchHttpScopeTest fast_results=1 late_requests=0",
+    "stderr": ""
+  },
+  {
+    "check": "com.github.catvod.crawler.js.QuickJsResultTest",
+    "exit": 0,
+    "stdout": "QuickJsResultTest: PASS (timeout, first settlement, interruption, executor recovery, sync and failure)",
+    "stderr": ""
+  },
+  {
+    "check": "python-http",
+    "exit": 0,
+    "stdout": "plugin downloaded spider.py",
+    "stderr": "no_session_adapter_mutation) ... ok\ntest_redirect_disabled (__main__.HttpTests.test_redirect_disabled) ... ok\ntest_redirect_limit (__main__.HttpTests.test_redirect_limit) ... ok\ntest_redirect_post_302_becomes_get (__main__.HttpTests.test_redirect_post_302_becomes_get) ... ok\ntest_redirect_post_307_keeps_form (__main__.HttpTests.test_redirect_post_307_keeps_form) ... ok\ntest_relative_redirect_cookie_and_history (__main__.HttpTests.test_relative_redirect_cookie_and_history) ... ok\ntest_request_cookies_and_session_headers (__main__.HttpTests.test_request_cookies_and_session_headers) ... ok\ntest_response_contract (__main__.HttpTests.test_response_contract) ... ok\ntest_timeout_none_and_validation (__main__.HttpTests.test_timeout_none_and_validation) ... ok\ntest_timeout_tuple (__main__.HttpTests.test_timeout_tuple) ... ok\ntest_transport_timeout (__main__.HttpTests.test_transport_timeout) ... ok\n\n----------------------------------------------------------------------\nRan 20 tests in 0.174s\n\nOK"
+  }
+]

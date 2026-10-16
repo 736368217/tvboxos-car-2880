@@ -1,5 +1,6 @@
 package com.github.tvbox.osc.viewmodel;
 
+import android.os.Build;
 import android.text.TextUtils;
 
 import android.util.Base64;
@@ -28,6 +29,7 @@ import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.LOG;
 import com.github.tvbox.osc.util.MD5;
+import com.github.tvbox.osc.util.SearchSession;
 import com.github.tvbox.osc.util.thunder.Thunder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -70,6 +72,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicLong;
 
 import okhttp3.Call;
 
@@ -899,125 +906,290 @@ public class SourceViewModel extends ViewModel {
         }
     }
 
-    // searchContent
+    // Search workers are shared and bounded even when a third-party JAR ignores interruption.
+    // Cancelling a page only cancels its registered Futures/Calls; idle workers expire in 1s.
+    private static final AtomicLong searchSessionSeq = new AtomicLong();
+    private static final ThreadPoolExecutor searchThreadPool = new ThreadPoolExecutor(0,
+            Build.VERSION.SDK_INT >= 35 ? 24 : Build.VERSION.SDK_INT >= 30 ? 18 : 12,
+            1L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
+    private SearchSession searchSession;
+    private SearchSession detailFallbackSearchSession;
+    private String detailFallbackSearchToken = "";
+    private boolean searchesCleared;
+
+    public synchronized String beginSearches() {
+        if (searchSession != null) searchSession.close();
+        String token = "page_search_" + searchSessionSeq.incrementAndGet();
+        searchSession = new SearchSession(token);
+        if (searchesCleared) searchSession.close();
+        return token;
+    }
+
+    /** Register before execute: cancellation and immediate completion cannot miss the Future. */
+    public boolean submitSearchTask(String token, String sourceKey, FutureTask<?> future, boolean blocking) {
+        SearchSession.Scope scope = searchScope(token, sourceKey, false);
+        if (scope == null || !scope.register(future)) {
+            future.cancel(true);
+            return false;
+        }
+        if (!blocking) {
+            future.run(); // HTTP preparation is asynchronous; do not wait behind stuck JARs.
+            return true;
+        }
+        try {
+            searchThreadPool.execute(future);
+            return true;
+        } catch (RejectedExecutionException rejected) {
+            scope.unregister(future);
+            future.cancel(false);
+            return false; // The page pump retries after an actual worker becomes available.
+        }
+    }
+
+    public synchronized void cancelSearchSource(String token, String sourceKey) {
+        if (searchSession != null && searchSession.matches(token)) {
+            searchSession.cancelSource(sourceKey);
+        }
+    }
+
+    public synchronized void cancelSearches(String token) {
+        if (searchSession != null && searchSession.matches(token)) searchSession.close();
+    }
+
+    public synchronized void cancelDetailFallbackSearches(String token) {
+        if (detailFallbackSearchSession == null || (!detailFallbackSearchSession.matches(token)
+                && compareFallbackTokens(token, detailFallbackSearchToken) > 0)) {
+            if (detailFallbackSearchSession != null) detailFallbackSearchSession.close();
+            detailFallbackSearchToken = token;
+            detailFallbackSearchSession = new SearchSession(token);
+        }
+        if (detailFallbackSearchSession.matches(token)) detailFallbackSearchSession.close();
+    }
+
+    // DetailActivity numbers rounds/batches monotonically. Retain only the high-water token,
+    // so a queued old batch cannot reopen a cancelled namespace or close a newer one.
+    private static int compareFallbackTokens(String left, String right) {
+        try {
+            String[] a = left.substring("detail_fallback_".length()).split("_batch_");
+            String[] b = right.substring("detail_fallback_".length()).split("_batch_");
+            int round = Long.compare(Long.parseLong(a[0]), Long.parseLong(b[0]));
+            return round != 0 ? round : Long.compare(Long.parseLong(a[1]), Long.parseLong(b[1]));
+        } catch (RuntimeException invalidToken) {
+            return -1;
+        }
+    }
+
+    private synchronized SearchSession.Scope searchScope(String token, String sourceKey, boolean fallback) {
+        if (searchesCleared || Thread.currentThread().isInterrupted()) return null;
+        if (fallback) {
+            // DetailActivity supplies its own batch tokens. Keep this namespace separate.
+            if (detailFallbackSearchSession == null || !detailFallbackSearchSession.matches(token)) {
+                if (detailFallbackSearchSession != null && compareFallbackTokens(token, detailFallbackSearchToken) <= 0) return null;
+                detailFallbackSearchToken = token;
+                if (detailFallbackSearchSession != null) detailFallbackSearchSession.close();
+                detailFallbackSearchSession = new SearchSession(token);
+            }
+            return detailFallbackSearchSession.source(sourceKey);
+        }
+        return searchSession != null && searchSession.matches(token) ? searchSession.source(sourceKey) : null;
+    }
+
     public void getSearch(String sourceKey, String wd) {
-        getSearch(sourceKey, wd, "");
+        getSearch(sourceKey, wd, beginSearches());
     }
 
     public void getSearch(String sourceKey, String wd, String searchToken) {
-        getSearch(sourceKey, wd, searchToken, searchResult, "search");
+        getSearch(sourceKey, wd, searchToken, searchResult, false);
     }
 
     public void getDetailFallbackSearch(String sourceKey, String wd, String searchToken) {
-        getSearch(sourceKey, wd, searchToken, detailFallbackSearchResult, "detail_fallback_search");
+        getSearch(sourceKey, wd, searchToken, detailFallbackSearchResult, true);
     }
 
-    private void getSearch(String sourceKey, String wd, String searchToken, MutableLiveData<AbsXml> result, String requestTag) {
-        SourceBean sourceBean = ApiConfig.get().getSource(sourceKey);
-        if (sourceBean == null) {
-            postEmptySearchResult(result, sourceKey, searchToken);
+    private void getSearch(String sourceKey, String wd, String searchToken,
+                           MutableLiveData<AbsXml> result, boolean fallback) {
+        final SearchSession.Scope scope = searchScope(searchToken, sourceKey, fallback);
+        if (scope == null || !scope.isActive()) return;
+        final SourceBean bean = ApiConfig.get().getSource(sourceKey);
+        if (bean == null) {
+            completeSearch(scope, result, null, sourceKey, searchToken, -1, "missing_source");
             return;
         }
-        int type = sourceBean.getType();
+        final int type = bean.getType();
         if (type == 3) {
             try {
-                Spider sp = ApiConfig.get().getCSP(sourceBean);
-                String search = sp.searchContent(wd, false);
-//                LOG.i("echo--searchContent--result:" + search);
-                if(!TextUtils.isEmpty(search)){
-                    json(result, search, sourceBean.getKey(), searchToken);
+                if (!scope.isActive() || Thread.currentThread().isInterrupted()) return;
+                Spider spider = ApiConfig.get().getCSP(bean);
+                if (!scope.isActive() || Thread.currentThread().isInterrupted()) return;
+                String body = spider.searchContent(wd, false);
+                if (!scope.isActive() || Thread.currentThread().isInterrupted()) return;
+                if (TextUtils.isEmpty(body)) {
+                    completeSearch(scope, result, null, sourceKey, searchToken, type, "script_no_result");
                 } else {
-                    json(result, "", sourceBean.getKey(), searchToken);
+                    completeSearchBody(scope, result, body, sourceKey, searchToken, type);
                 }
-            } catch (Throwable th) {
-                th.printStackTrace();
-                json(result, "", sourceBean.getKey(), searchToken);
+            } catch (Throwable error) {
+                boolean interrupted = Thread.currentThread().isInterrupted();
+                Throwable cause = error;
+                for (int i = 0; cause != null && i < 8; i++, cause = cause.getCause()) {
+                    if (cause instanceof InterruptedException || cause instanceof java.util.concurrent.CancellationException) {
+                        interrupted = true;
+                    }
+                }
+                boolean timedOut = false;
+                cause = error;
+                for (int i = 0; cause != null && i < 8; i++, cause = cause.getCause()) {
+                    if (cause instanceof TimeoutException) timedOut = true;
+                }
+                if (interrupted || timedOut) {
+                    if (interrupted) Thread.currentThread().interrupt();
+                    searchDiagnostic(type, interrupted ? "interrupted" : "script_timeout");
+                    return; // The page deadline records failure; never emit empty success here.
+                }
+                if (!scope.isActive()) return;
+                completeSearch(scope, result, null, sourceKey, searchToken, type, "script_error");
             }
         } else if (type == 0 || type == 1) {
-            OkGo.<String>get(sourceBean.getApi())
-                    .params("wd", wd)
-                    .params(type == 1 ? "ac" : null, type == 1 ? "detail" : null)
-                    .tag(requestTag)
-                    .execute(new AbsCallback<String>() {
-                        @Override
-                        public String convertResponse(okhttp3.Response response) throws Throwable {
-                            if (response.body() != null) {
-                                return response.body().string();
-                            } else {
-                                throw new IllegalStateException("网络请求错误");
-                            }
-                        }
-
-                        @Override
-                        public void onSuccess(Response<String> response) {
-                            if (type == 0) {
-                                String xml = response.body();
-                                xml(result, xml, sourceBean.getKey(), searchToken);
-                            } else {
-                                String json = response.body();
-                                json(result, json, sourceBean.getKey(), searchToken);
-                            }
-                        }
-
-                        @Override
-                        public void onError(Response<String> response) {
-                            super.onError(response);
-                            postEmptySearchResult(result, sourceBean.getKey(), searchToken);
-                        }
-                    });
-        }else if (type == 4) {
-            final String searchWd = wd;
-            httpPrepareThreadPool.execute(new Runnable() {
+            executeSearchRequest(scope, result, bean, wd, searchToken, null);
+        } else if (type == 4) {
+            FutureTask<Void> prepare = new FutureTask<>(new Runnable() {
                 @Override
                 public void run() {
-            String extend=sourceBean.getExt();
-            extend=getFixUrlDirect(extend);
-            String queryWd = searchWd;
-            try {
-                queryWd=URLEncoder.encode(queryWd, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-
-            GetRequest<String> request = OkGo.<String>get(sourceBean.getApi())
-                    .tag(requestTag)
-                    .params("wd", queryWd)
-                    .params("ac" ,"detail")
-                    .params("quick" ,"false");
-            // 当 extend 不为空且非空字符串时添加参数
-            if (extend != null && !extend.isEmpty()) {
-                request.params("extend", extend);
-            }
-            request.execute(new AbsCallback<String>() {
-                    @Override
-                    public String convertResponse(okhttp3.Response response) throws Throwable {
-                        if (response.body() != null) {
-                            return response.body().string();
-                        } else {
-                            LOG.i("echo-t4 search-网络请求错误");
-                            throw new IllegalStateException("网络请求错误");
+                    if (!scope.isActive() || Thread.currentThread().isInterrupted()) return;
+                    try {
+                        String extend = getSearchExtend(bean.getExt(), scope);
+                        if (!scope.isActive() || Thread.currentThread().isInterrupted()) return;
+                        executeSearchRequest(scope, result, bean, URLEncoder.encode(wd, "UTF-8"), searchToken, extend);
+                    } catch (Throwable error) {
+                        if (scope.isActive() && !Thread.currentThread().isInterrupted()) {
+                            completeSearch(scope, result, null, sourceKey, searchToken, type, "prepare_error");
                         }
                     }
-
-                    @Override
-                    public void onSuccess(Response<String> response) {
-                            String json = response.body();
-//                            LOG.i("echo-t4 search onSuccess"+json);
-                            json(result, json, sourceBean.getKey(), searchToken);
-                    }
-
-                    @Override
-                    public void onError(Response<String> response) {
-                        LOG.i("echo-t4 search-onError");
-                        super.onError(response);
-                        postEmptySearchResult(result, sourceBean.getKey(), searchToken);
-                    }
-                });
                 }
-            });
+            }, null);
+            if (!scope.register(prepare, new Runnable() {
+                @Override
+                public void run() {
+                    prepare.cancel(true);
+                    ((ThreadPoolExecutor) httpPrepareThreadPool).remove(prepare);
+                }
+            })) return;
+            try {
+                httpPrepareThreadPool.execute(prepare);
+                if (prepare.isCancelled()) ((ThreadPoolExecutor) httpPrepareThreadPool).remove(prepare);
+            } catch (RejectedExecutionException rejected) {
+                scope.unregister(prepare);
+                prepare.cancel(false);
+                completeSearch(scope, result, null, sourceKey, searchToken, type, "prepare_rejected");
+            }
         } else {
-            postEmptySearchResult(result, sourceBean.getKey(), searchToken);
+            completeSearch(scope, result, null, sourceKey, searchToken, type, "unsupported_type");
         }
+    }
+
+    private void executeSearchRequest(SearchSession.Scope scope, MutableLiveData<AbsXml> result,
+                                      SourceBean bean, String wd, String token, String extend) {
+        if (!scope.isActive()) return;
+        int type = bean.getType();
+        GetRequest<String> request = OkGo.<String>get(bean.getApi())
+                .tag(scope.requestTag()).params("wd", wd);
+        if (type == 1 || type == 4) request.params("ac", "detail");
+        if (type == 4) {
+            request.params("quick", "false");
+            if (!TextUtils.isEmpty(extend)) request.params("extend", extend);
+        }
+        final Call call = request.getRawCall();
+        if (!scope.register(call, call::cancel)) return;
+        // A Call cancelled between registration and enqueue remains cancelled in OkHttp.
+        call.enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(@NonNull Call failed, @NonNull IOException error) {
+                if (scope.isActive()) {
+                    completeSearch(scope, result, null, bean.getKey(), token, type, "http_error");
+                }
+            }
+
+            @Override
+            public void onResponse(@NonNull Call completed, @NonNull okhttp3.Response response) {
+                try (okhttp3.Response closeable = response) {
+                    if (!scope.isActive()) return;
+                    if (!response.isSuccessful() || response.body() == null) {
+                        completeSearch(scope, result, null, bean.getKey(), token, type, "http_error");
+                        return;
+                    }
+                    String body = response.body().string();
+                    if (scope.isActive()) completeSearchBody(scope, result, body, bean.getKey(), token, type);
+                } catch (Throwable error) {
+                    if (scope.isActive()) completeSearch(scope, result, null, bean.getKey(), token, type, "http_error");
+                }
+            }
+        });
+    }
+
+    /** Type4 extension downloads share the source scope, including their actual network Call. */
+    private String getSearchExtend(String extend, SearchSession.Scope scope) throws IOException {
+        if (TextUtils.isEmpty(extend) || !scope.isActive()) return "";
+        if (!extend.startsWith("http")) return extend;
+        String key = MD5.string2MD5(extend);
+        String cached = extendCache.get(key);
+        if (cached != null) return cached;
+        String value;
+        if (extend.startsWith("http://127.0.0.1")) {
+            String path = extend.replaceAll("^http.+/file/", FileUtils.getRootPath() + "/").replaceAll("localhost/", "/");
+            value = FileUtils.readFileToString(path, "UTF-8");
+        } else {
+            Call call = OkGo.<String>get(extend).tag(scope.requestTag()).getRawCall();
+            if (!scope.register(call, call::cancel)) return "";
+            try (okhttp3.Response response = call.execute()) {
+                if (!response.isSuccessful() || response.body() == null) return extend;
+                value = response.body().string();
+            } catch (IOException failure) {
+                // Preserve type4's existing ability to pass the extension URL to its server.
+                return scope.isActive() ? extend : "";
+            } finally {
+                scope.unregister(call);
+            }
+        }
+        if (!scope.isActive() || Thread.currentThread().isInterrupted()) return "";
+        if (TextUtils.isEmpty(value)) return extend;
+        value = tryMinifyJson(value);
+        if (value.length() > 2500) value = extend;
+        extendCache.putIfAbsent(key, value);
+        return value;
+    }
+
+    private void completeSearchBody(SearchSession.Scope scope, MutableLiveData<AbsXml> result,
+                                    String body, String sourceKey, String token, int type) {
+        if (!scope.isActive()) return;
+        // Parse without publishing. The scope is checked again on the main delivery thread.
+        AbsXml data = type == 0 ? xml(null, body, sourceKey, token) : json(null, body, sourceKey, token);
+        String outcome = data == null ? "invalid_result"
+                : data.movie == null || data.movie.videoList == null || data.movie.videoList.isEmpty() ? "empty_result" : "result";
+        completeSearch(scope, result, data, sourceKey, token, type, outcome);
+    }
+
+    private void completeSearch(SearchSession.Scope scope, MutableLiveData<AbsXml> result,
+                                AbsXml data, String sourceKey, String token, int type, String outcome) {
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (!scope.finish()) return;
+                searchDiagnostic(type, outcome);
+                AbsXml delivered = data == null ? new AbsXml() : data;
+                delivered.sourceKey = sourceKey;
+                delivered.searchToken = token;
+                if (result == searchResult) {
+                    EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_SEARCH_RESULT, delivered));
+                } else {
+                    result.setValue(delivered);
+                }
+            }
+        });
+    }
+
+    private static void searchDiagnostic(int type, String outcome) {
+        // Only fixed outcome codes and the source type; never URLs, script text or exceptions.
+        LOG.i("search type=" + type + " outcome=" + outcome);
     }
     // searchContent
     public void getQuickSearch(String sourceKey, String wd) {
@@ -1987,7 +2159,10 @@ public class SourceViewModel extends ViewModel {
     }
 
     @Override
-    protected void onCleared() {
+    protected synchronized void onCleared() {
+        searchesCleared = true;
+        if (searchSession != null) searchSession.close();
+        if (detailFallbackSearchSession != null) detailFallbackSearchSession.close();
         super.onCleared();
     }
 }

@@ -43,7 +43,8 @@ public class Req {
     }
 
     public Integer getTimeout() {
-        return timeout == null ? 10000 : timeout;
+        // Milliseconds; non-positive values must not create an unbounded network call.
+        return timeout == null || timeout <= 0 ? 10000 : timeout;
     }
 
     public String getPostType() {

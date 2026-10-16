@@ -1,0 +1,78 @@
+{
+  "passed": 10,
+  "failed": 2,
+  "events": [
+    {
+      "pass": true,
+      "test": "subscription parsed sites",
+      "detail": "unique_sites=108",
+      "at": 1792165614354
+    },
+    {
+      "pass": true,
+      "test": "subscription-热播影视-home",
+      "detail": "",
+      "at": 1792165614425
+    },
+    {
+      "pass": true,
+      "test": "subscription-热播影视-category",
+      "detail": "",
+      "at": 1792165614512
+    },
+    {
+      "pass": true,
+      "test": "subscription-热播影视-detail",
+      "detail": "",
+      "at": 1792165614652
+    },
+    {
+      "pass": true,
+      "test": "subscription-热播影视-positive-search",
+      "detail": "",
+      "at": 1792165614794
+    },
+    {
+      "pass": true,
+      "test": "subscription-枫叶影视-home",
+      "detail": "",
+      "at": 1792165617310
+    },
+    {
+      "pass": false,
+      "test": "subscription-枫叶影视-category",
+      "detail": "",
+      "at": 1792165617557
+    },
+    {
+      "pass": true,
+      "test": "subscription-枫叶影视-search",
+      "detail": "",
+      "at": 1792165618674
+    },
+    {
+      "pass": true,
+      "test": "subscription-爱动漫-home",
+      "detail": "",
+      "at": 1792165624573
+    },
+    {
+      "pass": true,
+      "test": "subscription-爱动漫-category",
+      "detail": "",
+      "at": 1792165629289
+    },
+    {
+      "pass": true,
+      "test": "subscription-爱动漫-detail",
+      "detail": "",
+      "at": 1792165630657
+    },
+    {
+      "pass": false,
+      "test": "subscription-爱动漫",
+      "detail": "ExecutionException",
+      "at": 1792165660657
+    }
+  ]
+}

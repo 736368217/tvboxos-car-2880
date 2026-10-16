@@ -1,0 +1,87 @@
+{
+  "candidate_sha256": "B2EEDC14021696467C3E21412208BEDA9CA3FC78F173FFFFF56F970BD77AA8C1",
+  "local_acceptance_passed": true,
+  "external_acceptance_passed": false,
+  "deliveryReady": true,
+  "releaseReady": false,
+  "native": {
+    "playback": {
+      "passed": 101,
+      "failed": 0,
+      "pid": 13091,
+      "tag": "final-B2EEDC14-playback"
+    },
+    "pages": {
+      "passed": 49,
+      "failed": 0,
+      "pid": 16963,
+      "tag": "final-B2EEDC14-pages"
+    },
+    "ui": {
+      "passed": 58,
+      "failed": 0,
+      "pid": 18229,
+      "tag": "final-B2EEDC14-ui"
+    },
+    "quickjs": {
+      "passed": 14,
+      "failed": 0,
+      "pid": 12588,
+      "tag": "final-B2EEDC14-quickjs"
+    },
+    "searchqueue": {
+      "passed": 12,
+      "failed": 0,
+      "pid": 19789,
+      "tag": "final-B2EEDC14-searchqueue-r2"
+    },
+    "python": {
+      "passed": 12,
+      "failed": 1,
+      "pid": 18470,
+      "tag": "final-B2EEDC14-python"
+    },
+    "python-chain": {
+      "passed": 12,
+      "failed": 1,
+      "pid": 18995,
+      "tag": "final-B2EEDC14-python-chain"
+    },
+    "xiaosa": {
+      "passed": 10,
+      "failed": 2,
+      "pid": 19354,
+      "tag": "final-B2EEDC14-xiaosa"
+    },
+    "aidongman-recheck": {
+      "passed": 4,
+      "failed": 1,
+      "pid": 20089,
+      "tag": "final-B2EEDC14-aidongman-r2"
+    }
+  },
+  "pixels": {
+    "passed": 8,
+    "failed": 0
+  },
+  "cleanup": {
+    "original_prefs_restored": true,
+    "hawk_cmp_before_start": true,
+    "test_package_removed": true,
+    "pid_before": 20439,
+    "pid_after": 20439,
+    "fatal_exceptions": 0,
+    "installed_sha256": "b2eedc14021696467c3e21412208beda9ca3fc78f173fffff56f970bd77aa8c1"
+  },
+  "lease": {
+    "index": 0,
+    "released": true,
+    "instance_shutdown": true,
+    "main_app_preserved": true
+  },
+  "registry": {
+    "tvbox_artifact_registered": true,
+    "global_exit": 1,
+    "unrelated_error": "UNREGISTERED_PACKAGE com.carhd.fileopener"
+  }
+}

@@ -18,22 +18,119 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URLEncoder;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
 public class Global {
     private QuickJSContext runtime;
-    public ExecutorService executor;
+    public final ExecutorService executor;
     private final Timer timer;
+    private final Object networkTag;
+    private final AtomicBoolean closed = new AtomicBoolean();
+    private final Set<Pending> pending = Collections.newSetFromMap(new ConcurrentHashMap<Pending, Boolean>());
+    private Async.Result scope; // Accessed only on the JS executor, including nested callbacks.
 
-    public Global(ExecutorService executor) {
+    public Global(ExecutorService executor, Object networkTag) {
         this.executor = executor;
-        this.timer = new Timer();
+        this.networkTag = networkTag;
+        this.timer = new Timer("QuickJS timers", true);
+    }
+
+    void enter(Async.Result result) {
+        scope = result;
+    }
+
+    void leave() {
+        scope = null;
+    }
+
+    // These cancellation methods use Java/OkHttp objects only and may run on the caller thread.
+    void cancel(Async.Result result) {
+        for (Pending item : pending) if (item.owner == result) item.cancel();
+    }
+
+    void stop() {
+        closed.set(true);
+        timer.cancel();
+        for (Pending item : pending) item.cancel();
+        Connect.cancelByTag(networkTag);
+    }
+
+    // Release native function references only on the JS executor, before destroying the context.
+    void release(Async.Result result) {
+        for (Pending item : pending) if (item.owner == result) item.release();
+        timer.purge();
+    }
+
+    void release() {
+        stop();
+        for (Pending item : pending) item.release();
+        runtime = null;
+    }
+
+    private boolean live(Pending item) {
+        return !closed.get() && (item.owner == null || !item.owner.isDone());
+    }
+
+    private boolean post(Pending item, Runnable callback) {
+        if (closed.get()) return false;
+        try {
+            executor.submit(() -> {
+                Async.Result previous = scope;
+                try {
+                    if (live(item)) {
+                        scope = item.owner;
+                        callback.run();
+                    }
+                } catch (Throwable error) {
+                    if (item.owner != null) item.owner.completeExceptionally(error);
+                } finally {
+                    scope = previous;
+                    item.release();
+                }
+            });
+            return true;
+        } catch (RejectedExecutionException ignored) {
+            return false;
+        }
+    }
+
+    private final class Pending {
+        final Async.Result owner = scope;
+        JSFunction function;
+        volatile Call call;
+        volatile TimerTask task;
+        volatile Response response;
+
+        Pending(JSFunction function) {
+            this.function = function;
+            pending.add(this);
+        }
+
+        void cancel() {
+            if (call != null) call.cancel();
+            if (task != null) task.cancel();
+            Response res = response;
+            if (res != null) res.close();
+        }
+
+        void release() {
+            cancel();
+            if (!pending.remove(this)) return;
+            if (function != null) {
+                function.release();
+                function = null;
+            }
+        }
     }
 
     @Keep
@@ -272,51 +369,91 @@ public class Global {
         }
     }
 
-    private JSObject req(String url, JSObject options) {
+    private JSObject req(String url, Req req) {
+        Pending item = new Pending(null);
         try {
-            Req req = Req.objectFrom(JSUtils.toJsonObject(options).toString());
-            Response res = Connect.to(url, req).execute();
-            return Connect.success(runtime, req, res);
+            item.call = Connect.to(url, req, networkTag);
+            if (!live(item)) throw new IOException("QuickJS call cancelled");
+            try (Response res = item.call.execute()) {
+                return Connect.success(runtime, req, res);
+            }
         } catch (Exception e) {
-            return Connect.error(runtime);
+            return Connect.error(runtime, e);
+        } finally {
+            item.release();
         }
     }
-
     @Keep
     @Function
     public JSObject _http(String url, JSObject options) {
-        JSFunction complete = options.getJSFunction("complete");
-        if (complete == null) return req(url, options);
         Req req = Req.objectFrom(JSUtils.toJsonObject(options).toString());
-        Connect.to(url, req).enqueue(getCallback(complete, req));
+        JSFunction complete = options == null ? null : options.getJSFunction("complete");
+        if (complete == null) return req(url, req);
+        complete.hold();
+        complete.release(); // Keep only the held reference owned by Pending.
+        Pending item = new Pending(complete);
+        try {
+            item.call = Connect.to(url, req, networkTag);
+            if (!live(item)) {
+                item.release();
+                return null;
+            }
+            item.call.enqueue(getCallback(item, req));
+        } catch (Exception error) {
+            JSObject response = Connect.error(runtime, error);
+            try {
+                complete.callVoid(response);
+            } finally {
+                response.release();
+                item.release();
+            }
+        }
         return null;
     }
 
     @Keep
     @Function
     public void setTimeout(JSFunction func, Integer delay) {
+        if (closed.get() || (scope != null && scope.isDone())) return;
         func.hold();
-        timer.schedule(new TimerTask() {
+        Pending item = new Pending(func);
+        item.task = new TimerTask() {
             @Override
             public void run() {
-                if (!executor.isShutdown()) executor.submit(() -> {func.call();});
+                post(item, () -> item.function.callVoid());
             }
-        }, delay);
+        };
+        try {
+            timer.schedule(item.task, Math.max(0, delay == null ? 0 : delay));
+        } catch (IllegalStateException error) {
+            item.release();
+        }
     }
 
-    private Callback getCallback(JSFunction complete, Req req) {
+    private Callback getCallback(Pending item, Req req) {
         return new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response res) {
-                executor.submit(() -> {
-                    complete.call(Connect.success(runtime, req, res));
-                });
+                item.response = res;
+                if (!post(item, () -> {
+                    JSObject response = Connect.success(runtime, req, res);
+                    try {
+                        item.function.callVoid(response);
+                    } finally {
+                        response.release();
+                    }
+                })) res.close();
             }
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                executor.submit(() -> {
-                    complete.call(Connect.error(runtime));
+                post(item, () -> {
+                    JSObject response = Connect.error(runtime, e);
+                    try {
+                        item.function.callVoid(response);
+                    } finally {
+                        response.release();
+                    }
                 });
             }
         };

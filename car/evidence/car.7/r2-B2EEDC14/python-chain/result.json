@@ -1,0 +1,84 @@
+{
+  "passed": 12,
+  "failed": 1,
+  "events": [
+    {
+      "pass": true,
+      "test": "subscription parsed sites",
+      "detail": "unique_sites=89",
+      "at": 1792165571519
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_juzong-home",
+      "detail": "",
+      "at": 1792165571784
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_juzong-category",
+      "detail": "",
+      "at": 1792165572258
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_juzong-detail",
+      "detail": "",
+      "at": 1792165572679
+    },
+    {
+      "pass": false,
+      "test": "subscription-py_juzong-positive-search",
+      "detail": "",
+      "at": 1792165573181
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_apples-home",
+      "detail": "",
+      "at": 1792165574427
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_apples-category",
+      "detail": "",
+      "at": 1792165574510
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_apples-detail",
+      "detail": "",
+      "at": 1792165574564
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_apples-positive-search",
+      "detail": "",
+      "at": 1792165574715
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_guazi-home",
+      "detail": "",
+      "at": 1792165575600
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_guazi-category",
+      "detail": "",
+      "at": 1792165581422
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_guazi-detail",
+      "detail": "",
+      "at": 1792165582218
+    },
+    {
+      "pass": true,
+      "test": "subscription-py_guazi-positive-search",
+      "detail": "",
+      "at": 1792165589873
+    }
+  ]
+}

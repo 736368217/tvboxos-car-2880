@@ -1,0 +1,39 @@
+{
+  "package": "com.github.tvbox.osc.jun",
+  "label": "TVBox",
+  "versionCode": 8,
+  "versionName": "1.0.0-car.7",
+  "path": "C:\\Users\\WIN10\\.pi-desktop\\scratch\\88918c31-fa28-4670-8460-1ec11885bd74\\TVBox-car7-acceptance.apk",
+  "bytes": 52676888,
+  "sha256": "B2EEDC14021696467C3E21412208BEDA9CA3FC78F173FFFFF56F970BD77AA8C1",
+  "python_abis": [
+    "armeabi-v7a",
+    "arm64-v8a"
+  ],
+  "checks": [
+    {
+      "check": "zipalign",
+      "exit": 0
+    },
+    {
+      "check": "sign",
+      "exit": 0
+    },
+    {
+      "check": "verify-signature",
+      "exit": 0
+    },
+    {
+      "check": "verify-align",
+      "exit": 0
+    },
+    {
+      "check": "badging",
+      "exit": 0
+    },
+    {
+      "check": "manifest",
+      "exit": 0
+    }
+  ]
+}

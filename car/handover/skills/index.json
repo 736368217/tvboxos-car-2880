@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "normalization": "CRLF to LF",
+  "auto_install": false,
+  "instructions": "Read and compare with local versions; merge deliberately rather than overwriting newer skills.",
+  "files": [
+    {
+      "path": "glsurfaceview-video-lifecycle/SKILL.md",
+      "bytes": 8747,
+      "sha256_lf": "180864CA083B6AA9094217C32D575C611BFDF72A86ED1F362CBFD6FFAFCFF38D"
+    },
+    {
+      "path": "android-native-acceptance-evidence/SKILL.md",
+      "bytes": 9759,
+      "sha256_lf": "C804075440F89CFBA8E9761F573D5F88032C896B975FF2629CE14699F3A8BE1A"
+    },
+    {
+      "path": "git-workspace-handover/SKILL.md",
+      "bytes": 6012,
+      "sha256_lf": "FAFEFBF5D6147B305BFF89E51D0F78C1D290EF3269F57BF1B3C0C80C25DFDC3C"
+    }
+  ]
+}

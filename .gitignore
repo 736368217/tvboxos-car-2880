@@ -104,3 +104,14 @@ output-metadata.json
 # Car edition delivery docs (the upstream '*.md' rule must not hide these).
 !car/*.md
 
+# Handover entry points, incident notes, and versioned skill snapshots.
+!AGENTS.md
+!START-HERE.md
+!car/handover/**/*.md
+# Never add local signing material or delivery archives.
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.zip
+__pycache__/

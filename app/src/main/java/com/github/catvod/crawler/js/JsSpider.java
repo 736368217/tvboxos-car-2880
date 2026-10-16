@@ -31,10 +31,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -67,16 +71,28 @@ public class JsSpider extends Spider {
     private boolean cat;
     private byte[] emptyModuleBytecode;
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
+    private final Object lifecycle = new Object();
+    private final Object networkTag = new Object();
+    private final Map<Async.Result, Future<Async.Result>> calls = new ConcurrentHashMap<>();
+    private volatile Global global;
 
     public JsSpider(String key, String api, Class<?> cls) throws Exception {
         this.key = "J" + MD5.encode(key);
         this.executor = Executors.newSingleThreadExecutor();
         this.api = api;
         this.dex = cls;
-        initializeJS();
+        try {
+            initializeJS();
+        } catch (Exception error) {
+            destroy();
+            throw error;
+        }
     }
     public void cancelByTag() {
-        Connect.cancelByTag("js_okhttp_tag");
+        synchronized (lifecycle) {
+            cancelCalls(new CancellationException("QuickJS calls cancelled"));
+        }
+        Connect.cancelByTag(networkTag);
     }
 
     private JSObject createObject() {
@@ -116,8 +132,14 @@ public class JsSpider extends Spider {
                 public Object call(Object... args) {
                     try {
                         return method.invoke(receiver, args);
-                    } catch (Throwable ignored) {
+                    } catch (Throwable error) {
+                        Throwable cause = error.getCause() == null ? error : error.getCause();
+                        ctx.evaluate("throw new Error(" + JSONObject.quote(cause.toString()) + ")");
                         return null;
+                    } finally {
+                        if (args != null) {
+                            for (Object arg : args) if (arg instanceof JSObject) ((JSObject) arg).release();
+                        }
                     }
                 }
             });
@@ -134,22 +156,89 @@ public class JsSpider extends Spider {
         return method.getName();
     }
 
-    private void submit(Runnable runnable) {
-        if (!destroyed.get()) executor.submit(runnable);
-    }
-
-    private <T> Future<T> submit(Callable<T> callable) {
-        return executor.submit(callable);
-    }
-
     private Object call(String func, Object... args) {
-//        return executor.submit((FunCall.call(jsObject, func, args))).get();
-        if (destroyed.get() || jsObject == null) return null;
+        return callWithArgs(func, () -> args);
+    }
+
+    private Object callWithArgs(String func, Callable<Object[]> arguments) {
+        final long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(Async.DEFAULT_TIMEOUT_MILLIS);
+        final Async.Result result = new Async.Result();
+        final Future<Async.Result> invocation;
+        synchronized (lifecycle) {
+            if (destroyed.get()) throw new IllegalStateException("QuickJS spider is destroyed");
+            invocation = executor.submit(() -> {
+                if (result.isDone()) return result;
+                Object[] args = null;
+                try {
+                    if (jsObject == null) throw new IllegalStateException("QuickJS spider is not initialized");
+                    global.enter(result);
+                    args = arguments.call();
+                    return Async.run(jsObject, func, args, result);
+                } catch (Throwable error) {
+                    result.completeExceptionally(error);
+                    return result;
+                } finally {
+                    if (args != null) {
+                        for (Object arg : args) if (arg instanceof JSObject) ((JSObject) arg).release();
+                    }
+                    if (global != null) global.leave();
+                }
+            });
+            calls.put(result, invocation);
+        }
         try {
-            return submit(() -> Async.run(jsObject, func, args).get()).get();  // 等待 executor 线程完成 JS 调用
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.i("Executor 提交或等待失败"+ e);
-            return null;
+            // Only the calling thread waits; callbacks can now run on the JS executor.
+            Async.Result pending = invocation.get(remaining(deadline), TimeUnit.NANOSECONDS);
+            return pending.get(remaining(deadline), TimeUnit.NANOSECONDS);
+        } catch (InterruptedException error) {
+            result.completeExceptionally(error);
+            invocation.cancel(true);
+            Thread.currentThread().interrupt();
+            throw failure(func, error);
+        } catch (TimeoutException error) {
+            result.completeExceptionally(error);
+            invocation.cancel(true);
+            throw failure(func, error);
+        } catch (ExecutionException error) {
+            result.completeExceptionally(error.getCause());
+            throw failure(func, error.getCause());
+        } catch (Exception error) {
+            result.completeExceptionally(error);
+            throw failure(func, error);
+        } finally {
+            Global current = global;
+            if (current != null) current.cancel(result);
+            synchronized (lifecycle) {
+                if (!destroyed.get()) executor.submit(() -> release(result));
+            }
+        }
+    }
+
+    private static long remaining(long deadline) {
+        return Math.max(0, deadline - System.nanoTime());
+    }
+
+    private static RuntimeException failure(String func, Throwable cause) {
+        return new IllegalStateException("QuickJS " + func + " failed", cause);
+    }
+
+    private void release(Async.Result result) {
+        try {
+            try {
+                if (global != null) global.release(result);
+            } finally {
+                result.release();
+            }
+        } finally {
+            calls.remove(result);
+        }
+    }
+
+    private void cancelCalls(Throwable error) {
+        for (Map.Entry<Async.Result, Future<Async.Result>> entry : calls.entrySet()) {
+            entry.getKey().completeExceptionally(error);
+            entry.getValue().cancel(true);
+            if (global != null) global.cancel(entry.getKey());
         }
     }
 
@@ -158,140 +247,105 @@ public class JsSpider extends Spider {
         set(cfg, "stype", 3);
         set(cfg, "skey", TextUtils.isEmpty(siteKey) ? key : siteKey);
         if (Json.invalid(ext)) set(cfg, "ext", ext);
-        else set(cfg, "ext", (JSObject) ctx.parse(ext));
+        else {
+            JSObject value = (JSObject) ctx.parse(ext);
+            try {
+                set(cfg, "ext", value);
+            } finally {
+                value.release();
+            }
+        }
         return cfg;
     }
 
     @Override
     public void init(Context context, String extend) {
-        try {
-            if (cat) call("init", submit(() -> cfg(extend)).get());
-            else call("init", Json.valid(extend) ? ctx.parse(extend) : extend);
-        }catch (Exception e){
-
-        }
+        callWithArgs("init", () -> new Object[]{cat ? cfg(extend) : Json.valid(extend) ? ctx.parse(extend) : extend});
     }
 
     @Override
     public String homeContent(boolean filter) {
-        try {
-            return (String) call("home", filter);
-        }catch (Exception e){
-           return null;
-        }
+        return (String) call("home", filter);
     }
 
     @Override
     public String homeVideoContent() {
-        try {
-            return (String) call("homeVod");
-        }catch (Exception e){
-            return null;
-        }
+        return (String) call("homeVod");
     }
 
     @Override
-    public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend)  {
-        try {
-            JSObject obj = submit(() -> new JSUtils<String>().toObj(ctx, extend)).get();
-            return (String) call("category", tid, pg, filter, obj);
-        }catch (Exception e){
-            return null;
-        }
+    public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
+        return (String) callWithArgs("category", () -> new Object[]{tid, pg, filter, new JSUtils<String>().toObj(ctx, extend)});
     }
 
     @Override
-    public String detailContent(List<String> ids)  {
-        try {
-            return (String) call("detail", ids.get(0));
-        }catch (Exception e){
-            return null;
-        }
+    public String detailContent(List<String> ids) {
+        return (String) call("detail", ids.get(0));
     }
 
     @Override
-    public String searchContent(String key, boolean quick)  {
-        try {
-            return (String) call("search", key, quick);
-        }catch (Exception e){
-            return null;
-        }
+    public String searchContent(String key, boolean quick) {
+        return (String) call("search", key, quick);
     }
-
 
     @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
-        try {
-            JSArray array = submit(() -> new JSUtils<String>().toArray(ctx, vipFlags)).get();
-            return (String) call("play", flag, id, array);
-        }catch (Exception e){
-            return null;
-        }
+        return (String) callWithArgs("play", () -> new Object[]{flag, id, new JSUtils<String>().toArray(ctx, vipFlags)});
     }
 
     @Override
     public String liveContent(String url) {
-        try {
-            return (String) call("live", url);
-        } catch (Exception e) {
-            return null;
-        }
+        return (String) call("live", url);
     }
 
     @Override
-    public boolean manualVideoCheck()  {
-        try {
-            return (Boolean) call("sniffer");
-        }catch (Exception e){
-            return false;
-        }
+    public boolean manualVideoCheck() {
+        return Boolean.TRUE.equals(call("sniffer"));
     }
 
     @Override
     public boolean isVideoFormat(String url) {
-        try {
-            return (Boolean) call("isVideo", url);
-        }catch (Exception e){
-            return false;
-        }
+        return Boolean.TRUE.equals(call("isVideo", url));
     }
 
     @Override
-    public Object[] proxyLocal(Map<String, String> params)  {
+    public Object[] proxyLocal(Map<String, String> params) {
         try {
-            if ("catvod".equals(params.get("from"))) return proxy2(params);
-            else return submit(() -> proxy1(params)).get();
-
-        }catch (Exception E){
-            return new Object[0];
+            return "catvod".equals(params.get("from")) ? proxy2(params) : proxy1(params);
+        } catch (Exception error) {
+            throw failure("proxy", error);
         }
     }
 
     @Override
     public String action(String action) {
-        try {
-            return (String) call("action", action);
-        } catch (Exception e) {
-            return null;
-        }
+        return (String) call("action", action);
     }
 
     @Override
     public void destroy() {
-        if (!destroyed.compareAndSet(false, true)) return;
-        try {
+        synchronized (lifecycle) {
+            if (!destroyed.compareAndSet(false, true)) return;
+            cancelCalls(new CancellationException("QuickJS spider destroyed"));
+            if (global != null) global.stop();
             executor.submit(() -> {
                 try {
-                    jsObject = null;
-                    if (ctx != null) ctx.destroy();
-                } catch (Throwable th) {
-                    LOG.i("echo-js-destroy-error " + th.getMessage());
+                    try {
+                        if (global != null) global.release();
+                        for (Async.Result result : calls.keySet()) result.release();
+                        if (jsObject != null) jsObject.release();
+                    } finally {
+                        calls.clear();
+                        jsObject = null;
+                        if (ctx != null) ctx.destroy();
+                        ctx = null;
+                    }
+                } catch (Throwable error) {
+                    LOG.i("echo-js-destroy-error " + error.getMessage());
                 } finally {
                     executor.shutdown();
                 }
             });
-        } catch (Throwable th) {
-            executor.shutdownNow();
         }
     }
 
@@ -306,7 +360,7 @@ public class JsSpider extends Spider {
             "    }\n" +
             "}\n";
     private void initializeJS() throws Exception {
-        submit(() -> {
+        Future<?> initialization = executor.submit(() -> {
             if (ctx == null) createCtx();
             if (dex != null) createDex();
 
@@ -345,9 +399,18 @@ public class JsSpider extends Spider {
                 //ctx.evaluate("globalThis." + key + " = __JS_SPIDER__;");                
             }
             jsObject = (JSObject) get(ctx.getGlobalObject(), key);
-            if (jsObject != null) jsObject.hold();
             return null;
-        }).get();
+        });
+        try {
+            initialization.get(Async.DEFAULT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException error) {
+            initialization.cancel(true);
+            Thread.currentThread().interrupt();
+            throw error;
+        } catch (TimeoutException error) {
+            initialization.cancel(true);
+            throw error;
+        }
     }
 
     public static byte[] byteFF(byte[] bytes) {
@@ -412,7 +475,8 @@ public class JsSpider extends Spider {
             }
         });
 
-        bind(ctx.getGlobalObject(), new Global(executor));
+        global = new Global(executor, networkTag);
+        bind(ctx.getGlobalObject(), global);
 
         JSObject local = createObject();
         set(ctx.getGlobalObject(), "local", local);
@@ -535,9 +599,9 @@ public class JsSpider extends Spider {
         }
     }
 
-    private Object[] proxy1(Map<String, String> params) {
-        JSObject object = new JSUtils<String>().toObj(ctx, params);
-        JSONArray array = toJsonArray((JSArray) jsObject.getJSFunction("proxy").call(object));
+    private Object[] proxy1(Map<String, String> params) throws Exception {
+        String json = (String) callWithArgs("proxy", () -> new Object[]{new JSUtils<String>().toObj(ctx, params)});
+        JSONArray array = new JSONArray(json);
         boolean headerAvailable = array.length() > 3 && array.opt(3) != null;
         Object[] result = new Object[4];
         result[0] = array.opt(0);
@@ -590,9 +654,8 @@ public class JsSpider extends Spider {
     private Object[] proxy2(Map<String, String> params) throws Exception {
         String url = params.get("url");
         String header = params.get("header");
-        JSArray array = submit(() -> new JSUtils<String>().toArray(ctx, Arrays.asList(url.split("/")))).get();
-        Object object = submit(() -> ctx.parse(header)).get();
-        String json = (String) call("proxy", array, object);
+        String json = (String) callWithArgs("proxy", () -> new Object[]{
+                new JSUtils<String>().toArray(ctx, Arrays.asList(url.split("/"))), ctx.parse(header)});
         Res res = Res.objectFrom(json);
         String contentType = res.getContentType();
         if (TextUtils.isEmpty(contentType)) contentType = "application/octet-stream";

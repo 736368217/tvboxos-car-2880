@@ -1,0 +1,195 @@
+[
+  {
+    "title": "主页与推荐区",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-home.png",
+    "context": "主页使用本地长标题素材，展示 2880×1620 / 160 dpi 下的实际布局。",
+    "caption": "主页原生截图；黄框与编号为报告后加标注，不属于应用界面。",
+    "marks": [
+      {"rect": [79, 90, 883, 203], "text": "car.7：顶部操作内容保持在上方安全边距内，背景仍然铺满屏幕。"},
+      {"rect": [2302, 369, 2707, 572], "text": "car.7：最右侧设置入口完整可见，推荐区可以继续横向滑到末项。"},
+      {"rect": [100, 1210, 528, 1367], "text": "car.7：影片标题使用独立的两行高度，避免底部文字被海报或容器裁掉。"}
+    ]
+  },
+  {
+    "title": "分类列表",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-category.png",
+    "context": "主页中的分类子页面，不是另一个独立 Activity。",
+    "caption": "分类页原生截图；长标题和多分类均为本地测试素材。",
+    "marks": [
+      {"rect": [79, 114, 2801, 215], "text": "car.7：分类条可横向滚动，折叠顶部后仍保留安全位置。"},
+      {"rect": [94, 733, 571, 877], "text": "car.7：网格影片标题有独立高度；返回入口一次回到主页分类。"}
+    ]
+  },
+  {
+    "title": "影片详情与预览",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-detail.png",
+    "context": "使用本地影片详情、剧集与动态测试视频验证预览和全屏切换。",
+    "caption": "详情页原生截图。",
+    "marks": [
+      {"rect": [79, 695, 322, 938], "text": "r2 修复：应用内返回不再只执行遥控器焦点移动；退出全屏后，再点一次可离开详情。"}
+    ],
+    "notes": ["保留原有实体遥控器 Back 的焦点导航行为；修复只针对应用内返回动作。"]
+  },
+  {
+    "title": "全屏播放器与四个快捷入口",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-player-controls-enabled.png",
+    "context": "通过真实触摸唤出控制条，并实际切换画面、超分、补帧和音效。",
+    "caption": "四个入口启用后的原生截图；播放器继续前进。",
+    "marks": [
+      {"rect": [79, 1191, 732, 1304], "text": "画面预设：选择后更新当前渲染配置，不重建解码器。"},
+      {"rect": [759, 1191, 1412, 1304], "text": "SGSR1 超分：独立开关，与画面预设分别保存。"},
+      {"rect": [1439, 1191, 2093, 1304], "text": "时域平滑补帧：独立开关，按当前渲染配置生效。"},
+      {"rect": [2120, 1191, 2774, 1304], "text": "音效预设：作用于当前 audio session，切换时 session 不变。"}
+    ],
+    "notes": ["四个控件高度均为 113 px；验收同时检查偏好、当前渲染器、解码器对象与音频 session，未仅以按钮文字判断。"]
+  },
+  {
+    "title": "画面预设弹窗",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-player-presets.png",
+    "context": "在播放中打开预设列表并选择“臻彩”，检查当前 renderer 的 preset ID。",
+    "caption": "预设弹窗原生截图。",
+    "marks": [],
+    "notes": ["重点：预设入口位于播放器中；11 组稳定预设 ID、旧设置迁移及异常值回退由宿主测试覆盖。"]
+  },
+  {
+    "title": "基础设置",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-settings-top.png",
+    "context": "基础设置保留原有订阅、播放器等配置，不用车机高级设置替代原功能。",
+    "caption": "基础设置上半部分原生截图。",
+    "marks": [
+      {"rect": [79, 695, 322, 938], "text": "car.7：设置页面内也有应用内返回入口，不依赖系统导航栏、无障碍或悬浮窗权限。"}
+    ]
+  },
+  {
+    "title": "基础设置中的车机入口",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-settings-car.png",
+    "context": "滚动到车机相关设置的位置。",
+    "caption": "车机设置入口原生截图。",
+    "marks": [
+      {"rect": [79, 113, 2801, 226], "text": "显示应用内返回按钮：可控制所有当前 Activity 内的返回入口。"},
+      {"rect": [79, 407, 2801, 542], "text": "车机高级设置：集中管理画面、音效和双模返回的详细选项。"}
+    ]
+  },
+  {
+    "title": "车机高级设置：音视频",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-advanced-top.png",
+    "context": "高级设置中的音视频选项，与播放中的快捷入口共享偏好配置。",
+    "caption": "高级设置上半部分原生截图。",
+    "marks": [
+      {"rect": [79, 247, 2801, 544], "text": "音效与画面预设分别配置，不互相覆盖。"},
+      {"rect": [79, 571, 2801, 868], "text": "超分与时域平滑均为独立开关，原生验收已实际切换并读取保存值。"}
+    ]
+  },
+  {
+    "title": "车机高级设置：双模返回",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-advanced-back.png",
+    "context": "高级设置滚动到返回控件配置位置。",
+    "caption": "双模共存、胶囊抽屉与 6 秒收起配置的原生截图。",
+    "marks": [
+      {"rect": [79, 351, 2801, 648], "text": "开关与模式：悬浮球、边缘拉回、双模共存。"},
+      {"rect": [79, 675, 2801, 1134], "text": "停靠侧、边缘皮肤和大号悬浮球可配置。"},
+      {"rect": [79, 1161, 2801, 1296], "text": "收起时长与主设置共享；支持 4/6/8 秒及常驻选项。"}
+    ]
+  },
+  {
+    "title": "返回模式与收起时长弹窗",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-back-mode-options.png",
+    "context": "通过原生点击打开模式弹窗，并选择“双模共存”。",
+    "caption": "返回模式选择原生截图。",
+    "marks": [],
+    "notes": ["重点：已验证选项保存；收起时长弹窗另外验证选择“6 秒”。弹窗外触摸的关闭行为另有基础 UI 用例。"]
+  },
+  {
+    "title": "普通搜索",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-search.png",
+    "context": "普通搜索输入页面；后台队列功能另用 35 站压力素材验收。",
+    "caption": "普通搜索页面原生截图。",
+    "marks": [
+      {"rect": [79, 90, 866, 475], "text": "r2 修复：普通搜索补齐周期推进、每站超时和取消；慢站不再阻塞尾部站点。"},
+      {"rect": [173, 695, 416, 938], "text": "离开页面时关闭该轮会话并取消其任务，不清空其他页面的请求。"}
+    ]
+  },
+  {
+    "title": "快速搜索",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-fastsearch.png",
+    "context": "本地素材返回 5 项，用于展示原有快速搜索页面和新队列行为。",
+    "caption": "快速搜索结果原生截图。",
+    "marks": [
+      {"rect": [124, 113, 619, 226], "text": "r2 修复：每站仅结算一次，过期轮次和取消后的迟到结果不再污染新一轮。"},
+      {"rect": [709, 249, 2666, 1451], "text": "共享有界工作线程池，超时会释放页面调度槽，避免无限增加后台线程。"}
+    ]
+  },
+  {
+    "title": "播放历史",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-history.png",
+    "context": "保留原有历史记录界面；列表中的测试记录来自本地影片。",
+    "caption": "播放历史原生截图。",
+    "marks": [{"rect": [79, 695, 322, 938], "text": "本页已接入同一窗口内返回机制，点击返回上一页。"}]
+  },
+  {
+    "title": "收藏",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-collect.png",
+    "context": "收藏页面，空状态照实展示，不伪造收藏内容。",
+    "caption": "收藏页面原生截图。",
+    "marks": [{"rect": [79, 695, 322, 938], "text": "本页返回行为已验收；原有收藏数据结构没有改变。"}]
+  },
+  {
+    "title": "本地文件",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-localfile.png",
+    "context": "本地文件浏览页面；本轮未扩大或重写文件管理能力。",
+    "caption": "本地文件原生截图。",
+    "marks": [{"rect": [79, 695, 322, 938], "text": "文件页面内的返回入口可用，不要求车机提供系统 Back。"}]
+  },
+  {
+    "title": "推送",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-push.png",
+    "context": "保留原有推送页面。本页验证覆盖打开与逐级返回，未声称本轮新增跨设备推送能力。",
+    "caption": "推送页面原生截图。",
+    "marks": [{"rect": [79, 695, 322, 938], "text": "推送页同样接入应用内返回，避免没有系统导航键时无法离开。"}]
+  },
+  {
+    "title": "直播播放",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-live.png",
+    "context": "本地 M3U 指向自制动态视频，验证直播页面确实处于播放和进度前进状态。",
+    "caption": "直播播放原生截图；画面为测试图，不是远端电视频道。",
+    "marks": [{"rect": [79, 695, 322, 938], "text": "直播全屏中存在返回入口；先收起频道界面，再退出该页面。"}]
+  },
+  {
+    "title": "直播频道列表",
+    "source": "../../evidence/car.7/r2-B2EEDC14/pages/page-live-channels.png",
+    "context": "直播中打开频道列表，保留原有频道组与频道选择方式。",
+    "caption": "两条本地测试频道的原生截图。",
+    "marks": [{"rect": [498, 90, 1173, 330], "text": "已验证频道列表可展开；新增返回控件与原有频道操作共同位于应用窗口内。"}]
+  },
+  {
+    "title": "悬浮球拖动与磁吸停靠",
+    "source": "../../evidence/car.7/r2-B2EEDC14/ui/ball-right-dock.png",
+    "context": "真实触摸拖动到右侧，松手后磁吸停靠并保存归一化坐标。",
+    "caption": "右侧停靠的原生截图。",
+    "marks": [{"rect": [2558, 328, 2801, 571], "text": "car.7：悬浮球有 243 px 点击热区，拖动不误触返回，位置可跨页面保留。"}],
+    "notes": ["空闲后收起及低透明度状态、任意页面触摸唤醒、大号模式均有独立设备用例。首页根状态点击只提示，不会直接退出应用。"]
+  },
+  {
+    "title": "边缘拉回：水滴皮肤",
+    "source": "../../evidence/car.7/r2-B2EEDC14/ui/edge-armed-teardrop.png",
+    "context": "在屏幕边缘向内拉动，达到阈值后才进入可返回状态。",
+    "caption": "水滴皮肤拉动状态原生截图；黄框表示边缘交互所在区域。",
+    "marks": [{"rect": [0, 90, 460, 1496], "text": "car.7：轻点和短拉不返回；拉过阈值再松手才提交，向回拖动或 CANCEL 会取消。"}]
+  },
+  {
+    "title": "边缘拉回：胶囊皮肤",
+    "source": "../../evidence/car.7/r2-B2EEDC14/ui/edge-armed-capsule.png",
+    "context": "同一边缘拉回机制的第二种皮肤，可与悬浮球同时显示。",
+    "caption": "胶囊皮肤拉动状态原生截图。",
+    "marks": [{"rect": [0, 90, 460, 1496], "text": "car.7：水滴、胶囊只改变表现形式，返回策略和取消阈值保持一致。"}],
+    "notes": ["控件附着于 Activity 的 DecorView；没有新增系统 overlay、无障碍服务或全局按键权限。"]
+  },
+  {
+    "title": "IJK 全屏画面修复证据",
+    "source": "../../evidence/car.7/r2-B2EEDC14/playback/IJK-fullscreen.png",
+    "context": "与前台恢复、重新进入和初始播放一起构成八张客观像素门禁。",
+    "caption": "最终 APK 的 IJK 硬解全屏样本。",
+    "marks": [{"rect": [560, 30, 2780, 260], "text": "r2 核心修复：跨 EGL 重建保留同一个 SurfaceTexture / Surface，避免 MediaCodec producer 被替换后出现绿块。"}],
+    "notes": ["该结论由已安装 APK 的 SHA、producer 身份断言、进度前进与色条像素中位数共同支持，不是只凭播放状态码。"]
+  }
+]

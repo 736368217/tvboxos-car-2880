@@ -1,0 +1,90 @@
+{
+  "passed": 14,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "QuickJS sync",
+      "detail": "elapsed_ms=0",
+      "at": 1792165162426
+    },
+    {
+      "pass": true,
+      "test": "QuickJS promise",
+      "detail": "elapsed_ms=2",
+      "at": 1792165162427
+    },
+    {
+      "pass": true,
+      "test": "QuickJS timer",
+      "detail": "elapsed_ms=42",
+      "at": 1792165162470
+    },
+    {
+      "pass": true,
+      "test": "QuickJS req",
+      "detail": "elapsed_ms=30",
+      "at": 1792165162500
+    },
+    {
+      "pass": true,
+      "test": "QuickJS object snapshot crosses thread safely",
+      "detail": "",
+      "at": 1792165162500
+    },
+    {
+      "pass": true,
+      "test": "QuickJS category arguments created on owner thread",
+      "detail": "",
+      "at": 1792165162521
+    },
+    {
+      "pass": true,
+      "test": "QuickJS reject propagates failure",
+      "detail": "elapsed_ms=3",
+      "at": 1792165162524
+    },
+    {
+      "pass": true,
+      "test": "QuickJS throw propagates failure",
+      "detail": "elapsed_ms=0",
+      "at": 1792165162524
+    },
+    {
+      "pass": true,
+      "test": "QuickJS req-timeout propagates failure",
+      "detail": "elapsed_ms=83",
+      "at": 1792165162608
+    },
+    {
+      "pass": true,
+      "test": "QuickJS Promise has bounded wait",
+      "detail": "elapsed_ms=30001",
+      "at": 1792165192609
+    },
+    {
+      "pass": true,
+      "test": "QuickJS recovers after timeout and late resolve",
+      "detail": "",
+      "at": 1792165192631
+    },
+    {
+      "pass": true,
+      "test": "QuickJS timeout cancels pending timer",
+      "detail": "",
+      "at": 1792165193832
+    },
+    {
+      "pass": true,
+      "test": "QuickJS interrupted caller exits promptly",
+      "detail": "",
+      "at": 1792165193983
+    },
+    {
+      "pass": true,
+      "test": "QuickJS next call survives cancellation",
+      "detail": "",
+      "at": 1792165194004
+    }
+  ]
+}

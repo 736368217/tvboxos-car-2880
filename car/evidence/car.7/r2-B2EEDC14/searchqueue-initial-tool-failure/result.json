@@ -1,0 +1,30 @@
+{
+  "passed": 3,
+  "failed": 1,
+  "events": [
+    {
+      "pass": true,
+      "test": "search fixture has more sites than worker cap",
+      "detail": "",
+      "at": 1792165212154
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165213452
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity all sites converge",
+      "detail": "",
+      "at": 1792165246525
+    },
+    {
+      "pass": false,
+      "test": "searchqueue",
+      "detail": "java.lang.Exception: java.lang.NoSuchMethodException: androidx.base.f70.getData\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.ui(Car7Acceptance.java:539)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.searchQueueChecks(Car7Acceptance.java:208)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.$r8$lambda$QsFF3CBN5lxYnvskl9pLOZd24Ws(Unknown Source:0)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance$$ExternalSyntheticLambda15.run(Unknown Source:2)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.section(Car7Acceptance.java:532)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.onStart(Car7Acceptance.java:89)\n\tat android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2606)\nCaused by: java.lang.NoSuchMethodException: androidx.base.f70.getData\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.call(Car7Acceptance.java:589)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.lambda$searchQueueChecks$14(Car7Acceptance.java:208)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance$$ExternalSyntheticLambda49.run(Unknown Source:2)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.lambda$ui$81(Car7Acceptance.java:538)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance$$ExternalSyntheticLambda179.run(Unknown Source:6)\n\tat android.app.Instrumentation$SyncRunnable.run(Instrumentation.java:2624)\n\tat android.os.Handler.handleCallback(Handler.java:991)\n\tat android.os.Handler.dispatchMessage(Handler.java:102)\n\tat android.os.Looper.loopOnce(Looper.java:232)\n\tat android.os.Looper.loop(Looper.java:317)\n\tat android.app.ActivityThread.main(ActivityThread.java:8971)\n\tat java.lang.reflect.Method.invoke(Native Method)\n\tat com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:597)\n\tat com.android.internal.os.ZygoteInit.main(ZygoteInit.java:919)\n",
+      "at": 1792165247028
+    }
+  ]
+}

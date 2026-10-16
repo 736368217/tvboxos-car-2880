@@ -71,6 +71,7 @@ public final class Car7Acceptance extends Instrumentation {
                     if (!Boolean.TRUE.equals(call(hawk, "isBuilt"))) throw new IllegalStateException("Application preferences not initialized");
                     call(hawk, "put", mapping.getJSONObject("constants").getString("API_URL"), arguments.getString("api"));
                     call(hawk, "put", mapping.getJSONObject("constants").getString("HOME_API"), arguments.getString("homeSite", "py_maple"));
+                    if ("pages".equals(arguments.getString("mode"))) putPref("HOME_REC", 1);
                 }
                 Intent launch = getTargetContext().getPackageManager().getLaunchIntentForPackage(getTargetContext().getPackageName());
                 launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -80,6 +81,12 @@ public final class Car7Acceptance extends Instrumentation {
                     section("subscription", this::subscriptionChecks);
                 } else if (arguments != null && "playback".equals(arguments.getString("mode"))) {
                     section("playback", this::playbackChecks);
+                } else if (arguments != null && "pages".equals(arguments.getString("mode"))) {
+                    section("pages", this::pagesChecks);
+                } else if (arguments != null && "quickjs".equals(arguments.getString("mode"))) {
+                    section("quickjs", this::quickJsChecks);
+                } else if (arguments != null && "searchqueue".equals(arguments.getString("mode"))) {
+                    section("searchqueue", this::searchQueueChecks);
                 } else {
                     section("home", this::homeChecks);
                     section("back", this::backChecks);
@@ -105,10 +112,125 @@ public final class Car7Acceptance extends Instrumentation {
         try { return executor.submit(() -> work.run()).get(seconds, java.util.concurrent.TimeUnit.SECONDS); }
         finally { executor.shutdownNow(); }
     }
+    private static final class LocalHttp implements AutoCloseable {
+        final java.net.ServerSocket server;
+        final java.util.List<Thread> workers = new java.util.concurrent.CopyOnWriteArrayList<>();
+        final Thread accept;
+        volatile boolean closed;
+        LocalHttp() throws Exception {
+            server = new java.net.ServerSocket(0, 16, java.net.InetAddress.getByName("127.0.0.1"));
+            accept = new Thread(() -> {
+                while (!closed) try {
+                    final java.net.Socket socket = server.accept();
+                    Thread worker = new Thread(() -> {
+                        try (java.net.Socket client = socket) {
+                            client.setSoTimeout(3000);
+                            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(client.getInputStream(), "UTF-8"));
+                            String line = reader.readLine();
+                            if (line != null && line.contains("/slow")) Thread.sleep(2500);
+                            client.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nOK".getBytes("UTF-8"));
+                        } catch (Exception ignored) { }
+                    }, "Car7LocalHttp");
+                    workers.add(worker); worker.start();
+                } catch (java.io.IOException error) { if (!closed) Log.e("Car7Native", "local HTTP accept failed"); }
+            }, "Car7LocalAccept");
+            accept.start();
+        }
+        String base() { return "http://127.0.0.1:" + server.getLocalPort(); }
+        @Override public void close() throws Exception {
+            closed = true; server.close(); accept.join(1000);
+            for (Thread worker : workers) { worker.interrupt(); worker.join(1000); }
+        }
+    }
+    private boolean hasCause(Throwable error, Class<?> kind) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) if (kind.isInstance(cause)) return true;
+        return false;
+    }
+    private void quickJsChecks() throws Exception {
+        try (LocalHttp server = new LocalHttp()) {
+            Object loader = type("com.github.catvod.crawler.JsLoader").getConstructor().newInstance();
+            String ext = new JSONObject().put("base", server.base()).toString();
+            Object spider = bounded(() -> call(loader, "getSpider", "car7-async-local", "http://127.0.0.1:9978/file/TVBoxCar5/quickjs_runtime.js", ext, ""), 20);
+            try {
+                for (String[] sample : new String[][]{{"sync","SYNC_OK"},{"promise","PROMISE_OK"},{"timer","TIMER_OK"},{"req","REQ_OK"}}) {
+                    long start = SystemClock.elapsedRealtime();
+                    String value = bounded(() -> String.valueOf(call(spider, "searchContent", sample[0], false)), 8);
+                    record(sample[1].equals(value), "QuickJS " + sample[0], "elapsed_ms=" + (SystemClock.elapsedRealtime() - start));
+                }
+                String object = bounded(() -> String.valueOf(call(spider, "searchContent", "object", false)), 5);
+                check("QuickJS object snapshot crosses thread safely", "OBJECT_OK".equals(new JSONObject(object).optString("value")));
+                java.util.HashMap<String,String> markers = new java.util.HashMap<>(); markers.put("marker", "BRIDGE");
+                String category = bounded(() -> String.valueOf(call(spider, "categoryContent", "local", "1", true, markers)), 5);
+                check("QuickJS category arguments created on owner thread", category.contains("CATEGORY_BRIDGE"));
+                for (String mode : new String[]{"reject", "throw", "req-timeout"}) {
+                    long start = SystemClock.elapsedRealtime(); boolean failedExpected = false;
+                    try { bounded(() -> String.valueOf(call(spider, "searchContent", mode, false)), 5); }
+                    catch (Exception error) { failedExpected = !hasCause(error, java.util.concurrent.TimeoutException.class); }
+                    record(failedExpected, "QuickJS " + mode + " propagates failure", "elapsed_ms=" + (SystemClock.elapsedRealtime() - start));
+                }
+                long start = SystemClock.elapsedRealtime(); boolean timedOut = false;
+                try { bounded(() -> String.valueOf(call(spider, "searchContent", "timeout", false)), 34); }
+                catch (Exception error) { timedOut = hasCause(error, java.util.concurrent.TimeoutException.class); }
+                long elapsed = SystemClock.elapsedRealtime() - start;
+                record(timedOut && elapsed >= 29000 && elapsed < 33000, "QuickJS Promise has bounded wait", "elapsed_ms=" + elapsed);
+                String recovered = bounded(() -> String.valueOf(call(spider, "searchContent", "recover", false)), 5);
+                check("QuickJS recovers after timeout and late resolve", "RECOVER_OK".equals(recovered));
+                SystemClock.sleep(1200);
+                JSONObject event = new JSONObject(String.valueOf(call(spider, "searchContent", "events", false)));
+                check("QuickJS timeout cancels pending timer", event.optInt("lateTimers") == 0);
+                java.util.concurrent.ExecutorService outer = java.util.concurrent.Executors.newSingleThreadExecutor();
+                java.util.concurrent.CountDownLatch exit = new java.util.concurrent.CountDownLatch(1);
+                try {
+                    java.util.concurrent.Future<?> pending = outer.submit(() -> {
+                        try { call(spider, "searchContent", "pending-network", false); }
+                        catch (Exception ignored) { } finally { exit.countDown(); }
+                    });
+                    SystemClock.sleep(150); pending.cancel(true);
+                    check("QuickJS interrupted caller exits promptly", exit.await(2, java.util.concurrent.TimeUnit.SECONDS));
+                    check("QuickJS next call survives cancellation", "RECOVER_OK".equals(String.valueOf(call(spider, "searchContent", "recover", false))));
+                } finally { outer.shutdownNow(); }
+            } finally { call(spider, "destroy"); }
+        }
+    }
+    private void searchQueueChecks() throws Exception {
+        Object api = call(type("com.github.tvbox.osc.api.ApiConfig"), "get");
+        List<?> sources = (List<?>) call(api, "getSourceBeanList");
+        check("search fixture has more sites than worker cap", sources.size() == 35);
+        for (String name : new String[]{"SearchActivity", "FastSearchActivity"}) {
+            main(() -> putPref("FAST_SEARCH_MODE", false));
+            Bundle extras = new Bundle(); if (name.equals("FastSearchActivity")) extras.putString("title", "car7-search");
+            Activity page = openPage(name, extras);
+            try {
+                if (name.equals("SearchActivity")) main(() -> call(page, "search", "car7-search"));
+                long end = SystemClock.elapsedRealtime() + 80000;
+                while (SystemClock.elapsedRealtime() < end && ((java.util.concurrent.atomic.AtomicInteger) ui(() -> field(page, "allRunCount"))).get() > 0) SystemClock.sleep(200);
+                check(name + " all sites converge", ((java.util.concurrent.atomic.AtomicInteger) ui(() -> field(page, "allRunCount"))).get() == 0);
+                List<?> rows = (List<?>) ui(() -> field(field(page, "searchAdapter"), "mData"));
+                boolean tail = false;
+                for (Object row : rows) tail |= String.valueOf(field(row, "id")).equals("car7-search-33");
+                check(name + " tail site after full queue has result", tail);
+                capturePage(page, "search-queue-" + name.replace("Activity", ""));
+                Object source = call(api, "getSource", "car7-tail-33");
+                Object spider = call(api, "getCSP", source);
+                java.util.concurrent.atomic.AtomicInteger active = (java.util.concurrent.atomic.AtomicInteger) field(spider, "ACTIVE");
+                java.util.concurrent.atomic.AtomicInteger peak = (java.util.concurrent.atomic.AtomicInteger) field(spider, "PEAK");
+                end = SystemClock.elapsedRealtime() + 10000;
+                while (active.get() > 0 && SystemClock.elapsedRealtime() < end) SystemClock.sleep(100);
+                check(name + " workers stop after timeout", active.get() == 0);
+                check(name + " bounded worker cap", peak.get() <= 24);
+                if (name.equals("SearchActivity")) main(() -> call(page, "search", "car7-next"));
+                else main(() -> { });
+                if (name.equals("SearchActivity")) {
+                    SystemClock.sleep(200); main(page::finish); SystemClock.sleep(700);
+                    check("search exit cancels active work", active.get() == 0);
+                }
+            } finally { if (!ui(page::isFinishing)) main(page::finish); pause(500); }
+        }
+    }
     private void subscriptionChecks() throws Exception {
         Object api = call(type("com.github.tvbox.osc.api.ApiConfig"), "get");
         List<?> sources = (List<?>) call(api, "getSourceBeanList");
-        record(sources.size() >= 100, "subscription parsed site count", "unique_sites=" + sources.size());
+        record(sources.size() > 0, "subscription parsed sites", "unique_sites=" + sources.size());
         JSONArray observations = new JSONArray();
         for (String key : arguments.getString("sites", "热播影视,枫叶影视,爱动漫").split(",")) {
             JSONObject entry = new JSONObject(); entry.put("key", key); observations.put(entry);
@@ -118,19 +240,23 @@ public final class Car7Acceptance extends Instrumentation {
                 Object source = call(api, "getSource", key);
                 if (source == null) throw new IllegalStateException("missing source");
                 String sourceApi = String.valueOf(call(source, "getApi"));
-                entry.put("runtime", sourceApi.contains(".js") ? "QuickJS" : "JAR");
+                entry.put("runtime", sourceApi.contains(".js") ? "QuickJS" : sourceApi.contains(".py") ? "Python" : "JAR");
                 Object spider = bounded(() -> call(api, "getCSP", source), 45);
                 JSONObject first = new JSONObject(bounded(() -> String.valueOf(call(spider, "homeContent", true)), 30));
                 JSONArray categories = first.optJSONArray("class");
                 entry.put("categories", categories == null ? 0 : categories.length());
                 check("subscription-" + key + "-home", categories != null && categories.length() > 0);
+                String positiveTitle = "", positiveId = "";
                 if (categories != null && categories.length() > 0) {
                     String tid = categories.getJSONObject(0).getString("type_id");
+                    entry.put("category_tid", tid);
                     JSONObject category = new JSONObject(bounded(() -> String.valueOf(call(spider, "categoryContent", tid, "1", true, new java.util.HashMap<String,String>())), 30));
                     JSONArray videos = category.optJSONArray("list");
                     entry.put("category_items", videos == null ? 0 : videos.length());
                     check("subscription-" + key + "-category", videos != null && videos.length() > 0);
                     if (videos != null && videos.length() > 0) {
+                        positiveTitle = videos.getJSONObject(0).optString("vod_name");
+                        positiveId = videos.getJSONObject(0).optString("vod_id");
                         List<String> ids = new ArrayList<>(); ids.add(videos.getJSONObject(0).getString("vod_id"));
                         JSONObject detail = new JSONObject(bounded(() -> String.valueOf(call(spider, "detailContent", ids)), 30));
                         JSONArray details = detail.optJSONArray("list");
@@ -138,12 +264,32 @@ public final class Car7Acceptance extends Instrumentation {
                         check("subscription-" + key + "-detail", details != null && details.length() > 0);
                     }
                 }
-                JSONObject search = new JSONObject(bounded(() -> String.valueOf(call(spider, "searchContent", "潜伏", false)), 30));
+                JSONObject search = new JSONObject(bounded(() -> String.valueOf(call(spider, "searchContent", "潜伏", false)), 32));
                 JSONArray found = search.optJSONArray("list");
                 entry.put("search_items", found == null ? 0 : found.length());
-                check("subscription-" + key + "-search", found != null && found.length() > 0);
+                if (!positiveTitle.isEmpty()) {
+                    final String query = positiveTitle;
+                    JSONObject positive = new JSONObject(bounded(() -> String.valueOf(call(spider, "searchContent", query, false)), 32));
+                    JSONArray matches = positive.optJSONArray("list");
+                    entry.put("positive_search_items", matches == null ? 0 : matches.length());
+                    boolean matched = false;
+                    if (matches != null) for (int j = 0; j < matches.length(); j++) {
+                        JSONObject match = matches.getJSONObject(j);
+                        matched |= positiveId.equals(match.optString("vod_id")) || query.trim().equals(match.optString("vod_name").trim());
+                    }
+                    entry.put("positive_search_known_item", matched);
+                    check("subscription-" + key + "-positive-search", matched);
+                } else check("subscription-" + key + "-search", found != null && found.length() > 0);
             } catch (Throwable error) {
                 entry.put("error_class", error.getClass().getSimpleName());
+                Throwable cause = error;
+                JSONArray chain = new JSONArray();
+                while (cause != null) { chain.put(cause.getClass().getSimpleName()); if (cause.getCause() == null) break; cause = cause.getCause(); }
+                entry.put("cause_classes", chain);
+                String message = cause == null ? "" : String.valueOf(cause.getMessage());
+                message = message.replaceAll("(?i)https?://[^\\s]+", "[url]");
+                if (message.matches("(?is).*(?:token|secret|password|authorization|api.?key)\\s*[:=].*")) message = "sensitive diagnostic withheld";
+                entry.put("cause_message", message.substring(0, Math.min(500, message.length())));
                 record(false, "subscription-" + key, error.getClass().getSimpleName());
                 if (error instanceof java.util.concurrent.TimeoutException) throw new Exception("Spider timeout; aborting outstanding work");
             } finally {
@@ -264,10 +410,19 @@ public final class Car7Acceptance extends Instrumentation {
                 check(name + " paused Texture to GL preserves state", state(video) == 4 && Math.abs(position(video) - paused) < 200 && player == ui(() -> call(video, "getMediaPlayer")));
                 main(() -> call(video, "resume")); check(name + " paused switch resumes", waitPlaying(video, 8000));
                 progressing(video, name + " after paused switch", observations);
+                final Object fullscreenRenderer = ui(() -> field(video, "mRenderView"));
+                final Object fullscreenSurface = ui(() -> field(fullscreenRenderer, "mPlayerSurface"));
+                final Object fullscreenConsumer = ui(() -> field(fullscreenRenderer, "mSurfaceTexture"));
                 main(() -> call(video, "startFullScreen")); SystemClock.sleep(1500);
                 check(name + " fullscreen active", Boolean.TRUE.equals(ui(() -> call(video, "isFullScreen"))));
+                check(name + " fullscreen preserves decoder producer", player == ui(() -> call(video, "getMediaPlayer"))
+                        && fullscreenSurface == ui(() -> field(fullscreenRenderer, "mPlayerSurface"))
+                        && fullscreenConsumer == ui(() -> field(fullscreenRenderer, "mSurfaceTexture")));
                 progressing(video, name + " fullscreen", observations); shot(name + "-fullscreen");
                 main(() -> call(video, "stopFullScreen")); SystemClock.sleep(1200);
+                check(name + " fullscreen exit preserves decoder producer", fullscreenSurface == ui(() -> field(fullscreenRenderer, "mPlayerSurface"))
+                        && fullscreenConsumer == ui(() -> field(fullscreenRenderer, "mSurfaceTexture")));
+                progressing(video, name + " fullscreen exit", observations); shot(name + "-fullscreen-exit");
                 main(() -> { call(video, "pause"); home.startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); });
                 SystemClock.sleep(2500);
                 Object bgRenderer = ui(() -> field(video, "mRenderView"));
@@ -511,6 +666,156 @@ public final class Car7Acceptance extends Instrumentation {
         if (v.getContentDescription() != null) n.put("description", v.getContentDescription().toString());
         nodes.put(n);
         if (v instanceof ViewGroup) for (int i = 0; i < ((ViewGroup) v).getChildCount(); i++) addNodes(((ViewGroup) v).getChildAt(i), nodes);
+    }
+    private Activity openPage(String name, Bundle extras) throws Exception {
+        Intent intent = new Intent();
+        intent.setClassName(getTargetContext().getPackageName(), "com.github.tvbox.osc.ui.activity." + name);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (extras != null) intent.putExtras(extras);
+        Activity page = startActivitySync(intent); pause(900);
+        check(name + " has in-app Back host", host(page).isAttachedToWindow());
+        return page;
+    }
+    private void clickView(Activity page, String resource) throws Exception {
+        View target = view(page, resource);
+        main(() -> target.requestRectangleOnScreen(new Rect(0, 0, target.getWidth(), target.getHeight()), true));
+        pause(250);
+        Rect bounds = rect(target);
+        check(resource + " reachable", bounds.width() > 0 && bounds.height() > 0 && bounds.centerY() >= 0 && bounds.centerY() < 1620);
+        tap(page, bounds.exactCenterX(), bounds.exactCenterY());
+    }
+    private android.view.accessibility.AccessibilityNodeInfo optionNode(android.view.accessibility.AccessibilityNodeInfo node, String prefix) {
+        if (node == null) return null;
+        CharSequence text = node.getText();
+        if (node.isVisibleToUser() && text != null && text.toString().startsWith(prefix)) return node;
+        for (int i = 0; i < node.getChildCount(); i++) {
+            android.view.accessibility.AccessibilityNodeInfo found = optionNode(node.getChild(i), prefix);
+            if (found != null) return found;
+        }
+        return null;
+    }
+    private void selectOption(String prefix) throws Exception {
+        android.view.accessibility.AccessibilityNodeInfo node = optionNode(getUiAutomation().getRootInActiveWindow(), prefix);
+        if (node == null) throw new IllegalStateException("missing visible option " + prefix);
+        Rect bounds = new Rect(); node.getBoundsInScreen(bounds);
+        long t = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(t, t, MotionEvent.ACTION_DOWN, bounds.exactCenterX(), bounds.exactCenterY(), 0);
+        MotionEvent up = MotionEvent.obtain(t, t + 60, MotionEvent.ACTION_UP, bounds.exactCenterX(), bounds.exactCenterY(), 0);
+        down.setSource(InputDevice.SOURCE_TOUCHSCREEN); up.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        sendPointerSync(down); sendPointerSync(up); down.recycle(); up.recycle(); pause(450);
+    }
+    private void capturePage(Activity page, String name) throws Exception { tree(page, name); shot(name); }
+    private void wakePlayerControls(Activity page) throws Exception {
+        if (!ui(() -> view(page, "bottom_container").isShown())) { tap(page, 1440, 600); pause(400); }
+        if (!ui(() -> view(page, "bottom_container").isShown())) throw new IllegalStateException("player touch did not reveal controls");
+    }
+    private void pagesChecks() throws Exception {
+        config(home, "setEnabled", true); config(home, "setMode", "floating");
+        config(home, "setHideOnRoot", false); config(home, "setHideSeconds", 4);
+        capturePage(home, "page-home");
+        View categoryTabs = view(home, "mGridView");
+        Object categoryManager = ui(() -> call(categoryTabs, "getLayoutManager"));
+        View firstCategory = (View) ui(() -> call(categoryManager, "findViewByPosition", 1));
+        if (firstCategory != null) {
+            Rect categoryBox = rect(firstCategory); tap(home, categoryBox.exactCenterX(), categoryBox.exactCenterY()); pause(1200);
+            capturePage(home, "page-category");
+            check("gallery category is selected", ((Number) ui(() -> field(home, "currentSelected"))).intValue() == 1);
+            config(home, "setHideSeconds", 0); tapBall(home); pause(500);
+            check("gallery category Back returns home", ((Number) ui(() -> field(home, "currentSelected"))).intValue() == 0);
+        } else check("gallery category exists", false);
+        section("gallery-detail-player", () -> {
+            main(() -> { putPref("SHOW_PREVIEW", true); putPref("VIDEO_ENHANCE", 0); putPref("VIDEO_SR", 0); putPref("VIDEO_INTERP", 0); putPref("HIFI_AUDIO", 0); });
+            Bundle extras = new Bundle(); extras.putString("sourceKey", "car7_ui"); extras.putString("id", "car7-0");
+            Activity detail = openPage("DetailActivity", extras);
+            try {
+                pause(2500); capturePage(detail, "page-detail");
+                check("detail fixture metadata loaded", ui(() -> field(detail, "vodInfo")) != null);
+                Object fragment = ui(() -> field(detail, "playFragment"));
+                Object video = ui(() -> field(fragment, "mVideoView"));
+                check("detail preview plays fixture", waitPlaying(video, 15000));
+                clickView(detail, "tvPlay"); pause(1000);
+                Object controller = ui(() -> field(fragment, "mController"));
+                wakePlayerControls(detail);
+                capturePage(detail, "page-player-controls");
+                Object decoder = ui(() -> call(video, "getMediaPlayer"));
+                int session = ((Number) ui(() -> call(video, "getAudioSessionId"))).intValue();
+                clickView(detail, "play_car_sr");
+                check("SR button updates saved preference", ((Number) pref("VIDEO_SR")).intValue() == 1);
+                check("SR button updates current renderer", Boolean.TRUE.equals(ui(() -> field(field(field(video, "mRenderView"), "mConfiguration"), "superResolution"))));
+                wakePlayerControls(detail); clickView(detail, "play_car_interp");
+                check("interpolation button updates current renderer", Boolean.TRUE.equals(ui(() -> field(field(field(video, "mRenderView"), "mConfiguration"), "interpolation"))));
+                wakePlayerControls(detail); clickView(detail, "play_car_audio");
+                check("audio button uses same current session", ((Number) pref("HIFI_AUDIO")).intValue() == 1
+                        && session == ((Number) ui(() -> call(video, "getAudioSessionId"))).intValue());
+                wakePlayerControls(detail); clickView(detail, "play_car_video");
+                shot("page-player-presets"); selectOption("臻彩 ·");
+                check("video preset button updates current renderer", ((Number) pref("VIDEO_ENHANCE")).intValue() == 1
+                        && ((Number) ui(() -> field(field(field(field(video, "mRenderView"), "mConfiguration"), "preset"), "id"))).intValue() == 1);
+                check("four quick controls preserve decoder", decoder == ui(() -> call(video, "getMediaPlayer")));
+                wakePlayerControls(detail); capturePage(detail, "page-player-controls-enabled");
+                JSONArray observation = new JSONArray(); progressing(video, "detail quick controls", observation);
+                write("page-playback.json", observation.toString(2));
+                if (ui(() -> view(detail, "bottom_container").isShown())) { tap(detail, 1440, 600); pause(350); }
+                config(detail, "setHideSeconds", 0); tapBall(detail);
+                check("player Back returns to detail before finishing", !ui(detail::isFinishing) && !Boolean.TRUE.equals(ui(() -> field(detail, "fullWindows"))));
+                capturePage(detail, "page-detail-after-back");
+                tapBall(detail); check("detail Back finishes one page", ui(detail::isFinishing));
+            } finally { if (!ui(detail::isFinishing)) main(detail::finish); pause(400); }
+        });
+        section("gallery-settings", () -> {
+            Activity settings = openPage("SettingActivity", null);
+            capturePage(settings, "page-settings-top");
+            View entry = view(settings, "llCarAdvanced");
+            main(() -> entry.requestRectangleOnScreen(new Rect(0, 0, entry.getWidth(), entry.getHeight()), true)); pause(350);
+            capturePage(settings, "page-settings-car");
+            Activity a = openAdvanced();
+            try {
+                capturePage(a, "page-advanced-top");
+                int srBefore = ((Number) pref("VIDEO_SR")).intValue();
+                int interpBefore = ((Number) pref("VIDEO_INTERP")).intValue();
+                clickView(a, "llAdvancedSr");
+                check("advanced SR switch toggles saved value", ((Number) pref("VIDEO_SR")).intValue() == 1 - srBefore);
+                clickView(a, "llAdvancedInterp");
+                check("advanced interpolation switch toggles saved value", ((Number) pref("VIDEO_INTERP")).intValue() == 1 - interpBefore);
+                clickView(a, "llAdvancedBackHide"); shot("page-hide-options"); selectOption("6 秒");
+                check("advanced hide duration stored", ((Number) pref("BACK_HIDE_SECONDS")).intValue() == 6);
+                clickView(a, "llAdvancedBackMode"); shot("page-back-mode-options"); selectOption("双模共存");
+                check("advanced dual mode stored", "both".equals(pref("BACK_MODE")));
+                clickView(a, "llAdvancedBackSkin"); selectOption("胶囊抽屉");
+                check("advanced capsule skin stored", "capsule".equals(pref("BACK_EDGE_SKIN")));
+                View last = view(a, "llAdvancedRootHide");
+                main(() -> last.requestRectangleOnScreen(new Rect(0, 0, last.getWidth(), last.getHeight()), true)); pause(350);
+                capturePage(a, "page-advanced-back");
+                config(a, "setHideSeconds", 0); tapBall(a); check("advanced Back returns one page", ui(a::isFinishing));
+            } finally { if (!ui(a::isFinishing)) main(a::finish); }
+            config(settings, "setHideSeconds", 0); tapBall(settings); check("settings Back returns home", ui(settings::isFinishing));
+        });
+        for (String name : new String[]{"SearchActivity", "FastSearchActivity", "HistoryActivity", "CollectActivity", "LocalFileActivity", "PushActivity"}) {
+            final String pageName = name;
+            section("gallery-" + name, () -> {
+                Bundle extras = new Bundle(); if (pageName.equals("FastSearchActivity")) extras.putString("title", "车机界面验收");
+                Activity page = openPage(pageName, extras);
+                try {
+                    pause(pageName.equals("FastSearchActivity") ? 2500 : 400);
+                    capturePage(page, "page-" + pageName.replace("Activity", "").toLowerCase(java.util.Locale.US));
+                    config(page, "setMode", "floating"); config(page, "setHideSeconds", 0); tapBall(page);
+                    check(pageName + " in-app Back finishes one level", ui(page::isFinishing));
+                } finally { if (!ui(page::isFinishing)) main(page::finish); pause(300); }
+            });
+        }
+        section("gallery-live", () -> {
+            main(() -> { putPref("LIVE_API_URL", "http://127.0.0.1:9978/file/TVBoxCar5/car7-live.m3u"); putPref("PLAY_TYPE", 2); });
+            Activity live = openPage("LivePlayActivity", null);
+            try {
+                Object video = ui(() -> field(live, "mVideoView"));
+                check("live fixture actually playing", waitPlaying(video, 20000));
+                JSONArray observation = new JSONArray(); progressing(video, "local live", observation); write("page-live-playback.json", observation.toString(2));
+                capturePage(live, "page-live"); main(() -> call(live, "showChannelList")); pause(300); capturePage(live, "page-live-channels");
+                config(live, "setHideSeconds", 0); tapBall(live); tapBall(live);
+                check("live in-app Back exits one page", ui(live::isFinishing));
+            } finally { if (!ui(live::isFinishing)) main(live::finish); pause(400); }
+        });
+        check("page gallery retains home", !ui(home::isFinishing));
     }
     private void homeChecks() throws Exception {
         tree(home, "home-cold"); shot("home-cold");

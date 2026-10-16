@@ -1916,6 +1916,17 @@ public class DetailActivity extends BaseActivity {
         super.onSaveInstanceState(outState);
     }
 
+    private boolean inAppBackStep;
+
+    @Override
+    public boolean onBackButtonStepUp() {
+        // Decor Back is navigation; D-pad Back may still move episode focus to its line.
+        inAppBackStep = true;
+        try { onBackPressed(); }
+        finally { inAppBackStep = false; }
+        return true;
+    }
+
     @Override
     public void onBackPressed() {
         if (fullWindows) {
@@ -1924,7 +1935,7 @@ public class DetailActivity extends BaseActivity {
             exitFullPreview();
             return;
         }
-        if (mGridView != null && mGridView.hasFocus()
+        if (!inAppBackStep && mGridView != null && mGridView.hasFocus()
                 && mGridViewFlag != null && mGridViewFlag.getVisibility() == View.VISIBLE) {
             try {
                 if (seriesFlagFocus != null && seriesFlagFocus.isShown()

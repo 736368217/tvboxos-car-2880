@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "handoff_ref": "handoff-car.7-r2-20261017",
+  "remote": "origin",
+  "repository": "https://github.com/736368217/tvboxos-car-2880.git",
+  "source_base_commit": "fa297472a608dcc37ee23bcdefafe7107f721fae",
+  "candidate": {
+    "path": "tvbox-os-car/TVBox-1.0.0-car.7-r2-python-signed.apk",
+    "sha256": "B2EEDC14021696467C3E21412208BEDA9CA3FC78F173FFFFF56F970BD77AA8C1",
+    "bytes": 52676888,
+    "package": "com.github.tvbox.osc.jun",
+    "label": "TVBox",
+    "versionCode": 8,
+    "versionName": "1.0.0-car.7"
+  },
+  "local_acceptance_passed": true,
+  "external_acceptance_passed": false,
+  "releaseReady": false,
+  "evidence": "car/evidence/car.7/r2-B2EEDC14",
+  "source_hash_normalization": "CRLF to LF only; all production files matched the previous accepted artifact manifest before freezing",
+  "local_deletions_not_committed": ["car/cartest.mp4", "car/cartest-lowsat.mp4"],
+  "production_files": [
+    {"path": "app/src/main/java/com/github/catvod/crawler/js/Async.java", "sha256_lf": "DA35E588E8AB349273CCA2369764B02AC16DC9A13E721F8DB5E6B75B21594334"},
+    {"path": "app/src/main/java/com/github/catvod/crawler/js/Connect.java", "sha256_lf": "B036F235080D9984574E00E2BFEE2640A2CDB2FED1D5411CE0BF424533A3CD40"},
+    {"path": "app/src/main/java/com/github/catvod/crawler/js/Global.java", "sha256_lf": "1596A0EB61DF18C970EDE4070E3CEC3082472E6034D52048C20B47D6E38AF9F6"},
+    {"path": "app/src/main/java/com/github/catvod/crawler/js/JsSpider.java", "sha256_lf": "196A8366612EA59642479FACED7A86BBD8DC43C3E069503F002F679E9B3A4488"},
+    {"path": "app/src/main/java/com/github/catvod/crawler/js/Req.java", "sha256_lf": "77408CD363C729333F4A296824F30B996FA4E5C847938AE4211671CE874962F1"},
+    {"path": "app/src/main/java/com/github/tvbox/osc/ui/activity/DetailActivity.java", "sha256_lf": "4C1EDA20E1D857CEE3A7A10BBE14875A3C18F50A1C09B833E5A34D9D50221C59"},
+    {"path": "app/src/main/java/com/github/tvbox/osc/ui/activity/FastSearchActivity.java", "sha256_lf": "169C316958DF4282A36563850FD24165906076EF63FC3132FD327A4744EEB8B2"},
+    {"path": "app/src/main/java/com/github/tvbox/osc/ui/activity/SearchActivity.java", "sha256_lf": "ED546EF5D81B69D64D9F80B084D90822131FEE79DEA60413CC448E35690D993F"},
+    {"path": "app/src/main/java/com/github/tvbox/osc/viewmodel/SourceViewModel.java", "sha256_lf": "C483C16F030EEF0B88E5D64734E8D8800BF7A8D5817A390644841C74C4404549"},
+    {"path": "app/src/main/java/com/github/tvbox/osc/util/SearchSession.java", "sha256_lf": "63D1636D01BB8C2E3F2ABC3F8E9CF7F09F38F96EE3DEA0C4C33EB2EA46F838D6"},
+    {"path": "player/src/main/java/xyz/doikki/videoplayer/render/GlEnhanceRenderView.java", "sha256_lf": "F48044F6179B8A946BAB1EAB841E6FEA802C5C7854AD18B027579848AB155A1B"}
+  ]
+}

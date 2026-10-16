@@ -1,0 +1,300 @@
+{
+  "passed": 49,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "gallery category is selected",
+      "detail": "",
+      "at": 1792165371290
+    },
+    {
+      "pass": true,
+      "test": "gallery category Back returns home",
+      "detail": "",
+      "at": 1792165372669
+    },
+    {
+      "pass": true,
+      "test": "DetailActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165374019
+    },
+    {
+      "pass": true,
+      "test": "detail fixture metadata loaded",
+      "detail": "",
+      "at": 1792165376781
+    },
+    {
+      "pass": true,
+      "test": "detail preview plays fixture",
+      "detail": "",
+      "at": 1792165376782
+    },
+    {
+      "pass": true,
+      "test": "tvPlay reachable",
+      "detail": "",
+      "at": 1792165377032
+    },
+    {
+      "pass": true,
+      "test": "play_car_sr reachable",
+      "detail": "",
+      "at": 1792165379738
+    },
+    {
+      "pass": true,
+      "test": "SR button updates saved preference",
+      "detail": "",
+      "at": 1792165379969
+    },
+    {
+      "pass": true,
+      "test": "SR button updates current renderer",
+      "detail": "",
+      "at": 1792165379969
+    },
+    {
+      "pass": true,
+      "test": "play_car_interp reachable",
+      "detail": "",
+      "at": 1792165380220
+    },
+    {
+      "pass": true,
+      "test": "interpolation button updates current renderer",
+      "detail": "",
+      "at": 1792165380447
+    },
+    {
+      "pass": true,
+      "test": "play_car_audio reachable",
+      "detail": "",
+      "at": 1792165380698
+    },
+    {
+      "pass": true,
+      "test": "audio button uses same current session",
+      "detail": "",
+      "at": 1792165380926
+    },
+    {
+      "pass": true,
+      "test": "play_car_video reachable",
+      "detail": "",
+      "at": 1792165381180
+    },
+    {
+      "pass": true,
+      "test": "video preset button updates current renderer",
+      "detail": "",
+      "at": 1792165382408
+    },
+    {
+      "pass": true,
+      "test": "four quick controls preserve decoder",
+      "detail": "",
+      "at": 1792165382408
+    },
+    {
+      "pass": true,
+      "test": "detail quick controls advancing decoder and source",
+      "detail": "",
+      "at": 1792165384625
+    },
+    {
+      "pass": true,
+      "test": "player Back returns to detail before finishing",
+      "detail": "",
+      "at": 1792165386049
+    },
+    {
+      "pass": true,
+      "test": "detail Back finishes one page",
+      "detail": "",
+      "at": 1792165386985
+    },
+    {
+      "pass": true,
+      "test": "SettingActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165388669
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedSr reachable",
+      "detail": "",
+      "at": 1792165390868
+    },
+    {
+      "pass": true,
+      "test": "advanced SR switch toggles saved value",
+      "detail": "",
+      "at": 1792165391097
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedInterp reachable",
+      "detail": "",
+      "at": 1792165391350
+    },
+    {
+      "pass": true,
+      "test": "advanced interpolation switch toggles saved value",
+      "detail": "",
+      "at": 1792165391577
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedBackHide reachable",
+      "detail": "",
+      "at": 1792165391828
+    },
+    {
+      "pass": true,
+      "test": "advanced hide duration stored",
+      "detail": "",
+      "at": 1792165392703
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedBackMode reachable",
+      "detail": "",
+      "at": 1792165392954
+    },
+    {
+      "pass": true,
+      "test": "advanced dual mode stored",
+      "detail": "",
+      "at": 1792165393836
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedBackSkin reachable",
+      "detail": "",
+      "at": 1792165394087
+    },
+    {
+      "pass": true,
+      "test": "advanced capsule skin stored",
+      "detail": "",
+      "at": 1792165394803
+    },
+    {
+      "pass": true,
+      "test": "advanced Back returns one page",
+      "detail": "",
+      "at": 1792165396174
+    },
+    {
+      "pass": true,
+      "test": "settings Back returns home",
+      "detail": "",
+      "at": 1792165397015
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165398285
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792165399860
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165401419
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792165405106
+    },
+    {
+      "pass": true,
+      "test": "HistoryActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165406652
+    },
+    {
+      "pass": true,
+      "test": "HistoryActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792165408225
+    },
+    {
+      "pass": true,
+      "test": "CollectActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165409753
+    },
+    {
+      "pass": true,
+      "test": "CollectActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792165411322
+    },
+    {
+      "pass": true,
+      "test": "LocalFileActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165412869
+    },
+    {
+      "pass": true,
+      "test": "LocalFileActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792165414439
+    },
+    {
+      "pass": true,
+      "test": "PushActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165416002
+    },
+    {
+      "pass": true,
+      "test": "PushActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792165417581
+    },
+    {
+      "pass": true,
+      "test": "LivePlayActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165419170
+    },
+    {
+      "pass": true,
+      "test": "live fixture actually playing",
+      "detail": "",
+      "at": 1792165419170
+    },
+    {
+      "pass": true,
+      "test": "local live advancing decoder and source",
+      "detail": "",
+      "at": 1792165420975
+    },
+    {
+      "pass": true,
+      "test": "live in-app Back exits one page",
+      "detail": "",
+      "at": 1792165423529
+    },
+    {
+      "pass": true,
+      "test": "page gallery retains home",
+      "detail": "",
+      "at": 1792165423929
+    }
+  ]
+}

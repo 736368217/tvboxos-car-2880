@@ -1,0 +1,78 @@
+{
+  "passed": 12,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "search fixture has more sites than worker cap",
+      "detail": "",
+      "at": 1792165840053
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165841335
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity all sites converge",
+      "detail": "",
+      "at": 1792165874394
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity tail site after full queue has result",
+      "detail": "",
+      "at": 1792165874394
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity workers stop after timeout",
+      "detail": "",
+      "at": 1792165874605
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity bounded worker cap",
+      "detail": "",
+      "at": 1792165874605
+    },
+    {
+      "pass": true,
+      "test": "search exit cancels active work",
+      "detail": "",
+      "at": 1792165875512
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792165877252
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity all sites converge",
+      "detail": "",
+      "at": 1792165909111
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity tail site after full queue has result",
+      "detail": "",
+      "at": 1792165909112
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity workers stop after timeout",
+      "detail": "",
+      "at": 1792165909270
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity bounded worker cap",
+      "detail": "",
+      "at": 1792165909270
+    }
+  ]
+}
