@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Poster/copy backdrop: nav surface with a hairline rim so thumbnails read as framed cards. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="@dimen/car_radius_sm" />
+    <solid android:color="@color/car_surface_nav" />
+    <stroke
+        android:width="@dimen/car_stroke_hair"
+        android:color="@color/car_outline_soft" />
+</shape>

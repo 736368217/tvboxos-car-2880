@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom title scrim: transparent at the top edge, obsidian (#E60B0F17) at the bottom,
+     rounded only on the bottom corners so it can sit flush inside a poster.
+     angle=90 => startColor is drawn at the bottom edge. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners
+        android:bottomLeftRadius="@dimen/car_radius_sm"
+        android:bottomRightRadius="@dimen/car_radius_sm" />
+    <gradient
+        android:angle="90"
+        android:endColor="@color/car_scrim_top"
+        android:startColor="@color/car_scrim_bottom" />
+</shape>

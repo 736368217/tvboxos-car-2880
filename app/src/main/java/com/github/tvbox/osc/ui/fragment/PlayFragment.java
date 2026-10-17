@@ -152,6 +152,7 @@ public class PlayFragment extends BaseLazyFragment {
     private Handler mHandler;
     private boolean exitingPreview = false;
     private boolean audioPlayback;
+    private boolean carLifecyclePaused;
     private boolean switchingPlayback;
     private boolean reusePlayerOnSwitch;
     private boolean releasePlayerOnSwitch;
@@ -1452,7 +1453,7 @@ public class PlayFragment extends BaseLazyFragment {
             playArtwork = mVodInfo.pic;
             mVideoView.setArtwork(playArtwork);
         }
-        if (mVodInfo == null || mVideoView == null || !audioPlayback
+        if (mVodInfo == null || mVideoView == null || (!audioPlayback && !com.github.tvbox.osc.car.CarPlaybackPreferences.backgroundAudio())
                 || mVideoView.getCurrentPlayState() == VideoView.STATE_ERROR
                 || mVideoView.getCurrentPlayState() == VideoView.STATE_PLAYBACK_COMPLETED) {
             MusicPlaybackService.stop(getContext(), this);
@@ -1523,9 +1524,11 @@ public class PlayFragment extends BaseLazyFragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (mVideoView != null && !exitingPreview && !hasAudioOnlyPlayback()) {
-            mVideoView.pause();
-        }
+        carLifecyclePaused = mVideoView != null && mVideoView.isPlaying()
+                && !exitingPreview && !hasAudioOnlyPlayback()
+                && !com.github.tvbox.osc.car.CarPlaybackPreferences.backgroundAudio();
+        if (carLifecyclePaused) mVideoView.pause();
+        updateMusicSession();
     }
 
     @Override
@@ -1533,7 +1536,11 @@ public class PlayFragment extends BaseLazyFragment {
         super.onResume();
         exitingPreview = false;
         if (mVideoView != null) {
-            mVideoView.resume();
+            com.github.tvbox.osc.car.CarEnhance.applyVideo(mVideoView);
+            com.github.tvbox.osc.car.CarEnhance.applyAudio(mVideoView);
+            if (mController != null) mController.setGestureEnabled(com.github.tvbox.osc.car.CarPlaybackPreferences.gestures());
+            if (carLifecyclePaused) mVideoView.resume();
+            carLifecyclePaused = false;
         }
     }
 

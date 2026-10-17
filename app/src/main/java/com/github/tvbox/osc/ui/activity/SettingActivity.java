@@ -18,6 +18,7 @@ import com.github.tvbox.osc.base.BaseLazyFragment;
 import com.github.tvbox.osc.ui.adapter.SettingMenuAdapter;
 import com.github.tvbox.osc.ui.adapter.SettingPageAdapter;
 import com.github.tvbox.osc.ui.fragment.ModelSettingFragment;
+import com.github.tvbox.osc.ui.adapter.ux_setting_MenuAdapter;
 import com.github.tvbox.osc.util.AppManager;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.orhanobut.hawk.Hawk;
@@ -66,7 +67,8 @@ public class SettingActivity extends BaseActivity {
     private void initView() {
         mGridView = findViewById(R.id.mGridView);
         mViewPager = findViewById(R.id.mViewPager);
-        sortAdapter = new SettingMenuAdapter();
+        findViewById(R.id.ux_setting_back).setOnClickListener(v -> onBackPressed());
+        sortAdapter = new ux_setting_MenuAdapter();
         mGridView.setAdapter(sortAdapter);
         mGridView.setLayoutManager(new V7LinearLayoutManager(this.mContext, 1, false));
         sortAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
@@ -77,13 +79,13 @@ public class SettingActivity extends BaseActivity {
                         ((ViewGroup) view.getParent()).requestFocus();
                         sortFocused = position;
                         if (sortFocused != defaultSelected) {
-                            defaultSelected = sortFocused;
-                            mViewPager.setCurrentItem(sortFocused, false);
+                            selectCategory(sortFocused);
                         }
                     }
                 }
             }
         });
+        sortAdapter.setOnItemClickListener((adapter, view, position) -> selectCategory(position));
         mGridView.setOnItemListener(new TvRecyclerView.OnItemListener() {
             @Override
             public void onItemPreSelected(TvRecyclerView parent, View itemView, int position) {
@@ -105,7 +107,7 @@ public class SettingActivity extends BaseActivity {
 
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
-
+                selectCategory(position);
             }
         });
     }
@@ -116,12 +118,14 @@ public class SettingActivity extends BaseActivity {
         homeRec = Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC);
         currentLiveApi = Hawk.get(HawkConfig.LIVE_API_URL, "");
         List<String> sortList = new ArrayList<>();
-        sortList.add("设置其他");
+        java.util.Collections.addAll(sortList, "01  画面色彩与超分引擎", "02  座舱声场与音效", "03  播放解码与后台行为",
+                "04  触控手势与长按倍速", "05  双模应用内返回控件", "06  订阅源与多仓管理", "07  关于 TVBox");
         sortAdapter.setNewData(sortList);
         initViewPager();
     }
 
     private void initViewPager() {
+        // One original settings instance: preserve handlers without duplicate subscription state.
         fragments.add(ModelSettingFragment.newInstance());
         pageAdapter = new SettingPageAdapter(getSupportFragmentManager(), fragments);
         mViewPager.setAdapter(pageAdapter);
@@ -134,12 +138,24 @@ public class SettingActivity extends BaseActivity {
             if (sortChange) {
                 sortChange = false;
                 if (sortFocused != defaultSelected) {
-                    defaultSelected = sortFocused;
-                    mViewPager.setCurrentItem(sortFocused, false);
+                    selectCategory(sortFocused);
                 }
             }
         }
     };
+
+    private void selectCategory(int category) {
+        defaultSelected = category;
+        sortFocused = category;
+        ((ux_setting_MenuAdapter) sortAdapter).setSelectedCategory(category);
+        if (!fragments.isEmpty()) ((ModelSettingFragment) fragments.get(0)).showUxCategory(category);
+    }
+
+    @Override protected void onDestroy() {
+        mHandler.removeCallbacksAndMessages(null);
+        callback = null;
+        super.onDestroy();
+    }
 
     private Runnable mDevModeRun = new Runnable() {
         @Override

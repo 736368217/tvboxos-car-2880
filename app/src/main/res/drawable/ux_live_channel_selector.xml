@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape><corners android:radius="20px" /><solid android:color="@color/car_surface_card_pressed" /><stroke android:width="3px" android:color="@color/car_accent" /></shape>
+    </item>
+    <item android:state_focused="true" android:drawable="@drawable/car_outline_focus" />
+    <item android:state_pressed="true" android:drawable="@drawable/car_outline_focus" />
+    <item android:drawable="@drawable/car_surface_card_raised" />
+</selector>

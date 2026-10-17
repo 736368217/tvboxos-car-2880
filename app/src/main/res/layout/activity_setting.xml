@@ -1,29 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
-
-    <LinearLayout
-        android:layout_width="@dimen/vs_180"
-        android:layout_height="match_parent"
-        android:background="@color/color_6632364E"
-        android:orientation="vertical"
-        android:paddingLeft="@dimen/vs_10"
-        android:paddingTop="@dimen/vs_20"
-        android:paddingRight="@dimen/vs_10"
-        android:paddingBottom="@dimen/vs_20"
-        android:visibility="gone">
-
-        <com.owen.tvrecyclerview.widget.TvRecyclerView
-            android:id="@+id/mGridView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center" />
-    </LinearLayout>
-
-    <com.github.tvbox.osc.ui.tv.widget.NoScrollViewPager
-        android:id="@+id/mViewPager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-</LinearLayout>
+<com.github.tvbox.osc.car.CarSceneLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:tag="2880,1620"
+    android:background="@color/car_bg">
+    <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
+        <TextView android:id="@+id/ux_setting_back" android:layout_width="160px" android:layout_height="90px"
+            android:layout_marginLeft="60px" android:layout_marginTop="40px" android:text="‹ 返回"
+            android:textSize="32px" android:textColor="@color/car_text" android:gravity="center"
+            android:focusable="true" android:background="@drawable/ux_setting_choice" />
+        <TextView android:layout_width="2400px" android:layout_height="90px"
+            android:layout_marginLeft="260px" android:layout_marginTop="40px" android:gravity="center_vertical"
+            android:text="播放器设置中心  /  核心解码与音画调优" android:textSize="38px"
+            android:textStyle="bold" android:textColor="@color/car_text" />
+        <FrameLayout android:layout_width="620px" android:layout_height="1400px"
+            android:layout_marginLeft="60px" android:layout_marginTop="160px" android:background="@drawable/ux_setting_card">
+            <com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/mGridView"
+                android:layout_width="580px" android:layout_height="1320px"
+                android:layout_marginLeft="20px" android:layout_marginTop="40px" />
+        </FrameLayout>
+        <com.github.tvbox.osc.ui.tv.widget.NoScrollViewPager android:id="@+id/mViewPager"
+            android:layout_width="2100px" android:layout_height="1400px"
+            android:layout_marginLeft="720px" android:layout_marginTop="160px" />
+    </FrameLayout>
+</com.github.tvbox.osc.car.CarSceneLayout>

@@ -1,102 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="true"
-        android:fillViewport="true"
-        android:paddingLeft="@dimen/car_side_padding"
-        android:paddingRight="@dimen/car_side_padding"
-        android:paddingTop="@dimen/car_top_padding"
-        android:paddingBottom="@dimen/car_bottom_padding"
-        android:scrollbars="none">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/vs_70"
-                android:gravity="center_vertical"
-                android:text="高级功能"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/ts_30"
-                android:textStyle="bold" />
-            <LinearLayout android:id="@+id/llAdvancedAudio" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="音效预设" />
-                <Space style="@style/CarAdvancedWeight" />
-                <TextView android:id="@+id/tvAdvancedAudio" style="@style/CarAdvancedValue" />
-                <ImageView style="@style/CarAdvancedMenuIcon" android:src="@drawable/car_chevron_right" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedVideo" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="画面预设" />
-                <Space style="@style/CarAdvancedWeight" />
-                <TextView android:id="@+id/tvAdvancedVideo" style="@style/CarAdvancedValue" />
-                <ImageView style="@style/CarAdvancedMenuIcon" android:src="@drawable/car_chevron_right" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedSr" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="SGSR1 超分" />
-                <Space style="@style/CarAdvancedWeight" />
-                <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchAdvancedSr" style="@style/CarAdvancedSwitch" android:contentDescription="SGSR1 超分" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedInterp" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="时域平滑补帧" />
-                <Space style="@style/CarAdvancedWeight" />
-                <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchAdvancedInterp" style="@style/CarAdvancedSwitch" android:contentDescription="时域平滑补帧" />
-            </LinearLayout>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/vs_60"
-                android:gravity="center_vertical"
-                android:text="返回交互"
-                android:textColor="@color/color_CCFFFFFF"
-                android:textSize="@dimen/ts_22" />
-            <LinearLayout android:id="@+id/llAdvancedBackEnabled" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="显示应用内返回按钮" />
-                <Space style="@style/CarAdvancedWeight" />
-                <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchAdvancedBackEnabled" style="@style/CarAdvancedSwitch" android:contentDescription="显示应用内返回按钮" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedBackMode" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="返回模式" />
-                <Space style="@style/CarAdvancedWeight" />
-                <TextView android:id="@+id/tvAdvancedBackMode" style="@style/CarAdvancedValue" />
-                <ImageView style="@style/CarAdvancedMenuIcon" android:src="@drawable/car_chevron_right" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedBackSide" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="边缘驻留侧" />
-                <Space style="@style/CarAdvancedWeight" />
-                <TextView android:id="@+id/tvAdvancedBackSide" style="@style/CarAdvancedValue" />
-                <ImageView style="@style/CarAdvancedMenuIcon" android:src="@drawable/car_chevron_right" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedBackSkin" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="边缘抽屉外观" />
-                <Space style="@style/CarAdvancedWeight" />
-                <TextView android:id="@+id/tvAdvancedBackSkin" style="@style/CarAdvancedValue" />
-                <ImageView style="@style/CarAdvancedMenuIcon" android:src="@drawable/car_chevron_right" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedBackSize" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="大号悬浮球" />
-                <Space style="@style/CarAdvancedWeight" />
-                <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchAdvancedBackSize" style="@style/CarAdvancedSwitch" android:contentDescription="大号悬浮球" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedBackHide" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="闲置半隐藏" />
-                <Space style="@style/CarAdvancedWeight" />
-                <TextView android:id="@+id/tvAdvancedBackHide" style="@style/CarAdvancedValue" />
-                <ImageView style="@style/CarAdvancedMenuIcon" android:src="@drawable/car_chevron_right" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedHaptic" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="触感反馈" />
-                <Space style="@style/CarAdvancedWeight" />
-                <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchAdvancedHaptic" style="@style/CarAdvancedSwitch" android:contentDescription="触感反馈" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/llAdvancedRootHide" style="@style/CarAdvancedRow">
-                <TextView style="@style/CarAdvancedLabel" android:text="首页根状态自动隐藏" />
-                <Space style="@style/CarAdvancedWeight" />
-                <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchAdvancedRootHide" style="@style/CarAdvancedSwitch" android:contentDescription="首页根状态自动隐藏" />
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
-</FrameLayout>
+<com.github.tvbox.osc.car.CarSceneLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:tag="2880,1620"
+    android:background="@color/car_bg">
+    <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
+        <TextView android:id="@+id/ux_setting_back" android:layout_width="160px" android:layout_height="90px"
+            android:layout_marginLeft="60px" android:layout_marginTop="40px" android:text="‹ 返回"
+            android:textSize="32px" android:textColor="@color/car_text" android:gravity="center"
+            android:focusable="true" android:background="@drawable/ux_setting_choice" />
+        <TextView android:layout_width="2400px" android:layout_height="90px" android:layout_marginLeft="260px"
+            android:layout_marginTop="40px" android:text="高级功能  /  画面 · 音效 · 应用内返回"
+            android:textSize="38px" android:textStyle="bold" android:textColor="@color/car_text" android:gravity="center_vertical" />
+        <FrameLayout android:layout_width="620px" android:layout_height="1400px"
+            android:layout_marginLeft="60px" android:layout_marginTop="160px" android:background="@drawable/ux_setting_card">
+            <TextView android:id="@+id/ux_setting_video_tab" android:layout_width="580px" android:layout_height="130px"
+                android:layout_marginLeft="20px" android:layout_marginTop="40px" android:text="01  画面色彩与超分引擎"
+                android:textSize="28px" android:textStyle="bold" android:textColor="@color/car_text" android:gravity="center_vertical"
+                android:paddingLeft="28px" android:focusable="true" android:background="@drawable/ux_setting_choice" />
+            <TextView android:id="@+id/ux_setting_audio_tab" android:layout_width="580px" android:layout_height="130px"
+                android:layout_marginLeft="20px" android:layout_marginTop="195px" android:text="02  座舱声场与音效"
+                android:textSize="28px" android:textStyle="bold" android:textColor="@color/car_text" android:gravity="center_vertical"
+                android:paddingLeft="28px" android:focusable="true" android:background="@drawable/ux_setting_choice" />
+            <TextView android:id="@+id/ux_setting_return_tab" android:layout_width="580px" android:layout_height="130px"
+                android:layout_marginLeft="20px" android:layout_marginTop="350px" android:text="03  双模应用内返回控件"
+                android:textSize="28px" android:textStyle="bold" android:textColor="@color/car_text" android:gravity="center_vertical"
+                android:paddingLeft="28px" android:focusable="true" android:background="@drawable/ux_setting_choice" />
+        </FrameLayout>
+        <FrameLayout android:layout_width="2100px" android:layout_height="1400px"
+            android:layout_marginLeft="720px" android:layout_marginTop="160px">
+            <include layout="@layout/ux_setting_model" />
+        </FrameLayout>
+    </FrameLayout>
+</com.github.tvbox.osc.car.CarSceneLayout>

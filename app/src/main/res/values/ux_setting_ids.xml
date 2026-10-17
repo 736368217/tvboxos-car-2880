@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Stable advanced-control IDs retained by the native settings page builder. -->
+    <item name="llAdvancedAudio" type="id" /><item name="tvAdvancedAudio" type="id" />
+    <item name="llAdvancedVideo" type="id" /><item name="tvAdvancedVideo" type="id" />
+    <item name="llAdvancedSr" type="id" /><item name="switchAdvancedSr" type="id" />
+    <item name="llAdvancedInterp" type="id" /><item name="switchAdvancedInterp" type="id" />
+    <item name="llAdvancedBackEnabled" type="id" /><item name="switchAdvancedBackEnabled" type="id" />
+    <item name="llAdvancedBackMode" type="id" /><item name="tvAdvancedBackMode" type="id" />
+    <item name="llAdvancedBackSide" type="id" /><item name="tvAdvancedBackSide" type="id" />
+    <item name="llAdvancedBackSkin" type="id" /><item name="tvAdvancedBackSkin" type="id" />
+    <item name="llAdvancedBackSize" type="id" /><item name="switchAdvancedBackSize" type="id" />
+    <item name="llAdvancedBackHide" type="id" /><item name="tvAdvancedBackHide" type="id" />
+    <item name="llAdvancedHaptic" type="id" /><item name="switchAdvancedHaptic" type="id" />
+    <item name="llAdvancedRootHide" type="id" /><item name="switchAdvancedRootHide" type="id" />
+</resources>

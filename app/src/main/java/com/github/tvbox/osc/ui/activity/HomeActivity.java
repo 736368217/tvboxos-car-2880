@@ -111,7 +111,7 @@ public class HomeActivity extends BaseActivity {
         @Override
         public void run() {
             Date date = new Date();
-            SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy/MM/dd  E  HH:mm", Locale.CHINA);
+            SimpleDateFormat timeFormat = new SimpleDateFormat("MM/dd E HH:mm", Locale.CHINA);
             tvDate.setText(timeFormat.format(date));
             mHandler.postDelayed(this, 1000);
         }
@@ -133,8 +133,8 @@ public class HomeActivity extends BaseActivity {
             hideSysBar();
             applyHomeSafeInsets();
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) topLayout.getLayoutParams();
-            params.topMargin = getResources().getDimensionPixelSize(R.dimen.car_top_padding);
-            params.height = AutoSizeUtils.mm2px(HomeActivity.this, 50.0f);
+            params.topMargin = 40;
+            params.height = 90;
             topLayout.setLayoutParams(params);
             topLayout.setAlpha(1.0f);
             refreshTopInfoTextSize();
@@ -177,6 +177,7 @@ public class HomeActivity extends BaseActivity {
         this.contentLayout = findViewById(R.id.contentLayout);
         this.mGridView = findViewById(R.id.mGridView);
         this.mViewPager = findViewById(R.id.mViewPager);
+        bindCarNavigation();
         this.sortAdapter = new SortAdapter();
         this.mGridView.setLayoutManager(new V7LinearLayoutManager(this.mContext, 0, false));
         this.mGridView.setSpacingWithMargins(0, AutoSizeUtils.dp2px(this.mContext, 10.0f));
@@ -708,8 +709,8 @@ public class HomeActivity extends BaseActivity {
         if (tvName == null || tvDate == null) {
             return;
         }
-        tvName.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.ts_30));
-        tvDate.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.ts_26));
+        tvName.setTextSize(TypedValue.COMPLEX_UNIT_PX, 26f);
+        tvDate.setTextSize(TypedValue.COMPLEX_UNIT_PX, 28f);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -782,30 +783,47 @@ public class HomeActivity extends BaseActivity {
     byte topHide = 0;
 
     private void applyHomeSafeInsets() {
-        int side = getResources().getDimensionPixelSize(R.dimen.car_side_padding);
-        topLayout.setPadding(side, 0, side, 0);
-        int tabSide = side + getResources().getDimensionPixelSize(R.dimen.vs_10);
-        mGridView.setPadding(tabSide, mGridView.getPaddingTop(), tabSide, mGridView.getPaddingBottom());
+        topLayout.setPadding(0, 0, 0, 0);
+        mGridView.setPadding(0, 0, 0, 0);
         mGridView.setClipToPadding(true);
     }
 
     private void changeTop(boolean hide) {
-        if ((hide && topHide == 1) || (!hide && topHide == 0)) return;
         if (topAnimator != null) topAnimator.cancel();
-        applyHomeSafeInsets();
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) topLayout.getLayoutParams();
-        params.topMargin = getResources().getDimensionPixelSize(R.dimen.car_top_padding);
-        topLayout.setLayoutParams(params);
         topHide = (byte) (hide ? 1 : 0);
-        tvName.setFocusable(!hide);
-        int targetHeight = hide ? 1 : getResources().getDimensionPixelSize(R.dimen.vs_50);
-        ViewObj viewObj = new ViewObj(topLayout, params);
-        topAnimator = new AnimatorSet();
-        topAnimator.playTogether(ObjectAnimator.ofObject(viewObj, "height", new IntEvaluator(),
-                        topLayout.getHeight(), targetHeight),
-                ObjectAnimator.ofFloat(topLayout, "alpha", topLayout.getAlpha(), hide ? 0f : 1f));
-        topAnimator.setDuration(200);
-        topAnimator.start();
+        topLayout.setAlpha(1f);
+        tvName.setFocusable(true);
+        ViewGroup.MarginLayoutParams tabs = (ViewGroup.MarginLayoutParams) mGridView.getLayoutParams();
+        tabs.topMargin = hide ? 160 : 710;
+        mGridView.setLayoutParams(tabs);
+        findViewById(R.id.uxNavHome).setSelected(!hide);
+        findViewById(R.id.uxNavCategories).setSelected(hide);
+    }
+
+    private void bindCarNavigation() {
+        findViewById(R.id.uxNavHome).setOnClickListener(v -> selectCarPage(0));
+        findViewById(R.id.uxNavCategories).setOnClickListener(v -> {
+            if (fragments.size() > 1) selectCarPage(1);
+            else Toast.makeText(this, "当前源暂无分类，请选择其他源站", Toast.LENGTH_SHORT).show();
+        });
+        findViewById(R.id.uxNavLive).setOnClickListener(v -> jumpActivity(LivePlayActivity.class));
+        findViewById(R.id.uxNavHistory).setOnClickListener(v -> jumpActivity(HistoryActivity.class));
+        findViewById(R.id.uxNavCollect).setOnClickListener(v -> jumpActivity(CollectActivity.class));
+        findViewById(R.id.uxNavPush).setOnClickListener(v -> jumpActivity(PushActivity.class));
+        findViewById(R.id.uxNavSettings).setOnClickListener(v -> jumpActivity(SettingActivity.class));
+        findViewById(R.id.uxHomeSearch).setOnClickListener(v -> jumpActivity(SearchActivity.class));
+        ((TextView) findViewById(R.id.uxEngineStatus)).setText("播放器就绪\nSGSR1 · "
+                + (com.github.tvbox.osc.car.CarEnhance.videoSrEnabled() ? "开" : "关"));
+    }
+
+    private void selectCarPage(int position) {
+        if (position < 0 || position >= fragments.size()) return;
+        sortFocused = position;
+        sortChange = true;
+        mHandler.removeCallbacks(mDataRunnable);
+        mDataRunnable.run();
+        mGridView.setSelectedPosition(position);
+        changeTop(position != 0);
     }
 
     @Override

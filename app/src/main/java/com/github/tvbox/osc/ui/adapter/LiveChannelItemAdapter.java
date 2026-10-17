@@ -1,7 +1,9 @@
 package com.github.tvbox.osc.ui.adapter;
 
-import android.graphics.Color;
+import android.view.View;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -9,58 +11,69 @@ import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.bean.LiveChannelItem;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
-/**
- * @author pj567
- * @date :2021/1/12
- * @description:
- */
+/** Native large-touch channel rows. EPG is supplied from the activity's real cache only. */
 public class LiveChannelItemAdapter extends BaseQuickAdapter<LiveChannelItem, BaseViewHolder> {
+    public interface ProgramTitleProvider {
+        String getTitle(LiveChannelItem channel);
+    }
+
     private int selectedChannelIndex = -1;
     private int focusedChannelIndex = -1;
+    private LiveChannelItem playingChannel;
+    private boolean playing;
+    private ProgramTitleProvider programTitleProvider;
 
     public LiveChannelItemAdapter() {
         super(R.layout.item_live_channel, new ArrayList<>());
     }
 
+    public void setProgramTitleProvider(ProgramTitleProvider provider) {
+        programTitleProvider = provider;
+    }
+
+    public void setPlaybackState(LiveChannelItem channel, boolean isPlaying) {
+        if (playingChannel == channel && playing == isPlaying) return;
+        playingChannel = channel;
+        playing = isPlaying;
+        notifyDataSetChanged();
+    }
+
     @Override
     protected void convert(BaseViewHolder holder, LiveChannelItem item) {
-        TextView tvChannelNum = holder.getView(R.id.tvChannelNum);
-        TextView tvChannel = holder.getView(R.id.tvChannelName);
-        tvChannelNum.setText(String.format("%s", item.getChannelNum()));
-        tvChannel.setText(item.getChannelName());
-        tvChannelNum.setSelected(true);
-        tvChannel.setSelected(true);
-        int channelIndex = item.getChannelIndex();
-        holder.itemView.setSelected(channelIndex == selectedChannelIndex);
-        if (channelIndex == selectedChannelIndex && channelIndex != focusedChannelIndex) {
-            tvChannelNum.setTextColor(mContext.getResources().getColor(R.color.color_1890FF));
-            tvChannel.setTextColor(mContext.getResources().getColor(R.color.color_1890FF));
-        }
-        else{
-            tvChannelNum.setTextColor(Color.WHITE);
-            tvChannel.setTextColor(Color.WHITE);
-        }
+        TextView number = holder.getView(R.id.tvChannelNum);
+        TextView name = holder.getView(R.id.tvChannelName);
+        TextView epg = holder.getView(R.id.ux_live_channel_epg);
+        TextView state = holder.getView(R.id.ux_live_channel_playing);
+        boolean current = item == playingChannel;
+        holder.itemView.setSelected(current);
+        number.setText(String.format(Locale.getDefault(), "%02d", item.getChannelNum()));
+        number.setTextColor(ContextCompat.getColor(mContext, current ? R.color.car_accent : R.color.car_text_muted));
+        name.setText(item.getChannelName());
+        name.setTextColor(ContextCompat.getColor(mContext, R.color.car_text));
+        String title = programTitleProvider == null ? null : programTitleProvider.getTitle(item);
+        epg.setText(title == null || title.trim().isEmpty() ? "暂无节目单" : "▶ 正在播出：" + title);
+        state.setVisibility(current ? View.VISIBLE : View.GONE);
+        state.setText(playing ? "播放中" : "已选择");
     }
 
     public void setSelectedChannelIndex(int selectedChannelIndex) {
         if (selectedChannelIndex == this.selectedChannelIndex) return;
-        int preSelectedChannelIndex = this.selectedChannelIndex;
+        int previous = this.selectedChannelIndex;
         this.selectedChannelIndex = selectedChannelIndex;
-        if (preSelectedChannelIndex != -1)
-            notifyItemChanged(preSelectedChannelIndex);
-        if (this.selectedChannelIndex != -1)
-            notifyItemChanged(this.selectedChannelIndex);
+        notifyChannelChanged(previous);
+        notifyChannelChanged(selectedChannelIndex);
     }
 
     public void setFocusedChannelIndex(int focusedChannelIndex) {
-        int preFocusedChannelIndex = this.focusedChannelIndex;
+        int previous = this.focusedChannelIndex;
         this.focusedChannelIndex = focusedChannelIndex;
-        if (preFocusedChannelIndex != -1)
-            notifyItemChanged(preFocusedChannelIndex);
-        if (this.focusedChannelIndex != -1)
-            notifyItemChanged(this.focusedChannelIndex);
-        else if (this.selectedChannelIndex != -1)
-            notifyItemChanged(this.selectedChannelIndex);
+        notifyChannelChanged(previous);
+        notifyChannelChanged(focusedChannelIndex);
+    }
+
+    private void notifyChannelChanged(int position) {
+        if (position >= 0 && position < getItemCount()) notifyItemChanged(position);
     }
 }

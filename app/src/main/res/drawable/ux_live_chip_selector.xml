@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape><corners android:radius="35px" /><solid android:color="@color/car_surface_card_pressed" /><stroke android:width="2px" android:color="@color/car_accent" /></shape>
+    </item>
+    <item android:drawable="@drawable/car_chip_selector" />
+</selector>

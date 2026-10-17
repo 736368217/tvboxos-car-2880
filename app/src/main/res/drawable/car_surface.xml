@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Root page surface for the obsidian deep-space theme: subtle vertical depth gradient. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:endColor="@color/car_bg_obsidian_deep"
+        android:startColor="@color/car_bg_obsidian" />
+</shape>

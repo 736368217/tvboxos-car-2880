@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="UxSceneText">
+        <item name="android:layout_width">wrap_content</item><item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/car_text_strong</item><item name="android:textSize">28px</item>
+        <item name="android:includeFontPadding">false</item><item name="android:ellipsize">end</item>
+    </style>
+    <style name="UxSceneButton" parent="UxSceneText">
+        <item name="android:layout_width">240px</item><item name="android:layout_height">100px</item>
+        <item name="android:gravity">center</item><item name="android:background">@drawable/car_button_selector</item>
+        <item name="android:focusable">true</item><item name="android:clickable">true</item>
+        <item name="android:maxLines">2</item><item name="android:textStyle">bold</item>
+        <item name="android:paddingLeft">16px</item><item name="android:paddingRight">16px</item>
+    </style>
+    <style name="UxSceneNav">
+        <item name="android:layout_width">200px</item><item name="android:layout_height">105px</item>
+        <item name="android:layout_marginBottom">20px</item><item name="android:background">@drawable/car_nav_selector</item>
+        <item name="android:focusable">true</item><item name="android:clickable">true</item>
+        <item name="android:gravity">center_vertical</item><item name="android:orientation">horizontal</item>
+        <item name="android:paddingLeft">18px</item><item name="android:paddingRight">10px</item>
+    </style>
+    <style name="UxSceneNavIcon"><item name="android:layout_width">28px</item><item name="android:layout_height">28px</item><item name="android:importantForAccessibility">no</item></style>
+    <style name="UxSceneNavText" parent="UxSceneText"><item name="android:layout_marginLeft">12px</item><item name="android:textSize">25px</item><item name="android:textStyle">bold</item></style>
+</resources>

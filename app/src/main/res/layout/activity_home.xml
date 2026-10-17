@@ -1,86 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <LinearLayout
-        android:id="@+id/topLayout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/vs_50"
-        android:layout_marginTop="@dimen/car_top_padding"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingLeft="@dimen/car_side_padding"
-        android:paddingRight="@dimen/car_side_padding"
-        android:paddingTop="@dimen/vs_0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/tvName"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:maxWidth="480mm"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:focusable="true"
-            android:focusableInTouchMode="false"
-            android:gravity="left|center_vertical"
-            android:text="@string/app_name"
-            android:textAlignment="gravity"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/ts_30"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="@dimen/vs_0"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:gravity="right|center_vertical"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:textAlignment="gravity"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/ts_26"
-            tools:text="2026/06/16  周二  15:01" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/contentLayout"
-        android:layout_width="@dimen/vs_0"
-        android:layout_height="@dimen/vs_0"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/topLayout">
-
-        <com.owen.tvrecyclerview.widget.TvRecyclerView
-            android:id="@+id/mGridView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/vs_10"
-            android:layout_marginBottom="@dimen/vs_4"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:overScrollMode="always"
-            android:paddingLeft="@dimen/car_side_padding"
-            android:paddingRight="@dimen/car_side_padding"
-            app:tv_horizontalSpacingWithMargins="@dimen/vs_12"
-            app:tv_selectedItemIsCentered="true" />
-
-        <com.github.tvbox.osc.ui.tv.widget.NoScrollViewPager
-            android:id="@+id/mViewPager"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-    </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+<com.github.tvbox.osc.car.CarSceneLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/uxHomeRoot" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/car_bg">
+    <FrameLayout android:layout_width="2880px" android:layout_height="1620px" android:background="@drawable/car_surface">
+        <LinearLayout android:id="@+id/contentLayout" android:layout_width="2880px" android:layout_height="1470px" android:layout_marginTop="150px" android:orientation="vertical">
+            <com.github.tvbox.osc.ui.tv.widget.NoScrollViewPager android:id="@+id/mViewPager" android:layout_width="match_parent" android:layout_height="match_parent" />
+        </LinearLayout>
+        <com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/mGridView" android:layout_width="2520px" android:layout_height="100px" android:layout_marginLeft="280px" android:layout_marginTop="710px" android:clipToPadding="true" android:background="@color/car_bg" app:tv_horizontalSpacingWithMargins="20px" app:tv_selectedItemIsCentered="false" />
+        <FrameLayout android:layout_width="240px" android:layout_height="match_parent" android:background="@color/car_surface_nav">
+            <TextView style="@style/UxSceneText" android:layout_marginLeft="45px" android:layout_marginTop="45px" android:text="TVBOX" android:textColor="@color/car_accent_cyan" android:textSize="38px" android:textStyle="bold" />
+            <TextView style="@style/UxSceneText" android:layout_marginLeft="48px" android:layout_marginTop="98px" android:text="CAR 3K" android:textColor="@color/car_text_dim" android:textSize="24px" android:textStyle="bold" />
+            <LinearLayout android:layout_width="200px" android:layout_height="wrap_content" android:layout_marginLeft="20px" android:layout_marginTop="175px" android:orientation="vertical">
+                <LinearLayout android:id="@+id/uxNavHome" style="@style/UxSceneNav"><ImageView style="@style/UxSceneNavIcon" android:src="@drawable/ux_star"/><TextView style="@style/UxSceneNavText" android:text="精选推荐"/></LinearLayout>
+                <LinearLayout android:id="@+id/uxNavCategories" style="@style/UxSceneNav"><ImageView style="@style/UxSceneNavIcon" android:src="@drawable/ux_grid"/><TextView style="@style/UxSceneNavText" android:text="分类专题"/></LinearLayout>
+                <LinearLayout android:id="@+id/uxNavLive" style="@style/UxSceneNav"><ImageView style="@style/UxSceneNavIcon" android:src="@drawable/icon_live"/><TextView style="@style/UxSceneNavText" android:text="电视直播"/></LinearLayout>
+                <LinearLayout android:id="@+id/uxNavHistory" style="@style/UxSceneNav"><ImageView style="@style/UxSceneNavIcon" android:src="@drawable/icon_history"/><TextView style="@style/UxSceneNavText" android:text="播放历史"/></LinearLayout>
+                <LinearLayout android:id="@+id/uxNavCollect" style="@style/UxSceneNav"><ImageView style="@style/UxSceneNavIcon" android:src="@drawable/icon_collect"/><TextView style="@style/UxSceneNavText" android:text="我的收藏"/></LinearLayout>
+                <LinearLayout android:id="@+id/uxNavPush" style="@style/UxSceneNav"><ImageView style="@style/UxSceneNavIcon" android:src="@drawable/icon_push"/><TextView style="@style/UxSceneNavText" android:text="多端推送"/></LinearLayout>
+                <LinearLayout android:id="@+id/uxNavSettings" style="@style/UxSceneNav"><ImageView style="@style/UxSceneNavIcon" android:src="@drawable/icon_setting"/><TextView style="@style/UxSceneNavText" android:text="系统设置"/></LinearLayout>
+            </LinearLayout>
+            <TextView android:id="@+id/uxEngineStatus" style="@style/UxSceneText" android:layout_width="200px" android:layout_height="100px" android:layout_marginLeft="20px" android:layout_marginTop="1470px" android:background="@drawable/car_surface_card" android:gravity="center" android:text="播放器就绪" android:textColor="@color/car_accent_green" android:textSize="22px" />
+        </FrameLayout>
+        <LinearLayout android:id="@+id/topLayout" android:layout_width="2520px" android:layout_height="90px" android:layout_marginLeft="280px" android:layout_marginTop="40px" android:gravity="center_vertical" android:orientation="horizontal">
+            <TextView android:id="@+id/tvName" style="@style/UxSceneButton" android:layout_width="520px" android:layout_height="90px" android:background="@drawable/car_surface_card" android:text="TVBox · 选择源站" android:textColor="@color/car_accent_cyan" android:textSize="26px" android:maxLines="1" />
+            <TextView android:id="@+id/uxHomeSearch" style="@style/UxSceneButton" android:layout_width="1460px" android:layout_height="90px" android:layout_marginLeft="40px" android:background="@drawable/ux_search_outline" android:gravity="center_vertical" android:paddingLeft="30px" android:drawableLeft="@drawable/icon_search" android:drawablePadding="20px" android:text="搜索片名 / 首字母简拼" android:textColor="@color/car_text_dim" android:textSize="28px" />
+            <TextView android:id="@+id/tvDate" style="@style/UxSceneText" android:layout_width="460px" android:layout_height="90px" android:layout_marginLeft="40px" android:background="@drawable/car_surface_card" android:gravity="center" android:textSize="28px" android:textStyle="bold" android:maxLines="1" />
+        </LinearLayout>
+    </FrameLayout>
+</com.github.tvbox.osc.car.CarSceneLayout>

@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="@dimen/vs_4_"
-    android:layout_marginRight="@dimen/vs_4_">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/mRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/mRecyclerView"
+        android:layout_width="match_parent" android:layout_height="540px" android:overScrollMode="never" />
+    <TextView android:id="@+id/ux_search_remote" android:layout_width="560px" android:layout_height="90px"
+        android:layout_marginTop="555px" android:text="手机扫码 / 远程输入" android:textSize="30px"
+        android:textColor="@color/car_accent_cyan" android:gravity="center" android:focusable="true"
+        android:background="@drawable/ux_setting_choice" />
+    <TextView android:id="@+id/ux_search_left" android:layout_width="290px" android:layout_height="90px"
+        android:layout_marginLeft="580px" android:layout_marginTop="555px" android:text="← 光标"
+        android:textSize="30px" android:textColor="@color/car_text" android:gravity="center"
+        android:focusable="true" android:background="@drawable/ux_setting_choice" />
+    <TextView android:id="@+id/ux_search_right" android:layout_width="290px" android:layout_height="90px"
+        android:layout_marginLeft="890px" android:layout_marginTop="555px" android:text="光标 →"
+        android:textSize="30px" android:textColor="@color/car_text" android:gravity="center"
+        android:focusable="true" android:background="@drawable/ux_setting_choice" />
 </FrameLayout>

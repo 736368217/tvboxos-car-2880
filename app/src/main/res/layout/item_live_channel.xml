@@ -1,37 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="6mm"
-    android:layout_marginTop="4mm"
-    android:layout_marginRight="6mm"
-    android:layout_marginBottom="4mm"
-    android:background="@drawable/shape_live_focus"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="980px"
+    android:layout_height="155px"
+    android:layout_marginBottom="20px"
+    android:background="@drawable/ux_live_channel_selector"
     android:focusable="true"
-    android:focusableInTouchMode="false"
-    android:orientation="horizontal">
+    android:focusableInTouchMode="false">
 
     <TextView
         android:id="@+id/tvChannelNum"
-        android:layout_width="54mm"
-        android:layout_height="52mm"
-        android:ellipsize="marquee"
+        android:layout_width="110px"
+        android:layout_height="90px"
+        android:layout_marginLeft="20px"
+        android:layout_marginTop="10px"
+        android:ellipsize="end"
         android:gravity="center"
-        android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
-        android:textColor="@android:color/white"
-        android:textSize="19mm" />
+        android:textColor="@color/car_text_muted"
+        android:textSize="40px"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvChannelName"
-        android:layout_width="0mm"
-        android:layout_height="52mm"
-        android:layout_weight="1"
-        android:ellipsize="marquee"
+        android:layout_width="670px"
+        android:layout_height="70px"
+        android:layout_marginLeft="140px"
+        android:layout_marginTop="15px"
+        android:ellipsize="end"
         android:gravity="center_vertical"
-        android:paddingRight="8mm"
-        android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
-        android:textColor="@android:color/white"
-        android:textSize="20mm" />
-</LinearLayout>
+        android:textColor="@color/car_text"
+        android:textSize="34px"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/ux_live_channel_epg"
+        android:layout_width="790px"
+        android:layout_height="50px"
+        android:layout_marginLeft="140px"
+        android:layout_marginTop="90px"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:text="暂无节目单"
+        android:textColor="@color/car_accent_alt"
+        android:textSize="26px" />
+
+    <TextView
+        android:id="@+id/ux_live_channel_playing"
+        android:layout_width="120px"
+        android:layout_height="65px"
+        android:layout_gravity="right|top"
+        android:layout_marginRight="30px"
+        android:layout_marginTop="30px"
+        android:background="@drawable/car_badge_green"
+        android:gravity="center"
+        android:text="播放中"
+        android:textColor="@color/car_text"
+        android:textSize="20px"
+        android:textStyle="bold"
+        android:visibility="gone" />
+</FrameLayout>

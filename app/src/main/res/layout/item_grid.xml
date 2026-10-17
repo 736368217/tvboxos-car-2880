@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Obsidian grid card. IDs / hierarchy are contract-bound to GridAdapter, CollectAdapter,
+     HistoryAdapter (ivThumb, tvYear, tvArea, tvLang, tvNote, tvName, tvActor, delFrameLayout, imageView).
+     Visual only: card surface + cyan focus ring (foreground) + badge/scrim hierarchy. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/shape_user_focus"
-    android:focusable="true"
+    android:background="@drawable/car_surface_card_selector"
     android:clipChildren="false"
-    android:padding="@dimen/vs_1">
+    android:focusable="true"
+    android:foreground="@drawable/car_outline_focus"
+    android:padding="@dimen/car_gap_card">
 
     <FrameLayout
         android:layout_width="@dimen/vs_214"
         android:layout_height="@dimen/vs_280"
+        android:background="@drawable/car_poster_surface"
         android:clipChildren="false">
 
         <ImageView
@@ -22,55 +27,31 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/vs_5"
-            android:layout_marginTop="@dimen/vs_5"
-            android:layout_marginRight="@dimen/vs_5"
+            android:layout_marginLeft="@dimen/vs_6"
+            android:layout_marginTop="@dimen/vs_6"
+            android:layout_marginRight="@dimen/vs_6"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tvYear"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/CarPosterBadge"
                 android:layout_marginEnd="@dimen/vs_5"
                 android:layout_marginRight="@dimen/vs_5"
-                android:background="@drawable/shape_thumb_bottom_name"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:paddingLeft="@dimen/vs_5"
-                android:paddingRight="@dimen/vs_5"
-                android:singleLine="true"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/ts_20" />
+                android:background="@drawable/car_badge_blue" />
 
             <TextView
                 android:id="@+id/tvArea"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/CarPosterBadge"
                 android:layout_marginEnd="@dimen/vs_5"
                 android:layout_marginRight="@dimen/vs_5"
-                android:background="@drawable/shape_thumb_lang"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:paddingLeft="@dimen/vs_5"
-                android:paddingRight="@dimen/vs_5"
-                android:singleLine="true"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/ts_20" />
+                android:background="@drawable/car_badge_amber" />
 
             <TextView
                 android:id="@+id/tvLang"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/CarPosterBadge"
                 android:layout_marginEnd="@dimen/vs_5"
                 android:layout_marginRight="@dimen/vs_5"
-                android:background="@drawable/shape_thumb_year"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:paddingLeft="@dimen/vs_5"
-                android:paddingRight="@dimen/vs_5"
-                android:singleLine="true"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/ts_20" />
+                android:background="@drawable/car_badge_green" />
         </LinearLayout>
 
         <LinearLayout
@@ -82,51 +63,31 @@
 
             <TextView
                 android:id="@+id/tvNote"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/CarPosterBadge"
                 android:layout_gravity="bottom"
-                android:layout_marginLeft="@dimen/vs_5"
-                android:layout_marginRight="@dimen/vs_5"
+                android:layout_marginLeft="@dimen/vs_6"
+                android:layout_marginRight="@dimen/vs_6"
                 android:layout_marginBottom="@dimen/vs_5"
-                android:background="@drawable/shape_thumb_note"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:paddingLeft="@dimen/vs_5"
-                android:paddingRight="@dimen/vs_5"
-                android:singleLine="true"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/ts_20" />
+                android:background="@drawable/car_badge_dark" />
 
             <TextView
                 android:id="@+id/tvName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/shape_thumb_bottom_name"
+                style="@style/CarGridItemTitle"
                 android:ellipsize="end"
-                android:gravity="center"
-                android:maxLines="2"
-                android:minHeight="@dimen/vs_40"
-                android:paddingLeft="@dimen/vs_5"
-                android:paddingRight="@dimen/vs_5"
-                android:paddingTop="@dimen/vs_3"
-                android:paddingBottom="@dimen/vs_3"
-                android:singleLine="false"
-                android:text="Title"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/ts_20" />
+                android:text="Title" />
 
             <TextView
                 android:id="@+id/tvActor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/shape_thumb_bottom_name"
+                android:background="@drawable/car_badge_scrim"
                 android:ellipsize="end"
                 android:gravity="top"
                 android:maxLines="1"
                 android:padding="@dimen/vs_5"
                 android:singleLine="true"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/ts_16"
+                android:textColor="@color/car_text_dim"
+                android:textSize="@dimen/ts_18"
                 android:visibility="gone" />
         </LinearLayout>
 
@@ -134,8 +95,8 @@
             android:id="@+id/delFrameLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/shape_user_delete"
             android:layout_gravity="center"
+            android:background="@drawable/shape_user_delete"
             android:visibility="gone">
 
             <ImageView

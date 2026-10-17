@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true"><shape><solid android:color="@color/car_accent_green" /><corners android:radius="26px" /><stroke android:width="3px" android:color="@color/car_accent_cyan" /></shape></item>
+    <item android:state_pressed="true"><shape><solid android:color="@color/car_accent_blue" /><corners android:radius="26px" /></shape></item>
+    <item><shape><solid android:color="@color/car_accent_green" /><corners android:radius="26px" /></shape></item>
+</selector>

@@ -71,7 +71,7 @@ public final class Car7Acceptance extends Instrumentation {
                     if (!Boolean.TRUE.equals(call(hawk, "isBuilt"))) throw new IllegalStateException("Application preferences not initialized");
                     call(hawk, "put", mapping.getJSONObject("constants").getString("API_URL"), arguments.getString("api"));
                     call(hawk, "put", mapping.getJSONObject("constants").getString("HOME_API"), arguments.getString("homeSite", "py_maple"));
-                    if ("pages".equals(arguments.getString("mode"))) putPref("HOME_REC", 1);
+                    if ("pages".equals(arguments.getString("mode")) || "ux3k".equals(arguments.getString("mode"))) putPref("HOME_REC", 1);
                 }
                 Intent launch = getTargetContext().getPackageManager().getLaunchIntentForPackage(getTargetContext().getPackageName());
                 launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -83,6 +83,8 @@ public final class Car7Acceptance extends Instrumentation {
                     section("playback", this::playbackChecks);
                 } else if (arguments != null && "pages".equals(arguments.getString("mode"))) {
                     section("pages", this::pagesChecks);
+                } else if (arguments != null && "ux3k".equals(arguments.getString("mode"))) {
+                    section("ux3k", this::uxChecks);
                 } else if (arguments != null && "quickjs".equals(arguments.getString("mode"))) {
                     section("quickjs", this::quickJsChecks);
                 } else if (arguments != null && "searchqueue".equals(arguments.getString("mode"))) {
@@ -708,6 +710,148 @@ public final class Car7Acceptance extends Instrumentation {
     private void wakePlayerControls(Activity page) throws Exception {
         if (!ui(() -> view(page, "bottom_container").isShown())) { tap(page, 1440, 600); pause(400); }
         if (!ui(() -> view(page, "bottom_container").isShown())) throw new IllegalStateException("player touch did not reveal controls");
+    }
+
+    private View textView(View root, String text) {
+        if (root instanceof TextView && text.contentEquals(((TextView) root).getText()) && root.isShown()) return root;
+        if (root instanceof ViewGroup) for (int i = 0; i < ((ViewGroup) root).getChildCount(); i++) {
+            View found = textView(((ViewGroup) root).getChildAt(i), text);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    private void tapText(Activity page, String value) throws Exception {
+        View target = ui(() -> textView(page.getWindow().getDecorView(), value));
+        if (target == null) throw new IllegalStateException("missing visible text " + value);
+        Rect bounds = rect(target); tap(page, bounds.exactCenterX(), bounds.exactCenterY());
+    }
+
+    private void uxChecks() throws Exception {
+        config(home, "setHideSeconds", 0);
+        config(home, "setHideOnRoot", true);
+        for (String nav : new String[]{"uxNavHome", "uxNavCategories", "uxNavLive", "uxNavHistory", "uxNavCollect", "uxNavPush", "uxNavSettings"}) {
+            View target = view(home, nav); Rect box = rect(target);
+            check(nav + " native touch geometry", ui(target::isShown) && box.width() >= 180 && box.height() >= 100 && box.bottom < 1620);
+        }
+        check("home native 3K scene", ui(() -> view(home, "uxHomeRoot").getWidth()) == 2880);
+        capturePage(home, "ux-home");
+        clickView(home, "uxNavCategories"); pause(800);
+        check("category rail selects category", ((Number) ui(() -> field(home, "currentSelected"))).intValue() == 1);
+        capturePage(home, "ux-category");
+        clickView(home, "uxNavHome");
+        check("recommendation rail returns home", ((Number) ui(() -> field(home, "currentSelected"))).intValue() == 0);
+
+        section("ux-settings", () -> {
+            Activity settings = openPage("SettingActivity", null);
+            try {
+                Object menu = ui(() -> field(settings, "sortAdapter"));
+                check("settings seven real categories", ((Number) ui(() -> call(menu, "getItemCount"))).intValue() == 7);
+                capturePage(settings, "ux-settings-picture");
+                Object manager = ui(() -> call(view(settings, "mGridView"), "getLayoutManager"));
+                for (int category = 0; category < 7; category++) {
+                    final int index = category;
+                    View item = (View) ui(() -> call(manager, "findViewByPosition", index));
+                    if (item == null) throw new IllegalStateException("settings category not visible " + index);
+                    Rect box = rect(item); tap(settings, box.exactCenterX(), box.exactCenterY()); pause(200);
+                    check("settings category " + index + " selected", ((Number) ui(() -> field(settings, "defaultSelected"))).intValue() == index);
+                    if (index == 2) {
+                        android.widget.CompoundButton toggle = (android.widget.CompoundButton) view(settings, "uxBackgroundSwitch");
+                        boolean before = ui(toggle::isChecked); clickView(settings, "uxBackgroundRow");
+                        check("background switch persists", ui(toggle::isChecked) != before);
+                        clickView(settings, "uxBackgroundRow");
+                    }
+                    if (index == 3) {
+                        android.widget.CompoundButton toggle = (android.widget.CompoundButton) view(settings, "uxLongPressSwitch");
+                        boolean before = ui(toggle::isChecked); clickView(settings, "uxLongPressRow");
+                        check("long press switch toggles", ui(toggle::isChecked) != before);
+                        clickView(settings, "uxLongPressRow"); capturePage(settings, "ux-settings-touch");
+                    }
+                }
+            } finally { main(settings::finish); pause(300); }
+        });
+
+        section("ux-search", () -> {
+            Activity search = openPage("SearchActivity", null);
+            try {
+                check("search native split panels", ui(() -> view(search, "etSearch").getWidth()) == 2100);
+                View keyboard = view(search, "keyBoardRoot");
+                for (String key : new String[]{"A", "Z", "0", "9"}) check("keyboard includes " + key, ui(() -> textView(keyboard, key)) != null);
+                tapText(search, "Q");
+                check("native keyboard inserts at cursor", ui(() -> ((EditText) view(search, "etSearch")).getText().toString()).contains("Q"));
+                main(() -> ((EditText) view(search, "etSearch")).setText("车机界面验收"));
+                clickView(search, "tvSearch"); pause(6000);
+                Object adapter = ui(() -> field(search, "searchAdapter"));
+                int count = ((List<?>) ui(() -> field(adapter, "mData"))).size();
+                check("search session completed", count >= 0);
+                capturePage(search, "ux-search-results");
+                capturePage(search, "ux-search-results");
+            } finally { main(search::finish); pause(300); }
+        });
+
+        section("ux-detail-player", () -> {
+            main(() -> { putPref("SHOW_PREVIEW", true); putPref("VIDEO_ENHANCE", 1); putPref("VIDEO_SR", 1); putPref("VIDEO_INTERP", 1); putPref("PLAY_TYPE", 2); });
+            Bundle extras = new Bundle(); extras.putString("sourceKey", "car7_ui"); extras.putString("id", "car7-0");
+            Activity detail = openPage("DetailActivity", extras);
+            try {
+                pause(3500);
+                Object fragment = ui(() -> field(detail, "playFragment"));
+                Object video = ui(() -> field(fragment, "mVideoView"));
+                Object controller = ui(() -> field(fragment, "mController"));
+                check("detail fixture preview playing", waitPlaying(video, 15000));
+                View preview = view(detail, "previewPlayer");
+                check("detail true 16:9 preview", ui(preview::getWidth) * 9 == ui(preview::getHeight) * 16);
+                Object manager = ui(() -> call(view(detail, "mGridView"), "getLayoutManager"));
+                check("detail eight-column episodes", ((Number) ui(() -> call(manager, "getSpanCount"))).intValue() == 8);
+                check("detail no raw address in metadata", !ui(() -> ((TextView) view(detail, "tvPlayUrl")).getText().toString()).contains("://"));
+                capturePage(detail, "ux-detail");
+                Object decoder = ui(() -> call(video, "getMediaPlayer"));
+                clickView(detail, "tvPlay"); pause(800); wakePlayerControls(detail);
+                check("fullscreen keeps decoder", decoder == ui(() -> call(video, "getMediaPlayer")));
+                pause(1500);
+                check("source frame-rate badge present", ui(() -> ((TextView) view(detail, "tv_framerate")).getText().toString()).contains("fps"));
+                check("primary playback targets 190px", ui(() -> view(detail, "uxPlayPause").getHeight()) == 190);
+                capturePage(detail, "ux-player");
+                clickView(detail, "uxPlayPause"); pause(300);
+                check("pause primary control", !Boolean.TRUE.equals(ui(() -> call(video, "isPlaying"))));
+                long before = position(video); clickView(detail, "uxForward"); pause(400);
+                check("forward 15s primary control", position(video) >= before + 12000);
+                clickView(detail, "uxRewind"); pause(400);
+                check("rewind 15s primary control", Math.abs(position(video) - before) < 2500);
+                clickView(detail, "uxPlayPause"); check("resume primary control", waitPlaying(video, 5000));
+                wakePlayerControls(detail); clickView(detail, "uxMore");
+                check("legacy advanced controls reachable", ui(() -> view(detail, "uxAdvancedControls").isShown()));
+                capturePage(detail, "ux-player-more");
+                clickView(detail, "uxMore");
+                long down = SystemClock.uptimeMillis();
+                main(() -> { MotionEvent press = MotionEvent.obtain(down, down, MotionEvent.ACTION_DOWN, 1440, 600, 0); call(controller, "onLongPress", press); press.recycle(); });
+                check("long press speed 2x", Math.abs(((Number) ui(() -> call(video, "getSpeed"))).floatValue() - 2f) < .05f);
+                main(() -> { MotionEvent cancel = MotionEvent.obtain(down, SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL, 1440, 600, 0); call(controller, "onTouchEvent", cancel); cancel.recycle(); });
+                check("cancel restores speed", Math.abs(((Number) ui(() -> call(video, "getSpeed"))).floatValue() - 1f) < .05f);
+                main(() -> call(detail, "onBackButtonStepUp")); pause(500);
+                check("Back leaves fullscreen before detail", !Boolean.TRUE.equals(ui(() -> field(detail, "fullWindows"))) && !ui(detail::isFinishing));
+                main(() -> call(detail, "onBackButtonStepUp")); pause(500);
+                check("Back leaves detail", ui(detail::isFinishing));
+            } finally { if (!ui(detail::isFinishing)) main(detail::finish); pause(500); }
+        });
+
+        section("ux-live", () -> {
+            Activity live = openPage("LivePlayActivity", null);
+            try {
+                pause(5000);
+                Object video = ui(() -> field(live, "mVideoView"));
+                check("live fixture playing", waitPlaying(video, 15000));
+                View player = (View) video;
+                check("live 16:9 preview", ui(player::getWidth) * 9 == ui(player::getHeight) * 16);
+                capturePage(live, "ux-live");
+                clickView(live, "ux_live_fullscreen"); pause(600);
+                check("live fullscreen keeps same VideoView", ui(player::getWidth) == 2880);
+                main(live::onBackPressed); pause(500);
+                check("live Back returns preview", ui(player::getWidth) == 1632 && !ui(live::isFinishing));
+                capturePage(live, "ux-live-after-back");
+                capturePage(live, "ux-live-after-back");
+            } finally { main(live::finish); pause(400); }
+        });
     }
     private void pagesChecks() throws Exception {
         config(home, "setEnabled", true); config(home, "setMode", "floating");

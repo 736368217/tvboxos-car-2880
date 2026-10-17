@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.ImageView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -72,6 +75,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     private List<Movie.Video> homeSourceRec;
     public static TvRecyclerView tvHotList;
     private SourceViewModel sourceViewModel;
+    private VodInfo resumeRecord;
 
     public static UserFragment newInstance() {
         return new UserFragment();
@@ -99,9 +103,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         tvHotList.setLayoutManager(grid
                 ? new V7GridLayoutManager(mContext, spanCount)
                 : new V7LinearLayoutManager(mContext, V7LinearLayoutManager.HORIZONTAL, false));
-        int side = getResources().getDimensionPixelSize(R.dimen.car_side_padding);
-        tvHotList.setPadding(side, getResources().getDimensionPixelSize(R.dimen.vs_10),
-                side, getResources().getDimensionPixelSize(R.dimen.car_bottom_padding));
+        tvHotList.setPadding(0, 0, 0, 0);
         tvHotList.setClipToPadding(true);
         if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 2) {
             List<VodInfo> allVodRecord = RoomDataManger.getAllVodRecord(20);
@@ -118,6 +120,8 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
             }
             homeHotVodAdapter.setNewData(vodList);
         }
+        bindResumeCard();
+        bindFeatureCard();
     }
 
     @Override
@@ -170,6 +174,9 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         tvPush.setOnFocusChangeListener(focusChangeListener);
         tvCollect.setOnFocusChangeListener(focusChangeListener);
         tvHotList = findViewById(R.id.tvHotList);
+        findViewById(R.id.homeResumeButton).setOnClickListener(v -> openResume(true));
+        findViewById(R.id.uxResumeEpisodes).setOnClickListener(v -> openResume(false));
+        findViewById(R.id.uxFeaturePlay).setOnClickListener(v -> openFeatured());
         if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 1 && homeSourceRec!=null) {
             style=ImgUtil.initStyle();
         }
@@ -180,6 +187,10 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
           tvRate= homeSourceRec!=null?"站点推荐":"豆瓣热播";
         }
         homeHotVodAdapter = new HomeHotVodAdapter(style,tvRate);
+        homeHotVodAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override public void onChanged() { bindFeatureCard(); }
+            @Override public void onItemRangeInserted(int start, int count) { bindFeatureCard(); }
+        });
         homeHotVodAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
@@ -265,6 +276,61 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
                 if (!msg.isEmpty()) Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void bindResumeCard() {
+        if (getView() == null) return;
+        List<VodInfo> records = RoomDataManger.getAllVodRecord(1);
+        resumeRecord = records.isEmpty() ? null : records.get(0);
+        TextView title = findViewById(R.id.uxResumeTitle);
+        TextView note = findViewById(R.id.uxResumeNote);
+        if (resumeRecord == null) {
+            title.setText("暂无观看记录");
+            note.setText("播放后可在这里继续上次观看");
+        } else {
+            title.setText(resumeRecord.name);
+            note.setText("上次看到 " + (resumeRecord.playNote == null ? "" : resumeRecord.playNote));
+            bindPoster((ImageView) findViewById(R.id.uxResumePoster), resumeRecord.pic, resumeRecord.name, 440, 470);
+        }
+        findViewById(R.id.uxResumeEpisodes).setEnabled(resumeRecord != null);
+    }
+
+    private void openResume(boolean play) {
+        if (resumeRecord == null) { jumpActivity(HistoryActivity.class); return; }
+        Bundle data = new Bundle();
+        data.putString("id", resumeRecord.id);
+        data.putString("sourceKey", resumeRecord.sourceKey);
+        data.putString("title", resumeRecord.name);
+        data.putString("picture", resumeRecord.pic);
+        data.putBoolean("uxResume", play);
+        jumpActivity(DetailActivity.class, data);
+    }
+
+    private void bindFeatureCard() {
+        if (getView() == null || homeHotVodAdapter == null) return;
+        List<Movie.Video> videos = homeHotVodAdapter.getData();
+        Movie.Video first = videos.isEmpty() ? null : videos.get(0);
+        ((TextView) findViewById(R.id.uxFeatureTitle)).setText(first == null ? "等待源站推荐" : first.name);
+        ((TextView) findViewById(R.id.uxFeatureNote)).setText(first == null ? "请在顶部选择源站，或配置订阅" : (first.note == null ? "站点推荐 · 点击查看详情" : first.note));
+        findViewById(R.id.uxFeaturePlay).setEnabled(first != null);
+        if (first != null) bindPoster((ImageView) findViewById(R.id.uxFeaturePoster), first.pic, first.name, 420, 470);
+    }
+
+    private void openFeatured() {
+        if (homeHotVodAdapter == null || homeHotVodAdapter.getData().isEmpty()) return;
+        Movie.Video item = homeHotVodAdapter.getItem(0);
+        if (item == null) return;
+        if (item.action != null && homeSourceRec != null) { sourceViewModel.action(item.sourceKey, item.action); return; }
+        if (item.id == null || item.id.isEmpty() || item.id.startsWith("msearch:")) { jumpSearch(item); return; }
+        Bundle data = new Bundle();
+        data.putString("id", item.id); data.putString("sourceKey", item.sourceKey);
+        data.putString("title", item.name); data.putString("picture", item.pic);
+        jumpActivity(DetailActivity.class, data);
+    }
+
+    private void bindPoster(ImageView image, String url, String name, int width, int height) {
+        if (url == null || url.trim().isEmpty()) image.setImageDrawable(ImgUtil.createTextDrawable(name == null ? "TVBox" : name));
+        else ImgUtil.load(url, image, 22, width, height, name);
     }
 
     private void initHomeHotVod(HomeHotVodAdapter adapter) {

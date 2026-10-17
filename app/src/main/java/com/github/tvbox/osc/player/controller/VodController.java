@@ -35,6 +35,7 @@ import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.car.AudioEffectController;
 import com.github.tvbox.osc.car.CarEnhance;
+import com.github.tvbox.osc.car.CarPlaybackPreferences;
 import com.github.tvbox.osc.bean.IJKCode;
 import com.github.tvbox.osc.bean.ParseBean;
 import com.github.tvbox.osc.bean.SourceBean;
@@ -132,7 +133,7 @@ public class VodController extends BaseController {
                             net_play_speed.setVisibility(GONE);
                         }
                         boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-                        backBtn.setVisibility(ScreenUtils.isTv(context) || isPortrait ? INVISIBLE : VISIBLE);
+                        backBtn.setVisibility(isPortrait ? INVISIBLE : VISIBLE);
                         showLockView();
                         break;
                     }
@@ -154,6 +155,7 @@ public class VodController extends BaseController {
                         }
                         backBtn.setVisibility(INVISIBLE);
                         mHandler.removeCallbacks(lockRunnable);
+                        if (isLock) mTopRoot2.setVisibility(VISIBLE);
                         if (mLockView != null) {
                             mLockView.setVisibility(INVISIBLE);
                         }
@@ -301,6 +303,8 @@ public class VodController extends BaseController {
             String height = Integer.toString(mVideoSizes[1]);
             mVideoSize.setText(width + " X " + height);
             updateFrameRateDisplay();
+            TextView pauseButton = findViewById(R.id.uxPlayPause);
+            if (pauseButton != null) pauseButton.setText(mControlWrapper.isPlaying() ? "暂停" : "播放");
 
             mHandler.postDelayed(this, 1000);
         }
@@ -339,22 +343,22 @@ public class VodController extends BaseController {
     }
 
     private void updateCarEnhanceButtons() {
-        if (mCarVideoBtn != null) mCarVideoBtn.setText("画面·" + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
+        if (mCarVideoBtn != null) mCarVideoBtn.setText("画面预设\n" + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
         if (mCarSrBtn != null) mCarSrBtn.setText("超分·" + (CarEnhance.videoSrEnabled() ? "开" : "关"));
         if (mCarInterpBtn != null) mCarInterpBtn.setText("补帧·" + (CarEnhance.videoInterpEnabled() ? "开" : "关"));
-        if (mCarAudioBtn != null) mCarAudioBtn.setText("音效·" + AudioEffectController.name(CarEnhance.audioMode()));
+        if (mCarAudioBtn != null) mCarAudioBtn.setText("座舱音效\n" + AudioEffectController.name(CarEnhance.audioMode()));
         updateFrameRateDisplay();
     }
     private void updateFrameRateDisplay() {
         if (mVideoFrameRate == null) return;
         float sourceFrameRate = mCarVideoView == null ? 0f : mCarVideoView.getSourceFrameRate();
-        if (sourceFrameRate <= 0f) {
+        if (sourceFrameRate <= 0f || Float.isNaN(sourceFrameRate) || Float.isInfinite(sourceFrameRate)) {
             mVideoFrameRate.setText("帧率 --");
             return;
         }
         String source = formatFrameRate(sourceFrameRate);
         if (CarEnhance.videoInterpEnabled()) {
-            mVideoFrameRate.setText("片源 " + source + " fps · 补帧 "
+            mVideoFrameRate.setText("片源 " + source + " fps · 补帧目标 "
                     + formatFrameRate(VideoPostProcessPolicy.INTERPOLATION_OUTPUT_FPS) + " fps");
         } else {
             mVideoFrameRate.setText("片源 " + source + " fps");
@@ -453,6 +457,7 @@ public class VodController extends BaseController {
         mPlayLoadNetSpeed = findViewById(R.id.tv_play_load_net_speed);
         mVideoFrameRate = findViewById(R.id.tv_framerate);
         updateFrameRateDisplay();
+        bindCarPlaybackControls();
         mVideoSize = findViewById(R.id.tv_videosize);
         mSubtitleView = findViewById(R.id.subtitle_view);
         mLyricView = findViewById(R.id.lyric_view);
@@ -1640,7 +1645,7 @@ public class VodController extends BaseController {
     void showBottom() {
         mHandler.removeMessages(1003);
         mHandler.sendEmptyMessage(1002);
-        mNextBtn.requestFocus();
+        findViewById(R.id.uxPlayPause).requestFocus();
     }
 
     void showUpBottom() {
@@ -1724,7 +1729,7 @@ public class VodController extends BaseController {
         fromLongPress = true;
         try {
             speed_old = (float) mPlayerConfig.getDouble("sp");
-            float speed = 3.0f;
+            float speed = 2.0f;
             mPlayerConfig.put("sp", speed);
             updatePlayerCfgView();
             listener.updatePlayerCfg();
@@ -1751,7 +1756,7 @@ public class VodController extends BaseController {
     }
     @Override
     public void onLongPress(MotionEvent e) {
-        if (videoPlayState!=VideoView.STATE_PAUSED) {
+        if (!isLock && !previewMode && CarPlaybackPreferences.longPress() && isInPlaybackState() && videoPlayState != VideoView.STATE_PAUSED) {
             speedPlayStart();
         }
     }
@@ -1759,10 +1764,43 @@ public class VodController extends BaseController {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        if (e.getAction() == MotionEvent.ACTION_UP) {
+        if (e.getAction() == MotionEvent.ACTION_UP || e.getAction() == MotionEvent.ACTION_CANCEL) {
             speedPlayEnd();
         }
         return super.onTouchEvent(e);
+    }
+
+    private void bindCarPlaybackControls() {
+        findViewById(R.id.uxPlayPause).setOnClickListener(v -> { togglePlay(); keepSeekBarActive(); });
+        findViewById(R.id.uxRewind).setOnClickListener(v -> seekCarOffset(-15000));
+        findViewById(R.id.uxForward).setOnClickListener(v -> seekCarOffset(15000));
+        findViewById(R.id.uxEpisodes).setOnClickListener(v -> { if (listener != null) listener.showEpisodeDialog(); });
+        findViewById(R.id.uxChangeSource).setOnClickListener(v -> {
+            Activity activity = xyz.doikki.videoplayer.util.PlayerUtils.scanForActivity(getContext());
+            View source = activity == null ? null : activity.findViewById(R.id.tvChangeSource);
+            if (source != null) source.performClick();
+            else CarEnhance.toast(getContext(), "请返回影片详情切换源站");
+        });
+        findViewById(R.id.uxMore).setOnClickListener(v -> {
+            View advanced = findViewById(R.id.uxAdvancedControls);
+            advanced.setVisibility(advanced.getVisibility() == VISIBLE ? GONE : VISIBLE);
+            keepSeekBarActive();
+        });
+        TextView background = findViewById(R.id.uxBackgroundPlayback);
+        background.setText("后台播放 · " + (CarPlaybackPreferences.backgroundAudio() ? "开" : "关"));
+        background.setOnClickListener(v -> {
+            CarPlaybackPreferences.setBackgroundAudio(!CarPlaybackPreferences.backgroundAudio());
+            background.setText("后台播放 · " + (CarPlaybackPreferences.backgroundAudio() ? "开" : "关"));
+        });
+    }
+
+    private void seekCarOffset(long delta) {
+        if (mControlWrapper == null || !isInPlaybackState()) return;
+        long duration = mControlWrapper.getDuration();
+        long target = Math.max(0, mControlWrapper.getCurrentPosition() + delta);
+        if (duration > 0) target = Math.min(target, duration);
+        mControlWrapper.seekTo(target);
+        keepSeekBarActive();
     }
 
     /**
@@ -2180,14 +2218,14 @@ public class VodController extends BaseController {
         private boolean active;
 
         CircleThumbDrawable(Context context) {
-            normalSize = dp(context, 12);
-            activeSize = dp(context, 16);
-            strokeWidth = dp(context, 2);
+            normalSize = 46;
+            activeSize = 54;
+            strokeWidth = 4;
             fillPaint.setStyle(Paint.Style.FILL);
             fillPaint.setColor(Color.WHITE);
             strokePaint.setStyle(Paint.Style.STROKE);
             strokePaint.setStrokeWidth(strokeWidth);
-            strokePaint.setColor(Color.parseColor("#FF4081"));
+            strokePaint.setColor(Color.parseColor("#00D2FF"));
         }
 
         @Override

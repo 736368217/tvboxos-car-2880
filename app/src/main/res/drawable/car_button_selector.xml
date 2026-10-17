@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Control/button state list: idle #1C2636, pressed deep blue, focused gem blue + cyan rim. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_sm" />
+            <solid android:color="@color/car_surface_nav" />
+            <stroke
+                android:width="@dimen/car_stroke_hair"
+                android:color="@color/car_outline_soft" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_sm" />
+            <solid android:color="@color/car_surface_control_pressed" />
+            <stroke
+                android:width="@dimen/car_stroke_mid"
+                android:color="@color/car_outline_focused" />
+        </shape>
+    </item>
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_sm" />
+            <gradient
+                android:angle="90"
+                android:endColor="@color/car_accent_blue_deep"
+                android:startColor="@color/car_accent_blue" />
+            <stroke
+                android:width="@dimen/car_stroke_focus"
+                android:color="@color/car_outline_focused" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_sm" />
+            <solid android:color="@color/car_surface_control" />
+            <stroke
+                android:width="@dimen/car_stroke_hair"
+                android:color="@color/car_outline_idle" />
+        </shape>
+    </item>
+</selector>

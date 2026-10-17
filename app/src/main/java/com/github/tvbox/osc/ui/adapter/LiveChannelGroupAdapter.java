@@ -1,6 +1,6 @@
 package com.github.tvbox.osc.ui.adapter;
 
-import android.graphics.Color;
+import androidx.core.content.ContextCompat;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -32,9 +32,9 @@ public class LiveChannelGroupAdapter extends BaseQuickAdapter<LiveChannelGroup, 
         int groupIndex = item.getGroupIndex();
         holder.itemView.setSelected(groupIndex == selectedGroupIndex);
         if (groupIndex == selectedGroupIndex && groupIndex != focusedGroupIndex) {
-            tvGroupName.setTextColor(mContext.getResources().getColor(R.color.color_1890FF));
+            tvGroupName.setTextColor(ContextCompat.getColor(mContext, R.color.car_accent));
         } else {
-            tvGroupName.setTextColor(Color.WHITE);
+            tvGroupName.setTextColor(ContextCompat.getColor(mContext, R.color.car_text));
         }
     }
 

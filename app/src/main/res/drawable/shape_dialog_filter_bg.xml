@@ -2,7 +2,12 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 <!--    筛选页背景颜色-->
     <corners
-        android:topLeftRadius="@dimen/vs_10"
-        android:topRightRadius="@dimen/vs_10" />
-    <solid android:color="@color/color_99FFFFFF" />
+        android:topLeftRadius="@dimen/car_radius_lg"
+        android:topRightRadius="@dimen/car_radius_lg"
+        android:bottomLeftRadius="@dimen/car_radius_lg"
+        android:bottomRightRadius="@dimen/car_radius_lg" />
+    <solid android:color="@color/car_surface_card_raised" />
+    <stroke
+        android:width="@dimen/car_stroke_mid"
+        android:color="@color/car_outline_soft" />
 </shape>

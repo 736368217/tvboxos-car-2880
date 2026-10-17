@@ -57,29 +57,27 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         helper.setText(R.id.tvName, item.name);
         ImageView ivThumb = helper.getView(R.id.ivThumb);
 
-        float ratio = style != null && style.ratio > 0 ? style.ratio
-                : (float) ImgUtil.defaultWidth / ImgUtil.defaultHeight;
-        int newWidth = style == null ? 190 : Math.min(340, defaultWidth);
-        int newHeight = Math.min(250, Math.round(newWidth / ratio));
-        newWidth = Math.round(newHeight * ratio);
+        // This card is hosted in the native 2880px scene; do not apply AutoSize twice.
+        int newWidth = 435;
+        int newHeight = 500;
         ViewGroup frame = helper.getView(R.id.mItemFrame);
         ViewGroup.LayoutParams frameParams = frame.getLayoutParams();
-        frameParams.width = AutoSizeUtils.mm2px(mContext, newWidth);
+        frameParams.width = newWidth;
         frameParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         frame.setLayoutParams(frameParams);
         View poster = helper.getView(R.id.posterFrame);
         ViewGroup.LayoutParams posterParams = poster.getLayoutParams();
-        posterParams.height = AutoSizeUtils.mm2px(mContext, newHeight);
+        posterParams.height = newHeight;
         poster.setLayoutParams(posterParams);
-        tvRate.setMaxWidth(AutoSizeUtils.mm2px(mContext, newWidth - 10));
-        tvNote.setMaxWidth(AutoSizeUtils.mm2px(mContext, newWidth - 10));
+        tvRate.setMaxWidth(newWidth - 20);
+        tvNote.setMaxWidth(newWidth - 20);
 
         String pic = item.pic == null ? "" : item.pic.trim();
         if (!TextUtils.isEmpty(pic)) {
             if (ImgUtil.isBase64Image(pic)) {
                 ivThumb.setImageBitmap(ImgUtil.decodeBase64ToBitmap(pic));
             } else {
-                ImgUtil.load(pic, ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, newWidth), AutoSizeUtils.mm2px(mContext, newHeight), item.name);
+                ImgUtil.load(pic, ivThumb, 18, newWidth, newHeight, item.name);
             }
         } else {
             ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));

@@ -16,7 +16,8 @@
         <item name="windowNoTitle">true</item>
         <item name="android:keepScreenOn">true</item>
         <!--        <item name="android:windowBackground">@drawable/main_bg</item>-->
-        <item name="android:windowBackground">@color/car_bg</item>
+        <!-- Obsidian deep-space root surface (#0B0F17 -> #070A10 vertical depth). -->
+        <item name="android:windowBackground">@drawable/car_surface</item>
     </style>
     <!-- 自定义dialog样式 -->
     <style name="CustomDialogStyle" parent="@android:style/Theme.Dialog">
@@ -40,12 +41,17 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+    <!-- Obsidian nav shortcut: 180x90mm touch hot zone, gem-blue focused fill, cyan rim. -->
     <style name="CarHomeShortcut">
-        <item name="android:layout_width">180mm</item>
-        <item name="android:layout_height">@dimen/vs_90</item>
-        <item name="android:layout_marginLeft">@dimen/vs_8</item>
-        <item name="android:layout_marginRight">@dimen/vs_8</item>
-        <item name="android:background">@drawable/shape_user_focus</item>
+        <item name="android:layout_width">@dimen/car_touch_shortcut_w</item>
+        <item name="android:layout_height">@dimen/car_touch_shortcut_h</item>
+        <item name="android:minWidth">@dimen/car_touch_shortcut_w</item>
+        <item name="android:minHeight">@dimen/car_touch_shortcut_h</item>
+        <item name="android:layout_marginLeft">@dimen/vs_6</item>
+        <item name="android:layout_marginRight">@dimen/vs_6</item>
+        <item name="android:paddingLeft">@dimen/vs_14</item>
+        <item name="android:paddingRight">@dimen/vs_14</item>
+        <item name="android:background">@drawable/car_nav_selector</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
         <item name="android:gravity">center</item>
@@ -55,7 +61,6 @@
     <style name="CarHomeShortcutIcon">
         <item name="android:layout_width">@dimen/vs_40</item>
         <item name="android:layout_height">@dimen/vs_40</item>
-        <item name="android:alpha">0.8</item>
         <item name="android:importantForAccessibility">no</item>
     </style>
 
@@ -64,8 +69,54 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginLeft">@dimen/vs_10</item>
         <item name="android:singleLine">true</item>
-        <item name="android:textColor">@color/color_CCFFFFFF</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/car_text_strong</item>
         <item name="android:textSize">@dimen/ts_30</item>
+    </style>
+
+    <!-- Poster corner badge text (year / area / lang / note chips over artwork). -->
+    <style name="CarPosterBadge">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingLeft">@dimen/vs_6</item>
+        <item name="android:paddingRight">@dimen/vs_6</item>
+        <item name="android:paddingTop">@dimen/vs_2</item>
+        <item name="android:paddingBottom">@dimen/vs_2</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/car_text_strong</item>
+        <item name="android:textSize">@dimen/ts_18</item>
+    </style>
+
+    <!-- Grid card title strip: strong text over the bottom scrim of the poster. -->
+    <style name="CarGridItemTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/car_badge_scrim</item>
+        <item name="android:gravity">center</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:minHeight">@dimen/vs_40</item>
+        <item name="android:paddingLeft">@dimen/vs_8</item>
+        <item name="android:paddingRight">@dimen/vs_8</item>
+        <item name="android:paddingTop">@dimen/vs_4</item>
+        <item name="android:paddingBottom">@dimen/vs_4</item>
+        <item name="android:textColor">@color/car_text_strong</item>
+        <item name="android:textSize">@dimen/ts_22</item>
+    </style>
+
+    <!-- Home sort pill title. -->
+    <style name="CarSortChipTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/car_text_regular</item>
+        <item name="android:textSize">@dimen/ts_24</item>
     </style>
 
     <style name="CarAdvancedSwitch">
@@ -83,26 +134,32 @@
         <item name="android:importantForAccessibility">no</item>
     </style>
 
+    <!-- Obsidian player quick control: 56mm tall (host row is 60mm), gem-blue focus fill. -->
     <style name="CarPlayerQuickControl">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">@dimen/vs_50</item>
+        <item name="android:layout_height">@dimen/car_touch_control_h</item>
+        <item name="android:minHeight">@dimen/car_touch_control_h</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_marginRight">@dimen/vs_12</item>
-        <item name="android:background">@drawable/button_dialog_main</item>
+        <item name="android:background">@drawable/car_button_selector</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
         <item name="android:gravity">center</item>
+        <item name="android:paddingLeft">@dimen/vs_6</item>
+        <item name="android:paddingRight">@dimen/vs_6</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">end</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@color/car_text_strong</item>
         <item name="android:textSize">@dimen/ts_19</item>
     </style>
 
+    <!-- Obsidian settings row: 70mm touch height, card surface with cyan focus rim. -->
     <style name="CarAdvancedRow">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/vs_60</item>
-        <item name="android:layout_marginBottom">@dimen/vs_12</item>
-        <item name="android:background">@drawable/shape_setting_model_focus</item>
+        <item name="android:layout_height">@dimen/car_touch_row_h</item>
+        <item name="android:minHeight">@dimen/car_touch_row_h</item>
+        <item name="android:layout_marginBottom">@dimen/vs_10</item>
+        <item name="android:background">@drawable/car_surface_card_selector</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <item name="android:gravity">center_vertical</item>
@@ -114,14 +171,14 @@
     <style name="CarAdvancedLabel">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@color/car_text_strong</item>
         <item name="android:textSize">@dimen/ts_22</item>
     </style>
 
     <style name="CarAdvancedValue">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/color_CCFFFFFF</item>
+        <item name="android:textColor">@color/car_text_dim</item>
         <item name="android:textSize">@dimen/ts_20</item>
     </style>
 
@@ -129,7 +186,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginLeft">@dimen/vs_10</item>
-        <item name="android:textColor">@color/color_CCFFFFFF</item>
+        <item name="android:textColor">@color/car_text_dim</item>
         <item name="android:textSize">@dimen/ts_28</item>
     </style>
 

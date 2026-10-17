@@ -107,6 +107,17 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvCarBack;
     private TextView tvCarBackHide;
 
+    private ux_setting_Pages uxPages;
+    private int uxCategory;
+
+    public void showUxCategory(int category) {
+        uxCategory = Math.max(0, Math.min(6, category));
+        if (uxPages != null) {
+            uxPages.show(uxCategory);
+            rootView.findViewById(R.id.ux_setting_scroll).scrollTo(0, 0);
+        }
+    }
+
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
     }
@@ -117,7 +128,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
 
     @Override
     protected int getLayoutResID() {
-        return R.layout.fragment_model;
+        return R.layout.ux_setting_model;
     }
 
     @Override
@@ -125,10 +136,14 @@ public class ModelSettingFragment extends BaseLazyFragment {
         super.onFragmentResume();
         if (tvCarBack != null) tvCarBack.setText(InAppBackButton.isEnabled() ? "开启" : "关闭");
         if (tvCarBackHide != null) tvCarBackHide.setText(carBackHideName(InAppBackButton.getHideSeconds()));
+        if (uxPages != null) uxPages.refresh();
     }
 
     @Override
     protected void init() {
+        uxPages = new ux_setting_Pages(mActivity, findViewById(R.id.ux_setting_content));
+        uxPages.buildAll();
+        uxPages.show(uxCategory);
         tvFastSearchText = findViewById(R.id.showFastSearchText);
         tvFastSearchText.setText(Hawk.get(HawkConfig.FAST_SEARCH_MODE, true) ? "开启" : "关闭");
         tvm3u8AdText = findViewById(R.id.m3u8AdText);
@@ -929,7 +944,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
     }
 
     private void updateApiRowWeight(boolean showLine) {
-        if (llApi == null) return;
+        // Scene rows are full-width vertical cards, never weighted legacy horizontal columns.
+        if (uxPages != null || llApi == null) return;
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) llApi.getLayoutParams();
         params.weight = showLine ? 1.0f : 3.08f;
         llApi.setLayoutParams(params);

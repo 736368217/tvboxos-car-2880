@@ -72,7 +72,7 @@ final class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener 
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK://此时需降低音量
                 if (videoView.isPlaying() && !videoView.isMute()) {
-                    videoView.setVolume(0.1f, 0.1f);
+                    videoView.setVolume(0.2f, 0.2f);
                 }
                 break;
         }

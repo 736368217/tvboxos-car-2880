@@ -112,6 +112,7 @@ public class DetailActivity extends BaseActivity {
     private TextView tvActor;
     private TextView tvDirector;
     private TextView tvPlayUrl;
+    private String currentPlayUrl = "";
     private TextView tvDes;
     private TextView tvPlay;
 //    private TextView tvSort;
@@ -202,10 +203,17 @@ public class DetailActivity extends BaseActivity {
         tvCollect = findViewById(R.id.tvCollect);
         tvQuickSearch = findViewById(R.id.tvQuickSearch);
         tvChangeSource = findViewById(R.id.tvChangeSource);
+        findViewById(R.id.uxDetailBack).setOnClickListener(v -> onBackButtonStepUp());
+        findViewById(R.id.uxDetailCast).setOnClickListener(v -> {
+            if (playFragment != null && playFragment.getPlayer() != null) {
+                View cast = playFragment.getPlayer().findViewById(R.id.play_cast);
+                if (cast != null) cast.performClick();
+            } else jumpActivity(PushActivity.class);
+        });
         mEmptyPlayList = findViewById(R.id.mEmptyPlaylist);
         mGridView = findViewById(R.id.mGridView);
         mGridView.setHasFixedSize(false);
-        this.mGridViewLayoutMgr = new V7GridLayoutManager(this.mContext, 6);
+        this.mGridViewLayoutMgr = new V7GridLayoutManager(this.mContext, 8);
         mGridView.setLayoutManager(this.mGridViewLayoutMgr);
 //        mGridView.setLayoutManager(new V7LinearLayoutManager(this.mContext, 0, false));
 
@@ -375,7 +383,7 @@ public class DetailActivity extends BaseActivity {
                 //获取剪切板管理器
                 ClipboardManager cm = (ClipboardManager)getSystemService(mContext.CLIPBOARD_SERVICE);
                 //设置内容到剪切板
-                cm.setPrimaryClip(ClipData.newPlainText(null, tvPlayUrl.getText().toString().replace("播放地址：","")));
+                cm.setPrimaryClip(ClipData.newPlainText("播放地址", currentPlayUrl));
                 Toast.makeText(DetailActivity.this, "已复制", Toast.LENGTH_SHORT).show();
             }
         });
@@ -694,26 +702,7 @@ public class DetailActivity extends BaseActivity {
             }
         }
 
-        Paint pFont = new Paint();
-//        pFont.setTypeface(Typeface.DEFAULT );
-        Rect rect = new Rect();
-
-        List<VodInfo.VodSeries> list = vodInfo.seriesMap.get(vodInfo.playFlag);
-        int listSize = list.size();
-        int w = 1;
-        for(int i =0; i < listSize; ++i){
-            String name = list.get(i).name;
-            pFont.getTextBounds(name, 0, name.length(), rect);
-            if(w < rect.width()){
-                w = rect.width();
-            }
-        }
-        w += 32;
-        int screenWidth = getWindowManager().getDefaultDisplay().getWidth()/3;
-        int offset = screenWidth/w;
-        if(offset <=2) offset =2;
-        if(offset > 6) offset =6;
-        mGridViewLayoutMgr.setSpanCount(offset);
+        mGridViewLayoutMgr.setSpanCount(8);
         seriesAdapter.setNewData(vodInfo.seriesMap.get(vodInfo.playFlag));
 
         setSeriesGroupOptions();
@@ -797,6 +786,12 @@ public class DetailActivity extends BaseActivity {
     }
 
     private void setTextShow(TextView view, String tag, String info) {
+        if (view == tvPlayUrl) {
+            currentPlayUrl = info == null ? "" : info;
+            view.setText("复制播放地址");
+            view.setVisibility(TextUtils.isEmpty(currentPlayUrl) ? View.GONE : View.VISIBLE);
+            return;
+        }
         if (info == null || info.trim().isEmpty()) {
             view.setVisibility(View.GONE);
             return;
@@ -819,7 +814,7 @@ public class DetailActivity extends BaseActivity {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             return;
         }
-        final float radius = getResources().getDimension(R.dimen.preview_player_radius);
+        final float radius = 28f;
         ViewOutlineProvider provider = new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
@@ -968,6 +963,10 @@ public class DetailActivity extends BaseActivity {
                             llPlayerFragmentContainer.setVisibility(View.VISIBLE);
                             llPlayerFragmentContainerBlock.setVisibility(View.VISIBLE);
                             toggleSubtitleTextSize();
+                            if (getIntent().getBooleanExtra("uxResume", false)) {
+                                getIntent().removeExtra("uxResume");
+                                enterFullPreview();
+                            }
                         }
                         // startQuickSearch();
                     } else {
@@ -975,6 +974,7 @@ public class DetailActivity extends BaseActivity {
                         mGridView.setVisibility(View.GONE);
                         tvSeriesGroup.setVisibility(View.GONE);
                         tvPlay.setVisibility(View.GONE);
+                        findViewById(R.id.uxDetailCast).setEnabled(false);
                         mEmptyPlayList.setVisibility(View.VISIBLE);
                         handleNoPlayableDetail();
                     }
@@ -1930,8 +1930,6 @@ public class DetailActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (fullWindows) {
-            if (playFragment.onBackPressed())
-                return;
             exitFullPreview();
             return;
         }

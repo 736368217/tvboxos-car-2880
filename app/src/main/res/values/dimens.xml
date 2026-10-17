@@ -101,4 +101,26 @@
     <dimen name="car_bottom_padding">55mm</dimen>
     <dimen name="car_side_padding">35mm</dimen>
     <dimen name="vs_22">22mm</dimen>
+    <dimen name="vs_25">25mm</dimen>
+
+    <!-- Obsidian visual system metrics (mm = car autosize canvas unit, 1mm = 2.25px @2880x1620).
+         Radii/strokes/spacing for the car_* drawables + car styles. -->
+    <dimen name="car_radius_xs">5mm</dimen>
+    <dimen name="car_radius_sm">8mm</dimen>
+    <dimen name="car_radius_md">12mm</dimen>
+    <dimen name="car_radius_lg">16mm</dimen>
+    <dimen name="car_radius_pill">24mm</dimen>
+    <dimen name="car_stroke_hair">1mm</dimen>
+    <dimen name="car_stroke_mid">1.5mm</dimen>
+    <dimen name="car_stroke_focus">2mm</dimen>
+    <dimen name="car_gap_card">6mm</dimen>
+    <dimen name="car_inset_card">8mm</dimen>
+    <dimen name="car_inset_chip">14mm</dimen>
+    <!-- Touch hot zones: primary targets stay >= 90mm, secondary rows >= 70mm,
+         and any control nested inside a fixed-height host row stays <= that row. -->
+    <dimen name="car_touch_shortcut_w">180mm</dimen>
+    <dimen name="car_touch_shortcut_h">90mm</dimen>
+    <dimen name="car_touch_row_h">70mm</dimen>
+    <dimen name="car_touch_control_h">56mm</dimen>
+    <dimen name="car_touch_chip_h">56mm</dimen>
 </resources>

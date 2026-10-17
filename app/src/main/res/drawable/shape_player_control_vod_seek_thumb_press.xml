@@ -2,8 +2,10 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
 <!--    进度条圆点按压状态颜色-->
-<!--    <solid android:color="@color/color_03DAC5" />-->
-    <solid android:color="@color/color_1890FF" />
+    <solid android:color="@color/car_accent_cyan" />
+    <stroke
+        android:width="2dp"
+        android:color="@color/car_accent_blue_deep" />
     <size
         android:width="@dimen/vs_30"
         android:height="@dimen/vs_30" />

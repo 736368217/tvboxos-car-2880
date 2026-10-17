@@ -1,59 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <HorizontalScrollView
-        android:id="@+id/homeShortcutsScroll"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/vs_120"
-        android:fillViewport="true"
-        android:paddingLeft="@dimen/car_side_padding"
-        android:paddingRight="@dimen/car_side_padding"
-        android:scrollbars="none">
-        <LinearLayout
-            android:id="@+id/tvUserHome"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <LinearLayout android:id="@+id/tvHistory" style="@style/CarHomeShortcut" android:nextFocusLeft="@id/tvSetting">
-                <ImageView style="@style/CarHomeShortcutIcon" android:src="@drawable/icon_history" />
-                <TextView style="@style/CarHomeShortcutLabel" android:text="历史" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/tvLive" style="@style/CarHomeShortcut">
-                <ImageView style="@style/CarHomeShortcutIcon" android:src="@drawable/icon_live" />
-                <TextView style="@style/CarHomeShortcutLabel" android:text="直播" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/tvSearch" style="@style/CarHomeShortcut">
-                <ImageView style="@style/CarHomeShortcutIcon" android:src="@drawable/icon_search" />
-                <TextView style="@style/CarHomeShortcutLabel" android:text="搜索" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/tvPush" style="@style/CarHomeShortcut">
-                <ImageView style="@style/CarHomeShortcutIcon" android:src="@drawable/icon_push" />
-                <TextView style="@style/CarHomeShortcutLabel" android:text="推送" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/tvFavorite" style="@style/CarHomeShortcut">
-                <ImageView style="@style/CarHomeShortcutIcon" android:src="@drawable/icon_collect" />
-                <TextView style="@style/CarHomeShortcutLabel" android:text="收藏" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/tvSetting" style="@style/CarHomeShortcut" android:nextFocusRight="@id/tvHistory">
-                <ImageView style="@style/CarHomeShortcutIcon" android:src="@drawable/icon_setting" />
-                <TextView style="@style/CarHomeShortcutLabel" android:text="设置" />
-            </LinearLayout>
-        </LinearLayout>
-    </HorizontalScrollView>
-
-    <com.owen.tvrecyclerview.widget.TvRecyclerView
-        android:id="@+id/tvHotList"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipChildren="true"
-        android:clipToPadding="true"
-        app:tv_horizontalSpacingWithMargins="@dimen/vs_15"
-        app:tv_selectedItemIsCentered="false"
-        app:tv_verticalSpacingWithMargins="@dimen/vs_15" />
-</LinearLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/car_bg">
+    <LinearLayout android:id="@+id/tvUserHome" android:layout_width="0px" android:layout_height="0px" android:visibility="gone"><LinearLayout android:id="@+id/tvHistory" android:layout_width="0px" android:layout_height="0px"/><LinearLayout android:id="@+id/tvLive" android:layout_width="0px" android:layout_height="0px"/><LinearLayout android:id="@+id/tvSearch" android:layout_width="0px" android:layout_height="0px"/><LinearLayout android:id="@+id/tvPush" android:layout_width="0px" android:layout_height="0px"/><LinearLayout android:id="@+id/tvFavorite" android:layout_width="0px" android:layout_height="0px"/><LinearLayout android:id="@+id/tvSetting" android:layout_width="0px" android:layout_height="0px"/></LinearLayout>
+    <FrameLayout android:id="@+id/homeHeroStage" android:layout_width="1100px" android:layout_height="510px" android:layout_marginLeft="280px" android:layout_marginTop="20px" android:background="@drawable/car_surface_card">
+        <ImageView android:id="@+id/uxResumePoster" android:layout_width="440px" android:layout_height="470px" android:layout_margin="20px" android:scaleType="centerCrop" android:background="@drawable/car_poster_surface" android:contentDescription="上次观看海报"/>
+        <TextView style="@style/UxSceneText" android:layout_width="210px" android:layout_height="55px" android:layout_marginLeft="480px" android:layout_marginTop="30px" android:background="@drawable/car_badge_blue" android:gravity="center" android:text="上次未看完" android:textSize="24px"/>
+        <TextView android:id="@+id/uxResumeTitle" style="@style/UxSceneText" android:layout_width="580px" android:layout_height="110px" android:layout_marginLeft="480px" android:layout_marginTop="105px" android:text="暂无观看记录" android:textSize="44px" android:textStyle="bold" android:maxLines="2"/>
+        <TextView android:id="@+id/uxResumeNote" style="@style/UxSceneText" android:layout_width="580px" android:layout_height="100px" android:layout_marginLeft="480px" android:layout_marginTop="225px" android:text="播放后将在这里显示续播入口" android:textColor="@color/car_accent_cyan" android:textSize="26px" android:maxLines="2"/>
+        <TextView android:id="@+id/homeResumeButton" style="@style/UxSceneButton" android:layout_width="310px" android:layout_height="125px" android:layout_marginLeft="480px" android:layout_marginTop="340px" android:text="▶ 继续播放" android:textSize="34px" />
+        <TextView android:id="@+id/uxResumeEpisodes" style="@style/UxSceneButton" android:layout_width="240px" android:layout_height="125px" android:layout_marginLeft="820px" android:layout_marginTop="340px" android:text="选集列表" android:textSize="30px" />
+    </FrameLayout>
+    <FrameLayout android:layout_width="1380px" android:layout_height="510px" android:layout_marginLeft="1420px" android:layout_marginTop="20px" android:background="@drawable/car_surface_card">
+        <ImageView android:id="@+id/uxFeaturePoster" android:layout_width="420px" android:layout_height="470px" android:layout_margin="20px" android:scaleType="centerCrop" android:background="@drawable/car_poster_surface" android:contentDescription="推荐影片海报"/>
+        <TextView style="@style/UxSceneText" android:layout_width="280px" android:layout_height="55px" android:layout_marginLeft="470px" android:layout_marginTop="30px" android:background="@drawable/car_badge_amber" android:gravity="center" android:text="今日推荐" android:textSize="24px" android:textColor="@color/car_bg"/>
+        <TextView android:id="@+id/uxFeatureTitle" style="@style/UxSceneText" android:layout_width="850px" android:layout_height="110px" android:layout_marginLeft="470px" android:layout_marginTop="105px" android:text="等待源站推荐" android:textSize="42px" android:textStyle="bold" android:maxLines="2"/>
+        <TextView android:id="@+id/uxFeatureNote" style="@style/UxSceneText" android:layout_width="850px" android:layout_height="100px" android:layout_marginLeft="470px" android:layout_marginTop="225px" android:text="请在顶部选择源站，或配置订阅" android:textColor="@color/car_text_dim" android:textSize="26px" android:maxLines="2"/>
+        <TextView android:id="@+id/uxFeaturePlay" style="@style/UxSceneButton" android:layout_width="350px" android:layout_height="125px" android:layout_marginLeft="470px" android:layout_marginTop="340px" android:text="▶ 立即观看" android:textSize="34px"/>
+    </FrameLayout>
+    <com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/tvHotList" android:layout_width="2520px" android:layout_height="720px" android:layout_marginLeft="280px" android:layout_marginTop="690px" android:clipToPadding="true" android:paddingLeft="0px" android:paddingRight="0px" app:tv_horizontalSpacingWithMargins="30px" app:tv_verticalSpacingWithMargins="30px" app:tv_selectedItemIsCentered="false"/>
+</FrameLayout>

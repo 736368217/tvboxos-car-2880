@@ -28,12 +28,13 @@ public class SeriesAdapter extends BaseQuickAdapter<VodInfo.VodSeries, BaseViewH
     @Override
     protected void convert(BaseViewHolder helper, VodInfo.VodSeries item) {
         TextView tvSeries = helper.getView(R.id.tvSeries);
+        helper.itemView.setSelected(item.selected);
         if (item.selected) {
             tvSeries.setTextColor(mContext.getResources().getColor(R.color.color_02F8E1));
         } else {
             tvSeries.setTextColor(Color.WHITE);
         }
-        helper.setText(R.id.tvSeries, item.name);
+        helper.setText(R.id.tvSeries, item.selected ? item.name + "\n正在播放" : item.name);
 
         if (getData().size() == 1 && helper.getLayoutPosition() == 0) {
             helper.itemView.setNextFocusUpId(R.id.mGridViewFlag);

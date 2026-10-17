@@ -30,7 +30,11 @@ import java.util.List;
  */
 public class SearchKeyboard extends FrameLayout {
     private RecyclerView mRecyclerView;
-    private List<String> keys = Arrays.asList("远程搜索", "删除", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0");
+    // Four complete 10-column rows; callback codes 0/1 retain remote/delete semantics.
+    private List<String> keys = Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+            "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
+            "A", "S", "D", "F", "G", "H", "J", "K", "L", "Del",
+            "Z", "X", "C", "V", "B", "N", "M", "，", "。", "空格");
     private List<Keyboard> keyboardList = new ArrayList<>();
     private OnSearchKeyListener searchKeyListener;
     private OnFocusChangeListener focusChangeListener = new OnFocusChangeListener() {
@@ -58,7 +62,7 @@ public class SearchKeyboard extends FrameLayout {
     private void initView() {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.layout_keyborad, this);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.mRecyclerView);
-        GridLayoutManager manager = new GridLayoutManager(getContext(), 6);
+        GridLayoutManager manager = new GridLayoutManager(getContext(), 10);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
             @Override
@@ -79,26 +83,23 @@ public class SearchKeyboard extends FrameLayout {
         }
         final KeyboardAdapter adapter = new KeyboardAdapter(keyboardList);
         mRecyclerView.setAdapter(adapter);
-        adapter.setSpanSizeLookup(new BaseQuickAdapter.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(GridLayoutManager gridLayoutManager, int position) {
-                if (position == 0)
-                    return 3;
-                else if (position == 1)
-                    return 3;
-                return 1;
-            }
-        });
+        // Additional actions sit below the 36-key matrix, never replacing letters/digits.
+        view.findViewById(R.id.ux_search_remote).setOnClickListener(v -> dispatchKey(0, "远程搜索"));
+        view.findViewById(R.id.ux_search_left).setOnClickListener(v -> dispatchKey(-1, "左移"));
+        view.findViewById(R.id.ux_search_right).setOnClickListener(v -> dispatchKey(-2, "右移"));
 
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 Keyboard keyboard = (Keyboard) adapter.getItem(position);
-                if (searchKeyListener != null) {
-                    searchKeyListener.onSearchKey(position, keyboard.getKey());
-                }
+                String value = keyboard.getKey();
+                dispatchKey("Del".equals(value) ? 1 : position + 2, "空格".equals(value) ? " " : value);
             }
         });
+    }
+
+    private void dispatchKey(int code, String key) {
+        if (searchKeyListener != null) searchKeyListener.onSearchKey(code, key);
     }
 
     static class Keyboard implements MultiItemEntity {

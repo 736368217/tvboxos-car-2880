@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Focus ring overlay for FrameLayout android:foreground: cyan rim above poster content,
+     fully transparent when the host is not focused. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_md" />
+            <solid android:color="@android:color/transparent" />
+            <stroke
+                android:width="@dimen/car_stroke_focus"
+                android:color="@color/car_outline_focused" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_md" />
+            <solid android:color="@android:color/transparent" />
+            <stroke
+                android:width="@dimen/car_stroke_mid"
+                android:color="@color/car_outline_pressed" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_md" />
+            <solid android:color="@android:color/transparent" />
+            <stroke
+                android:width="@dimen/car_stroke_hair"
+                android:color="@android:color/transparent" />
+        </shape>
+    </item>
+</selector>
