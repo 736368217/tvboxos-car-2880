@@ -1,10 +1,10 @@
 """
 generate_ux_redesign_mockups.py
-Generates 3 complete design schemes for the 17.3-inch 3K In-Car Video Player:
-- Scheme 1: Obsidian Glass (Restored & Refined Version 1, minus car telematics, full TVBox features preserved)
-- Scheme 2: Cinematic Infinity (Apple TV / Infuse style borderless panoramic design)
-- Scheme 3: Studio Cockpit (Dual-zone pro media workstation design)
-Plus 6 Before vs After comparison graphics.
+Full photographic rendering of 3 complete in-car UI design schemes:
+- Scheme 1: Obsidian Glass (Restored & Refined Version 1, 100% TVBox features, real posters/stills)
+- Scheme 2: Cinematic Infinity (Apple TV / Infuse style borderless panoramic design, real posters/stills)
+- Scheme 3: Studio Cockpit (Dual-zone pro media workstation design, real posters/stills)
+Plus 6 Before vs After side-by-side comparison graphics.
 """
 
 import os
@@ -12,6 +12,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 OUTPUT_DIR = "car/evidence/redesign"
 COMPARE_DIR = "car/reports/ux_redesign"
+ASSET_DIR = "car/evidence/redesign/assets"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(COMPARE_DIR, exist_ok=True)
 
@@ -40,6 +41,10 @@ TEXT_SECONDARY = (160, 172, 190)    # Subtext
 TEXT_MUTED = (105, 115, 130)        # Dim text
 SUCCESS_GREEN = (16, 185, 129)      # Green
 
+# ----------------------------------------------------------------------
+# IMAGE & DRAWING HELPERS
+# ----------------------------------------------------------------------
+
 def draw_rounded_rect(draw, box, radius, fill=None, outline=None, width=1):
     x0, y0, x1, y1 = box
     draw.rounded_rectangle([x0, y0, x1, y1], radius=radius, fill=fill, outline=outline, width=width)
@@ -49,9 +54,77 @@ def draw_pill(draw, box, fill=None, outline=None, width=1):
     radius = (y1 - y0) // 2
     draw.rounded_rectangle([x0, y0, x1, y1], radius=radius, fill=fill, outline=outline, width=width)
 
+def load_and_crop(filename, target_size, radius=0):
+    """Loads a real asset image, centers-crops to aspect ratio, resizes with LANCZOS, and optionally rounds corners."""
+    p = os.path.join(ASSET_DIR, filename)
+    tw, th = target_size
+    if not os.path.exists(p):
+        # Fallback colored card
+        im = Image.new("RGBA", (tw, th), (35, 45, 65))
+        return im
+    try:
+        orig = Image.open(p).convert("RGBA")
+        ow, oh = orig.size
+        target_aspect = tw / th
+        orig_aspect = ow / oh
+
+        if orig_aspect > target_aspect:
+            # Crop width
+            new_w = int(oh * target_aspect)
+            x_offset = (ow - new_w) // 2
+            cropped = orig.crop((x_offset, 0, x_offset + new_w, oh))
+        else:
+            # Crop height
+            new_h = int(ow / target_aspect)
+            y_offset = (oh - new_h) // 2
+            cropped = orig.crop((0, y_offset, ow, y_offset + new_h))
+
+        resized = cropped.resize((tw, th), Image.Resampling.LANCZOS)
+
+        if radius > 0:
+            mask = Image.new("L", (tw, th), 0)
+            mdraw = ImageDraw.Draw(mask)
+            mdraw.rounded_rectangle([0, 0, tw, th], radius=radius, fill=255)
+            resized.putalpha(mask)
+
+        return resized
+    except Exception as e:
+        print(f"Error loading {filename}: {e}")
+        return Image.new("RGBA", (tw, th), (35, 45, 65))
+
+def paste_image(canvas, im, pos):
+    canvas.paste(im, pos, im if im.mode == "RGBA" else None)
+
+def draw_icon_play(draw, center, size, color=(255, 255, 255)):
+    cx, cy = center
+    r = size // 2
+    points = [(cx - r // 2, cy - r), (cx - r // 2, cy + r), (cx + r, cy)]
+    draw.polygon(points, fill=color)
+
+def draw_icon_pause(draw, center, size, color=(255, 255, 255)):
+    cx, cy = center
+    w = size // 4
+    h = size
+    draw.rectangle([cx - w - 4, cy - h // 2, cx - 4, cy + h // 2], fill=color)
+    draw.rectangle([cx + 4, cy - h // 2, cx + w + 4, cy + h // 2], fill=color)
+
+def draw_icon_search(draw, center, size, color=(255, 255, 255)):
+    cx, cy = center
+    r = size // 3
+    draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline=color, width=3)
+    draw.line([cx + int(r * 0.7), cy + int(r * 0.7), cx + r + 8, cy + r + 8], fill=color, width=4)
+
+def draw_icon_mic(draw, center, size, color=(255, 255, 255)):
+    cx, cy = center
+    w = size // 3
+    h = size // 2
+    draw.rounded_rectangle([cx - w // 2, cy - h, cx + w // 2, cy], radius=6, fill=color)
+    draw.arc([cx - w - 2, cy - h // 2, cx + w + 2, cy + h // 2], start=0, end=180, fill=color, width=2)
+    draw.line([cx, cy + h // 2, cx, cy + h // 2 + 6], fill=color, width=2)
+
 
 # ==============================================================================
-# 方案一：【深空黑曜微光版 (Obsidian Glass)】(第一版完美还原与去底盘净化)
+# 方案一：【深空黑曜微光版 (Obsidian Glass)】(真海报/真剧照/第一版完整还原)
 # ==============================================================================
 
 def create_scheme1_01_home():
@@ -59,7 +132,7 @@ def create_scheme1_01_home():
     draw = ImageDraw.Draw(img, "RGBA")
     draw.ellipse([800, -200, 2200, 600], fill=(20, 35, 60, 120))
 
-    # 1. Left Vertical Dock (x: 0 ~ 240 px)
+    # 1. Left Vertical Dock
     draw.rectangle([0, 0, 240, 1620], fill=(18, 24, 34, 240))
     draw.line([240, 0, 240, 1620], fill=(45, 55, 72, 255), width=2)
     draw.text((45, 45), "TVBOX", fill=ACCENT_CYAN, font=get_font(True, 38))
@@ -85,17 +158,14 @@ def create_scheme1_01_home():
             draw.text((45, cur_y + 32), title, fill=TEXT_SECONDARY, font=get_font(False, 26))
         cur_y += 125
 
-    # Bottom Player Status Badge (Pure media status, no vehicle telematic)
     draw_rounded_rect(draw, [20, 1470, 220, 1570], radius=18, fill=(26, 36, 52, 220))
     draw.text((45, 1492), "4K 引擎就绪", fill=SUCCESS_GREEN, font=get_font(True, 24))
     draw.text((45, 1526), "IJK 硬解 · SGSR1", fill=TEXT_MUTED, font=get_font(False, 18))
 
-    # 2. Top Header Bar (x: 280 ~ 2800 px)
-    # Stream Status Capsule
+    # 2. Top Header Bar
     draw_pill(draw, [280, 40, 800, 130], fill=(26, 34, 48, 200), outline=(50, 60, 80), width=2)
     draw.text((320, 62), "✨ 4K 臻彩超清已就绪 · 杜比全景声 7.1", fill=ACCENT_CYAN, font=get_font(False, 26))
 
-    # Big Voice Search Input Bar
     draw_pill(draw, [840, 40, 2300, 130], fill=(30, 40, 58, 220), outline=ACCENT_CYAN, width=2)
     draw.text((890, 60), "🔍 语音搜片 / 首字母搜剧 (例如: QYN2 庆余年)", fill=TEXT_MUTED, font=get_font(False, 28))
     draw_pill(draw, [2020, 50, 2280, 120], fill=(37, 99, 235))
@@ -104,32 +174,41 @@ def create_scheme1_01_home():
     draw_pill(draw, [2340, 40, 2800, 130], fill=(26, 34, 48, 200), outline=(50, 60, 80), width=2)
     draw.text((2400, 60), "15:42  5G 📶 100%", fill=TEXT_PRIMARY, font=get_font(True, 28))
 
-    # 3. Main Stage: Left Hero Resume Card (x: 280 ~ 1380 px, y: 170 ~ 680 px)
+    # 3. Main Stage: Left Hero Resume Card with REAL Qingyunian Still!
     draw_rounded_rect(draw, [280, 170, 1380, 680], radius=32, fill=(24, 32, 48, 240), outline=(55, 75, 110), width=3)
-    draw_pill(draw, [320, 210, 540, 265], fill=(37, 99, 235, 200))
-    draw.text((345, 222), "上次未看完", fill=TEXT_PRIMARY, font=get_font(True, 24))
-    draw.text((320, 290), "庆余年 第二季", fill=TEXT_PRIMARY, font=get_font(True, 46))
-    draw.text((320, 360), "第 18 集 · 4K 臻彩超清 (已播至 72% / 42分15秒)", fill=ACCENT_CYAN, font=get_font(False, 30))
-    draw_rounded_rect(draw, [320, 430, 1340, 446], radius=8, fill=(45, 55, 72))
-    draw_rounded_rect(draw, [320, 430, 1050, 446], radius=8, fill=ACCENT_CYAN)
+    # Load and embed real Qingyunian still in the hero card
+    qyn_still = load_and_crop("qingyunian_still.jpg", (440, 470), radius=22)
+    paste_image(img, qyn_still, (300, 190))
 
-    draw_pill(draw, [320, 490, 780, 620], fill=(37, 99, 235), outline=(96, 165, 250), width=2)
-    draw.text((400, 528), "▶ 继续播放", fill=TEXT_PRIMARY, font=get_font(True, 38))
+    draw_pill(draw, [760, 200, 970, 255], fill=(37, 99, 235, 200))
+    draw.text((785, 212), "上次未看完", fill=TEXT_PRIMARY, font=get_font(True, 24))
+    draw.text((760, 275), "庆余年 第二季", fill=TEXT_PRIMARY, font=get_font(True, 44))
+    draw.text((760, 335), "第 18 集 · 4K 臻彩超清 (已播 72% / 42分15秒)", fill=ACCENT_CYAN, font=get_font(False, 26))
+    
+    draw_rounded_rect(draw, [760, 400, 1340, 416], radius=8, fill=(45, 55, 72))
+    draw_rounded_rect(draw, [760, 400, 1180, 416], radius=8, fill=ACCENT_CYAN)
 
-    draw_pill(draw, [810, 490, 1200, 620], fill=(45, 55, 75), outline=(75, 85, 105), width=2)
-    draw.text((850, 532), "▦ 选集列表", fill=TEXT_SECONDARY, font=get_font(True, 32))
+    draw_pill(draw, [760, 470, 1070, 595], fill=(37, 99, 235), outline=(96, 165, 250), width=2)
+    draw.text((810, 508), "▶ 继续播放", fill=TEXT_PRIMARY, font=get_font(True, 34))
 
-    # 4. Right Stage: Today Hot Feature Card (x: 1420 ~ 2800 px, y: 170 ~ 680 px)
+    draw_pill(draw, [1100, 470, 1340, 595], fill=(45, 55, 75), outline=(75, 85, 105), width=2)
+    draw.text((1140, 510), "▦ 选集列表", fill=TEXT_SECONDARY, font=get_font(True, 28))
+
+    # 4. Right Stage: Today Hot Feature Card with REAL Fanxiang Backdrop!
     draw_rounded_rect(draw, [1420, 170, 2800, 680], radius=32, fill=(28, 38, 56, 240), outline=(60, 80, 115), width=2)
-    draw_pill(draw, [1460, 210, 1720, 265], fill=(220, 38, 38, 200))
-    draw.text((1485, 222), "今日热榜 TOP 1", fill=TEXT_PRIMARY, font=get_font(True, 24))
-    draw.text((1460, 290), "繁花 (Blossoms Shanghai)", fill=TEXT_PRIMARY, font=get_font(True, 46))
-    draw.text((1460, 360), "王家卫导演作品 · 沪语4K原画 · 杜比全景声", fill=ACCENT_AMBER, font=get_font(False, 30))
-    draw.text((1460, 430), "九十年代上海黄河路商海浮沉，阿宝与李李的商战传奇...", fill=TEXT_SECONDARY, font=get_font(False, 26))
-    draw_pill(draw, [1460, 500, 1860, 620], fill=(16, 185, 129))
-    draw.text((1530, 535), "▶ 立即观看", fill=TEXT_PRIMARY, font=get_font(True, 36))
+    fx_img = load_and_crop("fanxiang_poster.jpg", (420, 470), radius=22)
+    paste_image(img, fx_img, (1440, 190))
 
-    # 5. Bottom Carousel Cards & Category Tabs (y: 720 ~ 1580 px)
+    draw_pill(draw, [1890, 200, 2140, 255], fill=(220, 38, 38, 200))
+    draw.text((1915, 212), "今日热榜 TOP 1", fill=TEXT_PRIMARY, font=get_font(True, 24))
+    draw.text((1890, 275), "繁花 (Blossoms Shanghai)", fill=TEXT_PRIMARY, font=get_font(True, 42))
+    draw.text((1890, 335), "王家卫导演作品 · 沪语4K原画 · 杜比全景声", fill=ACCENT_AMBER, font=get_font(False, 26))
+    draw.text((1890, 395), "九十年代上海黄河路商海浮沉，阿宝与李李的商战传奇...", fill=TEXT_SECONDARY, font=get_font(False, 24))
+    
+    draw_pill(draw, [1890, 470, 2240, 595], fill=(16, 185, 129))
+    draw.text((1940, 508), "▶ 立即观看", fill=TEXT_PRIMARY, font=get_font(True, 34))
+
+    # 5. Bottom Carousel Cards with REAL POSTERS!
     tabs = ["🔥 热播推荐", "🎬 4K臻彩大片", "📺 热门电视剧", "✨ 动漫追番", "🎞 纪录片专区", "📻 经典相声曲艺"]
     cur_tx = 280
     for idx, tab_name in enumerate(tabs):
@@ -141,30 +220,35 @@ def create_scheme1_01_home():
             draw.text((cur_tx + 35, 742), tab_name, fill=TEXT_SECONDARY, font=get_font(False, 28))
         cur_tx += 265
 
-    card_data = [
-        ("流浪地球2", "评分 9.1", "科幻/硬核/4K", (40, 60, 95)),
-        ("三体 (电视剧版)", "评分 8.8", "剧情/悬疑/臻彩", (50, 45, 80)),
-        ("周处除三害", "评分 8.5", "动作/犯罪/HDR", (70, 50, 40)),
-        ("狂飙", "评分 9.0", "反腐/扫黑/原画", (35, 70, 60)),
-        ("大理寺少卿游", "评分 8.2", "古装/探案/超分", (60, 60, 50)),
+    # 5 real posters
+    poster_items = [
+        ("wandering_earth2_poster.jpg", "流浪地球 2", "评分 9.1", "科幻 / 硬核 / 4K"),
+        ("santi_poster.jpg", "三体 (电视剧版)", "评分 8.8", "剧情 / 悬疑 / 臻彩"),
+        ("zhouchu_poster.jpg", "周处除三害", "评分 8.5", "动作 / 犯罪 / HDR"),
+        ("kuangbiao_poster.jpg", "狂飙", "评分 9.0", "反腐 / 扫黑 / 原画"),
+        ("dune2_poster.jpg", "沙丘 2", "评分 8.7", "科幻 / 巨制 / 杜比"),
     ]
     cur_cx = 280
-    for title, score, tag, color in card_data:
-        draw_rounded_rect(draw, [cur_cx, 840, cur_cx + 475, 1560], radius=24, fill=color, outline=(65, 85, 120), width=2)
-        draw.rectangle([cur_cx + 20, 860, cur_cx + 455, 1360], fill=(color[0] + 20, color[1] + 20, color[2] + 20))
-        draw.text((cur_cx + 60, 1080), title, fill=TEXT_PRIMARY, font=get_font(True, 40))
-        draw_pill(draw, [cur_cx + 40, 880, cur_cx + 200, 940], fill=(234, 88, 12, 220))
-        draw.text((cur_cx + 60, 895), score, fill=TEXT_PRIMARY, font=get_font(True, 24))
-        draw.text((cur_cx + 30, 1390), title, fill=TEXT_PRIMARY, font=get_font(True, 32))
-        draw.text((cur_cx + 30, 1445), tag, fill=TEXT_SECONDARY, font=get_font(False, 24))
-        draw_pill(draw, [cur_cx + 30, 1490, cur_cx + 445, 1545], fill=(37, 99, 235, 180))
-        draw.text((cur_cx + 170, 1502), "进入详情", fill=TEXT_PRIMARY, font=get_font(True, 24))
+    for img_file, title, score, tag in poster_items:
+        draw_rounded_rect(draw, [cur_cx, 840, cur_cx + 475, 1560], radius=24, fill=(24, 30, 44), outline=(65, 85, 120), width=2)
+        real_p = load_and_crop(img_file, (435, 500), radius=18)
+        paste_image(img, real_p, (cur_cx + 20, 860))
+
+        # Score badge
+        draw_pill(draw, [cur_cx + 35, 880, cur_cx + 195, 940], fill=(234, 88, 12, 230))
+        draw.text((cur_cx + 55, 895), score, fill=TEXT_PRIMARY, font=get_font(True, 24))
+
+        draw.text((cur_cx + 30, 1380), title, fill=TEXT_PRIMARY, font=get_font(True, 32))
+        draw.text((cur_cx + 30, 1435), tag, fill=TEXT_SECONDARY, font=get_font(False, 24))
+
+        draw_pill(draw, [cur_cx + 30, 1485, cur_cx + 445, 1545], fill=(37, 99, 235, 200))
+        draw.text((cur_cx + 170, 1498), "进入详情", fill=TEXT_PRIMARY, font=get_font(True, 24))
+
         cur_cx += 505
 
     img.save(os.path.join(OUTPUT_DIR, "scheme1-01-home.png"))
-    # Also save as canonical redesign-01-home.png for backward compat
     img.save(os.path.join(OUTPUT_DIR, "redesign-01-home.png"))
-    print("Generated scheme1-01-home.png")
+    print("Generated Scheme 1 Home with real photographic assets")
 
 
 def create_scheme1_02_detail():
@@ -179,14 +263,18 @@ def create_scheme1_02_detail():
     draw_pill(draw, [2340, 40, 2820, 130], fill=(28, 38, 56, 200), outline=(60, 75, 105), width=2)
     draw.text((2380, 62), "SGSR1 超分就绪  ·  臻彩滤镜", fill=ACCENT_CYAN, font=get_font(False, 26))
 
-    # LEFT HALF: Video Preview & Action Cluster
+    # LEFT HALF: Real Qingyunian Video Preview Window!
     draw_rounded_rect(draw, [60, 160, 1300, 840], radius=28, fill=(15, 20, 30), outline=(50, 70, 100), width=3)
-    draw.rectangle([80, 180, 1280, 820], fill=(25, 45, 65))
-    draw.ellipse([610, 430, 750, 570], fill=(0, 0, 0, 160), outline=ACCENT_CYAN, width=3)
-    draw.polygon([(660, 470), (660, 530), (715, 500)], fill=ACCENT_CYAN)
-    draw.text((540, 590), "轻触直接全屏播放", fill=TEXT_PRIMARY, font=get_font(True, 30))
-    draw_pill(draw, [100, 200, 320, 260], fill=(16, 185, 129, 220))
-    draw.text((125, 215), "4K 60FPS 极速", fill=TEXT_PRIMARY, font=get_font(True, 24))
+    qyn_preview = load_and_crop("qingyunian_still.jpg", (1220, 640), radius=22)
+    paste_image(img, qyn_preview, (70, 170))
+
+    # Play circle on video
+    draw.ellipse([620, 430, 760, 570], fill=(0, 0, 0, 180), outline=ACCENT_CYAN, width=3)
+    draw_icon_play(draw, (695, 500), 40, ACCENT_CYAN)
+    draw.text((545, 590), "轻触直接全屏播放", fill=TEXT_PRIMARY, font=get_font(True, 28))
+
+    draw_pill(draw, [90, 190, 310, 250], fill=(16, 185, 129, 230))
+    draw.text((115, 205), "4K 60FPS 极速", fill=TEXT_PRIMARY, font=get_font(True, 24))
 
     # Action buttons: Play, Switch Source, Collect, Push
     draw_pill(draw, [60, 870, 540, 1010], fill=(37, 99, 235), outline=(96, 165, 250), width=3)
@@ -271,32 +359,33 @@ def create_scheme1_02_detail():
 
     img.save(os.path.join(OUTPUT_DIR, "scheme1-02-detail.png"))
     img.save(os.path.join(OUTPUT_DIR, "redesign-02-detail.png"))
-    print("Generated scheme1-02-detail.png")
+    print("Generated Scheme 1 Detail with real video frame")
 
 
 def create_scheme1_03_player():
     img = Image.new("RGBA", (2880, 1620), (10, 12, 16))
     draw = ImageDraw.Draw(img, "RGBA")
 
-    # High Dynamic Cinematic Background Frame simulation
-    draw.rectangle([0, 0, 2880, 1620], fill=(20, 28, 42))
-    for y in range(0, 300):
-        alpha = int(220 * (1 - y / 300))
-        draw.line([0, y, 2880, y], fill=(0, 0, 0, alpha))
-    for y in range(1100, 1620):
-        alpha = int(240 * ((y - 1100) / 520))
-        draw.line([0, y, 2880, y], fill=(0, 0, 0, alpha))
+    # Load REAL 4K Cinematic Background Video Frame!
+    real_bg = load_and_crop("cinematic_player_bg.jpg", (2880, 1620))
+    paste_image(img, real_bg, (0, 0))
 
-    draw.text((1200, 700), "【4K 60FPS 电影画面呈现中】", fill=(80, 110, 150), font=get_font(True, 44))
+    # Dark gradient overlays for readability
+    for y in range(0, 320):
+        alpha = int(220 * (1 - y / 320))
+        draw.line([0, y, 2880, y], fill=(0, 0, 0, alpha))
+    for y in range(1080, 1620):
+        alpha = int(240 * ((y - 1080) / 540))
+        draw.line([0, y, 2880, y], fill=(0, 0, 0, alpha))
 
     # Top Control Bar
     draw_pill(draw, [60, 40, 240, 130], fill=(20, 28, 40, 220), outline=ACCENT_CYAN, width=2)
     draw.text((105, 62), "← 退出", fill=TEXT_PRIMARY, font=get_font(True, 30))
-    draw.text((280, 60), "庆余年 第二季 - 第 18 集", fill=TEXT_PRIMARY, font=get_font(True, 36))
-    draw_pill(draw, [780, 55, 1020, 115], fill=(16, 185, 129, 200))
-    draw.text((805, 70), "IJK 硬解 · SGSR1", fill=TEXT_PRIMARY, font=get_font(True, 22))
+    draw.text((280, 60), "沙丘 2 (Dune: Part Two) - 4K 60FPS IMAX 原画", fill=TEXT_PRIMARY, font=get_font(True, 36))
+    
+    draw_pill(draw, [1120, 55, 1380, 115], fill=(16, 185, 129, 200))
+    draw.text((1145, 70), "IJK 硬解 · SGSR1", fill=TEXT_PRIMARY, font=get_font(True, 22))
 
-    # Top Right Controls (Real features)
     draw_pill(draw, [1920, 45, 2280, 125], fill=(30, 40, 58, 220), outline=ACCENT_CYAN, width=2)
     draw.text((1955, 65), "🎧 后台播放：开", fill=ACCENT_CYAN, font=get_font(True, 26))
 
@@ -306,22 +395,21 @@ def create_scheme1_03_player():
     draw_pill(draw, [2620, 45, 2820, 125], fill=(30, 40, 58, 220), outline=(60, 75, 100), width=2)
     draw.text((2675, 65), "15:43", fill=TEXT_PRIMARY, font=get_font(True, 28))
 
-    # Gesture Guide Badges
-    draw_rounded_rect(draw, [60, 500, 180, 900], radius=30, fill=(20, 30, 45, 120), outline=(50, 70, 100, 140), width=2)
+    # Gesture Badges
+    draw_rounded_rect(draw, [60, 500, 180, 900], radius=30, fill=(20, 30, 45, 130), outline=(50, 70, 100, 140), width=2)
     draw.text((85, 540), "☼\n\n左\n屏\n上\n下\n滑\n\n调\n亮\n度", fill=TEXT_SECONDARY, font=get_font(False, 24))
 
-    draw_rounded_rect(draw, [2700, 500, 2820, 900], radius=30, fill=(20, 30, 45, 120), outline=(50, 70, 100, 140), width=2)
+    draw_rounded_rect(draw, [2700, 500, 2820, 900], radius=30, fill=(20, 30, 45, 130), outline=(50, 70, 100, 140), width=2)
     draw.text((2725, 540), "🔊\n\n右\n屏\n上\n下\n滑\n\n调\n音\n量", fill=TEXT_SECONDARY, font=get_font(False, 24))
 
-    # Center Long Press Tip
-    draw_pill(draw, [1220, 500, 1660, 580], fill=(0, 0, 0, 180), outline=ACCENT_CYAN, width=2)
+    draw_pill(draw, [1220, 500, 1660, 580], fill=(0, 0, 0, 190), outline=ACCENT_CYAN, width=2)
     draw.text((1260, 522), "⚡ 长按屏幕 2.0x 极速快进", fill=ACCENT_CYAN, font=get_font(True, 24))
 
     # Scrubber Bar
-    draw.text((60, 1240), "42:15 / 58:30", fill=TEXT_PRIMARY, font=get_font(True, 34))
-    draw_rounded_rect(draw, [320, 1250, 2820, 1270], radius=10, fill=(60, 75, 95))
-    draw_rounded_rect(draw, [320, 1250, 2120, 1270], radius=10, fill=ACCENT_CYAN)
-    draw.ellipse([2100, 1237, 2146, 1283], fill=(255, 255, 255), outline=ACCENT_CYAN, width=4)
+    draw.text((60, 1240), "01:24:15 / 02:46:30", fill=TEXT_PRIMARY, font=get_font(True, 34))
+    draw_rounded_rect(draw, [400, 1250, 2820, 1270], radius=10, fill=(60, 75, 95))
+    draw_rounded_rect(draw, [400, 1250, 1620, 1270], radius=10, fill=ACCENT_CYAN)
+    draw.ellipse([1600, 1237, 1646, 1283], fill=(255, 255, 255), outline=ACCENT_CYAN, width=4)
 
     # Bottom Control Island (Left)
     draw_pill(draw, [60, 1360, 320, 1550], fill=(37, 99, 235), outline=(96, 165, 250), width=3)
@@ -342,15 +430,14 @@ def create_scheme1_03_player():
     draw.text((1260, 1445), "影院环绕声", fill=ACCENT_AMBER, font=get_font(True, 34))
 
     # Secondary Tools (Right)
-    sec_buttons = [("倍速 1.25x", 1920), ("选集 (36)", 2160), ("比例 16:9", 2400), ("换源 (32ms)", 2640)]
+    sec_buttons = [("倍速 1.25x", 1920), ("选集 (36)", 2160), ("比例 21:9", 2400), ("换源 (32ms)", 2640)]
     for btn_text, bx in sec_buttons:
         draw_pill(draw, [bx, 1380, bx + 215, 1530], fill=(26, 34, 48, 220), outline=(60, 75, 100), width=2)
         draw.text((bx + 28, 1435), btn_text, fill=TEXT_SECONDARY, font=get_font(True, 26))
 
     img.save(os.path.join(OUTPUT_DIR, "scheme1-03-player.png"))
     img.save(os.path.join(OUTPUT_DIR, "redesign-03-player.png"))
-    print("Generated scheme1-03-player.png")
-
+    print("Generated Scheme 1 Player with real 4K cinematic background")
 
 def create_scheme1_04_search():
     img = Image.new("RGBA", (2880, 1620), BG_OBSIDIAN)
@@ -410,7 +497,7 @@ def create_scheme1_04_search():
         draw.text((cur_px + 30, 945), ps, fill=TEXT_PRIMARY, font=get_font(True, 24))
         cur_px += 175
 
-    # RIGHT HALF: Recent Searches & Real-Time Results
+    # RIGHT HALF: Recent Searches & Real-Time Results with Real Poster Thumbnails!
     draw_rounded_rect(draw, [1400, 230, 2820, 1560], radius=28, fill=(22, 30, 44, 220), outline=(50, 65, 95), width=2)
     draw.text((1440, 270), "最近历史搜索：", fill=TEXT_MUTED, font=get_font(True, 28))
     hist_tags = ["庆余年2", "繁花", "周处除三害", "三体", "飞驰人生2"]
@@ -422,27 +509,28 @@ def create_scheme1_04_search():
 
     draw.text((1440, 370), "搜索结果 (联想匹配到 5 条结果)：", fill=ACCENT_CYAN, font=get_font(True, 30))
     results = [
-        ("1", "庆余年 第二季 (2024)", "36集全 · 4K 臻彩超清 · 张若昀 / 陈道明", "立即播放 ▶"),
-        ("2", "庆余年 第一季 (2019)", "46集全 · 蓝光1080P · 经典重温", "立即播放 ▶"),
-        ("3", "庆余年 特别篇 / 花絮合集", "12个片段 · 原画超清 · 幕后专访", "查看详情"),
-        ("4", "周处除三害 (2024)", "电影 · 4K HDR · 阮经天", "立即播放 ▶"),
-        ("5", "大理寺少卿游 (2024)", "36集全 · 古装探案超清", "立即播放 ▶")
+        ("qingyunian_poster.jpg", "庆余年 第二季 (2024)", "36集全 · 4K 臻彩超清 · 张若昀 / 陈道明", "立即播放 ▶"),
+        ("fanxiang_poster.jpg", "繁花 (2023)", "30集全 · 沪语4K原画 · 王家卫导演", "立即播放 ▶"),
+        ("zhouchu_poster.jpg", "周处除三害 (2024)", "电影 · 4K HDR · 阮经天 / 袁富华", "立即播放 ▶"),
+        ("wandering_earth2_poster.jpg", "流浪地球 2 (2023)", "电影 · 4K 60FPS · 吴京 / 刘德华", "立即播放 ▶"),
+        ("kuangbiao_poster.jpg", "狂飙 (2023)", "39集全 · 扫黑反腐高分大剧", "立即播放 ▶")
     ]
     cur_ry = 430
-    for r_rank, r_title, r_desc, r_action in results:
+    for poster_fn, r_title, r_desc, r_action in results:
         draw_rounded_rect(draw, [1440, cur_ry, 2780, cur_ry + 195], radius=20, fill=(28, 38, 56, 220), outline=(60, 80, 115), width=2)
-        draw_pill(draw, [1470, cur_ry + 35, 1530, cur_ry + 95], fill=(37, 99, 235))
-        draw.text((1490, cur_ry + 45), r_rank, fill=TEXT_PRIMARY, font=get_font(True, 30))
-        draw.text((1560, cur_ry + 35), r_title, fill=TEXT_PRIMARY, font=get_font(True, 34))
-        draw.text((1560, cur_ry + 95), r_desc, fill=TEXT_SECONDARY, font=get_font(False, 26))
+        # Real Poster Thumbnail
+        thumb = load_and_crop(poster_fn, (130, 165), radius=14)
+        paste_image(img, thumb, (1460, cur_ry + 15))
+
+        draw.text((1620, cur_ry + 35), r_title, fill=TEXT_PRIMARY, font=get_font(True, 34))
+        draw.text((1620, cur_ry + 95), r_desc, fill=TEXT_SECONDARY, font=get_font(False, 26))
         draw_pill(draw, [2500, cur_ry + 45, 2740, cur_ry + 150], fill=(16, 185, 129))
         draw.text((2530, cur_ry + 78), r_action, fill=TEXT_PRIMARY, font=get_font(True, 26))
         cur_ry += 220
 
     img.save(os.path.join(OUTPUT_DIR, "scheme1-04-search.png"))
     img.save(os.path.join(OUTPUT_DIR, "redesign-04-search.png"))
-    print("Generated scheme1-04-search.png")
-
+    print("Generated Scheme 1 Search with real poster thumbnails")
 
 def create_scheme1_05_settings():
     img = Image.new("RGBA", (2880, 1620), BG_OBSIDIAN)
@@ -508,7 +596,7 @@ def create_scheme1_05_settings():
     draw.ellipse([2670, 845, 2750, 925], fill=(255, 255, 255))
     draw.text((2570, 868), "已开启", fill=TEXT_PRIMARY, font=get_font(True, 26))
 
-    # CARD 4: Touch Gestures & Background Play (Replaced fake D-gear with practical touch & bg options)
+    # CARD 4: Touch Gestures & Background Play
     draw_rounded_rect(draw, [720, 1030, 2820, 1550], radius=26, fill=(28, 40, 60, 240), outline=ACCENT_CYAN, width=2)
     draw.text((760, 1070), "👆 17.3 英寸触控交互与切后台音频配置", fill=ACCENT_CYAN, font=get_font(True, 34))
     draw.text((760, 1120), "个性化触控习惯：支持全屏长按倍速、边缘滑动手势与后台音频混音播放", fill=TEXT_MUTED, font=get_font(False, 26))
@@ -531,11 +619,9 @@ def create_scheme1_05_settings():
 
     img.save(os.path.join(OUTPUT_DIR, "scheme1-05-settings.png"))
     img.save(os.path.join(OUTPUT_DIR, "redesign-05-settings.png"))
-    print("Generated scheme1-05-settings.png")
-
+    print("Generated Scheme 1 Settings")
 
 def create_scheme1_06_live():
-    # Mockup 6: Live TV & EPG Stream (Replaces the fake pitch-black screen-off!)
     img = Image.new("RGBA", (2880, 1620), BG_OBSIDIAN)
     draw = ImageDraw.Draw(img, "RGBA")
 
@@ -547,10 +633,9 @@ def create_scheme1_06_live():
     draw_pill(draw, [2360, 40, 2820, 130], fill=(26, 36, 52, 200), outline=(55, 75, 105), width=2)
     draw.text((2400, 62), "⚡ 极速解码 · 0秒切台", fill=ACCENT_CYAN, font=get_font(False, 26))
 
-    # LEFT HALF: Channel Groups & Channel List (x: 60 ~ 1100 px, y: 160 ~ 1560 px)
+    # LEFT HALF: Channel Groups & Channel List
     draw_rounded_rect(draw, [60, 160, 1100, 1560], radius=28, fill=(20, 28, 40, 240), outline=(50, 65, 90), width=2)
     
-    # Channel Group Tabs
     c_groups = ["央视频道", "热门卫视", "高清电影", "体育赛事", "地方频道"]
     cur_gx = 90
     for idx, g_name in enumerate(c_groups):
@@ -563,7 +648,6 @@ def create_scheme1_06_live():
             draw.text((cur_gx + 30, 210), g_name, fill=TEXT_SECONDARY, font=get_font(False, 24))
         cur_gx += gw + 15
 
-    # Channels List (Large touch target 120px tall each)
     channels = [
         ("01", "CCTV-1 综合超清", "正在播出：新闻联播", True),
         ("02", "CCTV-5 体育赛事", "正在播出：天下足球", False),
@@ -589,18 +673,21 @@ def create_scheme1_06_live():
             draw.text((200, cur_cy + 90), c_epg, fill=TEXT_SECONDARY, font=get_font(False, 24))
         cur_cy += 175
 
-    # RIGHT HALF: Live TV Screen Preview & Quick Actions (x: 1140 ~ 2820 px)
+    # RIGHT HALF: Live TV Screen Preview & Quick Actions with REAL CCTV-1 Still!
     draw_rounded_rect(draw, [1140, 160, 2820, 1560], radius=28, fill=(16, 22, 32), outline=(50, 68, 98), width=3)
-    # Simulated Live Screen
-    draw.rectangle([1160, 180, 2800, 1150], fill=(22, 40, 60))
-    draw.text((1800, 640), "【CCTV-1 综合超清 正在高清直播】", fill=TEXT_PRIMARY, font=get_font(True, 40))
-    draw.text((1860, 710), "轻触屏幕任意区域唤起全屏播放", fill=ACCENT_CYAN, font=get_font(False, 28))
+    # Simulated Live Screen with real studio photo!
+    cctv_im = load_and_crop("cctv1_still.jpg", (1640, 970), radius=22)
+    paste_image(img, cctv_im, (1160, 180))
+
+    draw.ellipse([1920, 620, 2040, 740], fill=(0, 0, 0, 180), outline=ACCENT_CYAN, width=3)
+    draw_icon_play(draw, (1985, 680), 36, ACCENT_CYAN)
+    draw.text((1820, 770), "轻触唤起全屏沉浸直播", fill=TEXT_PRIMARY, font=get_font(True, 28))
 
     # Station Tag
     draw_pill(draw, [1190, 210, 1420, 275], fill=(220, 38, 38, 220))
     draw.text((1220, 228), "● 正在直播", fill=TEXT_PRIMARY, font=get_font(True, 24))
 
-    # Bottom Actions for Live TV (x: 1160 ~ 2800 px, y: 1180 ~ 1520 px)
+    # Bottom Actions for Live TV
     draw_rounded_rect(draw, [1160, 1180, 2800, 1520], radius=24, fill=(24, 34, 50, 220), outline=(50, 65, 95), width=2)
     draw.text((1200, 1220), "当前频道：CCTV-1 综合频道 (1080P 50FPS 极速源)", fill=TEXT_PRIMARY, font=get_font(True, 34))
     draw.text((1200, 1280), "节目流预告：19:00 新闻联播  |  19:35 焦点访谈  |  20:00 黄金档剧场", fill=TEXT_SECONDARY, font=get_font(False, 28))
@@ -616,27 +703,23 @@ def create_scheme1_06_live():
 
     img.save(os.path.join(OUTPUT_DIR, "scheme1-06-live.png"))
     img.save(os.path.join(OUTPUT_DIR, "redesign-06-screenoff-audio.png"))
-    print("Generated scheme1-06-live.png")
+    print("Generated Scheme 1 Live TV with real CCTV studio still")
 
 
 # ==============================================================================
-# 方案二：【全景悬浮无界版 (Cinematic Infinity / Apple TV & Infuse 极简风格)】
+# 方案二：【全景悬浮无界版 (Cinematic Infinity)】(多场景完整套图)
 # ==============================================================================
-
-def create_scheme2_home():
+def create_scheme2_01_home():
     img = Image.new("RGBA", (2880, 1620), BG_CINEMATIC)
     draw = ImageDraw.Draw(img, "RGBA")
 
-    # Big ambient poster lighting backdrop
+    # Ambient backdrop lighting
     draw.ellipse([400, 0, 2480, 800], fill=(30, 50, 80, 100))
 
     # Top Floating Capsule Navigation (Translucent Glass Bar x: 440 ~ 2440 px, y: 50 ~ 150 px)
     draw_pill(draw, [440, 50, 2440, 150], fill=(22, 28, 42, 200), outline=(50, 70, 100), width=2)
-    
-    # Brand inside pill
     draw.text((500, 75), "TVBOX PRO", fill=ACCENT_CYAN, font=get_font(True, 32))
 
-    # Nav Links
     cinematic_nav = ["精选推荐", "电影大片", "热门剧集", "电视直播", "播放历史", "我的收藏", "应用设置"]
     cur_nx = 760
     for idx, n_name in enumerate(cinematic_nav):
@@ -648,16 +731,14 @@ def create_scheme2_home():
             draw.text((cur_nx + 25, 82), n_name, fill=TEXT_SECONDARY, font=get_font(False, 24))
         cur_nx += nw + 25
 
-    # Voice Search Icon
     draw_pill(draw, [2150, 65, 2380, 135], fill=(30, 42, 60), outline=ACCENT_CYAN, width=1)
     draw.text((2185, 82), "🔍 语音搜片", fill=TEXT_PRIMARY, font=get_font(True, 22))
 
-    # Hero Full-Width Floating Spotlight Poster (x: 100 ~ 2780 px, y: 190 ~ 820 px)
+    # Hero Full-Width Floating Spotlight Poster with REAL Fanxiang backdrop!
     draw_rounded_rect(draw, [100, 190, 2780, 820], radius=36, fill=(20, 26, 40, 240), outline=(55, 75, 110), width=2)
-    # Background poster art
-    draw.rectangle([100, 190, 1600, 820], fill=(28, 42, 65)) # Image area
-    draw.text((250, 450), "【繁花 BLOSSOMS SHANGHAI 4K 原画】", fill=TEXT_PRIMARY, font=get_font(True, 44))
-    
+    fx_backdrop = load_and_crop("fanxiang_backdrop.jpg", (1500, 630), radius=30)
+    paste_image(img, fx_backdrop, (100, 190))
+
     # Right Information on Hero Card
     draw_pill(draw, [1680, 240, 1940, 300], fill=(220, 38, 38))
     draw.text((1710, 255), "今日全网热搜 TOP 1", fill=TEXT_PRIMARY, font=get_font(True, 22))
@@ -670,28 +751,28 @@ def create_scheme2_home():
     draw.text((1680, 530), synopsis_p[:38], fill=TEXT_MUTED, font=get_font(False, 24))
     draw.text((1680, 570), synopsis_p[38:], fill=TEXT_MUTED, font=get_font(False, 24))
 
-    # Hero Play Buttons
     draw_pill(draw, [1680, 650, 2100, 765], fill=(37, 99, 235), outline=(96, 165, 250), width=2)
     draw.text((1750, 685), "▶ 立即播放", fill=TEXT_PRIMARY, font=get_font(True, 34))
 
     draw_pill(draw, [2130, 650, 2450, 765], fill=(30, 40, 58), outline=(60, 75, 100), width=2)
     draw.text((2185, 690), "♥ 收藏剧集", fill=TEXT_SECONDARY, font=get_font(True, 28))
 
-    # Bottom Rows: Borderless Ultra-Clean 3K Poster Rails (y: 860 ~ 1580 px)
+    # Bottom Rows: Borderless Ultra-Clean 3K Poster Rails with REAL Posters!
     draw.text((100, 860), "本周精选榜单 (点击卡片直接开播)", fill=TEXT_PRIMARY, font=get_font(True, 32))
     
     posters = [
-        ("庆余年 第二季", "第18集/共36集", "4K 臻彩超清", (35, 50, 80)),
-        ("流浪地球 2", "173分钟完整版", "4K HDR 原画", (45, 40, 70)),
-        ("周处除三害", "动作犯罪高分", "杜比视界", (65, 45, 35)),
-        ("三体 (电视剧版)", "全30集", "科幻臻彩超清", (30, 60, 50)),
-        ("狂飙", "全39集扫黑大剧", "4K 60FPS", (50, 50, 45)),
+        ("qingyunian_poster.jpg", "庆余年 第二季", "第18集/共36集", "4K 臻彩超清"),
+        ("wandering_earth2_poster.jpg", "流浪地球 2", "173分钟完整版", "4K HDR 原画"),
+        ("zhouchu_poster.jpg", "周处除三害", "动作犯罪高分", "杜比视界"),
+        ("santi_poster.jpg", "三体 (电视剧版)", "全30集", "科幻臻彩超清"),
+        ("kuangbiao_poster.jpg", "狂飙", "全39集扫黑大剧", "4K 60FPS"),
     ]
     cur_px = 100
-    for p_title, p_sub, p_tag, p_col in posters:
-        draw_rounded_rect(draw, [cur_px, 920, cur_px + 510, 1560], radius=28, fill=p_col, outline=(60, 75, 105), width=2)
-        draw.rectangle([cur_px + 20, 940, cur_px + 490, 1400], fill=(p_col[0] + 15, p_col[1] + 15, p_col[2] + 15))
-        draw.text((cur_px + 50, 1140), p_title, fill=TEXT_PRIMARY, font=get_font(True, 40))
+    for fn, p_title, p_sub, p_tag in posters:
+        draw_rounded_rect(draw, [cur_px, 920, cur_px + 510, 1560], radius=28, fill=(20, 26, 38), outline=(60, 75, 105), width=2)
+        p_im = load_and_crop(fn, (470, 460), radius=22)
+        paste_image(img, p_im, (cur_px + 20, 940))
+
         draw_pill(draw, [cur_px + 40, 960, cur_px + 200, 1020], fill=(234, 88, 12, 220))
         draw.text((cur_px + 60, 975), p_tag, fill=TEXT_PRIMARY, font=get_font(True, 22))
 
@@ -699,15 +780,121 @@ def create_scheme2_home():
         draw.text((cur_px + 30, 1480), p_sub, fill=TEXT_SECONDARY, font=get_font(False, 24))
         cur_px += 535
 
+    img.save(os.path.join(OUTPUT_DIR, "scheme2-01-home.png"))
     img.save(os.path.join(OUTPUT_DIR, "scheme2-home.png"))
-    print("Generated scheme2-home.png")
+    print("Generated Scheme 2 Home with real photographic assets")
+
+
+def create_scheme2_02_detail():
+    img = Image.new("RGBA", (2880, 1620), BG_CINEMATIC)
+    draw = ImageDraw.Draw(img, "RGBA")
+
+    # Fullscreen cinematic backdrop
+    qyn_bg = load_and_crop("qingyunian_still.jpg", (2880, 1620))
+    paste_image(img, qyn_bg, (0, 0))
+
+    # Dark frosted glass veil
+    veil = Image.new("RGBA", (2880, 1620), (10, 14, 22, 210))
+    paste_image(img, veil, (0, 0))
+
+    # Top floating navigation
+    draw_pill(draw, [60, 50, 240, 140], fill=(24, 30, 44, 220), outline=ACCENT_CYAN, width=2)
+    draw.text((105, 72), "← 返回", fill=TEXT_PRIMARY, font=get_font(True, 30))
+
+    draw_pill(draw, [280, 50, 1200, 140], fill=(20, 26, 38, 200), outline=(50, 65, 90), width=1)
+    draw.text((320, 72), "影视详情  ·  庆余年 第二季 (Joy of Life II)", fill=TEXT_PRIMARY, font=get_font(True, 32))
+
+    # Detail Floating Poster & Information
+    poster_im = load_and_crop("qingyunian_poster.jpg", (460, 680), radius=28)
+    paste_image(img, poster_im, (120, 220))
+
+    # Info card on right
+    draw_rounded_rect(draw, [620, 220, 2760, 900], radius=32, fill=(18, 24, 36, 230), outline=(48, 65, 95), width=2)
+    draw.text((680, 260), "庆余年 第二季 (2024)", fill=TEXT_PRIMARY, font=get_font(True, 52))
+    draw.text((680, 340), "评分：★ 8.8 分 (豆瓣超 38 万人评价)  ·  古装 / 权谋 / 历史 / 喜剧", fill=ACCENT_AMBER, font=get_font(True, 30))
+    draw.text((680, 400), "导演：孙皓  |  编剧：王倦  |  领衔主演：张若昀 / 李沁 / 陈道明 / 吴刚 / 田雨", fill=TEXT_SECONDARY, font=get_font(False, 26))
+
+    syn = (
+        "剧情梗概：范闲率领使团回归南庆，面对二皇子与长公主的步步紧逼，以及抱月楼命案与内库亏空危机，"
+        "展开了一场更为凶险狡黠的朝堂权谋周旋。各方势力暗流涌动，悬空庙刺杀与科举舞弊大案接连爆发..."
+    )
+    draw.text((680, 470), syn[:55], fill=TEXT_MUTED, font=get_font(False, 26))
+    draw.text((680, 515), syn[55:], fill=TEXT_MUTED, font=get_font(False, 26))
+
+    # Big Glass Actions
+    draw_pill(draw, [680, 600, 1120, 730], fill=(37, 99, 235), outline=(96, 165, 250), width=2)
+    draw.text((750, 642), "▶ 立即全屏播放", fill=TEXT_PRIMARY, font=get_font(True, 36))
+
+    draw_pill(draw, [1160, 600, 1480, 730], fill=(30, 42, 60), outline=ACCENT_CYAN, width=2)
+    draw.text((1220, 646), "⚡ 智能换源", fill=ACCENT_CYAN, font=get_font(True, 30))
+
+    draw_pill(draw, [1520, 600, 1800, 730], fill=(30, 42, 60), outline=(60, 75, 100), width=2)
+    draw.text((1580, 646), "♥ 收藏剧集", fill=TEXT_SECONDARY, font=get_font(True, 28))
+
+    draw_pill(draw, [1840, 600, 2160, 730], fill=(30, 42, 60), outline=(60, 75, 100), width=2)
+    draw.text((1900, 646), "📲 投屏/推送", fill=TEXT_SECONDARY, font=get_font(True, 28))
+
+    # Bottom Fluid Episode Rails (Horizontal Scrolling Pills)
+    draw.text((120, 940), "剧集快速跳选 (全 36 集)：", fill=TEXT_PRIMARY, font=get_font(True, 32))
+    
+    cur_epx = 120
+    for ep in range(1, 16):
+        ew = 150
+        eh = 120
+        if ep == 18:
+            draw_rounded_rect(draw, [cur_epx, 1010, cur_epx + ew, 1010 + eh], radius=20, fill=(37, 99, 235), outline=ACCENT_CYAN, width=3)
+            draw.text((cur_epx + 45, 1035), f"{ep}", fill=TEXT_PRIMARY, font=get_font(True, 40))
+            draw.text((cur_epx + 25, 1090), "当前播放", fill=ACCENT_CYAN, font=get_font(True, 18))
+        else:
+            draw_rounded_rect(draw, [cur_epx, 1010, cur_epx + ew, 1010 + eh], radius=20, fill=(24, 32, 48, 220), outline=(50, 65, 90), width=2)
+            draw.text((cur_epx + 50, 1045), f"{ep}", fill=TEXT_SECONDARY, font=get_font(True, 36))
+        cur_epx += ew + 20
+
+    img.save(os.path.join(OUTPUT_DIR, "scheme2-02-detail.png"))
+    print("Generated Scheme 2 Detail")
+
+
+def create_scheme2_03_player():
+    img = Image.new("RGBA", (2880, 1620), BG_CINEMATIC)
+    draw = ImageDraw.Draw(img, "RGBA")
+
+    # Real space station 4K background!
+    real_space = load_and_crop("space_station_still.jpg", (2880, 1620))
+    paste_image(img, real_space, (0, 0))
+
+    # Minimalist Floating Frosted Scrubber at bottom (x: 200 ~ 2680 px, y: 1380 ~ 1560 px)
+    draw_rounded_rect(draw, [200, 1380, 2680, 1560], radius=32, fill=(16, 22, 34, 220), outline=(55, 75, 105), width=2)
+    
+    # Scrubber line inside floating bar
+    draw.text((250, 1410), "01:15:32", fill=TEXT_PRIMARY, font=get_font(True, 30))
+    draw.text((2450, 1410), "02:53:14", fill=TEXT_MUTED, font=get_font(True, 30))
+    draw_rounded_rect(draw, [420, 1422, 2400, 1438], radius=8, fill=(50, 65, 85))
+    draw_rounded_rect(draw, [420, 1422, 1450, 1438], radius=8, fill=ACCENT_CYAN)
+    draw.ellipse([1435, 1412, 1465, 1448], fill=(255, 255, 255), outline=ACCENT_CYAN, width=3)
+
+    # Floating Action Bar inside
+    actions = [
+        ("⏸", 250, 1470, 70), ("⏪ 15s", 360, 1470, 120), ("⏩ 15s", 510, 1470, 120),
+        ("倍速 1.5x", 660, 1470, 140), ("臻彩画质", 830, 1470, 150), ("杜比全景声", 1010, 1470, 160),
+        ("比例 21:9", 1200, 1470, 150), ("选集 (18/36)", 1380, 1470, 170)
+    ]
+    for a_text, ax, ay, aw in actions:
+        draw_pill(draw, [ax, ay, ax + aw, ay + 65], fill=(30, 42, 60), outline=(60, 75, 100), width=1)
+        draw.text((ax + 20, ay + 15), a_text, fill=TEXT_PRIMARY, font=get_font(True, 24))
+
+    # Top minimal bar
+    draw_pill(draw, [60, 50, 200, 130], fill=(20, 26, 38, 200), outline=ACCENT_CYAN, width=1)
+    draw.text((95, 70), "←", fill=TEXT_PRIMARY, font=get_font(True, 36))
+    draw.text((230, 72), "流浪地球 2 (The Wandering Earth II) · 4K 60FPS 臻彩超清", fill=TEXT_PRIMARY, font=get_font(True, 32))
+
+    img.save(os.path.join(OUTPUT_DIR, "scheme2-03-player.png"))
+    print("Generated Scheme 2 Player")
 
 
 # ==============================================================================
-# 方案三：【双区专业影音工作台版 (Studio Cockpit / 左右双翼非对称布局)】
+# 方案三：【双区专业影音工作台版 (Studio Cockpit)】(多场景完整套图)
 # ==============================================================================
-
-def create_scheme3_home():
+def create_scheme3_01_home():
     img = Image.new("RGBA", (2880, 1620), BG_STUDIO)
     draw = ImageDraw.Draw(img, "RGBA")
 
@@ -719,23 +906,27 @@ def create_scheme3_home():
     draw.text((60, 45), "TVBOX STUDIO", fill=ACCENT_CYAN, font=get_font(True, 38))
     draw.text((60, 95), "17.3-INCH 3K HIGH-FIDELITY COCKPIT", fill=TEXT_MUTED, font=get_font(True, 20))
 
-    # Fast Media Hub
+    # Fast Media Hub with Real Still!
     draw_rounded_rect(draw, [60, 160, 1090, 520], radius=24, fill=(25, 34, 48, 220), outline=(55, 75, 105), width=2)
-    draw_pill(draw, [100, 190, 310, 245], fill=(37, 99, 235))
-    draw.text((125, 205), "上次观看", fill=TEXT_PRIMARY, font=get_font(True, 22))
-    draw.text((100, 270), "庆余年 第二季 - 第18集", fill=TEXT_PRIMARY, font=get_font(True, 38))
-    draw.text((100, 330), "已播放 72% · 4K 臻彩 · 专线延迟 32ms", fill=ACCENT_CYAN, font=get_font(False, 26))
-    draw_pill(draw, [100, 390, 540, 490], fill=(37, 99, 235), outline=(96, 165, 250), width=2)
-    draw.text((170, 420), "▶ 继续播放", fill=TEXT_PRIMARY, font=get_font(True, 32))
-    draw_pill(draw, [570, 390, 1050, 490], fill=(30, 42, 60), outline=(60, 75, 100), width=2)
-    draw.text((650, 420), "⚡ 智能测速切源", fill=TEXT_SECONDARY, font=get_font(True, 30))
+    qyn_micro = load_and_crop("qingyunian_still.jpg", (300, 320), radius=16)
+    paste_image(img, qyn_micro, (80, 180))
 
-    # Multi-Source Latency Monitor (Real pro feature)
+    draw_pill(draw, [410, 180, 580, 230], fill=(37, 99, 235))
+    draw.text((435, 195), "上次观看", fill=TEXT_PRIMARY, font=get_font(True, 20))
+    draw.text((410, 250), "庆余年 第二季 - 18集", fill=TEXT_PRIMARY, font=get_font(True, 34))
+    draw.text((410, 305), "已播 72% · 4K 臻彩 · 延迟 32ms", fill=ACCENT_CYAN, font=get_font(False, 24))
+
+    draw_pill(draw, [410, 370, 720, 470], fill=(37, 99, 235), outline=(96, 165, 250), width=2)
+    draw.text((460, 400), "▶ 继续", fill=TEXT_PRIMARY, font=get_font(True, 28))
+    draw_pill(draw, [750, 370, 1060, 470], fill=(30, 42, 60), outline=(60, 75, 100), width=2)
+    draw.text((790, 400), "⚡ 智能测速", fill=TEXT_SECONDARY, font=get_font(True, 26))
+
+    # Multi-Source Latency Monitor
     draw_rounded_rect(draw, [60, 550, 1090, 980], radius=24, fill=(25, 34, 48, 220), outline=(55, 75, 105), width=2)
     draw.text((100, 585), "线路智能测速中心 (当前已选最快源)：", fill=TEXT_PRIMARY, font=get_font(True, 28))
     
     source_stats = [
-        ("专线·4K超清 (推荐)", "32 ms", "极低延迟 · 0丢包", True),
+        ("专线·4K超清 (推荐线路)", "32 ms", "极低延迟 · 0丢包", True),
         ("备线·蓝光HDR", "85 ms", "良好 · 无缓冲", False),
         ("专线·原画", "120 ms", "正常", False),
         ("备线·官方解析", "240 ms", "偏高", False),
@@ -765,7 +956,6 @@ def create_scheme3_home():
         draw.text((ax + 50, ay + 38), a_title, fill=TEXT_PRIMARY, font=get_font(True, 30))
 
     # RIGHT WING: Content Showcase (60% width: x: 1200 ~ 2820 px)
-    # Search Bar
     draw_pill(draw, [1200, 40, 2500, 130], fill=(24, 34, 52, 220), outline=ACCENT_CYAN, width=2)
     draw.text((1250, 62), "🔍 语音搜片 / 拼音首字母检索 (例如: QYN2)", fill=TEXT_MUTED, font=get_font(False, 28))
     draw_pill(draw, [2260, 50, 2480, 120], fill=(37, 99, 235))
@@ -774,36 +964,122 @@ def create_scheme3_home():
     draw_pill(draw, [2540, 40, 2820, 130], fill=(24, 34, 52, 220), outline=(50, 65, 90), width=1)
     draw.text((2600, 62), "15:42 5G", fill=TEXT_PRIMARY, font=get_font(True, 26))
 
-    # Right Hero Showcase (x: 1200 ~ 2820 px, y: 160 ~ 800 px)
+    # Right Hero Showcase with REAL Zhouchu Poster!
     draw_rounded_rect(draw, [1200, 160, 2820, 800], radius=32, fill=(28, 38, 56, 240), outline=(55, 75, 110), width=2)
-    draw.rectangle([1200, 160, 2100, 800], fill=(35, 50, 75))
-    draw.text((1400, 450), "【今日推荐大片 4K HDR】", fill=TEXT_PRIMARY, font=get_font(True, 40))
+    zc_poster = load_and_crop("zhouchu_poster.jpg", (850, 600), radius=24)
+    paste_image(img, zc_poster, (1220, 180))
     
-    draw.text((2150, 220), "周处除三害 (2024)", fill=TEXT_PRIMARY, font=get_font(True, 44))
-    draw.text((2150, 290), "黄精甫导演 · 阮经天 / 袁富华 / 陈以文", fill=ACCENT_AMBER, font=get_font(False, 26))
-    draw.text((2150, 350), "评分 ★ 8.5  ·  动作 / 犯罪 / 剧情", fill=TEXT_SECONDARY, font=get_font(False, 24))
-    draw_pill(draw, [2150, 420, 2520, 520], fill=(16, 185, 129))
-    draw.text((2210, 450), "▶ 立即观看", fill=TEXT_PRIMARY, font=get_font(True, 32))
+    draw.text((2120, 220), "周处除三害 (2024)", fill=TEXT_PRIMARY, font=get_font(True, 44))
+    draw.text((2120, 290), "黄精甫导演 · 阮经天 / 袁富华 / 陈以文", fill=ACCENT_AMBER, font=get_font(False, 26))
+    draw.text((2120, 350), "评分 ★ 8.5  ·  动作 / 犯罪 / 剧情 · 4K HDR", fill=TEXT_SECONDARY, font=get_font(False, 24))
+    draw_pill(draw, [2120, 430, 2520, 540], fill=(16, 185, 129))
+    draw.text((2190, 465), "▶ 立即观看", fill=TEXT_PRIMARY, font=get_font(True, 32))
 
-    # Right Bottom Showcase (y: 840 ~ 1560 px)
+    # Right Bottom Showcase with REAL Posters!
     draw.text((1200, 840), "热门热播流 (4K 臻彩超清专区)", fill=TEXT_PRIMARY, font=get_font(True, 32))
     r_cards = [
-        ("繁花", "沪语4K原画", (40, 60, 90)),
-        ("流浪地球2", "科幻硬核", (50, 45, 80)),
-        ("狂飙", "扫黑刑侦", (70, 50, 40)),
-        ("大理寺少卿游", "古装探案", (35, 70, 60)),
+        ("fanxiang_poster.jpg", "繁花", "沪语4K原画"),
+        ("wandering_earth2_poster.jpg", "流浪地球2", "科幻硬核"),
+        ("kuangbiao_poster.jpg", "狂飙", "扫黑刑侦"),
+        ("dune2_poster.jpg", "沙丘2", "宇宙巨制"),
     ]
     cur_rx = 1200
-    for r_title, r_desc, r_col in r_cards:
-        draw_rounded_rect(draw, [cur_rx, 900, cur_rx + 380, 1560], radius=24, fill=r_col, outline=(55, 75, 105), width=2)
-        draw.rectangle([cur_rx + 20, 920, cur_rx + 360, 1380], fill=(r_col[0] + 15, r_col[1] + 15, r_col[2] + 15))
-        draw.text((cur_rx + 60, 1120), r_title, fill=TEXT_PRIMARY, font=get_font(True, 36))
-        draw.text((cur_rx + 30, 1420), r_title, fill=TEXT_PRIMARY, font=get_font(True, 30))
-        draw.text((cur_rx + 30, 1475), r_desc, fill=TEXT_SECONDARY, font=get_font(False, 22))
+    for r_fn, r_title, r_desc in r_cards:
+        draw_rounded_rect(draw, [cur_rx, 900, cur_rx + 380, 1560], radius=24, fill=(24, 32, 46), outline=(55, 75, 105), width=2)
+        r_im = load_and_crop(r_fn, (340, 450), radius=18)
+        paste_image(img, r_im, (cur_rx + 20, 920))
+
+        draw.text((cur_rx + 30, 1410), r_title, fill=TEXT_PRIMARY, font=get_font(True, 30))
+        draw.text((cur_rx + 30, 1465), r_desc, fill=TEXT_SECONDARY, font=get_font(False, 22))
         cur_rx += 410
 
+    img.save(os.path.join(OUTPUT_DIR, "scheme3-01-home.png"))
     img.save(os.path.join(OUTPUT_DIR, "scheme3-home.png"))
-    print("Generated scheme3-home.png")
+    print("Generated Scheme 3 Home with real photographic assets")
+
+def create_scheme3_02_detail():
+    img = Image.new("RGBA", (2880, 1620), BG_STUDIO)
+    draw = ImageDraw.Draw(img, "RGBA")
+
+    # LEFT WING (40% width: x: 0 ~ 1150 px): Pro Calibration Station
+    draw.rectangle([0, 0, 1150, 1620], fill=(18, 24, 34, 240))
+    draw.line([1150, 0, 1150, 1620], fill=(45, 60, 85), width=3)
+
+    draw.text((60, 45), "STUDIO DETAIL", fill=ACCENT_CYAN, font=get_font(True, 38))
+    draw.text((60, 95), "PRO AUDIO/VIDEO MONITOR & ROUTING", fill=TEXT_MUTED, font=get_font(True, 20))
+
+    # 16:9 Still
+    still_im = load_and_crop("qingyunian_still.jpg", (1030, 520), radius=20)
+    paste_image(img, still_im, (60, 150))
+
+    # Pro Enhancements Tuning
+    draw_rounded_rect(draw, [60, 700, 1090, 1100], radius=24, fill=(24, 32, 46), outline=(50, 68, 95), width=2)
+    draw.text((90, 730), "专业渲染着色器配置 (实时调节)：", fill=TEXT_PRIMARY, font=get_font(True, 28))
+    
+    toggles = [
+        ("高通 SGSR1 硬件自适应锐化超分辨率", "已开启 (单通道自适应锐化)", True),
+        ("时域平滑算法 (Temporal Smoothing)", "已开启 (消除插帧残影)", True),
+        ("SDR-to-HDR 动态色调映射 (臻彩滤镜)", "已激活 (扩展色彩动态范围)", True),
+    ]
+    cur_ty = 790
+    for t_name, t_sub, t_val in toggles:
+        draw.text((90, cur_ty), t_name, fill=TEXT_PRIMARY, font=get_font(True, 24))
+        draw.text((90, cur_ty + 35), t_sub, fill=ACCENT_CYAN, font=get_font(False, 20))
+        draw_pill(draw, [920, cur_ty + 10, 1050, cur_ty + 60], fill=SUCCESS_GREEN)
+        draw.text((945, cur_ty + 20), "ON", fill=TEXT_PRIMARY, font=get_font(True, 22))
+        cur_ty += 95
+
+    # Multi-Source Latency Real-Time Check
+    draw_rounded_rect(draw, [60, 1130, 1090, 1550], radius=24, fill=(24, 32, 46), outline=(50, 68, 95), width=2)
+    draw.text((90, 1160), "各线路延迟测速看板 (点击即切)：", fill=TEXT_PRIMARY, font=get_font(True, 28))
+
+    pings = [
+        ("专线·4K超清 (推荐线路)", "32 ms", "极速 · 0丢包", True),
+        ("备用线路一·蓝光HDR", "85 ms", "良好", False),
+        ("备用线路二·原画直出", "140 ms", "正常", False),
+    ]
+    cur_py = 1220
+    for p_name, p_val, p_desc, p_act in pings:
+        bg = (35, 65, 110) if p_act else (28, 38, 54)
+        draw_rounded_rect(draw, [90, cur_py, 1050, cur_py + 80], radius=16, fill=bg, outline=ACCENT_CYAN if p_act else (50, 65, 90), width=2)
+        draw.text((120, cur_py + 25), p_name, fill=TEXT_PRIMARY, font=get_font(True, 24))
+        draw.text((680, cur_py + 25), p_val, fill=SUCCESS_GREEN if p_act else TEXT_MUTED, font=get_font(True, 26))
+        draw.text((820, cur_py + 28), p_desc, fill=ACCENT_CYAN if p_act else TEXT_MUTED, font=get_font(False, 20))
+        cur_py += 95
+
+    # RIGHT WING (60% width: x: 1200 ~ 2820 px): Full Episodes Matrix & Cast
+    draw.text((1200, 60), "庆余年 第二季 (Joy of Life II) · 全 36 集全", fill=TEXT_PRIMARY, font=get_font(True, 44))
+    draw.text((1200, 125), "评分 ★ 8.8  ·  张若昀 / 李沁 / 陈道明 / 吴刚  ·  IJK 硬件加速", fill=ACCENT_AMBER, font=get_font(False, 26))
+
+    # Action Pills
+    draw_pill(draw, [2280, 50, 2520, 140], fill=(37, 99, 235))
+    draw.text((2320, 75), "▶ 立即开播", fill=TEXT_PRIMARY, font=get_font(True, 30))
+    draw_pill(draw, [2550, 50, 2780, 140], fill=(30, 42, 60), outline=(60, 75, 100), width=2)
+    draw.text((2600, 78), "♥ 收藏剧集", fill=TEXT_SECONDARY, font=get_font(True, 28))
+
+    # Episode Matrix (Large touch squares)
+    ep_x0, ep_y0 = 1200, 200
+    ep_w, ep_h = 175, 145
+    sp_x, sp_y = 25, 25
+    for r in range(7):
+        for c in range(8):
+            num = r * 8 + c + 1
+            if num > 36:
+                break
+            bx0 = ep_x0 + c * (ep_w + sp_x)
+            by0 = ep_y0 + r * (ep_h + sp_y)
+            bx1 = bx0 + ep_w
+            by1 = by0 + ep_h
+            if num == 18:
+                draw_rounded_rect(draw, [bx0, by0, bx1, by1], radius=20, fill=(37, 99, 235), outline=ACCENT_CYAN, width=3)
+                draw.text((bx0 + 55, by0 + 30), f"{num}", fill=TEXT_PRIMARY, font=get_font(True, 44))
+                draw.text((bx0 + 35, by0 + 95), "正在播放", fill=ACCENT_CYAN, font=get_font(True, 20))
+            else:
+                draw_rounded_rect(draw, [bx0, by0, bx1, by1], radius=20, fill=(24, 32, 46), outline=(50, 65, 90), width=2)
+                draw.text((bx0 + 60, by0 + 45), f"{num}", fill=TEXT_SECONDARY, font=get_font(True, 38))
+
+    img.save(os.path.join(OUTPUT_DIR, "scheme3-02-detail.png"))
+    print("Generated Scheme 3 Detail")
 
 
 # ==============================================================================
@@ -863,13 +1139,14 @@ def main():
     create_scheme1_06_live()
 
     print("\n=== Generating Scheme 2 (Cinematic Infinity / Apple TV & Infuse Style) ===")
-    create_scheme2_home()
+    create_scheme2_01_home()
+    create_scheme2_02_detail()
+    create_scheme2_03_player()
 
     print("\n=== Generating Scheme 3 (Studio Cockpit / Pro Workstation Style) ===")
-    create_scheme3_home()
-
+    create_scheme3_01_home()
+    create_scheme3_02_detail()
     print("\n=== Generating 6 Before vs After Side-by-Side Comparisons ===")
-    # 1. Home
     generate_comparison_card(
         before_path="car/evidence/car.7/r2-B2EEDC14/pages/page-home.png",
         after_path=os.path.join(OUTPUT_DIR, "scheme1-01-home.png"),
@@ -891,7 +1168,6 @@ def main():
         ]
     )
 
-    # 2. Detail
     generate_comparison_card(
         before_path="car/evidence/car.7/r2-B2EEDC14/pages/page-detail.png",
         after_path=os.path.join(OUTPUT_DIR, "scheme1-02-detail.png"),
@@ -913,7 +1189,6 @@ def main():
         ]
     )
 
-    # 3. Player
     generate_comparison_card(
         before_path="car/evidence/car.7/r2-B2EEDC14/pages/page-player-controls-enabled.png",
         after_path=os.path.join(OUTPUT_DIR, "scheme1-03-player.png"),
@@ -935,7 +1210,6 @@ def main():
         ]
     )
 
-    # 4. Search
     generate_comparison_card(
         before_path="car/evidence/car.7/r2-B2EEDC14/pages/page-search.png",
         after_path=os.path.join(OUTPUT_DIR, "scheme1-04-search.png"),
@@ -955,7 +1229,6 @@ def main():
         ]
     )
 
-    # 5. Settings
     generate_comparison_card(
         before_path="car/evidence/car.7/r2-B2EEDC14/pages/page-settings-top.png",
         after_path=os.path.join(OUTPUT_DIR, "scheme1-05-settings.png"),
@@ -975,7 +1248,6 @@ def main():
         ]
     )
 
-    # 6. Live TV (Replacing the fake screen-off)
     generate_comparison_card(
         before_path="car/evidence/car.7/r2-B2EEDC14/pages/page-live-channels.png",
         after_path=os.path.join(OUTPUT_DIR, "scheme1-06-live.png"),
