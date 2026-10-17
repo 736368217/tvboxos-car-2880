@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TVBox 17.3英寸 3K车机专属视觉与交互易用性评估仪表盘</title>
+  <title>TVBox 17.3英寸 3K车机专属视频播放器视觉与交互重构评估</title>
   <style>
     :root {
       --bg-dark: #0a0d14;
@@ -35,7 +35,7 @@
       background: linear-gradient(135deg, #131b2e 0%, #0d121c 100%);
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 28px 36px;
+      padding: 26px 36px;
       margin-bottom: 24px;
       display: flex;
       justify-content: space-between;
@@ -44,7 +44,7 @@
       gap: 16px;
     }
     header h1 {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
       color: #fff;
       display: flex;
@@ -234,6 +234,15 @@
       background: rgba(255, 255, 255, 0.02);
     }
     .badge-p0 {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .badge-dep {
       background: rgba(239, 68, 68, 0.2);
       color: #f87171;
       border: 1px solid rgba(239, 68, 68, 0.4);
@@ -242,11 +251,13 @@
       font-weight: 600;
       font-size: 12px;
     }
-    .badge-dep {
-      background: rgba(156, 163, 175, 0.2);
-      color: #9ca3af;
+    .badge-mod {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
       padding: 2px 8px;
       border-radius: 4px;
+      font-weight: 600;
       font-size: 12px;
     }
   </style>
@@ -255,9 +266,9 @@
 
   <header>
     <div>
-      <h1>TVBox 车载 17.3英寸 3K (2880×1620) 视觉与易用性重构 <span class="badge">Car.7-r2 专项分支</span></h1>
+      <h1>TVBox 17.3英寸 3K车机专属视频播放器视觉与交互重构评估 <span class="badge">建议方案待审核</span></h1>
       <p style="color: var(--text-sub); margin-top: 6px; font-size: 14px;">
-        解决左舵主驾触控盲区、行车颠簸高频误触、强光倒影与夜间刺眼隐患，打造驾驶员友好（Driver-Oriented）智能座舱视听体验
+        聚焦纯粹大屏视频播放体验：去除车身底盘业务干扰，强化切后台音频保活、悬浮画中画 (PiP)、长按倍速与触控防误触
       </p>
     </div>
     <div>
@@ -267,7 +278,7 @@
 
   <div class="specs-grid">
     <div class="spec-card">
-      <div class="label">屏幕物理规格</div>
+      <div class="label">屏幕规格</div>
       <div class="val">17.3 英寸 / 38.3 × 21.5 cm</div>
     </div>
     <div class="spec-card">
@@ -275,26 +286,26 @@
       <div class="val">2880 × 1620 / 160 dpi</div>
     </div>
     <div class="spec-card">
-      <div class="label">像素物理密度</div>
-      <div class="val">7.52 px/mm (100px ≈ 13.3mm)</div>
+      <div class="label">定位属性</div>
+      <div class="val">专业大屏流媒体播放器</div>
     </div>
     <div class="spec-card">
-      <div class="label">驾驶员舒适视距</div>
-      <div class="val">60 ~ 80 cm (视偏角 &lt; 15°)</div>
+      <div class="label">核心协同能力</div>
+      <div class="val">后台播放 & 悬浮画中画 (PiP)</div>
     </div>
     <div class="spec-card">
-      <div class="label">颠簸防误触热区红线</div>
-      <div class="val">高度 &ge; 16mm (&ge; 120px)</div>
+      <div class="label">交互特色</div>
+      <div class="val">长按 2x 倍速 / 全屏手势</div>
     </div>
   </div>
 
   <div class="tabs-nav">
-    <button class="tab-btn active" onclick="switchTab(0)">01. 主界面与主驾侧边栏</button>
-    <button class="tab-btn" onclick="switchTab(1)">02. 影片详情与剧集选集</button>
-    <button class="tab-btn" onclick="switchTab(2)">03. 全屏播放器与播控岛</button>
-    <button class="tab-btn" onclick="switchTab(3)">04. 车载智能搜索与语音</button>
-    <button class="tab-btn" onclick="switchTab(4)">05. 双栏设置与行车安全</button>
-    <button class="tab-btn" onclick="switchTab(5)">06. 一键熄屏听剧 HUD</button>
+    <button class="tab-btn active" onclick="switchTab(0)">01. 主页与无缝续播</button>
+    <button class="tab-btn" onclick="switchTab(1)">02. 详情与智能测速切源</button>
+    <button class="tab-btn" onclick="switchTab(2)">03. 全屏播放器与触控岛</button>
+    <button class="tab-btn" onclick="switchTab(3)">04. 后台播放与悬浮画中画</button>
+    <button class="tab-btn" onclick="switchTab(4)">05. 智能搜索与多维筛选</button>
+    <button class="tab-btn" onclick="switchTab(5)">06. 精简实用型设置中心</button>
   </div>
 
   <!-- PANEL 1 -->
@@ -305,21 +316,22 @@
       </div>
       <div class="panel-details">
         <div class="diag-box problem">
-          <h3>🚨 原版问题定位 (BEFORE)</h3>
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
           <ul>
-            <li><strong>设置入口远距放逐</strong>：设置磁贴被排在最右侧 (x: 2302px / 30.6cm)，主驾在左舵座椅必须前倾探身；</li>
-            <li><strong>客厅 TV 大字过度留白</strong>：顶部日期独占 1918px (25.5cm) 宽，信息利用率极其低下；</li>
-            <li><strong>分类 Tab 容错率极低</strong>：高度仅 101px (13.4mm)，颠簸路段横划极易误触；</li>
-            <li><strong>无续播一键入口</strong>：每次上车重新开软件，找上次播放内容链路过长。</li>
+            <li><strong>设置按钮排在最右侧</strong>：位于 x: 2302px (30.6cm 处)，主驾伸手极其吃力；</li>
+            <li><strong>顶部日期独占 25.5cm 宽</strong>：客厅远视距无用留白，信息利用率极其低下；</li>
+            <li><strong>分类 Tab 高度仅 13.4mm</strong>：纵向点击热区过窄，手指滑动极易误触相邻项；</li>
+            <li><strong>缺乏快速续播卡片</strong>：每次打开应用找上次未看完的剧集链路过长；</li>
+            <li><strong>残留 TV 白色聚焦框</strong>：触摸屏缺少现代平滑波纹按压反馈。</li>
           </ul>
         </div>
         <div class="diag-box solution">
-          <h3>✨ 3K 车机重构方案 (AFTER)</h3>
+          <h3>✨ 建议优化方案 (AFTER)</h3>
           <ul>
-            <li><strong>主驾专属垂直侧边栏 (x: 0~240px)</strong>：设置/历史/直播/收藏近端触手可及；</li>
-            <li><strong>一键继续播放 Hero 磁贴 (x: 280~1380px)</strong>：上次播放剧集、进度条、大按键抬手即播；</li>
-            <li><strong>顶部车载状态胶囊</strong>：集成行车挡位、天气温度与一键按住语音搜片；</li>
-            <li><strong>触控面积全面升级至 64dp+</strong>：海报卡片重构为 475×720px，废除刺眼 TV 焦点白框。</li>
+            <li><strong>左侧垂直流媒体导航 Rail (x: 0~220px)</strong>：设置/影视/直播/收藏近端触手可及；</li>
+            <li><strong>上次播放无缝续播 Hero 卡片</strong>：直观展示剧集进度条与【继续播放】大按键，一点即播；</li>
+            <li><strong>顶部集成搜索与分类快速过滤标签</strong>：电影、剧集、4K HDR、动漫轻量切换；</li>
+            <li><strong>海报触控面积升级至 480×720px</strong>：彻底废除 TV 焦点白框，显示自适应双行标题。</li>
           </ul>
         </div>
       </div>
@@ -334,21 +346,23 @@
       </div>
       <div class="panel-details">
         <div class="diag-box problem">
-          <h3>🚨 原版问题定位 (BEFORE)</h3>
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
           <ul>
-            <li><strong>操作按钮全部向右沦陷</strong>：全屏(16.2cm)、快搜(20.1cm)、收藏(28.0cm)、换源(32.0cm)全在副驾区；</li>
-            <li><strong>暴露 1552px 原始 HTTP URL</strong>：界面中央大面积直接展示未转义的 play.m3u8 字符串，视觉噪点大；</li>
-            <li><strong>遥控器阻断假层妨碍触控</strong>：previewPlayerBlock 假层 view 导致用户点击小窗视频无法直接全屏；</li>
-            <li><strong>剧集下边距仅 1mm</strong>：纵向滚动极易误触邻近集数。</li>
+            <li><strong>操作按键向右沦陷</strong>：全屏、快搜、收藏、换源全部堆在右半屏副驾侧；</li>
+            <li><strong>暴露 1552px 原始 HTTP URL</strong>：界面中央大面积直接展示未经处理的 play.m3u8 字符串；</li>
+            <li><strong>遥控阻断假层妨碍触控</strong>：previewPlayerBlock 假层 view 导致用户点击小窗无法直接全屏；</li>
+            <li><strong>剧集下边距仅 1mm</strong>：纵向滚动极易误触邻近集数；</li>
+            <li><strong>线路切换全盲</strong>：不知道哪条线路延迟低、播放快，卡顿时只能逐个盲试。</li>
           </ul>
         </div>
         <div class="diag-box solution">
-          <h3>✨ 3K 车机重构方案 (AFTER)</h3>
+          <h3>✨ 建议优化方案 (AFTER)</h3>
           <ul>
-            <li><strong>主驾黄金岛四合一按键群 (x: 60~1300px)</strong>：【全屏】、【换源】、【收藏】、【纯听剧】收拢在左下角；</li>
-            <li><strong>优雅格式化元数据</strong>：隐藏原始 URL，重构为整齐的演职员、多维评分与剧情卡片；</li>
-            <li><strong>右侧 155×135px 超大方块选集矩阵</strong>：搭配 22px 安全间距与呼吸光标；</li>
-            <li><strong>引入 1-10、11-20、21-30 分段胶囊</strong>：长剧集一键直达，免除车内反复滑动。</li>
+            <li><strong>黄金岛按键群收拢在左下侧近端</strong>：【全屏播放】、【智能换源】、【收藏】、【悬浮画中画】；</li>
+            <li><strong>隐藏原始 URL 字符串</strong>：重构为规整的演职员、多维评分卡片与剧情简介；</li>
+            <li><strong>引入【多源智能测速】</strong>：实时显示各线路延迟（如专线 ⚡ 32ms 最快），一键选优；</li>
+            <li><strong>右侧 155×135px 超大方块选集矩阵</strong>：搭配 22px 安全间距与正在播放光标；</li>
+            <li><strong>提供 1-10、11-20、21-30 分段胶囊</strong>：长剧选集秒直达，免除反复滑动。</li>
           </ul>
         </div>
       </div>
@@ -363,21 +377,23 @@
       </div>
       <div class="panel-details">
         <div class="diag-box problem">
-          <h3>🚨 原版问题定位 (BEFORE)</h3>
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
           <ul>
-            <li><strong>单行水平硬塞 18 个密集小按键</strong>：单键宽仅 17.6mm，间距仅 3.6mm，颠簸误触率 &gt;60%；</li>
-            <li><strong>时间容器仅 22mm 导致文字截断</strong>：长视频时间戳 (01:23:45) 右侧直接被裁切；</li>
-            <li><strong>右侧音效胶囊落在 x: 2120px</strong>：横跨 2880px 全屏，主驾完全按不到；</li>
-            <li><strong>完全缺失盲操滑动手势</strong>：调亮调音必须睁大眼睛找细小按钮，严重违背 2 秒安全法则。</li>
+            <li><strong>底部平铺 18 个密集小按键</strong>：单键宽仅 17.6mm，间距仅 3.6mm，颠簸误触率 &gt;60%；</li>
+            <li><strong>时间容器仅 22mm 导致截断</strong>：长视频时间戳 (01:23:45) 右侧直接被裁切；</li>
+            <li><strong>右侧音效胶囊横跨 2880px 全屏</strong>：主驾在驾驶位完全按不到；</li>
+            <li><strong>缺乏触控倍速与手势调节</strong>：改倍速需点开小按钮，不支持现代触控的长按倍速；</li>
+            <li><strong>电视快进黑色弹窗居中遮挡画面主体</strong>。</li>
           </ul>
         </div>
         <div class="diag-box solution">
-          <h3>✨ 3K 车机重构方案 (AFTER)</h3>
+          <h3>✨ 建议优化方案 (AFTER)</h3>
           <ul>
-            <li><strong>左下角主驾专属 5 大防颠簸播控岛 (高 150px)</strong>：播放/暂停、&plusmn;15s 快进退、臻彩、座舱音效；</li>
-            <li><strong>重型防抖进度条 (高 20px)</strong>：带 46px 发光吸附手柄与放大的 42:15 / 58:30 时间气泡；</li>
+            <li><strong>左下角 5 大高容错播控岛 (高 150px)</strong>：播放/暂停、&plusmn;15s 快进退、臻彩调优、杜比音效；</li>
+            <li><strong>加粗防抖进度条 (高 20px)</strong>：搭配 46px 吸附手柄与放大的 42:15 / 58:30 无截断时间气泡；</li>
+            <li><strong>新增【长按屏幕 2.0x 极速快进】</strong>：手指长按屏幕任意位置瞬间 2.0x 快进，松手恢复原速；</li>
             <li><strong>全屏无级手势层</strong>：左半屏垂直滑调亮度、右半屏垂直滑调音量、双击暂停；</li>
-            <li><strong>次要功能收拢折叠</strong>：倍速、比例、选集收拢于右下角次级区域。</li>
+            <li><strong>右下角折叠收拢次要功能</strong>：倍速选择、选集列表、画面比例（适应/填充/21:9 宽银幕去黑边）。</li>
           </ul>
         </div>
       </div>
@@ -388,25 +404,25 @@
   <div class="panel" id="panel-3">
     <div class="comparison-container">
       <div class="comparison-img-wrapper">
-        <img src="compare-04-search.png" alt="04. 搜索界面前后对比">
+        <img src="compare-04-search.png" alt="04. 后台播放与悬浮画中画协同对比">
       </div>
       <div class="panel-details">
         <div class="diag-box problem">
-          <h3>🚨 原版问题定位 (BEFORE)</h3>
+          <h3>🚨 原版痛点诊断 (BEFORE)</h3>
           <ul>
-            <li><strong>强塞 36 键电视键盘并杀死软键盘</strong>：代码主动调用 hiddenImm() 封杀了车机语音输入；</li>
-            <li><strong>右半屏 50% (18.5cm) 全黑空白</strong>：宽屏空间巨大浪费；</li>
-            <li><strong>单列纵向热词排至 y: 1934px</strong>：跌出屏幕底端，查看成本过高；</li>
-            <li><strong>常驻电视扫码推流搜索</strong>：在自带 4G/5G 车机上毫无使用场景。</li>
+            <li><strong>切出应用后播放器直接休眠断音</strong>：无法边开地图导航边听剧集音频；</li>
+            <li><strong>缺乏画中画 (PiP) 悬浮能力</strong>：无法把视频缩小浮在车机导航地图上方；</li>
+            <li><strong>整屏黑屏属于脱离实际的伪需求</strong>：主驾需要看导航路线，大屏黑屏反而阻碍驾驶；</li>
+            <li><strong>大屏优势未发挥</strong>：多任务与导航协同场景下体验严重割裂。</li>
           </ul>
         </div>
         <div class="diag-box solution">
-          <h3>✨ 3K 车机重构方案 (AFTER)</h3>
+          <h3>✨ 建议优化方案 (AFTER)</h3>
           <ul>
-            <li><strong>集成一键语音搜片大按键</strong>：按住直接说话，行车过程零分心；</li>
-            <li><strong>开放调用 Android 原生输入法</strong>：同时内置 115×110px 车载防颠簸大键盘；</li>
-            <li><strong>右侧重构为双列卡片瀑布流</strong>：最近历史标签 + 联想结果；</li>
-            <li><strong>搜索结果卡片直带【立即播放】</strong>：搜播一步闭环，极大缩短交互路径。</li>
+            <li><strong>支持【后台音频不间断播放】</strong>：切出看高德/百度导航时，剧集声音平稳混音输出；</li>
+            <li><strong>支持【悬浮画中画 (PiP)】</strong>：视频缩小为轻量小窗浮在导航地图上方；</li>
+            <li><strong>副驾看剧、主驾看路互不干扰</strong>：彻底解决 17.3 寸车载大屏多任务协同痛点；</li>
+            <li><strong>画中画小窗带轻量播控</strong>：暂停、关闭、全屏还原、&plusmn;15s 快进退。</li>
           </ul>
         </div>
       </div>
@@ -417,25 +433,26 @@
   <div class="panel" id="panel-4">
     <div class="comparison-container">
       <div class="comparison-img-wrapper">
-        <img src="compare-05-settings.png" alt="05. 设置界面前后对比">
+        <img src="compare-05-settings.png" alt="05. 智能搜索与多维分类筛选对比">
       </div>
       <div class="panel-details">
         <div class="diag-box problem">
-          <h3>🚨 原版问题定位 (BEFORE)</h3>
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
           <ul>
-            <li><strong>左侧分类导航被写死 visibility='gone'</strong>：40+ 设置项只能单列硬滑查找；</li>
-            <li><strong>横向 32cm 视距严重拉扯</strong>：标题在 x: 124px，开关在 x: 2576px；</li>
-            <li><strong>大量电视底层工程级参数</strong>：Webview 嗅探、DNS 规则等未作场景分层；</li>
-            <li><strong>完全缺失车载安全与驾驶辅助配置</strong>。</li>
+            <li><strong>强塞 36 键 TV 虚拟键盘</strong>：触控屏上按键极其狭小难点；</li>
+            <li><strong>代码主动杀死原生输入法</strong>：SearchActivity 调用 hiddenImm() 封杀了车机原生输入法和语音；</li>
+            <li><strong>右半屏 50% (18.5cm) 全黑空白</strong>：宽屏空间巨大浪费；</li>
+            <li><strong>单列纵向热词排至 y: 1934px 跌出屏幕底端</strong>；</li>
+            <li><strong>常驻电视扫码推流搜索框</strong>：在自带 4G/5G 车机上毫无使用场景。</li>
           </ul>
         </div>
         <div class="diag-box solution">
-          <h3>✨ 3K 车机重构方案 (AFTER)</h3>
+          <h3>✨ 建议优化方案 (AFTER)</h3>
           <ul>
-            <li><strong>恢复左侧垂直分类导航栏 (x: 60~680px)</strong>：7 大车载板块分明；</li>
-            <li><strong>成组卡片式紧凑排布</strong>：开关紧跟标题说明右侧，两眼一瞥手掌微移即可触发；</li>
-            <li><strong>大号分段式触控调节条</strong>：画面预设一键无重启秒切；</li>
-            <li><strong>新增【车载行车安全防分心专区】</strong>：挂 D 档自动转纯音频听剧、防误触锁屏。</li>
+            <li><strong>搜索栏集成【🎙 车载语音搜片】按键</strong>：点击直接说出片名，行车中无需打字；</li>
+            <li><strong>彻底废除 TV 虚拟键盘</strong>：开放调用 Android 原生输入法、车机大手写板与语音输入；</li>
+            <li><strong>左侧打造【多维快速分类筛选滑轨】</strong>：类型、地区、年份、热度胶囊筛选；</li>
+            <li><strong>右侧重构为双列富媒体搜索结果卡片</strong>：单卡直接带【立即播放 ▶】按键，搜完即播。</li>
           </ul>
         </div>
       </div>
@@ -446,25 +463,26 @@
   <div class="panel" id="panel-5">
     <div class="comparison-container">
       <div class="comparison-img-wrapper">
-        <img src="compare-06-audio-mode.png" alt="06. 纯音频听剧前后对比">
+        <img src="compare-06-audio-mode.png" alt="06. 精简实用型媒体设置中心对比">
       </div>
       <div class="panel-details">
         <div class="diag-box problem">
-          <h3>🚨 真实车载痛点 (WHY IT MATTERS)</h3>
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
           <ul>
-            <li><strong>夜间巡航屏幕刺眼</strong>：持续强动态视频帧直射瞳孔，破坏夜间暗适应能力；</li>
-            <li><strong>前挡风玻璃高反光倒影</strong>：17.3 寸高亮大屏倒影严重遮挡路面与行人；</li>
-            <li><strong>违章抓拍隐患</strong>：行车亮动态视频画面易被交警抓拍判定为“分心驾驶”；</li>
-            <li><strong>实际高频需求只是听评书/相声/剧情对话</strong>。</li>
+            <li><strong>左侧分类导航菜单被写死 gone</strong>：40+ 设置项只能单列硬滑查找；</li>
+            <li><strong>通栏横向 32cm 视距严重撕裂</strong>：标题在 x: 124px，开关在 x: 2576px；</li>
+            <li><strong>充斥大量底层极客工程参数</strong>：Webview 嗅探、DNS 规则等未作场景分层；</li>
+            <li><strong>缺失真正需要的播放器实用配置</strong>（后台播放行为、画中画开关、长按倍速等）。</li>
           </ul>
         </div>
         <div class="diag-box solution">
-          <h3>✨ 3K 车机专属 HUD 重构方案 (AFTER)</h3>
+          <h3>✨ 建议优化方案 (AFTER)</h3>
           <ul>
-            <li><strong>0nit OLED 纯黑背景 + Surface 渲染挂起</strong>：背光功耗降低 85%，杜绝任何倒影；</li>
-            <li><strong>低照度琥珀黑胶视效与微光台词</strong>：低照度对话字幕，余光一瞥即知剧情；</li>
-            <li><strong>直径 240px 超大盲操圆形播控</strong>：右手凭肌肉记忆一拍即可暂停或倒回；</li>
-            <li><strong>方向盘多媒体按键无缝接管</strong>：打造最高安全标准的车载视听闭环。</li>
+            <li><strong>恢复左侧双栏分类导航 Rail (x: 60~680px)</strong>：划分为 5 大实用业务板块；</li>
+            <li><strong>成组卡片排布消除 32cm 视距撕裂</strong>：开关紧跟在标题和说明右侧，伸手即触；</li>
+            <li><strong>增加【切后台播放行为选择】</strong>：保持后台音频播放（推荐） / 自动画中画 / 切出暂停；</li>
+            <li><strong>增加【长按倍速速率设置】(2.0x / 3.0x)</strong> 与全屏手势开关；</li>
+            <li><strong>深度收敛折叠底层技术参数</strong>：专为大屏视频观影服务。</li>
           </ul>
         </div>
       </div>
@@ -473,52 +491,94 @@
 
   <!-- ROADMAP & ANALYSIS -->
   <div class="roadmap-section">
-    <h2>车载功能价值重估清单：冗余裁撤 vs 刚需补齐</h2>
+    <h2>车载大屏功能优化建议清单：减法裁撤 · 加法实用新增 · 细节修改</h2>
     <table>
       <thead>
         <tr>
+          <th>分类</th>
           <th>功能模块</th>
           <th>现存状态</th>
-          <th>车载真实使用评价</th>
-          <th>重构决策与路线</th>
+          <th>优化建议与价值说明</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td><strong>一键熄屏纯音频听剧</strong></td>
-          <td><span class="badge-dep">完全缺失</span></td>
-          <td>夜间巡航、高速防眩目、防分心违章抓拍的核心刚需</td>
-          <td><span class="badge-p0">P0 首发落地</span>：挂起 Surface 保持 AudioTrack，提供极暗 HUD</td>
+          <td><span class="badge-dep">剪裁 (减法)</span></td>
+          <td><strong>局域网扫码推送页面</strong></td>
+          <td>主导航常驻</td>
+          <td>车机自带网络，行车扫码推流无意义。建议从主界面彻底剥离，移入设置折叠。</td>
         </tr>
         <tr>
-          <td><strong>主驾黄金岛播控</strong></td>
-          <td><span class="badge-dep">18 键分散平铺</span></td>
-          <td>颠簸中误触率高，右侧按键完全够不着</td>
-          <td><span class="badge-p0">P0 首发落地</span>：左下角 5 个 150px 高胶囊，主驾盲操</td>
+          <td><span class="badge-dep">剪裁 (减法)</span></td>
+          <td><strong>TV 6×6 虚拟字母小键盘</strong></td>
+          <td>强制展示</td>
+          <td>按键极小难点且代码杀死软键盘。建议废除，移除 hiddenImm()，接入系统输入法与语音。</td>
         </tr>
         <tr>
+          <td><span class="badge-dep">剪裁 (减法)</span></td>
+          <td><strong>小窗遥控阻断假层 View</strong></td>
+          <td>详情页阻挡</td>
+          <td>为遥控巡焦设计的过渡层，阻碍触控点击小窗全屏。建议彻底删除该 View。</td>
+        </tr>
+        <tr>
+          <td><span class="badge-dep">剪裁 (减法)</span></td>
+          <td><strong>40+ 极客工程底层参数</strong></td>
+          <td>平铺硬滑</td>
+          <td>增加认知负担。建议折叠收拢至【高级设置 / 开发者选项】中默认隐藏。</td>
+        </tr>
+        <tr>
+          <td><span class="badge-p0">新增 (加法)</span></td>
+          <td><strong>后台音频平稳保活</strong></td>
+          <td>缺失 (切出休眠)</td>
+          <td><strong>核心刚需</strong>：用户切到车机看高德/百度导航时，剧集声音不中断，平稳混音输出。</td>
+        </tr>
+        <tr>
+          <td><span class="badge-p0">新增 (加法)</span></td>
+          <td><strong>悬浮画中画 (PiP)</strong></td>
+          <td>缺失</td>
+          <td><strong>协同刚需</strong>：视频缩小为可拖动小窗浮在导航上方，副驾追剧、主驾看路两不相误。</td>
+        </tr>
+        <tr>
+          <td><span class="badge-p0">新增 (加法)</span></td>
+          <td><strong>长按屏幕 2.0x 极速快进</strong></td>
+          <td>缺失</td>
+          <td>现代触控体验标配：手指长按屏幕即加速，松手即恢复原速，操作极爽快。</td>
+        </tr>
+        <tr>
+          <td><span class="badge-p0">新增 (加法)</span></td>
           <td><strong>全屏盲操滑动手势</strong></td>
-          <td><span class="badge-dep">完全缺失</span></td>
-          <td>调音调光必须看屏幕，严重违反 2 秒安全法则</td>
-          <td><span class="badge-p0">P0 首发落地</span>：左屏调光、右屏调音、双击暂停</td>
+          <td>缺失</td>
+          <td>左半屏垂直滑调亮度、右半屏垂直滑调音量、双击暂停、横划精准 Seek。</td>
         </tr>
         <tr>
-          <td><strong>电视局域网扫码推送</strong></td>
-          <td><span class="badge-p0">主页常驻</span></td>
-          <td>车机自带车规流量卡，行车掏手机扫码极其荒谬</td>
-          <td><span class="badge-dep">彻底剥离裁撤</span>：从主导航剔除，移至设置中折叠</td>
+          <td><span class="badge-p0">新增 (加法)</span></td>
+          <td><strong>多源延迟智能测速切源</strong></td>
+          <td>缺失 (盲试)</td>
+          <td>详情页与播放器直观标出各线路延迟（如专线 32ms），一键自动选优切源。</td>
         </tr>
         <tr>
-          <td><strong>TV 6×6 虚拟软键盘</strong></td>
-          <td><span class="badge-p0">强制展示</span></td>
-          <td>按键极小难点，且代码杀死原生输入法与语音</td>
-          <td><span class="badge-dep">废除重构</span>：接入车机原生输入法与一键语音搜片</td>
+          <td><span class="badge-p0">新增 (加法)</span></td>
+          <td><strong>21:9 宽银幕无黑边填充</strong></td>
+          <td>缺失</td>
+          <td>让 2.35:1 电影在 17.3 寸大屏上满屏播放，消除上下大黑边，视觉沉浸感极强。</td>
         </tr>
         <tr>
-          <td><strong>全屏高密度滚动弹幕</strong></td>
-          <td><span class="badge-p0">默认开启</span></td>
-          <td>17.3 寸宽屏横飞文字极度吸引驾驶员余光，严重分心</td>
-          <td><span class="badge-dep">车机默认禁用</span>：折叠于二级菜单，仅供副驾娱乐</td>
+          <td><span class="badge-mod">修改 (优化)</span></td>
+          <td><strong>播控栏密集 18 键精简</strong></td>
+          <td>18 键平铺易误触</td>
+          <td>精简为左下角 5 个超大高容错胶囊按键（高 150px），次要功能收拢折叠在右下角。</td>
+        </tr>
+        <tr>
+          <td><span class="badge-mod">修改 (优化)</span></td>
+          <td><strong>进度条与时间戳防截断</strong></td>
+          <td>22mm 文本截断</td>
+          <td>进度条加粗至 20px，时间框放大至 70px 以上，彻底杜绝长视频时间戳文字截断。</td>
+        </tr>
+        <tr>
+          <td><span class="badge-mod">修改 (优化)</span></td>
+          <td><strong>剧集选集分段快速跳选</strong></td>
+          <td>单列长列表硬滑</td>
+          <td>重构为 155×135px 大方块网格，增加【1-10】、【11-20】、【21-30】分段跳选胶囊。</td>
         </tr>
       </tbody>
     </table>
