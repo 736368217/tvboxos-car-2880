@@ -133,11 +133,11 @@ public class SearchCheckboxDialog extends BaseDialog{
     private void fitGridHeight() {
         if (mGridView == null || getWindow() == null) return;
         int windowHeight = getWindow().getDecorView().getHeight();
-        if (windowHeight <= 0) windowHeight = getResources().getDisplayMetrics().heightPixels;
+        if (windowHeight <= 0) windowHeight = getContext().getResources().getDisplayMetrics().heightPixels;
         View header = checkAll == null ? null : (View) checkAll.getParent();
         int reserved = header == null ? 0 : header.getMeasuredHeight();
-        reserved += getResources().getDimensionPixelSize(R.dimen.vs_30);
-        int available = Math.max(getResources().getDimensionPixelSize(R.dimen.vs_160), windowHeight - reserved);
+        reserved += getContext().getResources().getDimensionPixelSize(R.dimen.vs_30);
+        int available = Math.max(getContext().getResources().getDimensionPixelSize(R.dimen.vs_160), windowHeight - reserved);
         int desired = mGridView.getMeasuredHeight();
         if (desired <= 0) desired = available;
         desired = Math.min(desired, available);

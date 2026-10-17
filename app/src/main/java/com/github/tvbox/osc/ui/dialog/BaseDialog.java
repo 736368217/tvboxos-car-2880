@@ -60,11 +60,7 @@ public class BaseDialog extends Dialog {
     }
     @Override
     public void onBackPressed() {
-        if (isCancelable()) {
-            cancel();
-        } else {
-            super.onBackPressed();
-        }
+        cancel();
     }
 
 
