@@ -364,12 +364,6 @@ public class SearchActivity extends BaseActivity {
                         mSearchCheckboxDialog.setMSourceList(searchAbleSource);
                     }
                 }
-                mSearchCheckboxDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        dialog.dismiss();
-                    }
-                });
                 mSearchCheckboxDialog.show();
             }
         });

@@ -7,7 +7,7 @@
     <LinearLayout
         android:id="@+id/root"
         android:layout_width="@dimen/vs_420"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/shape_dialog_pg_search_checkbox"
         android:orientation="vertical">
@@ -54,7 +54,9 @@
             android:id="@+id/mGridView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"/>
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/vs_20"
+            android:orientation="vertical" />
 
     </LinearLayout>
 

@@ -46,6 +46,7 @@ public class BaseDialog extends Dialog {
         if (isContextInvalid()) return;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        setCancelable(true);
         super.show();
         hideSysBar();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
@@ -57,6 +58,15 @@ public class BaseDialog extends Dialog {
         setCancelable(true);
         setCanceledOnTouchOutside(true);
     }
+    @Override
+    public void onBackPressed() {
+        if (isCancelable()) {
+            cancel();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
 
     @Override
     public boolean dispatchTouchEvent(@NonNull MotionEvent event) {

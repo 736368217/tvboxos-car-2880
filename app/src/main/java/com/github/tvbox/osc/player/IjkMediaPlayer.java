@@ -246,6 +246,35 @@ public class IjkMediaPlayer extends IjkPlayer {
         }
     }
 
+    public float getVideoFrameRate() {
+        try {
+            if (mMediaPlayer == null) return 0f;
+            IjkTrackInfo[] trackInfo = mMediaPlayer.getTrackInfo();
+            if (trackInfo == null) return 0f;
+            int selectedTrack = mMediaPlayer.getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_VIDEO);
+            int trackIndex = 0;
+            float fallback = 0f;
+            for (IjkTrackInfo info : trackInfo) {
+                if (info.getTrackType() == ITrackInfo.MEDIA_TRACK_TYPE_VIDEO) {
+                    IMediaFormat format = info.getFormat();
+                    if (format != null) {
+                        int numerator = format.getInteger(IjkMediaMeta.IJKM_KEY_FPS_NUM);
+                        int denominator = format.getInteger(IjkMediaMeta.IJKM_KEY_FPS_DEN);
+                        if (numerator > 0 && denominator > 0) {
+                            float frameRate = (float) numerator / denominator;
+                            if (trackIndex == selectedTrack) return frameRate;
+                            fallback = Math.max(fallback, frameRate);
+                        }
+                    }
+                }
+                trackIndex++;
+            }
+            return fallback;
+        } catch (Throwable ignored) {
+            return 0f;
+        }
+    }
+
     public TrackInfo getTrackInfo() {
         IjkTrackInfo[] trackInfo = mMediaPlayer.getTrackInfo();
         if (trackInfo == null) return null;

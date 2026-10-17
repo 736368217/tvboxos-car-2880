@@ -193,6 +193,31 @@ public class ExoPlayer extends ExoMediaPlayer {
         return data;
     }
 
+    public float getVideoFrameRate() {
+        try {
+            if (trackSelector == null) return 0f;
+            MappingTrackSelector.MappedTrackInfo mappedInfo = trackSelector.getCurrentMappedTrackInfo();
+            if (mappedInfo == null) return 0f;
+            float fallback = 0f;
+            for (int rendererIndex = 0; rendererIndex < mappedInfo.getRendererCount(); rendererIndex++) {
+                if (mappedInfo.getRendererType(rendererIndex) != C.TRACK_TYPE_VIDEO) continue;
+                TrackGroupArray groups = mappedInfo.getTrackGroups(rendererIndex);
+                for (int groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+                    TrackGroup group = groups.get(groupIndex);
+                    for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+                        Format format = group.getFormat(trackIndex);
+                        if (format == null || format.frameRate <= 0f || Float.isNaN(format.frameRate)) continue;
+                        if (isCurrentTrackSelected(format, C.TRACK_TYPE_VIDEO)) return format.frameRate;
+                        fallback = Math.max(fallback, format.frameRate);
+                    }
+                }
+            }
+            return fallback;
+        } catch (Throwable ignored) {
+            return 0f;
+        }
+    }
+
     public void setTrack(int groupIndex, int trackIndex, String playKey) {
         MappingTrackSelector.MappedTrackInfo mappedInfo = trackSelector.getCurrentMappedTrackInfo();
         setTrack(findAudioRendererIndex(mappedInfo), groupIndex, trackIndex, playKey);

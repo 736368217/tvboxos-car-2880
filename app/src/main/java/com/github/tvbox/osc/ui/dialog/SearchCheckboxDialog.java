@@ -40,11 +40,12 @@ public class SearchCheckboxDialog extends BaseDialog{
         if (context instanceof Activity) {
             setOwnerActivity((Activity) context);
         }
-        setCanceledOnTouchOutside(false);
+        setCanceledOnTouchOutside(true);
         setCancelable(true);
         mSourceList = sourceList;
         mCheckSourcees = checkedSources;
         setContentView(R.layout.dialog_checkbox_search);
+        enableSelectionDismissal(R.id.root);
         initView(context);
     }
 
@@ -79,6 +80,7 @@ public class SearchCheckboxDialog extends BaseDialog{
         View root = findViewById(R.id.root);
         ViewGroup.LayoutParams clp = root.getLayoutParams();
         clp.width = AutoSizeUtils.mm2px(getContext(), 400 + 260 * (spanCount - 1));
+        clp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
 
         mGridView.setAdapter(checkboxSearchAdapter);
         checkboxSearchAdapter.setData(mSourceList, mCheckSourcees);
@@ -119,6 +121,33 @@ public class SearchCheckboxDialog extends BaseDialog{
             }
         });
     }
+    @Override
+    public void show() {
+        super.show();
+        if (!isShowing() || getWindow() == null) return;
+        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        View root = findViewById(R.id.root);
+        if (root != null) root.post(this::fitGridHeight);
+    }
+
+    private void fitGridHeight() {
+        if (mGridView == null || getWindow() == null) return;
+        int windowHeight = getWindow().getDecorView().getHeight();
+        if (windowHeight <= 0) windowHeight = getResources().getDisplayMetrics().heightPixels;
+        View header = checkAll == null ? null : (View) checkAll.getParent();
+        int reserved = header == null ? 0 : header.getMeasuredHeight();
+        reserved += getResources().getDimensionPixelSize(R.dimen.vs_30);
+        int available = Math.max(getResources().getDimensionPixelSize(R.dimen.vs_160), windowHeight - reserved);
+        int desired = mGridView.getMeasuredHeight();
+        if (desired <= 0) desired = available;
+        desired = Math.min(desired, available);
+        ViewGroup.LayoutParams params = mGridView.getLayoutParams();
+        if (params.height != desired) {
+            params.height = desired;
+            mGridView.setLayoutParams(params);
+        }
+    }
+
 
     public void setMSourceList(List<SourceBean> SourceBeanList) {
         mSourceList = SourceBeanList;

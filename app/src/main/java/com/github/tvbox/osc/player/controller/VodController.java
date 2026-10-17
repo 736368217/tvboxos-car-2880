@@ -87,6 +87,7 @@ import java.util.Locale;
 import xyz.doikki.videoplayer.controller.MediaPlayerControl;
 import xyz.doikki.videoplayer.player.VideoView;
 import xyz.doikki.videoplayer.render.VideoEnhancePreset;
+import xyz.doikki.videoplayer.render.VideoPostProcessPolicy;
 
 import static xyz.doikki.videoplayer.util.PlayerUtils.stringForTime;
 import static xyz.doikki.videoplayer.util.PlayerUtils.safeTimeMs;
@@ -243,6 +244,7 @@ public class VodController extends BaseController {
     TextView mCarSrBtn;
     TextView mCarInterpBtn;
     TextView mCarAudioBtn;
+    TextView mVideoFrameRate;
     private MyVideoView mCarVideoView;
     TextView mPlayerRetry;
     TextView mPlayrefresh;
@@ -298,6 +300,7 @@ public class VodController extends BaseController {
             String width = Integer.toString(mVideoSizes[0]);
             String height = Integer.toString(mVideoSizes[1]);
             mVideoSize.setText(width + " X " + height);
+            updateFrameRateDisplay();
 
             mHandler.postDelayed(this, 1000);
         }
@@ -340,7 +343,31 @@ public class VodController extends BaseController {
         if (mCarSrBtn != null) mCarSrBtn.setText("超分·" + (CarEnhance.videoSrEnabled() ? "开" : "关"));
         if (mCarInterpBtn != null) mCarInterpBtn.setText("补帧·" + (CarEnhance.videoInterpEnabled() ? "开" : "关"));
         if (mCarAudioBtn != null) mCarAudioBtn.setText("音效·" + AudioEffectController.name(CarEnhance.audioMode()));
+        updateFrameRateDisplay();
     }
+    private void updateFrameRateDisplay() {
+        if (mVideoFrameRate == null) return;
+        float sourceFrameRate = mCarVideoView == null ? 0f : mCarVideoView.getSourceFrameRate();
+        if (sourceFrameRate <= 0f) {
+            mVideoFrameRate.setText("帧率 --");
+            return;
+        }
+        String source = formatFrameRate(sourceFrameRate);
+        if (CarEnhance.videoInterpEnabled()) {
+            mVideoFrameRate.setText("片源 " + source + " fps · 补帧 "
+                    + formatFrameRate(VideoPostProcessPolicy.INTERPOLATION_OUTPUT_FPS) + " fps");
+        } else {
+            mVideoFrameRate.setText("片源 " + source + " fps");
+        }
+    }
+
+    private String formatFrameRate(float frameRate) {
+        String value = String.format(Locale.US, "%.2f", frameRate);
+        while (value.endsWith("0")) value = value.substring(0, value.length() - 1);
+        if (value.endsWith(".")) value = value.substring(0, value.length() - 1);
+        return value;
+    }
+
 
     private void showCarVideoDialog() {
         final SelectDialog<String> dialog = new SelectDialog<>(mActivity, R.layout.dialog_video_presets);
@@ -424,6 +451,8 @@ public class VodController extends BaseController {
         mPlayerTimeResetBtn = findViewById(R.id.play_time_reset);
         mPlayPauseTime = findViewById(R.id.tv_sys_time);
         mPlayLoadNetSpeed = findViewById(R.id.tv_play_load_net_speed);
+        mVideoFrameRate = findViewById(R.id.tv_framerate);
+        updateFrameRateDisplay();
         mVideoSize = findViewById(R.id.tv_videosize);
         mSubtitleView = findViewById(R.id.subtitle_view);
         mLyricView = findViewById(R.id.lyric_view);

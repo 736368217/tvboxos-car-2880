@@ -41,6 +41,7 @@ public class EpisodeDialog extends BaseDialog {
         this.selectedPosition = Math.max(0, Math.min(selectedPosition, Math.max(0, this.episodes.size() - 1)));
         this.listener = listener;
         setContentView(R.layout.dialog_episode);
+        enableSelectionDismissal(R.id.episode_panel);
         init(title);
     }
 

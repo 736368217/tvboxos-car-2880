@@ -3,6 +3,8 @@ package xyz.doikki.videoplayer.render;
 /** Pure timing/policy model shared by the renderer and host acceptance tests. */
 public final class VideoPostProcessPolicy {
     public static final float MAX_BLEND_ALPHA = 0.28f;
+    /** The renderer's interpolation presentation cadence is capped at the display target. */
+    public static final float INTERPOLATION_OUTPUT_FPS = 60f;
     public static final float DIFF_LOW = 0.015f;
     public static final float DIFF_HIGH = 0.10f;
     public static final long MIN_INTERVAL_NS = 8_000_000L;

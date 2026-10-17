@@ -49,6 +49,16 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
     public AbstractPlayer getMediaPlayer() {
         return mMediaPlayer;
     }
+    public float getSourceFrameRate() {
+        AbstractPlayer player = mMediaPlayer;
+        if (player instanceof IjkMediaPlayer) {
+            return ((IjkMediaPlayer) player).getVideoFrameRate();
+        }
+        if (player instanceof ExoPlayer) {
+            return ((ExoPlayer) player).getVideoFrameRate();
+        }
+        return 0f;
+    }
 
     /**
      * Car edition: audio session id of the current engine (EXO or IJK), 0 when the engine is not
