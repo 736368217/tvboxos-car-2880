@@ -3,22 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TVBox 17.3英寸 3K车机专属视频播放器重构方案选型仪表盘</title>
+  <title>TVBox 17.3英寸 3K车机专属视频播放器视觉与交互重构实施基线</title>
   <style>
     :root {
-      --bg-dark: #0a0d14;
-      --bg-card: #131924;
-      --bg-card-hover: #1a2332;
-      --border-color: #243044;
+      --bg-dark: #0b0f16;
+      --bg-card: #141b28;
+      --bg-card-hover: #1b2436;
+      --border-color: #2b3a52;
       --accent-cyan: #00d2ff;
       --accent-blue: #2563eb;
       --accent-amber: #ffb347;
-      --accent-purple: #a855f7;
       --accent-red: #ef4444;
       --accent-green: #10b981;
       --text-main: #f3f4f6;
-      --text-sub: #9ca3af;
-      --text-muted: #6b7280;
+      --text-sub: #a5b2c4;
+      --text-muted: #6e7a8a;
     }
     * {
       box-sizing: border-box;
@@ -60,49 +59,6 @@
       border-radius: 20px;
       font-weight: 600;
     }
-    .scheme-switcher {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      background: #0f1522;
-      padding: 8px;
-      border-radius: 14px;
-      border: 1px solid var(--border-color);
-    }
-    .scheme-btn {
-      flex: 1;
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-sub);
-      padding: 14px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 700;
-      text-align: center;
-      transition: all 0.2s ease;
-    }
-    .scheme-btn:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-    }
-    .scheme-btn.active {
-      background: #1e3a8a;
-      border-color: var(--accent-cyan);
-      color: #fff;
-      box-shadow: 0 0 16px rgba(0, 210, 255, 0.3);
-    }
-    .scheme-btn small {
-      display: block;
-      font-size: 12px;
-      font-weight: normal;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    .scheme-btn.active small {
-      color: #93c5fd;
-    }
-
     .specs-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -126,7 +82,6 @@
       color: var(--accent-cyan);
     }
 
-    /* Tabs within Scheme 1 */
     .tabs-nav {
       display: flex;
       gap: 10px;
@@ -139,10 +94,10 @@
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       color: var(--text-sub);
-      padding: 10px 18px;
+      padding: 12px 20px;
       border-radius: 10px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
       white-space: nowrap;
       transition: all 0.2s ease;
@@ -155,14 +110,7 @@
       background: #1e3a8a;
       border-color: var(--accent-cyan);
       color: #fff;
-    }
-
-    .scheme-view {
-      display: none;
-    }
-    .scheme-view.active {
-      display: block;
-      animation: fadeIn 0.3s ease-in-out;
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.25);
     }
     .panel {
       display: none;
@@ -175,7 +123,6 @@
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     .comparison-container {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -250,34 +197,6 @@
       color: #34d399;
       font-weight: bold;
     }
-
-    /* Single showcase container for Scheme 2 & 3 */
-    .showcase-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 24px;
-    }
-    .showcase-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .showcase-header h2 {
-      font-size: 18px;
-      color: #fff;
-    }
-    .showcase-desc {
-      padding: 20px 24px;
-      font-size: 15px;
-      color: var(--text-secondary);
-      line-height: 1.8;
-      background: rgba(0, 0, 0, 0.2);
-    }
-
     .roadmap-section {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -332,31 +251,15 @@
 
   <header>
     <div>
-      <h1>TVBox 17.3英寸 3K车机专属视频播放器重构方案选型仪表盘 <span class="badge">三大方案任选</span></h1>
+      <h1>TVBox 17.3英寸 3K车机专属视频播放器视觉与交互重构实施基线 <span class="badge">实施真值以图为准</span></h1>
       <p style="color: var(--text-sub); margin-top: 6px; font-size: 14px;">
-        纯粹视频播放器定位：去除底盘侵入，完整保留 TVBox 全部原生强大功能（大键盘、推送、直播、音画预设、换源），提供三大设计方案示意图供您评估选择
+        纯粹视频播放器定位：去除底盘侵入，完整保留 TVBox 全部原生强大功能（大键盘、推送、直播、音画预设、换源），以真实 4K 海报剧照与 Apple Liquid Glass 材质为实施真值
       </p>
     </div>
     <div>
       <span style="color: var(--accent-amber); font-weight: 600; font-size: 14px;">分支：feature/car-ux-redesign-3k</span>
     </div>
   </header>
-
-  <!-- Big Scheme Switcher -->
-  <div class="scheme-switcher">
-    <button class="scheme-btn active" onclick="switchScheme(0)">
-      🌟 方案一：深空黑曜微光版 (Obsidian Glass)
-      <small>经典第一版纯正还原 · 全量功能保留 · 6张前后对比图</small>
-    </button>
-    <button class="scheme-btn" onclick="switchScheme(1)">
-      ✨ 方案二：全景悬浮无界版 (Cinematic Infinity)
-      <small>Apple TV & Infuse 极简通透风格 · 顶部悬浮毛玻璃胶囊</small>
-    </button>
-    <button class="scheme-btn" onclick="switchScheme(2)">
-      ⚡ 方案三：双区专业影音工作台 (Studio Cockpit)
-      <small>左右双翼 40%:60% 分区 · 实时线路延迟测速 · 发烧友工作台</small>
-    </button>
-  </div>
 
   <div class="specs-grid">
     <div class="spec-card">
@@ -368,370 +271,269 @@
       <div class="val">2880 × 1620 / 160 dpi</div>
     </div>
     <div class="spec-card">
-      <div class="label">产品纯粹定位</div>
-      <div class="val">车载专业视频播放终端</div>
+      <div class="label">设计语言</div>
+      <div class="val">Apple Liquid Glass 微光玻璃</div>
     </div>
     <div class="spec-card">
-      <div class="label">音画质引擎</div>
-      <div class="val">高通 SGSR1 超分 + 臻彩预设</div>
+      <div class="label">矢量图标体系</div>
+      <div class="val">SF Symbols 精密矢量图标</div>
     </div>
     <div class="spec-card">
-      <div class="label">核心功能保留</div>
+      <div class="label">功能完整性</div>
       <div class="val">100% 全量保留 TVBox 原生能力</div>
     </div>
   </div>
 
-  <!-- ==================== SCHEME 1 VIEW ==================== -->
-  <div class="scheme-view active" id="scheme-0">
-    <div class="tabs-nav">
-      <button class="tab-btn active" onclick="switchTab(0)">01. 主页流媒体中心与续播</button>
-      <button class="tab-btn" onclick="switchTab(1)">02. 影片详情与选集矩阵</button>
-      <button class="tab-btn" onclick="switchTab(2)">03. 全屏播放器与现代播控岛</button>
-      <button class="tab-btn" onclick="switchTab(3)">04. 搜索大键盘与多端快速检索</button>
-      <button class="tab-btn" onclick="switchTab(4)">05. 双栏系统设置与画质调优</button>
-      <button class="tab-btn" onclick="switchTab(5)">06. 电视直播与 EPG 节目流</button>
-    </div>
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">01. 主页流媒体中心与续播</button>
+    <button class="tab-btn" onclick="switchTab(1)">02. 影片详情与选集矩阵</button>
+    <button class="tab-btn" onclick="switchTab(2)">03. 全屏播放器与现代播控岛</button>
+    <button class="tab-btn" onclick="switchTab(3)">04. 搜索大键盘与多端快速检索</button>
+    <button class="tab-btn" onclick="switchTab(4)">05. 双栏系统设置与画质调优</button>
+    <button class="tab-btn" onclick="switchTab(5)">06. 电视直播与 EPG 节目流</button>
+  </div>
 
-    <!-- PANEL 1 -->
-    <div class="panel active" id="panel-0">
-      <div class="comparison-container">
-        <div class="comparison-img-wrapper">
-          <img src="compare-01-home.png" alt="01. 主界面前后对比">
-        </div>
-        <div class="panel-details">
-          <div class="diag-box problem">
-            <h3>🚨 原版问题诊断 (BEFORE)</h3>
-            <ul>
-              <li>设置按钮排在最右侧 (x: 2302px / 30.6cm)，驾驶座伸手极其吃力；</li>
-              <li>顶部日期独占 25.5cm 宽，客厅远视距无用留白，信息利用率低下；</li>
-              <li>分类 Tab 条高度仅 13.4mm，手指滑动极易误触相邻项；</li>
-              <li>缺乏快速续播卡片，每次打开应用找上次未看完的剧集链路过长；</li>
-              <li>残留 TV 白色聚焦框，触摸屏缺少平滑波纹反馈。</li>
-            </ul>
-          </div>
-          <div class="diag-box solution">
-            <h3>✨ 方案一优化要点 (AFTER)</h3>
-            <ul>
-              <li><strong>左侧垂直流媒体导航 Rail (x: 0~240px)</strong>：设置/影视/直播/推送一触即达；</li>
-              <li><strong>新增【上次播放无缝续播 Hero 卡片】</strong>：直观展示剧集进度条与【继续播放】大按键；</li>
-              <li><strong>顶部集成搜索栏与分类快速过滤标签</strong>：电影/剧集/4K HDR/动漫；</li>
-              <li><strong>海报触控卡片重构为 475×720px 大规格</strong>：彻底废除 TV 焦点白框；</li>
-              <li><strong>深空黑曜微光质感</strong>：白天高清晰防反光，夜间护眼不刺眼。</li>
-            </ul>
-          </div>
-        </div>
+  <!-- PANEL 1 -->
+  <div class="panel active" id="panel-0">
+    <div class="comparison-container">
+      <div class="comparison-img-wrapper">
+        <img src="compare-01-home.png" alt="01. 主界面前后对比">
       </div>
-    </div>
-
-    <!-- PANEL 2 -->
-    <div class="panel" id="panel-1">
-      <div class="comparison-container">
-        <div class="comparison-img-wrapper">
-          <img src="compare-02-detail.png" alt="02. 影片详情前后对比">
+      <div class="panel-details">
+        <div class="diag-box problem">
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
+          <ul>
+            <li>设置按钮排在最右侧 (x: 2302px / 30.6cm)，驾驶座伸手极其困难；</li>
+            <li>顶部日期独占 25.5cm 宽，客厅远视距无用留白，信息利用率低下；</li>
+            <li>分类 Tab 条高度仅 13.4mm，手指滑动极易误触相邻项；</li>
+            <li>缺乏快速续播卡片，每次打开应用找上次未看完的剧集链路过长；</li>
+            <li>残留 TV 白色聚焦框，触摸屏缺少平滑波纹反馈。</li>
+          </ul>
         </div>
-        <div class="panel-details">
-          <div class="diag-box problem">
-            <h3>🚨 原版问题诊断 (BEFORE)</h3>
-            <ul>
-              <li>全屏、快速搜索、收藏、换源全部堆在右半屏副驾侧；</li>
-              <li>界面中央直接暴露 1552px 长的未格式化原始 HTTP play.m3u8 字符串；</li>
-              <li>previewPlayerBlock 假层 view 阻碍小窗直接点击全屏；</li>
-              <li>剧集列表下边距仅 1mm，长剧集反复滑动极度繁琐；</li>
-              <li>换源按钮距离过远，操作不顺手。</li>
-            </ul>
-          </div>
-          <div class="diag-box solution">
-            <h3>✨ 方案一优化要点 (AFTER)</h3>
-            <ul>
-              <li><strong>黄金操作按键群收拢在左侧近端</strong>：【全屏播放】、【智能换源】、【收藏】、【投屏推送】；</li>
-              <li><strong>隐藏原始 URL 字符串</strong>：重构为整洁优雅的演职员、评分与剧情简介卡片；</li>
-              <li><strong>剧集重构为 155×135px 超大方块矩阵</strong>：带 22px 充足安全间距与正在播放光标；</li>
-              <li><strong>提供 1-10、11-20、21-30 分段快速跳选胶囊</strong>：长剧选集秒直达；</li>
-              <li><strong>移除遥控假层</strong>：16:9 预览小窗支持轻触直接全屏。</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL 3 -->
-    <div class="panel" id="panel-2">
-      <div class="comparison-container">
-        <div class="comparison-img-wrapper">
-          <img src="compare-03-player.png" alt="03. 全屏播放器前后对比">
-        </div>
-        <div class="panel-details">
-          <div class="diag-box problem">
-            <h3>🚨 原版问题诊断 (BEFORE)</h3>
-            <ul>
-              <li>底部平铺 18 个细碎小按钮，单键宽 17.6mm，间距仅 3.6mm，极易误触；</li>
-              <li>时间显示框宽度仅 22mm，长视频时间戳 (01:23:45) 发生严重截断；</li>
-              <li>右侧音效胶囊落在 x: 2120px，主驾必须欠身；</li>
-              <li>缺乏屏幕触控长按倍速与滑动手势，调音量调亮度必须费力点小按钮；</li>
-              <li>电视快进黑色弹窗居中遮挡视频主体画面。</li>
-            </ul>
-          </div>
-          <div class="diag-box solution">
-            <h3>✨ 方案一优化要点 (AFTER)</h3>
-            <ul>
-              <li><strong>左下角 5 大高容错播控岛</strong>：暂停/播放、±15s 快进退、臻彩预设、杜比音效；</li>
-              <li><strong>进度条加粗至 20px</strong>：配合 46px 吸附手柄与放大的 42:15 / 58:30 无截断时间气泡；</li>
-              <li><strong>新增【长按屏幕 2.0x 极速快进】</strong>：手指长按即加速、松手恢复原速；</li>
-              <li><strong>建立全屏手势层</strong>：左侧垂直滑调亮度、右侧垂直滑调音量、双击暂停；</li>
-              <li><strong>右下角收拢次要功能</strong>：倍速选择、选集列表、画面比例（16:9/21:9 无黑边）。</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL 4 -->
-    <div class="panel" id="panel-3">
-      <div class="comparison-container">
-        <div class="comparison-img-wrapper">
-          <img src="compare-04-search.png" alt="04. 搜索界面前后对比">
-        </div>
-        <div class="panel-details">
-          <div class="diag-box problem">
-            <h3>🚨 原版问题诊断 (BEFORE)</h3>
-            <ul>
-              <li>原版 TV 软键盘按键密集，且代码中主动调用 hiddenImm() 封杀原生输入法；</li>
-              <li>右半屏 50% 面积 (18.5cm) 全黑空白，大屏显示空间严重浪费；</li>
-              <li>单列纵向热词排至 y: 1934px 跌出屏幕底端，查看成本极高；</li>
-              <li>缺少车载语音搜片按键。</li>
-            </ul>
-          </div>
-          <div class="diag-box solution">
-            <h3>✨ 方案一优化要点 (AFTER)</h3>
-            <ul>
-              <li><strong>保留并重构车载大软键盘（115×110px）</strong>：提供简拼/全拼与拼音后缀大按键；</li>
-              <li><strong>解除 hiddenImm() 封杀</strong>：支持一键唤起系统原生输入法与车载手写板；</li>
-              <li><strong>顶部集成【🎙 按住语音】按键</strong>：支持语音直接搜片；</li>
-              <li><strong>右侧 50% 空间打造最近历史搜索标签与双列富媒体搜索结果列表</strong>，带立即播放。</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL 5 -->
-    <div class="panel" id="panel-4">
-      <div class="comparison-container">
-        <div class="comparison-img-wrapper">
-          <img src="compare-05-settings.png" alt="05. 设置界面前后对比">
-        </div>
-        <div class="panel-details">
-          <div class="diag-box problem">
-            <h3>🚨 原版问题诊断 (BEFORE)</h3>
-            <ul>
-              <li>左侧分类导航菜单被代码写死 visibility='gone'，40+ 设置项只能单列硬滑；</li>
-              <li>高级设置项通栏排布撕裂：标题在 x: 124px，开关在 x: 2576px，视距拉扯 32cm；</li>
-              <li>缺乏关于全屏长按倍速速率、手势调节、后台音频播放等现代配置项。</li>
-            </ul>
-          </div>
-          <div class="diag-box solution">
-            <h3>✨ 方案一优化要点 (AFTER)</h3>
-            <ul>
-              <li><strong>恢复左侧垂直分类导航 Rail (x: 60~680px)</strong>：清晰划分为 7 大实用业务板块；</li>
-              <li><strong>紧凑成组卡片排布</strong>：消除 32cm 视距撕裂，开关紧挨配置说明右侧；</li>
-              <li><strong>画面预设升级为大号分段式胶囊调节条</strong>（原始、臻彩、动漫、影院、护眼、防眩）；</li>
-              <li><strong>完整保留高通 SGSR1 边缘超分辨率与时域平滑补帧配置</strong>；</li>
-              <li><strong>增加长按倍速速率设置（2.0x / 3.0x）与切后台音频保活开关</strong>。</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL 6 -->
-    <div class="panel" id="panel-5">
-      <div class="comparison-container">
-        <div class="comparison-img-wrapper">
-          <img src="compare-06-audio-mode.png" alt="06. 电视直播前后对比">
-        </div>
-        <div class="panel-details">
-          <div class="diag-box problem">
-            <h3>🚨 原版问题诊断 (BEFORE)</h3>
-            <ul>
-              <li>原版直播中台号浮层字号高达 100mm (225px)，在近距车机前粗糙突兀；</li>
-              <li>频道列表与节目单缺乏大触控方块，在行车颠簸中极易点错频道；</li>
-              <li>缺乏快速换源与多频道组（央视、卫视、体育、影视）清晰标签分类。</li>
-            </ul>
-          </div>
-          <div class="diag-box solution">
-            <h3>✨ 方案一优化要点 (AFTER)</h3>
-            <ul>
-              <li><strong>左侧建立清晰的电视频道分类滑轨与大号频道列表</strong>（单项高 155px，防误触）；</li>
-              <li><strong>实时显示 EPG 节目流</strong>（正在播出 / 下个预告），带科技绿“播放中”光标；</li>
-              <li><strong>右侧 16:9 实时超清小窗预览</strong>：轻触直接一键全屏，带【⚡ 切换源 (3条备用)】；</li>
-              <li><strong>彻底替换原有黑屏伪需求</strong>：完整呈现 TVBox 核心直播能力。</li>
-            </ul>
-          </div>
+        <div class="diag-box solution">
+          <h3>✨ 落地重构实施要点 (AFTER - 以图为准)</h3>
+          <ul>
+            <li><strong>左侧垂直流媒体导航 Rail (x: 0~240px)</strong>：设置/影视/直播/推送一触即达；</li>
+            <li><strong>新增【上次播放无缝续播 Hero 卡片】</strong>：直观展示剧集进度条与【继续播放】大按键；</li>
+            <li><strong>顶部集成搜索栏与分类快速过滤标签</strong>：电影/剧集/4K HDR/动漫；</li>
+            <li><strong>海报触控卡片重构为 475×720px 大规格</strong>：彻底废除 TV 焦点白框；</li>
+            <li><strong>深空黑曜微光质感</strong>：白天高清晰防反光，夜间护眼不刺眼。</li>
+          </ul>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== SCHEME 2 VIEW ==================== -->
-  <div class="scheme-view" id="scheme-1">
-    <!-- Scheme 2 Home -->
-    <div class="showcase-card">
-      <div class="showcase-header">
-        <h2>方案二·界面 01：全景悬浮无界主界面 (Cinematic Infinity Home)</h2>
-        <span class="badge-advise">Apple TV / Infuse 极简风格</span>
-      </div>
+  <!-- PANEL 2 -->
+  <div class="panel" id="panel-1">
+    <div class="comparison-container">
       <div class="comparison-img-wrapper">
-        <img src="../../evidence/redesign/scheme2-01-home.png" alt="方案二全景主界面">
+        <img src="compare-02-detail.png" alt="02. 影片详情前后对比">
       </div>
-      <div class="showcase-desc">
-        <strong>方案二·主界面理念</strong>：专为追求开阔视野、无边界全景震撼视觉的用户打造。
-        <br>• <strong>顶部悬浮毛玻璃胶囊导航</strong>：去除固定侧边栏，将 17.3 英寸 3K 屏幕 100% 空间全部还给影视海报与超清视频；
-        <br>• <strong>全幅聚光灯焦点轮播卡片</strong>：横跨 2680px 超大画幅，左侧《繁花》4K 原画实景预览、右侧高清图文；
-        <br>• <strong>无边界海报瀑布流</strong>：510×640px 超大规格圆角卡片，真实官方剧照海报呈现，沉浸感超越传统车载软件。
-      </div>
-    </div>
-
-    <!-- Scheme 2 Detail -->
-    <div class="showcase-card">
-      <div class="showcase-header">
-        <h2>方案二·界面 02：全景沉浸式详情页 (Cinematic Infinity Detail)</h2>
-        <span class="badge-advise">剧照全幅背景 + 磨砂玻璃浮层</span>
-      </div>
-      <div class="comparison-img-wrapper">
-        <img src="../../evidence/redesign/scheme2-02-detail.png" alt="方案二全景详情页">
-      </div>
-      <div class="showcase-desc">
-        <strong>方案二·详情页理念</strong>：将全屏背景替换为动态 4K 剧照微光磨砂幕布，前置高透光信息浮卡与横向流体剧集滑轨。
-        <br>• <strong>左侧悬浮封面与右侧全息卡片</strong>：规整展现豆瓣 8.8 高分、导演孙皓、编剧王倦与剧情简介；
-        <br>• <strong>底部横向流体选集滑轨</strong>：150×120px 大号触控胶囊，带当前播放集（第 18 集）科技蓝高光指示器。
-      </div>
-    </div>
-
-    <!-- Scheme 2 Player -->
-    <div class="showcase-card">
-      <div class="showcase-header">
-        <h2>方案二·界面 03：全景悬浮极简播放器 (Cinematic Floating Player)</h2>
-        <span class="badge-advise">纯粹 4K 巨幕视野 + 悬浮胶囊控制条</span>
-      </div>
-      <div class="comparison-img-wrapper">
-        <img src="../../evidence/redesign/scheme2-03-player.png" alt="方案二全景播放器">
-      </div>
-      <div class="showcase-desc">
-        <strong>方案二·播放器理念</strong>：以《流浪地球 2》太空站 4K 原画为背景，展示极致通透的悬浮微光控制条。
-        <br>• <strong>底部独立悬浮磨砂播控卡</strong>：整合 20px 进度条、时间戳、长按 2x 倍速、21:9 宽银幕无黑边模式与选集气泡；
-        <br>• 画面纯净无冗余遮挡，手指轻扫即隐，将 17.3 英寸 3K 大屏的画质表现推向巅峰。
+      <div class="panel-details">
+        <div class="diag-box problem">
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
+          <ul>
+            <li>全屏、快速搜索、收藏、换源全部堆在右半屏副驾侧；</li>
+            <li>界面中央直接暴露 1552px 长的未格式化原始 HTTP play.m3u8 字符串；</li>
+            <li>previewPlayerBlock 假层 view 阻碍小窗直接点击全屏；</li>
+            <li>剧集列表下边距仅 1mm，长剧集反复滑动极度繁琐；</li>
+            <li>换源按钮距离过远，操作不顺手。</li>
+          </ul>
+        </div>
+        <div class="diag-box solution">
+          <h3>✨ 落地重构实施要点 (AFTER - 以图为准)</h3>
+          <ul>
+            <li><strong>黄金操作按键群收拢在左侧近端</strong>：【全屏播放】、【智能换源】、【收藏】、【投屏推送】；</li>
+            <li><strong>隐藏原始 URL 字符串</strong>：重构为整洁优雅的演职员、评分与剧情简介卡片；</li>
+            <li><strong>剧集重构为 155×135px 超大方块矩阵</strong>：带 22px 充足安全间距与正在播放光标；</li>
+            <li><strong>提供 1-10、11-20、21-30 分段快速跳选胶囊</strong>：长剧选集秒直达；</li>
+            <li><strong>移除遥控假层</strong>：16:9 预览小窗支持轻触直接全屏。</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== SCHEME 3 VIEW ==================== -->
-  <div class="scheme-view" id="scheme-2">
-    <!-- Scheme 3 Home -->
-    <div class="showcase-card">
-      <div class="showcase-header">
-        <h2>方案三·界面 01：双区专业影音工作台主页 (Studio Cockpit Home)</h2>
-        <span class="badge-advise">左右双翼 40%:60% 非对称工作台</span>
-      </div>
+  <!-- PANEL 3 -->
+  <div class="panel" id="panel-2">
+    <div class="comparison-container">
       <div class="comparison-img-wrapper">
-        <img src="../../evidence/redesign/scheme3-01-home.png" alt="方案三双翼工作台主页">
+        <img src="compare-03-player.png" alt="03. 全屏播放器前后对比">
       </div>
-      <div class="showcase-desc">
-        <strong>方案三·主页理念</strong>：充分利用 17.3 寸超宽比例的左右双翼工作台，专为极客与影音发烧友打造。
-        <br>• <strong>左翼 40% (x: 0~1150px) 深度控制区</strong>：集中放置上次播放卡片、<strong>实时线路延迟测速看板 (专线 32ms / 备线 85ms 实时直标)</strong>、六大功能矩阵；
-        <br>• <strong>右翼 60% (x: 1200~2820px) 沉浸大画幅</strong>：超宽比例《周处除三害》推荐位与海报流，操作与浏览互不遮挡，极适合大屏多任务与快速选集。
-      </div>
-    </div>
-
-    <!-- Scheme 3 Detail -->
-    <div class="showcase-card">
-      <div class="showcase-header">
-        <h2>方案三·界面 02：双区专业微调详情页 (Studio Cockpit Detail)</h2>
-        <span class="badge-advise">专业着色器微调 + 全景选集矩阵</span>
-      </div>
-      <div class="comparison-img-wrapper">
-        <img src="../../evidence/redesign/scheme3-02-detail.png" alt="方案三双区详情页">
-      </div>
-      <div class="showcase-desc">
-        <strong>方案三·详情页理念</strong>：左翼集成 16:9 实时视频监看小窗、<strong>高通 SGSR1 边缘锐化实时开关、时域平滑防抖算法、SDR-to-HDR 臻彩滤镜调节</strong>与多源测速看板；右翼为 175×145px 36 集完整超大方块选集矩阵，专业操控感拉满。
+      <div class="panel-details">
+        <div class="diag-box problem">
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
+          <ul>
+            <li>底部平铺 18 个细碎小按钮，单键宽 17.6mm，间距仅 3.6mm，极易误触；</li>
+            <li>时间显示框宽度仅 22mm，长视频时间戳 (01:23:45) 发生严重截断；</li>
+            <li>右侧音效胶囊落在 x: 2120px，主驾必须欠身；</li>
+            <li>缺乏屏幕触控长按倍速与滑动手势，调音量调亮度必须费力点小按钮；</li>
+            <li>电视快进黑色弹窗居中遮挡视频主体画面。</li>
+          </ul>
+        </div>
+        <div class="diag-box solution">
+          <h3>✨ 落地重构实施要点 (AFTER - 以图为准)</h3>
+          <ul>
+            <li><strong>左下角 5 大高容错播控岛</strong>：暂停/播放、±15s 快进退、臻彩预设、杜比音效；</li>
+            <li><strong>进度条加粗至 20px</strong>：配合 46px 吸附手柄与放大的 42:15 / 58:30 无截断时间气泡；</li>
+            <li><strong>新增【长按屏幕 2.0x 极速快进】</strong>：手指长按即加速、松手恢复，体验极佳；</li>
+            <li><strong>建立全屏手势层</strong>：左侧垂直滑调亮度、右侧垂直滑调音量、双击暂停；</li>
+            <li><strong>右下角收拢次要功能</strong>：倍速选择、选集列表、画面比例（16:9/21:9 无黑边）。</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- PANEL 4 -->
+  <div class="panel" id="panel-3">
+    <div class="comparison-container">
+      <div class="comparison-img-wrapper">
+        <img src="compare-04-search.png" alt="04. 搜索界面前后对比">
+      </div>
+      <div class="panel-details">
+        <div class="diag-box problem">
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
+          <ul>
+            <li>原版 TV 软键盘按键密集，且代码中主动调用 hiddenImm() 封杀原生输入法；</li>
+            <li>右半屏 50% 面积 (18.5cm) 全黑空白，大屏显示空间严重浪费；</li>
+            <li>单列纵向热词排至 y: 1934px 跌出屏幕底端，查看成本极高；</li>
+            <li>缺少车载语音搜片按键。</li>
+          </ul>
+        </div>
+        <div class="diag-box solution">
+          <h3>✨ 落地重构实施要点 (AFTER - 以图为准)</h3>
+          <ul>
+            <li><strong>保留并重构车载大软键盘（115×110px）</strong>：提供简拼/全拼与拼音后缀大按键；</li>
+            <li><strong>解除 hiddenImm() 封杀</strong>：支持一键唤起系统原生输入法与车载手写板；</li>
+            <li><strong>顶部集成【🎙 按住语音】按键</strong>：支持语音直接搜片；</li>
+            <li><strong>右侧 50% 空间打造最近历史搜索标签与双列富媒体搜索结果列表</strong>，带立即播放。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 5 -->
+  <div class="panel" id="panel-4">
+    <div class="comparison-container">
+      <div class="comparison-img-wrapper">
+        <img src="compare-05-settings.png" alt="05. 设置界面前后对比">
+      </div>
+      <div class="panel-details">
+        <div class="diag-box problem">
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
+          <ul>
+            <li>左侧分类导航菜单被代码写死 visibility='gone'，40+ 设置项只能单列硬滑；</li>
+            <li>高级设置项通栏排布撕裂：标题在 x: 124px，开关在 x: 2576px，视距拉扯 32cm；</li>
+            <li>缺乏关于全屏长按倍速速率、手势调节、后台音频播放等现代配置项。</li>
+          </ul>
+        </div>
+        <div class="diag-box solution">
+          <h3>✨ 落地重构实施要点 (AFTER - 以图为准)</h3>
+          <ul>
+            <li><strong>恢复左侧垂直分类导航 Rail (x: 60~680px)</strong>：清晰划分为 7 大实用业务板块；</li>
+            <li><strong>紧凑成组卡片排布</strong>：消除 32cm 视距撕裂，开关紧挨配置说明右侧；</li>
+            <li><strong>画面预设升级为大号分段式胶囊调节条</strong>（原始、臻彩、动漫、影院、护眼、防眩）；</li>
+            <li><strong>完整保留高通 SGSR1 边缘超分辨率与时域平滑补帧配置</strong>；</li>
+            <li><strong>增加长按倍速速率设置（2.0x / 3.0x）与切后台音频保活开关</strong>。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 6 -->
+  <div class="panel" id="panel-5">
+    <div class="comparison-container">
+      <div class="comparison-img-wrapper">
+        <img src="compare-06-live.png" alt="06. 电视直播前后对比">
+      </div>
+      <div class="panel-details">
+        <div class="diag-box problem">
+          <h3>🚨 原版问题诊断 (BEFORE)</h3>
+          <ul>
+            <li>原版直播中台号浮层字号高达 100mm (225px)，在近距车机前粗糙突兀；</li>
+            <li>频道列表与节目单缺乏大触控方块，在行车颠簸中极易点错频道；</li>
+            <li>缺乏快速换源与多频道组（央视、卫视、体育、影视）清晰标签分类。</li>
+          </ul>
+        </div>
+        <div class="diag-box solution">
+          <h3>✨ 落地重构实施要点 (AFTER - 以图为准)</h3>
+          <ul>
+            <li><strong>左侧建立清晰的电视频道分类滑轨与大号频道列表</strong>（单项高 155px，防误触）；</li>
+            <li><strong>实时显示 EPG 节目流</strong>（正在播出 / 下个预告），带科技绿“播放中”光标；</li>
+            <li><strong>右侧 16:9 实时超清小窗预览</strong>：轻触直接一键全屏，带【⚡ 切换源 (3条备用)】；</li>
+            <li><strong>彻底替换原有黑屏伪需求</strong>：完整呈现 TVBox 核心直播能力。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- FEATURES AUDIT TABLE -->
   <div class="roadmap-section">
-    <h2>功能保留与实用性增强建议清单（供评估审批）</h2>
+    <h2>功能保留与图文真值对照清单（严格以图为准）</h2>
     <table>
       <thead>
         <tr>
           <th>功能模块</th>
-          <th>处理决策</th>
-          <th>详细说明</th>
+          <th>图示位置与对应组件</th>
+          <th>对应功能与实现细节</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><strong>TV 36 键虚拟大软键盘</strong></td>
-          <td><span class="badge-keep">全量保留并升级</span></td>
-          <td>单键扩大至 115×110px，增加拼音后缀联想大键；同时解除系统输入法封杀，输入双保险。</td>
+          <td>图 04：左侧 x: 60~1350px 键盘容器</td>
+          <td>单键 115×110px，间距 15px，带拼音后缀快捷胶囊；提供【⌨ 唤起系统输入法】</td>
         </tr>
         <tr>
           <td><strong>多端局域网推送 / 投屏</strong></td>
-          <td><span class="badge-keep">全量保留并优化</span></td>
-          <td>侧边栏常驻入口，支持多设备连接、扫码推流与本地文件互传。</td>
+          <td>图 01：左侧导航第 6 项<br>图 02：详情页第 4 个主按键</td>
+          <td>完整保留局域网设备互联、扫码推流与视频投屏功能，入口移入主导航与详情页黄金岛</td>
         </tr>
         <tr>
           <td><strong>电视直播与 EPG 节目流</strong></td>
-          <td><span class="badge-keep">全量保留并重构</span></td>
-          <td>恢复央视/卫视/电影分类滑轨，大号触控列表，带实时 EPG 节目预告与秒切源。</td>
+          <td>图 01：左侧导航第 3 项<br>图 06：整页电视直播交互</td>
+          <td>央视/卫视/电影分类滑轨，155px 高触控频道列表，实时 EPG 节目预告与多线路秒切</td>
         </tr>
         <tr>
-          <td><strong>音画调优与超分辨率</strong></td>
-          <td><span class="badge-keep">全量保留并强化</span></td>
-          <td>完整保留高通 SGSR1 硬件超分辨率、时域平滑防抖、SDR-to-HDR 臻彩色彩矩阵与杜比音效。</td>
+          <td><strong>音画调优与超分引擎</strong></td>
+          <td>图 03：播控岛第 4、5 胶囊<br>图 05：设置中心前两张卡片</td>
+          <td>高通 SGSR1 边缘超分辨率自适应锐化、时域平滑防抖补帧、SDR-to-HDR 臻彩预设与杜比全景声音效</td>
         </tr>
         <tr>
-          <td><strong>详细设置中心 (解码/网络/订阅)</strong></td>
-          <td><span class="badge-keep">全量保留并重构</span></td>
-          <td>恢复左侧双栏分类，右侧成组紧凑卡片排布，消除视距撕裂。</td>
+          <td><strong>双栏系统设置中心</strong></td>
+          <td>图 05：左侧 7 大 Rail 菜单 + 右侧卡片</td>
+          <td>恢复左侧分类导航菜单，右侧成组紧凑卡片排布，消除视距撕裂</td>
         </tr>
         <tr>
-          <td><strong>长按屏幕 2.0x 极速快进</strong></td>
-          <td><span class="badge-advise">实用增强建议</span></td>
-          <td>手指长按屏幕即加速、松手即恢复原速，现代触控播放器标配（建议采纳）。</td>
+          <td><strong>全屏长按 2.0x 极速快进</strong></td>
+          <td>图 03：全屏播控屏幕中央 HUD 提示</td>
+          <td>手指长按屏幕任意位置瞬间触发 2.0x 快进，松手立即恢复原速（带淡出提示气泡）</td>
         </tr>
         <tr>
           <td><strong>全屏无级滑动手势</strong></td>
-          <td><span class="badge-advise">实用增强建议</span></td>
-          <td>左半屏垂直滑调亮度、右半屏滑调音量、双击暂停（建议采纳）。</td>
+          <td>图 03：左右两侧半透明 HUD 滑轨</td>
+          <td>左半屏垂直滑调应用亮度、右半屏垂直滑调媒体音量、中央双击快速暂停/继续</td>
         </tr>
         <tr>
-          <td><strong>切后台音频混音播放</strong></td>
-          <td><span class="badge-advise">实用增强建议</span></td>
-          <td>切出去看车机导航地图时，保持视频音轨不停播，声音与导航平稳混音（建议采纳）。</td>
+          <td><strong>切后台音频平稳保活</strong></td>
+          <td>图 03：播放器顶部左侧第 1 个胶囊开关<br>图 05：设置中心触控交互第 2 项开关</td>
+          <td>用户切出 TVBox 看车机地图导航时，视频音轨平稳保活不中断，与导航语音自然混音</td>
         </tr>
         <tr>
           <td><strong>车身底盘侵入内容 (D档/车速)</strong></td>
-          <td><span class="badge-keep">彻底剔除</span></td>
-          <td>去除所有与视频播放器无关的车辆业务信号，不越俎代庖。</td>
+          <td>全图均已彻底剔除</td>
+          <td>去除所有与视频播放器无关的车辆底盘信号，纯粹专注于大屏音画视听与触控</td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <script>
-    function switchScheme(schemeIndex) {
-      const schemeBtns = document.querySelectorAll('.scheme-btn');
-      const schemeViews = document.querySelectorAll('.scheme-view');
-      schemeBtns.forEach((btn, i) => {
-        if (i === schemeIndex) {
-          btn.classList.add('active');
-          schemeViews[i].classList.add('active');
-        } else {
-          btn.classList.remove('active');
-          schemeViews[i].classList.remove('active');
-        }
-      });
-    }
-
     function switchTab(index) {
       const tabs = document.querySelectorAll('.tab-btn');
       const panels = document.querySelectorAll('.panel');
