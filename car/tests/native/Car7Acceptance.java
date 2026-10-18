@@ -85,6 +85,12 @@ public final class Car7Acceptance extends Instrumentation {
                     section("pages", this::pagesChecks);
                 } else if (arguments != null && "ux3k".equals(arguments.getString("mode"))) {
                     section("ux3k", this::uxChecks);
+                } else if (arguments != null && "searchdiag".equals(arguments.getString("mode"))) {
+                    section("searchdiag", this::searchDiagnosticChecks);
+                } else if (arguments != null && "journey".equals(arguments.getString("mode"))) {
+                    section("journey", this::journeyChecks);
+                } else if (arguments != null && "navigation".equals(arguments.getString("mode"))) {
+                    section("back", this::backChecks); section("dialogs", this::dialogChecks);
                 } else if (arguments != null && "quickjs".equals(arguments.getString("mode"))) {
                     section("quickjs", this::quickJsChecks);
                 } else if (arguments != null && "searchqueue".equals(arguments.getString("mode"))) {
@@ -647,11 +653,36 @@ public final class Car7Acceptance extends Instrumentation {
         Intent i = new Intent(); i.setClassName(getTargetContext().getPackageName(), "com.github.tvbox.osc.ui.activity.CarAdvancedActivity"); i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Activity a = startActivitySync(i); pause(500); advanced = a; return a;
     }
+    private void assertTargetWindow(String name) throws Exception {
+        android.view.accessibility.AccessibilityNodeInfo root = getUiAutomation().getRootInActiveWindow();
+        String pkg = root == null || root.getPackageName() == null ? "null" : root.getPackageName().toString();
+        check(name + " foreground belongs to target", getTargetContext().getPackageName().equals(pkg));
+        if (!getTargetContext().getPackageName().equals(pkg)) throw new IllegalStateException(name + " foreground package=" + pkg);
+    }
     private void shot(String name) throws Exception {
         Bitmap image = getUiAutomation().takeScreenshot();
         if (image == null) throw new IllegalStateException("empty screenshot");
         try (FileOutputStream f = new FileOutputStream(new File(out, name + ".png"))) { image.compress(Bitmap.CompressFormat.PNG, 100, f); }
         image.recycle();
+    }
+    private void accessibilityNode(android.view.accessibility.AccessibilityNodeInfo node, org.xmlpull.v1.XmlSerializer xml) throws Exception {
+        if (!node.isVisibleToUser()) return;
+        Rect bounds = new Rect(); node.getBoundsInScreen(bounds);
+        xml.startTag(null, "node");
+        xml.attribute(null, "class", String.valueOf(node.getClassName()));
+        xml.attribute(null, "package", String.valueOf(node.getPackageName()));
+        xml.attribute(null, "resource-id", String.valueOf(node.getViewIdResourceName()));
+        xml.attribute(null, "text", node.isPassword() ? "" : String.valueOf(node.getText() == null ? "" : node.getText()));
+        xml.attribute(null, "content-desc", String.valueOf(node.getContentDescription() == null ? "" : node.getContentDescription()));
+        xml.attribute(null, "clickable", String.valueOf(node.isClickable()));
+        xml.attribute(null, "scrollable", String.valueOf(node.isScrollable()));
+        xml.attribute(null, "checked", String.valueOf(node.isChecked()));
+        xml.attribute(null, "bounds", "[" + bounds.left + "," + bounds.top + "][" + bounds.right + "," + bounds.bottom + "]");
+        for (int i = 0; i < node.getChildCount(); i++) {
+            android.view.accessibility.AccessibilityNodeInfo child = node.getChild(i);
+            if (child != null) accessibilityNode(child, xml);
+        }
+        xml.endTag(null, "node");
     }
     private void tree(Activity a, String name) throws Exception {
         JSONArray nodes = ui(() -> { JSONArray arr = new JSONArray(); addNodes(a.getWindow().getDecorView(), arr); return arr; });
@@ -706,7 +737,7 @@ public final class Car7Acceptance extends Instrumentation {
         down.setSource(InputDevice.SOURCE_TOUCHSCREEN); up.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         sendPointerSync(down); sendPointerSync(up); down.recycle(); up.recycle(); pause(450);
     }
-    private void capturePage(Activity page, String name) throws Exception { tree(page, name); shot(name); }
+    private void capturePage(Activity page, String name) throws Exception { assertTargetWindow(name); tree(page, name); shot(name); }
     private void wakePlayerControls(Activity page) throws Exception {
         if (!ui(() -> view(page, "bottom_container").isShown())) { tap(page, 1440, 600); pause(400); }
         if (!ui(() -> view(page, "bottom_container").isShown())) throw new IllegalStateException("player touch did not reveal controls");
@@ -755,6 +786,13 @@ public final class Car7Acceptance extends Instrumentation {
                     if (item == null) throw new IllegalStateException("settings category not visible " + index);
                     Rect box = rect(item); tap(settings, box.exactCenterX(), box.exactCenterY()); pause(200);
                     check("settings category " + index + " selected", ((Number) ui(() -> field(settings, "defaultSelected"))).intValue() == index);
+                    capturePage(settings, "ux-settings-category-" + index);
+                    View scroll = view(settings, "ux_setting_scroll");
+                    for (int step = 0; step < 4 && ui(() -> scroll.canScrollVertically(1)); step++) {
+                        swipe(settings, 2300, 1330, 2300, 600, 500);
+                        capturePage(settings, "ux-settings-category-" + index + "-scroll-" + step);
+                    }
+                    main(() -> call(scroll, "scrollTo", 0, 0)); pause(150);
                     if (index == 2) {
                         android.widget.CompoundButton toggle = (android.widget.CompoundButton) view(settings, "uxBackgroundSwitch");
                         boolean before = ui(toggle::isChecked); clickView(settings, "uxBackgroundRow");
@@ -777,15 +815,30 @@ public final class Car7Acceptance extends Instrumentation {
                 check("search native split panels", ui(() -> view(search, "etSearch").getWidth()) == 2100);
                 View keyboard = view(search, "keyBoardRoot");
                 for (String key : new String[]{"A", "Z", "0", "9"}) check("keyboard includes " + key, ui(() -> textView(keyboard, key)) != null);
+                main(() -> ((EditText) view(search, "etSearch")).requestFocus());
                 tapText(search, "Q");
                 check("native keyboard inserts at cursor", ui(() -> ((EditText) view(search, "etSearch")).getText().toString()).contains("Q"));
                 main(() -> ((EditText) view(search, "etSearch")).setText("车机界面验收"));
-                clickView(search, "tvSearch"); pause(6000);
+                clickView(search, "tvSearch");
                 Object adapter = ui(() -> field(search, "searchAdapter"));
+                long deadline = SystemClock.elapsedRealtime() + 20000;
+                while (SystemClock.elapsedRealtime() < deadline && ((List<?>) ui(() -> field(adapter, "mData"))).size() < 5) pause(300);
                 int count = ((List<?>) ui(() -> field(adapter, "mData"))).size();
-                check("search session completed", count >= 0);
+                record(count == 5, "search positive fixture returns five results", "results=" + count);
+                check("search completed pending sources", ((java.util.Set<?>) ui(() -> field(search, "pendingSearchKeys"))).isEmpty());
                 capturePage(search, "ux-search-results");
-                capturePage(search, "ux-search-results");
+                if (count > 0) {
+                    ActivityMonitor monitor = addMonitor("com.github.tvbox.osc.ui.activity.DetailActivity", null, false);
+                    try {
+                        Object layout = ui(() -> call(view(search, "mGridView"), "getLayoutManager"));
+                        View first = (View) ui(() -> call(layout, "findViewByPosition", 0));
+                        if (first == null) throw new IllegalStateException("search result row not visible");
+                        Rect row = rect(first); tap(search, row.exactCenterX(), row.exactCenterY());
+                        Activity detail = waitForMonitorWithTimeout(monitor, 8000);
+                        check("search result opens detail by touch", detail != null);
+                        if (detail != null) { pause(1800); check("search detail metadata loaded", ui(() -> field(detail, "vodInfo")) != null); capturePage(detail, "ux-search-opened-detail"); main(() -> call(detail, "onBackButtonStepUp")); pause(350); }
+                    } finally { removeMonitor(monitor); }
+                }
             } finally { main(search::finish); pause(300); }
         });
 
@@ -844,29 +897,89 @@ public final class Car7Acceptance extends Instrumentation {
                 View player = (View) video;
                 check("live 16:9 preview", ui(player::getWidth) * 9 == ui(player::getHeight) * 16);
                 capturePage(live, "ux-live");
-                clickView(live, "ux_live_fullscreen"); pause(600);
-                check("live fullscreen keeps same VideoView", ui(player::getWidth) == 2880);
+                Object decoder = ui(() -> field(video, "mMediaPlayer"));
+                long before = position(video);
+                clickView(live, "ux_live_fullscreen"); pause(1000);
+                check("live fullscreen keeps same VideoView and decoder", video == ui(() -> field(live, "mVideoView")) && decoder == ui(() -> field(video, "mMediaPlayer")) && ui(player::getWidth) == 2880);
+                check("live fullscreen playback advances", position(video) > before + 300);
+                capturePage(live, "ux-live-fullscreen");
                 main(live::onBackPressed); pause(500);
-                check("live Back returns preview", ui(player::getWidth) == 1632 && !ui(live::isFinishing));
-                capturePage(live, "ux-live-after-back");
+                check("live Back returns preview without decoder restart", ui(player::getWidth) == 1632 && !ui(live::isFinishing) && decoder == ui(() -> field(video, "mMediaPlayer")));
                 capturePage(live, "ux-live-after-back");
             } finally { main(live::finish); pause(400); }
         });
     }
+    private void selectSettingsCategory(Activity settings, int index) throws Exception {
+        Object manager = ui(() -> call(view(settings, "mGridView"), "getLayoutManager"));
+        View item = (View) ui(() -> call(manager, "findViewByPosition", index));
+        Rect box = rect(item); tap(settings, box.exactCenterX(), box.exactCenterY()); pause(250);
+    }
+    private void journeyChecks() throws Exception {
+        main(() -> { putPref("SHOW_PREVIEW", true); putPref("PLAY_TYPE", 2); call(type("com.orhanobut.hawk.Hawk"), "put", "car_ux_background_audio", true); });
+        Bundle extras = new Bundle(); extras.putString("sourceKey", "car7_ui"); extras.putString("id", "car7-0");
+        Activity detail = openPage("DetailActivity", extras);
+        try {
+            Object fragment = ui(() -> field(detail, "playFragment"));
+            Object video = ui(() -> field(fragment, "mVideoView"));
+            check("journey playback starts", waitPlaying(video, 20000));
+            main(() -> call(video, "seekTo", 35000L)); pause(1500);
+            check("journey seek reached 35s", position(video) >= 33000);
+            Activity coverOn = openPage("SettingActivity", null);
+            try {
+                long bg = position(video); SystemClock.sleep(1800);
+                check("background audio ON keeps position progressing", position(video) > bg + 800 && Boolean.TRUE.equals(ui(() -> call(video, "isPlaying"))));
+                check("background audio owns foreground service", staticField("com.github.tvbox.osc.player.MusicPlaybackService", "instance") != null);
+            } finally { main(coverOn::finish); pause(800); }
+            Activity settingsOff = openPage("SettingActivity", null);
+            try {
+                selectSettingsCategory(settingsOff, 2);
+                boolean beforeToggle = (Boolean) ui(() -> call(view(settingsOff, "uxBackgroundSwitch"), "isChecked"));
+                if (beforeToggle) clickView(settingsOff, "uxBackgroundRow");
+                check("background preference OFF stored", !((Boolean) ui(() -> call(view(settingsOff, "uxBackgroundSwitch"), "isChecked"))));
+                long stopped = position(video); SystemClock.sleep(1200);
+                record(!Boolean.TRUE.equals(ui(() -> call(video, "isPlaying"))) && Math.abs(position(video) - stopped) < 300,
+                        "background audio OFF pauses playback",
+                        "before=" + stopped + " after=" + position(video) + " lifecyclePaused=" + ui(() -> field(fragment, "carLifecyclePaused")));
+            } finally { main(settingsOff::finish); pause(800); }
+            check("foreground resumes lifecycle-paused video", waitPlaying(video, 5000));
+            capturePage(detail, "journey-foreground-detail");
+            main(() -> call(detail, "onBackButtonStepUp")); pause(800);
+            check("journey detail closes", ui(detail::isFinishing));
+        } finally { if (!ui(detail::isFinishing)) main(detail::finish); }
+    }
+    private void searchDiagnosticChecks() throws Exception {
+        Activity search = openPage("SearchActivity", null);
+        try {
+            EditText input = (EditText) view(search, "etSearch");
+            main(() -> { input.setText(""); input.requestFocus(); });
+            tapText(search, "Q");
+            check("diagnostic focused keyboard inserts", ui(() -> input.getText().toString()).contains("Q"));
+            main(() -> input.setText("车机界面验收"));
+            main(() -> input.setSelection(input.length()));
+            check("diagnostic input exact text", "车机界面验收".equals(ui(() -> input.getText().toString())));
+            capturePage(search, "searchdiag-before");
+            clickView(search, "tvSearch");
+            Object adapter = ui(() -> field(search, "searchAdapter"));
+            long deadline = SystemClock.elapsedRealtime() + 30000;
+            while (SystemClock.elapsedRealtime() < deadline && !((java.util.Set<?>) ui(() -> field(search, "pendingSearchKeys"))).isEmpty()) pause(300);
+            int count = ((List<?>) ui(() -> field(adapter, "mData"))).size();
+            int pending = ((java.util.Set<?>) ui(() -> field(search, "pendingSearchKeys"))).size();
+            write("searchdiag.json", new JSONObject().put("input", ui(() -> input.getText().toString())).put("resultCount", count).put("pending", pending).toString(2));
+            record(count == 5, "diagnostic search returns five fixture results", "count=" + count + " pending=" + pending);
+            capturePage(search, "searchdiag-after");
+        } finally { main(search::finish); pause(300); }
+    }
     private void pagesChecks() throws Exception {
         config(home, "setEnabled", true); config(home, "setMode", "floating");
-        config(home, "setHideOnRoot", false); config(home, "setHideSeconds", 4);
-        capturePage(home, "page-home");
-        View categoryTabs = view(home, "mGridView");
-        Object categoryManager = ui(() -> call(categoryTabs, "getLayoutManager"));
-        View firstCategory = (View) ui(() -> call(categoryManager, "findViewByPosition", 1));
-        if (firstCategory != null) {
-            Rect categoryBox = rect(firstCategory); tap(home, categoryBox.exactCenterX(), categoryBox.exactCenterY()); pause(1200);
-            capturePage(home, "page-category");
-            check("gallery category is selected", ((Number) ui(() -> field(home, "currentSelected"))).intValue() == 1);
-            config(home, "setHideSeconds", 0); tapBall(home); pause(500);
-            check("gallery category Back returns home", ((Number) ui(() -> field(home, "currentSelected"))).intValue() == 0);
-        } else check("gallery category exists", false);
+        config(home, "setHideOnRoot", true); config(home, "setHideSeconds", 4);
+        clickView(home, "uxNavCategories");
+        long categoryDeadline = SystemClock.elapsedRealtime() + 6000;
+        while (SystemClock.elapsedRealtime() < categoryDeadline && ((Number) ui(() -> field(home, "currentSelected"))).intValue() != 1) pause(250);
+        capturePage(home, "page-category");
+        check("gallery category is selected", ((Number) ui(() -> field(home, "currentSelected"))).intValue() == 1);
+        config(home, "setHideOnRoot", false); config(home, "setHideSeconds", 0); tapBall(home); pause(500);
+        long homeDeadline = SystemClock.elapsedRealtime() + 3000;
+        while (SystemClock.elapsedRealtime() < homeDeadline && ((Number) ui(() -> field(home, "currentSelected"))).intValue() != 0) pause(200);
         section("gallery-detail-player", () -> {
             main(() -> { putPref("SHOW_PREVIEW", true); putPref("VIDEO_ENHANCE", 0); putPref("VIDEO_SR", 0); putPref("VIDEO_INTERP", 0); putPref("HIFI_AUDIO", 0); });
             Bundle extras = new Bundle(); extras.putString("sourceKey", "car7_ui"); extras.putString("id", "car7-0");
@@ -882,6 +995,7 @@ public final class Car7Acceptance extends Instrumentation {
                 wakePlayerControls(detail);
                 capturePage(detail, "page-player-controls");
                 Object decoder = ui(() -> call(video, "getMediaPlayer"));
+                clickView(detail, "uxMore");
                 int session = ((Number) ui(() -> call(video, "getAudioSessionId"))).intValue();
                 clickView(detail, "play_car_sr");
                 check("SR button updates saved preference", ((Number) pref("VIDEO_SR")).intValue() == 1);
@@ -909,6 +1023,9 @@ public final class Car7Acceptance extends Instrumentation {
         section("gallery-settings", () -> {
             Activity settings = openPage("SettingActivity", null);
             capturePage(settings, "page-settings-top");
+            Object settingsManager = ui(() -> call(view(settings, "mGridView"), "getLayoutManager"));
+            View backCategory = (View) ui(() -> call(settingsManager, "findViewByPosition", 4));
+            Rect tab = rect(backCategory); tap(settings, tab.exactCenterX(), tab.exactCenterY()); pause(250);
             View entry = view(settings, "llCarAdvanced");
             main(() -> entry.requestRectangleOnScreen(new Rect(0, 0, entry.getWidth(), entry.getHeight()), true)); pause(350);
             capturePage(settings, "page-settings-car");
@@ -921,6 +1038,8 @@ public final class Car7Acceptance extends Instrumentation {
                 check("advanced SR switch toggles saved value", ((Number) pref("VIDEO_SR")).intValue() == 1 - srBefore);
                 clickView(a, "llAdvancedInterp");
                 check("advanced interpolation switch toggles saved value", ((Number) pref("VIDEO_INTERP")).intValue() == 1 - interpBefore);
+                clickView(a, "ux_setting_audio_tab"); capturePage(a, "page-advanced-audio");
+                clickView(a, "ux_setting_return_tab"); capturePage(a, "page-advanced-return-top");
                 clickView(a, "llAdvancedBackHide"); shot("page-hide-options"); selectOption("6 秒");
                 check("advanced hide duration stored", ((Number) pref("BACK_HIDE_SECONDS")).intValue() == 6);
                 clickView(a, "llAdvancedBackMode"); shot("page-back-mode-options"); selectOption("双模共存");
@@ -955,7 +1074,14 @@ public final class Car7Acceptance extends Instrumentation {
                 check("live fixture actually playing", waitPlaying(video, 20000));
                 JSONArray observation = new JSONArray(); progressing(video, "local live", observation); write("page-live-playback.json", observation.toString(2));
                 capturePage(live, "page-live"); main(() -> call(live, "showChannelList")); pause(300); capturePage(live, "page-live-channels");
-                config(live, "setHideSeconds", 0); tapBall(live); tapBall(live);
+                clickView(live, "ux_live_favorite");
+                check("live channel favorite stores and labels", ui(() -> ((TextView) view(live, "ux_live_favorite")).getText().toString()).contains("已收藏"));
+                clickView(live, "ux_live_favorites"); shot("page-live-favorites"); sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); pause(200);
+                clickView(live, "ux_live_favorite");
+                check("live favorite removes again", !ui(() -> ((TextView) view(live, "ux_live_favorite")).getText().toString()).contains("已收藏"));
+                clickView(live, "ux_live_settings"); capturePage(live, "page-live-settings");
+                clickView(live, "ux_live_close_settings"); check("live settings closes", !ui(() -> view(live, "ux_live_close_settings").isShown()));
+                config(live, "setHideSeconds", 0); tapBall(live); if (!ui(live::isFinishing)) tapBall(live);
                 check("live in-app Back exits one page", ui(live::isFinishing));
             } finally { if (!ui(live::isFinishing)) main(live::finish); pause(400); }
         });
@@ -1018,6 +1144,7 @@ public final class Car7Acceptance extends Instrumentation {
     }
     private void backChecks() throws Exception {
         Activity a = openAdvanced();
+        clickView(a, "ux_setting_return_tab");
         config(a, "setEnabled", true); config(a, "setMode", "floating"); config(a, "setSide", "left"); config(a, "setLarge", false); config(a, "setHideSeconds", 0);
         float d = ((Number) ui(() -> field(host(a), "tokenScale"))).floatValue();
         check("standard ball 72dp hit box", Math.abs(ui(() -> ball(a).getWidth()) - 72 * d) <= 1);

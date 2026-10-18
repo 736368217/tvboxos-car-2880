@@ -1,0 +1,90 @@
+{
+  "passed": 14,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "search fixture has more sites than worker cap",
+      "detail": "",
+      "at": 1792257559074
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792257560356
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity all sites converge",
+      "detail": "",
+      "at": 1792257593453
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity tail site after full queue has result",
+      "detail": "",
+      "at": 1792257593453
+    },
+    {
+      "pass": true,
+      "test": "search-queue-Search foreground belongs to target",
+      "detail": "",
+      "at": 1792257593468
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity workers stop after timeout",
+      "detail": "",
+      "at": 1792257593695
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity bounded worker cap",
+      "detail": "",
+      "at": 1792257593695
+    },
+    {
+      "pass": true,
+      "test": "search exit cancels active work",
+      "detail": "",
+      "at": 1792257594602
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792257596356
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity all sites converge",
+      "detail": "",
+      "at": 1792257628239
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity tail site after full queue has result",
+      "detail": "",
+      "at": 1792257628239
+    },
+    {
+      "pass": true,
+      "test": "search-queue-FastSearch foreground belongs to target",
+      "detail": "",
+      "at": 1792257628241
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity workers stop after timeout",
+      "detail": "",
+      "at": 1792257628386
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity bounded worker cap",
+      "detail": "",
+      "at": 1792257628386
+    }
+  ]
+}

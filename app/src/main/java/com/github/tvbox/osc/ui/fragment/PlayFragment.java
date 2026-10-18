@@ -135,7 +135,7 @@ import xyz.doikki.videoplayer.player.AbstractPlayer;
 import xyz.doikki.videoplayer.player.ProgressManager;
 import xyz.doikki.videoplayer.player.VideoView;
 
-public class PlayFragment extends BaseLazyFragment {
+public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.osc.car.CarPlaybackPreferences.BackgroundAudioListener {
     private static final int MSG_PARSE_TIMEOUT = 100;
     private static final int MSG_RESOLVE_PLAY_URL_TIMEOUT = 101;
     private static final int MSG_SWITCH_LINE_PLAY_TIMEOUT = 102;
@@ -272,6 +272,7 @@ public class PlayFragment extends BaseLazyFragment {
             }
         });
         mVideoView = findViewById(R.id.mVideoView);
+        com.github.tvbox.osc.car.CarPlaybackPreferences.registerBackgroundAudioListener((com.github.tvbox.osc.car.CarPlaybackPreferences.BackgroundAudioListener) this);
         mPlayLoadTip = findViewById(R.id.play_load_tip);
         mPlayLoading = findViewById(R.id.play_loading);
         mPlayLoadErr = findViewById(R.id.play_load_error);
@@ -1522,6 +1523,16 @@ public class PlayFragment extends BaseLazyFragment {
     }
 
     @Override
+    public void onBackgroundAudioChanged(boolean enabled) {
+        if (mVideoView == null || enabled || exitingPreview || hasAudioOnlyPlayback()) return;
+        if (mVideoView.isPlaying()) {
+            carLifecyclePaused = true;
+            mVideoView.pause();
+            updateMusicSession();
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         carLifecyclePaused = mVideoView != null && mVideoView.isPlaying()
@@ -1560,6 +1571,7 @@ public class PlayFragment extends BaseLazyFragment {
 
     @Override
     public void onDestroyView() {
+        com.github.tvbox.osc.car.CarPlaybackPreferences.unregisterBackgroundAudioListener((com.github.tvbox.osc.car.CarPlaybackPreferences.BackgroundAudioListener) this);
         audioPlayback = false;
         switchingPlayback = false;
         MusicPlaybackService.stop(getContext(), this);

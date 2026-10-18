@@ -1,0 +1,48 @@
+{
+  "passed": 7,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "SearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792313432703
+    },
+    {
+      "pass": true,
+      "test": "diagnostic focused keyboard inserts",
+      "detail": "",
+      "at": 1792313432950
+    },
+    {
+      "pass": true,
+      "test": "diagnostic input exact text",
+      "detail": "",
+      "at": 1792313432969
+    },
+    {
+      "pass": true,
+      "test": "searchdiag-before foreground belongs to target",
+      "detail": "",
+      "at": 1792313433007
+    },
+    {
+      "pass": true,
+      "test": "tvSearch reachable",
+      "detail": "",
+      "at": 1792313433487
+    },
+    {
+      "pass": true,
+      "test": "diagnostic search returns five fixture results",
+      "detail": "count=5 pending=0",
+      "at": 1792313433713
+    },
+    {
+      "pass": true,
+      "test": "searchdiag-after foreground belongs to target",
+      "detail": "",
+      "at": 1792313433714
+    }
+  ]
+}

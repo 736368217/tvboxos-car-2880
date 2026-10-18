@@ -1,0 +1,84 @@
+{
+  "passed": 13,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "DetailActivity has in-app Back host",
+      "detail": "",
+      "at": 1792257074291
+    },
+    {
+      "pass": true,
+      "test": "journey playback starts",
+      "detail": "",
+      "at": 1792257074292
+    },
+    {
+      "pass": true,
+      "test": "journey seek reached 35s",
+      "detail": "",
+      "at": 1792257075806
+    },
+    {
+      "pass": true,
+      "test": "SettingActivity has in-app Back host",
+      "detail": "",
+      "at": 1792257077107
+    },
+    {
+      "pass": true,
+      "test": "background audio ON keeps position progressing",
+      "detail": "",
+      "at": 1792257078908
+    },
+    {
+      "pass": true,
+      "test": "background audio owns foreground service",
+      "detail": "",
+      "at": 1792257078908
+    },
+    {
+      "pass": true,
+      "test": "SettingActivity has in-app Back host",
+      "detail": "",
+      "at": 1792257080989
+    },
+    {
+      "pass": true,
+      "test": "uxBackgroundRow reachable",
+      "detail": "",
+      "at": 1792257081890
+    },
+    {
+      "pass": true,
+      "test": "background preference OFF stored",
+      "detail": "",
+      "at": 1792257082115
+    },
+    {
+      "pass": true,
+      "test": "background audio OFF pauses playback",
+      "detail": "before=42424 after=42424 lifecyclePaused=true",
+      "at": 1792257083316
+    },
+    {
+      "pass": true,
+      "test": "foreground resumes lifecycle-paused video",
+      "detail": "",
+      "at": 1792257084123
+    },
+    {
+      "pass": true,
+      "test": "journey-foreground-detail foreground belongs to target",
+      "detail": "",
+      "at": 1792257084136
+    },
+    {
+      "pass": true,
+      "test": "journey detail closes",
+      "detail": "",
+      "at": 1792257085279
+    }
+  ]
+}
