@@ -221,12 +221,12 @@ public final class InAppBackButton {
     }
 
     public static boolean isEnabled() { return bool(HawkConfig.IN_APP_BACK, true); }
-    public static String getMode() { return mode(text(HawkConfig.BACK_MODE, HawkConfig.BACK_MODE_FLOATING)); }
+    public static String getMode() { return mode(text(HawkConfig.BACK_MODE, HawkConfig.BACK_MODE_EDGE)); }
     public static String getSide() { return side(text(HawkConfig.BACK_SIDE, HawkConfig.BACK_SIDE_LEFT)); }
     public static boolean isLarge() { return bool(HawkConfig.BACK_LARGE, false); }
     public static boolean isHapticEnabled() { return bool(HawkConfig.BACK_HAPTIC, true); }
-    public static boolean isHideOnRoot() { return bool(HawkConfig.BACK_HIDE_ON_ROOT, false); }
-    public static String getEdgeSkin() { return skin(text(HawkConfig.BACK_EDGE_SKIN, HawkConfig.BACK_SKIN_TEARDROP)); }
+    public static boolean isHideOnRoot() { return bool(HawkConfig.BACK_HIDE_ON_ROOT, true); }
+    public static String getEdgeSkin() { return skin(text(HawkConfig.BACK_EDGE_SKIN, HawkConfig.BACK_SKIN_CAPSULE)); }
     public static int getHideSeconds() { return validHideSeconds(integer(HawkConfig.BACK_HIDE_SECONDS, 4)); }
 
     public static void setEnabled(Activity a, boolean value) { put(a, HawkConfig.IN_APP_BACK, value); }

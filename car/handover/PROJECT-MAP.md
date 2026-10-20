@@ -68,3 +68,7 @@ EXO允许普通Texture与增强GL按配置接管；替换/退休View不能同步
 - `summary.json`：历史验收汇总；交接提交以ZIP中的SOURCE-STATE为准，不能用旧scratch绝对路径识别当前工作区。
 
 先做无设备host检查。需要重新跑Android时，每批一租约、每次操作前check、插件优先、单instrument、实际显示/input与安装SHA门禁。测试结束恢复原偏好与权限、卸载测试包、干净启动、release。参考`LESSONS.md`和`HANDOVER-car.7-r2.md`。
+
+## Trial source memory
+
+See [`TRIAL-SOURCES.md`](TRIAL-SOURCES.md) for the user-requested clun and xiaosa subscription URLs, sanitized probe identities, and acceptance boundaries. Raw source bodies remain outside Git.

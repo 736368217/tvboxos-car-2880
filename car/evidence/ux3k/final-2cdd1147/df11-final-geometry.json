@@ -1,0 +1,741 @@
+{
+  "method": "visible accessibility nodes; partial scroll items are observations, not automatically blockers",
+  "display": [
+    2880,
+    1620
+  ],
+  "minimum_reference_px": 90,
+  "snapshots": [
+    {
+      "snapshot": "collect.xml",
+      "interactive_count": 3,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/uxPageBack",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            113,
+            106,
+            293,
+            194
+          ],
+          "width": 180,
+          "height": 88
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "detail-empty.xml",
+      "interactive_count": 0,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "history.xml",
+      "interactive_count": 5,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/uxPageBack",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            113,
+            106,
+            293,
+            194
+          ],
+          "width": 180,
+          "height": 88
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "home.xml",
+      "interactive_count": 10,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": [
+        {
+          "resource": "",
+          "class": "android.widget.FrameLayout",
+          "label": "",
+          "bounds": [
+            0,
+            150,
+            2880,
+            1620
+          ],
+          "width": 2880,
+          "height": 1470
+        }
+      ]
+    },
+    {
+      "snapshot": "live.xml",
+      "interactive_count": 8,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_live_preview_hint",
+          "class": "android.widget.TextView",
+          "label": "⛶ 轻触画面，进入全屏直播",
+          "bounds": [
+            1630,
+            1000,
+            2330,
+            1080
+          ],
+          "width": 700,
+          "height": 80
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "localfile.xml",
+      "interactive_count": 3,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/uxPageBack",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            90,
+            90,
+            270,
+            178
+          ],
+          "width": 180,
+          "height": 88
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "push.xml",
+      "interactive_count": 2,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/uxPageBack",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            60,
+            40,
+            240,
+            128
+          ],
+          "width": 180,
+          "height": 88
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "search.xml",
+      "interactive_count": 67,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_search_back",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            60,
+            40,
+            240,
+            128
+          ],
+          "width": 180,
+          "height": 88
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_search_ime",
+          "class": "android.widget.TextView",
+          "label": "⌨ 系统输入法",
+          "bounds": [
+            960,
+            250,
+            1310,
+            320
+          ],
+          "width": 350,
+          "height": 70
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/wordSwitch",
+          "class": "android.widget.TextView",
+          "label": "热词 | 历史",
+          "bounds": [
+            100,
+            1150,
+            1310,
+            1215
+          ],
+          "width": 1210,
+          "height": 65
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "嫁金钗",
+          "bounds": [
+            100,
+            1215,
+            495,
+            1295
+          ],
+          "width": 395,
+          "height": 80
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "醉梦",
+          "bounds": [
+            507,
+            1215,
+            902,
+            1295
+          ],
+          "width": 395,
+          "height": 80
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "蒸蒸日上",
+          "bounds": [
+            914,
+            1215,
+            1310,
+            1295
+          ],
+          "width": 396,
+          "height": 80
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "余红旧事",
+          "bounds": [
+            100,
+            1307,
+            495,
+            1387
+          ],
+          "width": 395,
+          "height": 80
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "兰香如故",
+          "bounds": [
+            507,
+            1307,
+            902,
+            1387
+          ],
+          "width": 395,
+          "height": 80
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "Doctor",
+          "bounds": [
+            914,
+            1307,
+            1310,
+            1387
+          ],
+          "width": 396,
+          "height": 80
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "玉簟秋",
+          "bounds": [
+            100,
+            1399,
+            495,
+            1479
+          ],
+          "width": 395,
+          "height": 80
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "我不是大师",
+          "bounds": [
+            507,
+            1399,
+            902,
+            1479
+          ],
+          "width": 395,
+          "height": 80
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "美人余",
+          "bounds": [
+            914,
+            1399,
+            1310,
+            1479
+          ],
+          "width": 396,
+          "height": 80
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "把黑夜点燃",
+          "bounds": [
+            100,
+            1491,
+            495,
+            1525
+          ],
+          "width": 395,
+          "height": 34
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "幻视任务",
+          "bounds": [
+            507,
+            1491,
+            902,
+            1525
+          ],
+          "width": 395,
+          "height": 34
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvSearchWord",
+          "class": "android.widget.TextView",
+          "label": "恋爱博士",
+          "bounds": [
+            914,
+            1491,
+            1310,
+            1525
+          ],
+          "width": 396,
+          "height": 34
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/tvHistoryClear",
+          "class": "android.widget.ImageView",
+          "label": "清空搜索历史",
+          "bounds": [
+            2690,
+            240,
+            2780,
+            305
+          ],
+          "width": 90,
+          "height": 65
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "嫁金钗",
+          "bounds": [
+            1448,
+            313,
+            1638,
+            383
+          ],
+          "width": 190,
+          "height": 70
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "jiagc",
+          "bounds": [
+            1654,
+            313,
+            1844,
+            383
+          ],
+          "width": 190,
+          "height": 70
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "兰香如故",
+          "bounds": [
+            1860,
+            313,
+            2050,
+            383
+          ],
+          "width": 190,
+          "height": 70
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-0-picture.xml",
+      "interactive_count": 30,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_setting_back",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            60,
+            40,
+            240,
+            128
+          ],
+          "width": 180,
+          "height": 88
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "原画",
+          "bounds": [
+            760,
+            650,
+            1080,
+            732
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "臻彩",
+          "bounds": [
+            1098,
+            650,
+            1418,
+            732
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "自然",
+          "bounds": [
+            1436,
+            650,
+            1756,
+            732
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "影院",
+          "bounds": [
+            1774,
+            650,
+            2094,
+            732
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "鲜艳",
+          "bounds": [
+            2112,
+            650,
+            2432,
+            732
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "柔和",
+          "bounds": [
+            2450,
+            650,
+            2770,
+            732
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "明亮",
+          "bounds": [
+            760,
+            746,
+            1080,
+            828
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "暖色",
+          "bounds": [
+            1098,
+            746,
+            1418,
+            828
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "动漫·暗光",
+          "bounds": [
+            1436,
+            746,
+            1756,
+            828
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "动漫·日间",
+          "bounds": [
+            1774,
+            746,
+            2094,
+            828
+          ],
+          "width": 320,
+          "height": 82
+        },
+        {
+          "resource": "",
+          "class": "android.widget.TextView",
+          "label": "动漫·清透",
+          "bounds": [
+            2112,
+            746,
+            2432,
+            828
+          ],
+          "width": 320,
+          "height": 82
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-1-audio.xml",
+      "interactive_count": 24,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_setting_back",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            60,
+            40,
+            240,
+            128
+          ],
+          "width": 180,
+          "height": 88
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-2-playback.xml",
+      "interactive_count": 24,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_setting_back",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            60,
+            40,
+            240,
+            128
+          ],
+          "width": 180,
+          "height": 88
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/llDns",
+          "class": "android.widget.FrameLayout",
+          "label": "",
+          "bounds": [
+            720,
+            1540,
+            2820,
+            1560
+          ],
+          "width": 2100,
+          "height": 20
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/llDns",
+          "class": "android.widget.FrameLayout",
+          "label": "",
+          "bounds": [
+            720,
+            1540,
+            2820,
+            1560
+          ],
+          "width": 2100,
+          "height": 20
+        }
+      ]
+    },
+    {
+      "snapshot": "settings-3-touch.xml",
+      "interactive_count": 24,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_setting_back",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            60,
+            40,
+            240,
+            128
+          ],
+          "width": 180,
+          "height": 88
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/uxNavHistoryRow",
+          "class": "android.widget.FrameLayout",
+          "label": "",
+          "bounds": [
+            720,
+            1500,
+            2820,
+            1560
+          ],
+          "width": 2100,
+          "height": 60
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-4-back.xml",
+      "interactive_count": 25,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_setting_back",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            60,
+            40,
+            240,
+            128
+          ],
+          "width": 180,
+          "height": 88
+        },
+        {
+          "resource": "com.github.tvbox.osc.jun:id/switchAdvancedHaptic",
+          "class": "android.widget.Switch",
+          "label": "已开启  ",
+          "bounds": [
+            2480,
+            1530,
+            2770,
+            1560
+          ],
+          "width": 290,
+          "height": 30
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-5-sources.xml",
+      "interactive_count": 18,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_setting_back",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            60,
+            40,
+            240,
+            128
+          ],
+          "width": 180,
+          "height": 88
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-6-about.xml",
+      "interactive_count": 18,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/ux_setting_back",
+          "class": "android.widget.TextView",
+          "label": "返回",
+          "bounds": [
+            60,
+            40,
+            240,
+            128
+          ],
+          "width": 180,
+          "height": 88
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    }
+  ]
+}

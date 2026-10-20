@@ -1,0 +1,4 @@
+APK_SHA=2cdd1147d70531e2c7db001c71f19dd9b1947be6795a30d4e64856a349d6c7f8
+PID=528
+    topResumedActivity=ActivityRecord{15616313 u0 com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.HomeActivity t25}
+FRESH_XML_SAVED

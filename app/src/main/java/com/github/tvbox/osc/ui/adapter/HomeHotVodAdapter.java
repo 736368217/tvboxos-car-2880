@@ -59,7 +59,7 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
 
         // This card is hosted in the native 2880px scene; do not apply AutoSize twice.
         int newWidth = 435;
-        int newHeight = 500;
+        int newHeight = 520;
         ViewGroup frame = helper.getView(R.id.mItemFrame);
         ViewGroup.LayoutParams frameParams = frame.getLayoutParams();
         frameParams.width = newWidth;

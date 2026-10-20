@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBox Aether 3K (V2.0) Automotive Cockpit Color System for 17.3" 3K (2880x1620) -->
+<resources>
+    <color name="aether_bg_obsidian_950">#FF070A10</color>
+    <color name="aether_bg_obsidian_900">#FF0C121D</color>
+    <color name="aether_surface_glass_base">#C8141D2E</color>
+    <color name="aether_surface_card_elevated">#EB161F30</color>
+    <color name="aether_border_subtle">#2E94A3B8</color>
+    <color name="aether_cyan_focus">#FF00E5FF</color>
+    <color name="aether_cyan_glow">#5900E5FF</color>
+    <color name="aether_cobalt_primary">#FF2563EB</color>
+    <color name="aether_cobalt_dark">#FF1D4ED8</color>
+    <color name="aether_emerald_ready">#FF10B981</color>
+    <color name="aether_emerald_text">#FF34D399</color>
+    <color name="aether_amber_atmos">#FFF59E0B</color>
+    <color name="aether_amber_text">#FFFBBF24</color>
+    <color name="aether_rose_danger">#FFF43F5E</color>
+    <color name="aether_text_primary">#FFF8FAFC</color>
+    <color name="aether_text_secondary">#FFCBD5E1</color>
+    <color name="aether_text_muted">#FF94A3B8</color>
+</resources>

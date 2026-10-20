@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="475px" android:layout_height="720px" android:background="@drawable/car_surface_card_selector" android:foreground="@drawable/car_outline_focus" android:focusable="true" android:padding="20px">
  <LinearLayout android:id="@+id/mItemFrame" android:layout_width="435px" android:layout_height="wrap_content" android:orientation="vertical">
-  <FrameLayout android:id="@+id/posterFrame" android:layout_width="435px" android:layout_height="500px" android:background="@drawable/car_poster_surface">
+  <FrameLayout android:id="@+id/posterFrame" android:layout_width="435px" android:layout_height="520px" android:background="@drawable/car_poster_surface">
    <ImageView android:id="@+id/ivThumb" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop"/>
    <TextView android:id="@+id/tvRate" style="@style/UxSceneText" android:layout_margin="12px" android:background="@drawable/car_badge_amber" android:textColor="@color/car_bg" android:textSize="24px" android:padding="8px" android:maxLines="1"/>
    <TextView android:id="@+id/tvNote" style="@style/UxSceneText" android:layout_gravity="bottom|start" android:layout_margin="12px" android:background="@drawable/car_badge_dark" android:textSize="24px" android:padding="8px" android:maxLines="1"/>
+   <ImageView android:id="@+id/uxCardPlay" android:layout_width="88px" android:layout_height="88px" android:layout_gravity="bottom|end" android:layout_margin="18px" android:background="@drawable/aether_play_ring" android:contentDescription="播放" android:importantForAccessibility="no" android:padding="24px" android:src="@drawable/aether_play"/>
   </FrameLayout>
-  <TextView android:id="@+id/tvName" style="@style/UxSceneText" android:layout_width="match_parent" android:layout_height="100px" android:gravity="center_vertical" android:textSize="32px" android:textStyle="bold" android:maxLines="2"/>
-  <TextView style="@style/UxSceneText" android:layout_width="match_parent" android:layout_height="72px" android:background="@drawable/car_badge_blue" android:gravity="center" android:text="进入详情" android:textSize="28px" android:importantForAccessibility="no"/>
+  <TextView android:id="@+id/tvName" style="@style/UxSceneText" android:layout_width="match_parent" android:layout_height="110px" android:gravity="center_vertical" android:textSize="32px" android:textStyle="bold" android:maxLines="2"/>
  </LinearLayout>
  <FrameLayout android:id="@+id/delFrameLayout" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/shape_user_delete" android:visibility="gone"><ImageView android:layout_width="80px" android:layout_height="80px" android:layout_gravity="center" android:src="@drawable/icon_delete"/></FrameLayout>
 </FrameLayout>

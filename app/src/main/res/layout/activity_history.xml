@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical" android:background="@drawable/car_surface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,15 +14,13 @@
         android:paddingRight="@dimen/vs_50"
         android:paddingBottom="@dimen/vs_20">
 
+        <TextView android:id="@+id/uxPageBack" style="@style/UxSceneButton" android:layout_width="180px" android:layout_height="96px" android:drawableLeft="@drawable/aether_back" android:drawablePadding="10px" android:text="返回" android:textColor="@color/aether_cyan_focus" android:textSize="28px" android:contentDescription="返回上一页" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="@dimen/vs_50"
             android:drawablePadding="@dimen/vs_10"
             android:gravity="center"
-            android:text="历史记录"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/ts_34"
-            android:textStyle="bold" />
+            android:text="历史记录" android:textColor="@color/aether_text_primary" android:textSize="@dimen/aether_section_title" android:textStyle="bold" />
 
         <Space
             android:layout_width="0dp"
@@ -43,31 +41,8 @@
             android:textSize="@dimen/ts_24"
             android:visibility="gone" />
 
-        <ImageView
-            android:id="@+id/tvDelete"
-            android:layout_width="@dimen/vs_50"
-            android:layout_height="@dimen/vs_50"
-            android:layout_marginStart="@dimen/vs_10"
-            android:layout_marginEnd="@dimen/vs_10"
-            android:gravity="center"
-            android:background="@drawable/button_dialog_vod"
-            android:focusable="true"
-            android:focusableInTouchMode="false"
-            android:padding="@dimen/vs_5"
-            android:src="@drawable/icon_delete" />
-
-        <ImageView
-            android:id="@+id/tvClear"
-            android:layout_width="@dimen/vs_50"
-            android:layout_height="@dimen/vs_50"
-            android:layout_marginStart="@dimen/vs_10"
-            android:layout_marginEnd="@dimen/vs_10"
-            android:gravity="center"
-            android:background="@drawable/button_dialog_vod"
-            android:focusable="true"
-            android:focusableInTouchMode="false"
-            android:padding="@dimen/vs_5"
-            android:src="@drawable/icon_clear" />
+        <ImageView android:id="@+id/tvDelete" android:layout_width="@dimen/vs_50" android:layout_height="@dimen/vs_50" android:layout_marginStart="@dimen/vs_10" android:layout_marginEnd="@dimen/vs_10" android:gravity="center" android:background="@drawable/button_dialog_vod" android:focusable="true" android:focusableInTouchMode="false" android:padding="@dimen/vs_5" android:contentDescription="删除选中记录" android:src="@drawable/icon_delete" />
+        <ImageView android:id="@+id/tvClear" android:layout_width="@dimen/vs_50" android:layout_height="@dimen/vs_50" android:layout_marginStart="@dimen/vs_10" android:layout_marginEnd="@dimen/vs_10" android:gravity="center" android:background="@drawable/button_dialog_vod" android:focusable="true" android:focusableInTouchMode="false" android:padding="@dimen/vs_5" android:contentDescription="清空播放历史" android:src="@drawable/icon_clear" />
     </LinearLayout>
 
     <com.owen.tvrecyclerview.widget.TvRecyclerView

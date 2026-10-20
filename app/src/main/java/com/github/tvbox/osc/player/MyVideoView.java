@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -119,6 +120,27 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
         return mVideoSize;
     }
 
+    public String getVideoEnhancementRuntimeStatus() {
+        VideoEnhanceConfig effective = getVideoEnhancementConfig();
+        int[] source = getVideoSize();
+        View output = mRenderView == null ? this : mRenderView.getView();
+        boolean gl = mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView;
+        boolean hdrBypass = isHdrVideo() && CarEnhance.videoMode() != xyz.doikki.videoplayer.render.VideoEnhancePreset.ORIGINAL;
+        boolean srEligible = gl && xyz.doikki.videoplayer.render.VideoPostProcessPolicy.superResolutionActive(
+                CarEnhance.videoSrEnabled(), source[0], source[1], output.getWidth(), output.getHeight());
+        String srState = !CarEnhance.videoSrEnabled() ? "关闭"
+                : !gl ? "renderer 不支持"
+                : srEligible ? "已提交到 SGSR1 输出分支"
+                : "等待低分辨率放大条件";
+        String interpState = !CarEnhance.videoInterpEnabled() ? "关闭"
+                : !gl ? "renderer 不支持"
+                : isPlaying() ? "播放中，按相邻有效帧混合" : "开启，播放时生效";
+        return "请求：" + xyz.doikki.videoplayer.render.VideoEnhancePreset.forMode(CarEnhance.videoMode()).name
+                + " · 实际 renderer：" + effective.preset.name + (hdrBypass ? "（HDR 旁路调色）" : "")
+                + " · SGSR1：" + srState + " · 时域平滑：" + interpState;
+    }
+
+
     public long getPlaybackPosition() {
         return mCurrentPosition;
     }
@@ -158,6 +180,7 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
     public void release() {
         super.release();
         if (haveDanmu()) danmuView.release();
+        CarEnhance.releaseVideo(this);
         // Car edition: the audio-effect chain is bound to this engine's session, so it dies with it.
         CarEnhance.releaseAudio();
     }

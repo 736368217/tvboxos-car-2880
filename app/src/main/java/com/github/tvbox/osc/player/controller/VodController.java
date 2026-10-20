@@ -124,8 +124,8 @@ public class VodController extends BaseController {
                         hidePauseRoot();
                         mPlayTitle.setVisibility(GONE);
                         mBottomRoot.setVisibility(VISIBLE);
-                        mTopRoot1.setVisibility(VISIBLE);
-                        mTopRoot2.setVisibility(VISIBLE);
+                        mTopRoot1.setVisibility(immersiveFullscreen ? GONE : VISIBLE);
+                        mTopRoot2.setVisibility(immersiveFullscreen ? GONE : VISIBLE);
                         mPlayLoadNetSpeedRightTop.setVisibility(VISIBLE);
                         if(Hawk.get(HawkConfig.SCREEN_DISPLAY,GONE)==GONE){
                             mPlayPauseTime.setVisibility(VISIBLE);
@@ -133,7 +133,7 @@ public class VodController extends BaseController {
                             net_play_speed.setVisibility(GONE);
                         }
                         boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-                        backBtn.setVisibility(isPortrait ? INVISIBLE : VISIBLE);
+                        backBtn.setVisibility(immersiveFullscreen || isPortrait ? INVISIBLE : VISIBLE);
                         showLockView();
                         break;
                     }
@@ -155,7 +155,7 @@ public class VodController extends BaseController {
                         }
                         backBtn.setVisibility(INVISIBLE);
                         mHandler.removeCallbacks(lockRunnable);
-                        if (isLock) mTopRoot2.setVisibility(VISIBLE);
+                        if (isLock && !immersiveFullscreen) mTopRoot2.setVisibility(VISIBLE);
                         if (mLockView != null) {
                             mLockView.setVisibility(INVISIBLE);
                         }
@@ -279,6 +279,7 @@ public class VodController extends BaseController {
     LockRunnable lockRunnable = new LockRunnable();
     private boolean isLock = false;
     private boolean previewMode = false;
+    private boolean immersiveFullscreen = false;
     Handler myHandle;
     Runnable myRunnable;
     int myHandleSeconds = 10000;//闲置多少毫秒秒关闭底栏  默认6秒
@@ -332,6 +333,28 @@ public class VodController extends BaseController {
         if (mLockView != null) {
             mLockView.setVisibility(INVISIBLE);
         }
+    }
+
+    /** Fullscreen playback keeps only the video surface; controls remain available through the host back key. */
+    public void setImmersiveFullscreen(boolean immersiveFullscreen) {
+        this.immersiveFullscreen = immersiveFullscreen;
+        if (mTopRoot1 == null || mTopRoot2 == null) return;
+        mHandler.removeMessages(1002);
+        mHandler.removeMessages(1003);
+        mHandler.removeCallbacks(lockRunnable);
+        speedPlayEnd();
+        isLock = false;
+        if (mBottomRoot != null) mBottomRoot.setVisibility(GONE);
+        mTopRoot1.setVisibility(GONE);
+        mTopRoot2.setVisibility(GONE);
+        if (mPlayLoadNetSpeedRightTop != null) mPlayLoadNetSpeedRightTop.setVisibility(GONE);
+        if (mPlayPauseTime != null) mPlayPauseTime.setVisibility(GONE);
+        if (net_play_speed != null) net_play_speed.setVisibility(GONE);
+        if (mProgressRoot != null) mProgressRoot.setVisibility(GONE);
+        if (mPlayTitle != null) mPlayTitle.setVisibility(GONE);
+        hidePauseRoot();
+        if (backBtn != null) backBtn.setVisibility(INVISIBLE);
+        if (mLockView != null) mLockView.setVisibility(INVISIBLE);
     }
 
     @Override
@@ -1072,8 +1095,8 @@ public class VodController extends BaseController {
         } else {
             mCastBtn.setVisibility(VISIBLE);
         }
-        mScreenDisplay.setNextFocusRightId(R.id.play_next);
-        mNextBtn.setNextFocusLeftId(R.id.screen_display);
+        mPreBtn.setNextFocusRightId(R.id.play_next);
+        mNextBtn.setNextFocusLeftId(R.id.play_pre);
     }
 
     private void showScaleDialog() {
@@ -1726,6 +1749,7 @@ public class VodController extends BaseController {
     private float speed_old = 1.0f;
 
     private void speedPlayStart(){
+        if (!CarPlaybackPreferences.longPress()) return;
         fromLongPress = true;
         try {
             speed_old = (float) mPlayerConfig.getDouble("sp");
@@ -1905,7 +1929,7 @@ public class VodController extends BaseController {
             mLongPressRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    speedPlayStart();
+                    if (CarPlaybackPreferences.longPress()) speedPlayStart();
                     isLongPressTriggered = true;
                 }
             };

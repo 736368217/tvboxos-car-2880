@@ -1,0 +1,46 @@
+{
+  "evidenceSet": "trial-sources-fullqa-f16dfdf7",
+  "apkSha256": "F16DFDF73F39D0868F166C2AC1F4672C6D1072503AD109ECB3D04BE4C66C982D",
+  "device": {
+    "instance": "vm2",
+    "emulator": "MuMu 6.8.7.0",
+    "androidVersion": "15.0",
+    "widthPx": 2880,
+    "heightPx": 1620,
+    "densityDpi": 160,
+    "displayGate": "CAR_DISPLAY_PASS"
+  },
+  "trialSources": [
+    {
+      "name": "clun box",
+      "url": "https://clun.top/box.json",
+      "probeBodySha256": "EB9E8BE391F49848619ADA3268A9F3BF06150359D6D4B91F8303F498F2DEB68B",
+      "probeSites": 100,
+      "runtimeHomeLabel": "豆瓣[py]"
+    },
+    {
+      "name": "xiaosa api",
+      "url": "https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/api.json",
+      "probeBodySha256": "C8EA6253825C5738AD2C5D0B18D26CF2FD6FDFEDB1A33E78A0BD153F9496DDFA",
+      "probeSites": 107,
+      "runtimeHomeLabel": "豆瓣 • 首页"
+    }
+  ],
+  "pageMatrix": {
+    "pages": 10,
+    "freshXml": 10,
+    "targetPackageXml": 10,
+    "targetCrashExcerptBytes": 0,
+    "pages": ["Home", "Search", "FastSearch", "Settings", "History", "Collect", "Push", "LocalFile", "Live", "Detail"]
+  },
+  "sourceSpecificResults": {
+    "clunSearch": "fixed query lanxiangrugu reached SearchActivity; result state was no data",
+    "xiaosaSearch": "fixed query lanxiangrugu reached SearchActivity; result state was no data",
+    "xiaosaFastSearch": "feature play route reached FastSearchActivity; 78/78 sources settled, 1 timeout, results 0",
+    "categoryNavigation": "not covered as a content pass: current source exposed no second Home fragment/category page; the navigation tap stayed on Home",
+    "live": "empty state; no channel/program data configured",
+    "detailPlayback": "no content hit; no valid media URL reached the player"
+  },
+  "mediaPlaybackVerified": false,
+  "reasonMediaNotVerified": "No valid media fixture or positive detail/play URL was available in this batch."
+}

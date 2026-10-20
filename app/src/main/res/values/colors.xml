@@ -52,41 +52,57 @@
     <color name="dialog_text_hint">#80FFFFFF</color>
 
     <!-- Car edition aliases intentionally point at the selected Obsidian palette. -->
-    <color name="car_bg">#FF0B0F17</color>
-    <color name="car_card">#FF182030</color>
-    <color name="car_card_translucent">#E6121A26</color>
-    <color name="car_text">#FFF2F7FF</color>
-    <color name="car_text_muted">#FF8C9EB6</color>
-    <color name="car_accent">#FF00D2FF</color>
+    <color name="car_bg">#FF070A10</color>
+    <color name="car_card">#FF161F30</color>
+    <color name="car_card_translucent">#C8141D2E</color>
+    <color name="car_text">#FFF8FAFC</color>
+    <color name="car_text_muted">#FF94A3B8</color>
+    <color name="car_accent">#FF00E5FF</color>
     <color name="car_accent_alt">#FFF59E0B</color>
 
     <!-- Obsidian deep-space visual system (2880x1620 car head unit).
          Surface ladder: page #0B0F17 -> nav #121A26 -> card #182030 -> raised #1C2636.
          Accents: tech cyan #00D2FF, gem blue #2563EB, green #10B981, amber #F59E0B.
          Existing car_* / color_* entries above are kept for legacy call sites. -->
-    <color name="car_bg_obsidian">#FF0B0F17</color>
+    <color name="car_bg_obsidian">#FF0C121D</color>
     <color name="car_bg_obsidian_deep">#FF070A10</color>
-    <color name="car_surface_nav">#FF121A26</color>
-    <color name="car_surface_card">#FF182030</color>
-    <color name="car_surface_card_raised">#FF1C2636</color>
+    <color name="car_surface_nav">#FF0C121D</color>
+    <color name="car_surface_card">#FF141D2E</color>
+    <color name="car_surface_card_raised">#EB161F30</color>
     <color name="car_surface_card_pressed">#FF243149</color>
-    <color name="car_surface_control">#FF1C2636</color>
+    <color name="car_surface_control">#FF161F30</color>
     <color name="car_surface_control_pressed">#FF1D4ED8</color>
     <color name="car_surface_selected">#FF2563EB</color>
-    <color name="car_text_strong">#FFF2F7FF</color>
-    <color name="car_text_regular">#FFDCE6F5</color>
-    <color name="car_text_dim">#FF8C9EB6</color>
-    <color name="car_text_faint">#FF5F7189</color>
-    <color name="car_accent_cyan">#FF00D2FF</color>
+    <color name="car_text_strong">#FFF8FAFC</color>
+    <color name="car_text_regular">#FFCBD5E1</color>
+    <color name="car_text_dim">#FF94A3B8</color>
+    <color name="car_text_faint">#FF64748B</color>
+    <color name="car_accent_cyan">#FF00E5FF</color>
     <color name="car_accent_blue">#FF2563EB</color>
     <color name="car_accent_blue_deep">#FF1D4ED8</color>
     <color name="car_accent_green">#FF10B981</color>
     <color name="car_accent_amber">#FFF59E0B</color>
-    <color name="car_outline_idle">#26FFFFFF</color>
-    <color name="car_outline_soft">#1F00D2FF</color>
-    <color name="car_outline_focused">#FF00D2FF</color>
+    <color name="car_outline_idle">#2E94A3B8</color>
+    <color name="car_outline_soft">#5900E5FF</color>
+    <color name="car_outline_focused">#FF00E5FF</color>
     <color name="car_outline_pressed">#B32563EB</color>
     <color name="car_scrim_top">#000B0F17</color>
     <color name="car_scrim_bottom">#E60B0F17</color>
     <color name="car_badge_bg">#CC0B0F17</color>
+    <!-- Aether 3K V2 design tokens: 17.3in 2880x1620 mdpi cockpit. -->
+    <color name="aether_bg_obsidian_950">#FF070A10</color>
+    <color name="aether_bg_obsidian_900">#FF0C121D</color>
+    <color name="aether_surface_glass_base">#C8141D2E</color>
+    <color name="aether_surface_card_elevated">#EB161F30</color>
+    <color name="aether_border_subtle">#2E94A3B8</color>
+    <color name="aether_cyan_focus">#FF00E5FF</color>
+    <color name="aether_cyan_glow">#5900E5FF</color>
+    <color name="aether_cobalt_primary">#FF2563EB</color>
+    <color name="aether_cobalt_dark">#FF1D4ED8</color>
+    <color name="aether_emerald_ready">#FF10B981</color>
+    <color name="aether_amber_atmos">#FFF59E0B</color>
+    <color name="aether_rose_alert">#FFF43F5E</color>
+    <color name="aether_text_primary">#FFF8FAFC</color>
+    <color name="aether_text_secondary">#FFCBD5E1</color>
+    <color name="aether_text_muted">#FF94A3B8</color>
 </resources>

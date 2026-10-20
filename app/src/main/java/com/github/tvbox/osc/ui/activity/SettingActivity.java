@@ -122,6 +122,10 @@ public class SettingActivity extends BaseActivity {
                 "04  触控手势与长按倍速", "05  双模应用内返回控件", "06  订阅源与多仓管理", "07  关于 TVBox");
         sortAdapter.setNewData(sortList);
         initViewPager();
+        int requestedUxCategory = getIntent().getIntExtra("uxSettingCategory", -1);
+        if (requestedUxCategory >= 0) {
+            mHandler.postDelayed(() -> selectCategory(requestedUxCategory), 450);
+        }
     }
 
     private void initViewPager() {

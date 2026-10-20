@@ -222,7 +222,7 @@
         <TextView
             android:id="@+id/ux_live_preview_hint"
             android:layout_width="700px"
-            android:layout_height="80px"
+            android:layout_height="96px"
             android:layout_marginLeft="1630px"
             android:layout_marginTop="1000px"
             android:background="@drawable/car_badge_scrim"

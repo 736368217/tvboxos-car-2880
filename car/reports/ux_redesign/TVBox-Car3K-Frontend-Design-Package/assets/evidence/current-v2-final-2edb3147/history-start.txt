@@ -1,0 +1,7 @@
+Starting: Intent { cmp=com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.HistoryActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.HistoryActivity
+TotalTime: 608
+WaitTime: 612
+Complete

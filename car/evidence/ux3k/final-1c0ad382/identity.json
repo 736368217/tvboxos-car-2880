@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "apk": {
+    "path": "C:\\Users\\WIN10\\.pi-desktop\\scratch\\18e6476a-13fa-44cd-8985-8cc0b204fc07\\TVBox-Car3K-final-r8-signed.apk",
+    "sha256": "1C0AD382B2A1C9244BEE1ACE49849A2FC734D94E9CDA1D9412C4E16316C652D5",
+    "package": "com.github.tvbox.osc.jun",
+    "versionName": "1.0.0-car.7",
+    "versionCode": 8
+  },
+  "source": {
+    "branch": "feature/car-ux-redesign-3k-fps",
+    "taskCommitPolicy": "one summary commit per large conversation task, then push"
+  },
+  "device": {
+    "mumu": "6.8.7.0",
+    "android": "15",
+    "display": "2880x1620",
+    "physicalDensity": 160,
+    "displayGate": "CAR_DISPLAY_PASS"
+  },
+  "matrix": {
+    "snapshots": 15,
+    "xmlParsed": 15,
+    "png2880x1620": 15,
+    "targetCrashFilesNonEmpty": 0,
+    "smallTargetSnapshots": 3,
+    "partialBoundsSnapshots": 0
+  },
+  "notes": [
+    "The three small-target observations are scroll-tail fragments in settings pages.",
+    "The r8 page matrix is exact-SHA visual evidence; positive xiaosa playback evidence is labeled separately in the HTML report."
+  ]
+}

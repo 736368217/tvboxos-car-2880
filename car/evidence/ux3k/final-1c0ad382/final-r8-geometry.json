@@ -1,0 +1,171 @@
+{
+  "method": "visible accessibility nodes; partial scroll items are observations, not automatically blockers",
+  "display": [
+    2880,
+    1620
+  ],
+  "minimum_reference_px": 90,
+  "snapshots": [
+    {
+      "snapshot": "collect.xml",
+      "interactive_count": 3,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "detail-empty.xml",
+      "interactive_count": 0,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "history.xml",
+      "interactive_count": 3,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "home.xml",
+      "interactive_count": 18,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "live.xml",
+      "interactive_count": 8,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "localfile.xml",
+      "interactive_count": 2,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "push.xml",
+      "interactive_count": 2,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "search.xml",
+      "interactive_count": 72,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-0-picture.xml",
+      "interactive_count": 30,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-1-audio.xml",
+      "interactive_count": 24,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-2-playback.xml",
+      "interactive_count": 24,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/llDns",
+          "class": "android.widget.FrameLayout",
+          "label": "",
+          "bounds": [
+            720,
+            1540,
+            2820,
+            1560
+          ],
+          "width": 2100,
+          "height": 20
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/llDns",
+          "class": "android.widget.FrameLayout",
+          "label": "",
+          "bounds": [
+            720,
+            1540,
+            2820,
+            1560
+          ],
+          "width": 2100,
+          "height": 20
+        }
+      ]
+    },
+    {
+      "snapshot": "settings-3-touch.xml",
+      "interactive_count": 24,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/uxNavHistoryRow",
+          "class": "android.widget.FrameLayout",
+          "label": "",
+          "bounds": [
+            720,
+            1500,
+            2820,
+            1560
+          ],
+          "width": 2100,
+          "height": 60
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-4-back.xml",
+      "interactive_count": 25,
+      "under_90px": [
+        {
+          "resource": "com.github.tvbox.osc.jun:id/switchAdvancedHaptic",
+          "class": "android.widget.Switch",
+          "label": "已开启  ",
+          "bounds": [
+            2480,
+            1530,
+            2770,
+            1560
+          ],
+          "width": 290,
+          "height": 30
+        }
+      ],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-5-sources.xml",
+      "interactive_count": 18,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    },
+    {
+      "snapshot": "settings-6-about.xml",
+      "interactive_count": 18,
+      "under_90px": [],
+      "partly_outside": [],
+      "without_accessible_text": []
+    }
+  ]
+}

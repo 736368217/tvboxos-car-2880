@@ -44,6 +44,7 @@ import com.github.tvbox.osc.bean.LiveEpgDate;
 import com.github.tvbox.osc.bean.LivePlayerManager;
 import com.github.tvbox.osc.bean.LiveSettingGroup;
 import com.github.tvbox.osc.bean.LiveSettingItem;
+import com.github.tvbox.osc.car.CarPlaybackPreferences;
 import com.github.tvbox.osc.player.controller.LiveController;
 import com.github.tvbox.osc.ui.adapter.LiveChannelGroupAdapter;
 import com.github.tvbox.osc.ui.adapter.LiveChannelItemAdapter;
@@ -2450,7 +2451,7 @@ public class LivePlayActivity extends BaseActivity {
         });
         controller.setCanChangePosition(false);
         controller.setEnableInNormal(true);
-        controller.setGestureEnabled(true);
+        controller.setGestureEnabled(CarPlaybackPreferences.gestures());
         controller.setDoubleTapTogglePlayEnabled(false);
         mVideoView.setVideoController(controller);
         mVideoView.setProgressManager(null);

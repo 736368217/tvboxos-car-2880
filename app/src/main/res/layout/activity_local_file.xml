@@ -5,8 +5,10 @@
     android:paddingLeft="@dimen/vs_40"
     android:paddingTop="@dimen/car_top_padding"
     android:paddingRight="@dimen/vs_40"
-    android:paddingBottom="@dimen/car_bottom_padding">
+    android:paddingBottom="@dimen/car_bottom_padding" android:background="@drawable/car_surface">
 
+    <TextView android:id="@+id/uxPageBack" style="@style/UxSceneButton" android:layout_width="180px" android:layout_height="96px" android:drawableLeft="@drawable/aether_back" android:drawablePadding="10px" android:text="返回" android:textColor="@color/aether_cyan_focus" android:textSize="28px" android:contentDescription="返回上一页" />
+    <TextView android:layout_width="1800px" android:layout_height="88px" android:layout_marginLeft="220px" android:gravity="center_vertical" android:text="本地文件 / 配置与媒体" android:textColor="@color/aether_text_primary" android:textSize="38px" android:textStyle="bold" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

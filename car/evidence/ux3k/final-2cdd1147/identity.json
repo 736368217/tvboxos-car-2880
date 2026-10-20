@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "apk": {
+    "path": "C:\\Users\\WIN10\\.pi-desktop\\scratch\\18e6476a-13fa-44cd-8985-8cc0b204fc07\\TVBox-Car3K-brand-fix-r4-signed.apk",
+    "sha256": "2CDD1147D70531E2C7DB001C71F19DD9B1947BE6795A30D4E64856A349D6C7F8",
+    "package": "com.github.tvbox.osc.jun",
+    "versionCode": 8,
+    "versionName": "1.0.0-car.7"
+  },
+  "source": {
+    "branch": "feature/car-ux-redesign-3k-fps",
+    "head": "974d40240362156c8bd4733f49ae1c81861ea9f8"
+  },
+  "device": {
+    "instance": "vm1",
+    "mumu": "6.8.7.0",
+    "android": "15",
+    "display": "2880x1620",
+    "physicalDensity": 160,
+    "rotation": "lock 1",
+    "fixedRotation": "enabled",
+    "displayGate": "CAR_DISPLAY_PASS"
+  },
+  "evidence": {
+    "matrixSnapshots": 15,
+    "matrixXmlParsed": 15,
+    "matrixPngSize": "2880x1620",
+    "matrixTargetCrashFilesNonEmpty": 0,
+    "geometrySmallTargetSnapshots": 13,
+    "geometryPartialBoundsSnapshots": 0,
+    "xiaosa": {
+      "home": true,
+      "positiveSearchTitle": "嫁金钗",
+      "detailSource": "咕噜 • APP",
+      "episodes": "第01集/第02集",
+      "fullscreenControls": true,
+      "renderViewport": "2880x1620",
+      "sourceFpsApprox": 25,
+      "active": true
+    },
+    "clun": {
+      "hostProbe": "HTTP 200",
+      "finalRuntime": "HTTP 404 on two attempts",
+      "playback": false
+    }
+  },
+  "checks": {
+    "testHandover": "11/11",
+    "compileCore": "passed",
+    "hostCoreProductChecks": "passed",
+    "pythonHttp": "blocked: ModuleNotFoundError: requests",
+    "voiceResidualsInSource": 0,
+    "gitDiffCheck": 0,
+    "signatures": ["v1", "v2", "v3"],
+    "zipalign": "passed"
+  }
+}

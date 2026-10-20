@@ -41,7 +41,7 @@ public final class CarPlaybackPreferences {
     }
 
     public static boolean longPress() {
-        return Hawk.get("car_ux_long_press", true);
+        return Hawk.get("car_ux_long_press", false);
     }
 
     public static void setLongPress(boolean value) {

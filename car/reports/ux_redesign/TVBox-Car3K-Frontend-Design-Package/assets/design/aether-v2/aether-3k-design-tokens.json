@@ -1,0 +1,42 @@
+{
+  "system_name": "TVBox Aether 3K Cockpit Design System",
+  "version": "2.0.0",
+  "target_hardware": {
+    "display_size_inches": 17.3,
+    "resolution_px": [
+      2880,
+      1620
+    ],
+    "aspect_ratio": "16:9",
+    "android_density_bucket": "mdpi (160dpi, 1dp = 1px)",
+    "viewing_distance_cm": [
+      65,
+      95
+    ]
+  },
+  "color_tokens": {
+    "bg_obsidian_950": "#070A10",
+    "bg_obsidian_900": "#0C121D",
+    "surface_glass": "rgba(20, 29, 46, 0.78)",
+    "accent_aether_cyan": "#00E5FF",
+    "accent_cobalt_primary": "#2563EB",
+    "status_emerald_ready": "#10B981",
+    "status_amber_atmos": "#F59E0B",
+    "status_rose_alert": "#F43F5E",
+    "text_primary": "#F8FAFC",
+    "text_secondary": "#CBD5E1",
+    "text_muted": "#94A3B8"
+  },
+  "ergonomic_rules": {
+    "focus_scale_factor": 1.0,
+    "focus_border_px": 3.0,
+    "floating_orb_deprecated": true,
+    "back_control_mode": "Top-Left Fixed Pill (180x88px) + Left Edge Fluid Ribbon (26x200px)",
+    "primary_touch_target_height_px": [
+      88,
+      120
+    ],
+    "min_touch_spacing_px": 20,
+    "minimum_font_size_px": 20
+  }
+}

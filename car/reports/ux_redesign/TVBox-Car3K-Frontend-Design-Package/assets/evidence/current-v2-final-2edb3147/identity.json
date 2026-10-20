@@ -1,0 +1,50 @@
+{
+  "evidenceSet": "current-v2-final-2edb3147",
+  "apkFileName": "TVBox-Car3K-V2-final-r3-signed.apk",
+  "apkSha256": "2EDB3147385C2D5639DE35E6A9CB7A56C4FBC4F571D5D4C3F03A6C57E888CD35",
+  "applicationId": "com.github.tvbox.osc.jun",
+  "applicationLabel": "TVBox",
+  "versionCode": 8,
+  "versionName": "1.0.0-car.7",
+  "signerCertificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+  "source": {
+    "branch": "feature/car-ux-redesign-3k-fps",
+    "head": "974d40240362156c8bd4733f49ae1c81861ea9f8",
+    "worktreeDirty": true
+  },
+  "device": {
+    "emulator": "MuMu 6.8.7.0",
+    "androidVersion": "15.0",
+    "displayGate": "CAR_DISPLAY_PASS",
+    "widthPx": 2880,
+    "heightPx": 1620,
+    "densityDpi": 160,
+    "landscapeRotationLocked": true,
+    "manualSizeOverride": false,
+    "manualDensityOverride": false
+  },
+  "installedBaseApkSha256": "2edb3147385c2d5639de35e6a9cb7a56c4fbc4f571d5d4c3f03a6c57e888cd35",
+  "captures": {
+    "screenshots": 22,
+    "uiXml": 22,
+    "freshXmlForTargetPackage": 22,
+    "emptyTargetCrashExcerpts": 22,
+    "pngDimensions": "22/22 at 2880x1620"
+  },
+  "geometry": {
+    "snapshots": 22,
+    "withInteractiveBoundsUnder90Px": 17,
+    "withPartiallyOutsideBounds": 0,
+    "details": "geometry.json"
+  },
+  "verifiedWorkflows": [
+    "Home voice button opens SearchActivity with the same process PID.",
+    "Home Settings rail opens SettingActivity; page Back returns to HomeActivity with the same process PID.",
+    "Search keyboard A key changes etSearch to A without a crash."
+  ],
+  "notCovered": [
+    "Live and Detail rendered their no-source/no-program empty states.",
+    "No valid media fixture was available for VOD playback, fullscreen, SGSR1, or temporal-smoothing visual acceptance.",
+    "Remote source compatibility and real head-unit/OEM behavior were not tested."
+  ]
+}

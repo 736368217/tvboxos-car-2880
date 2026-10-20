@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.BounceInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -203,10 +202,10 @@ public class HomeActivity extends BaseActivity {
                             TextView textView = view.findViewById(R.id.tvTitle);
                             textView.getPaint().setFakeBoldText(false);
                             if (sortFocused == p) {
-                                view.animate().scaleX(1.1f).scaleY(1.1f).setInterpolator(new BounceInterpolator()).setDuration(300).start();
+                                view.setScaleX(1.0f); view.setScaleY(1.0f);
                                 textView.setTextColor(HomeActivity.this.getResources().getColor(R.color.color_FFFFFF));
                             } else {
-                                view.animate().scaleX(1.0f).scaleY(1.0f).setDuration(300).start();
+                                view.setScaleX(1.0f); view.setScaleY(1.0f);
                                 textView.setTextColor(HomeActivity.this.getResources().getColor(R.color.color_BBFFFFFF));
                                 view.findViewById(R.id.tvFilter).setVisibility(View.GONE);
                                 view.findViewById(R.id.tvFilterColor).setVisibility(View.GONE);
@@ -224,7 +223,7 @@ public class HomeActivity extends BaseActivity {
                     HomeActivity.this.currentView = view;
                     HomeActivity.this.isDownOrUp = false;
                     HomeActivity.this.sortChange = true;
-                    view.animate().scaleX(1.1f).scaleY(1.1f).setInterpolator(new BounceInterpolator()).setDuration(300).start();
+                    view.setScaleX(1.0f); view.setScaleY(1.0f);
                     TextView textView = view.findViewById(R.id.tvTitle);
                     textView.getPaint().setFakeBoldText(true);
                     textView.setTextColor(HomeActivity.this.getResources().getColor(R.color.color_FFFFFF));
@@ -287,35 +286,9 @@ public class HomeActivity extends BaseActivity {
                 return !((GridFragment) baseLazyFragment).isLoad();
             }
         });
-        tvName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                if(dataInitOk && jarInitOk){
-                    String jar=ApiConfig.get().getHomeSourceBean().getJar();
-                    String jarUrl=!jar.isEmpty()?jar:ApiConfig.get().getSpider();
-                    String jarSource = jarUrl.split(";md5;")[0];
-                    File cspCacheDir = new File(FileUtils.getFilePath() + "/csp/" + MD5.string2MD5(jarSource) + ".jar");
-                    File jarCacheDir = new File(FileUtils.getCachePath() + "/jar/" + MD5.string2MD5(jarSource) + ".jar");
-                    File jarFullCacheDir = new File(FileUtils.getCachePath() + "/jar/" + MD5.string2MD5(jarUrl) + ".jar");
-                    Toast.makeText(mContext, "缓存已清除", Toast.LENGTH_LONG).show();
-                    new Thread(() -> {
-                        try {
-                            FileUtils.deleteFile(cspCacheDir);
-                            FileUtils.deleteFile(jarCacheDir);
-                            FileUtils.deleteFile(jarFullCacheDir);
-                            FileUtils.clearSpiderCacheFiles();
-                            ApiConfig.get().clearSpiderCache();
-                            refreshHome();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }).start();
-
-                }else {
-                    jumpActivity(SettingActivity.class);
-                }
-            }
+        tvName.setOnClickListener(v -> {
+            FastClickCheckUtil.check(v);
+            showSiteSwitch();
         });
         tvName.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -687,6 +660,7 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     protected void onResume() {
+        applyCarNavigationVisibility();
         super.onResume();
         refreshTopInfoTextSize();
         mHandler.removeCallbacks(refreshTopInfoTextSizeRunnable);
@@ -812,10 +786,20 @@ public class HomeActivity extends BaseActivity {
         findViewById(R.id.uxNavPush).setOnClickListener(v -> jumpActivity(PushActivity.class));
         findViewById(R.id.uxNavSettings).setOnClickListener(v -> jumpActivity(SettingActivity.class));
         findViewById(R.id.uxHomeSearch).setOnClickListener(v -> jumpActivity(SearchActivity.class));
+        applyCarNavigationVisibility();
         ((TextView) findViewById(R.id.uxEngineStatus)).setText("播放器就绪\nSGSR1 · "
                 + (com.github.tvbox.osc.car.CarEnhance.videoSrEnabled() ? "开" : "关"));
     }
 
+    private void applyCarNavigationVisibility() {
+        findViewById(R.id.uxNavHome).setVisibility(com.github.tvbox.osc.car.CarHomeNavigationPreferences.isVisible(com.github.tvbox.osc.car.CarHomeNavigationPreferences.HOME) ? View.VISIBLE : View.GONE);
+        findViewById(R.id.uxNavLive).setVisibility(com.github.tvbox.osc.car.CarHomeNavigationPreferences.isVisible(com.github.tvbox.osc.car.CarHomeNavigationPreferences.LIVE) ? View.VISIBLE : View.GONE);
+        findViewById(R.id.uxNavHistory).setVisibility(com.github.tvbox.osc.car.CarHomeNavigationPreferences.isVisible(com.github.tvbox.osc.car.CarHomeNavigationPreferences.HISTORY) ? View.VISIBLE : View.GONE);
+        findViewById(R.id.uxNavCollect).setVisibility(com.github.tvbox.osc.car.CarHomeNavigationPreferences.isVisible(com.github.tvbox.osc.car.CarHomeNavigationPreferences.COLLECT) ? View.VISIBLE : View.GONE);
+        findViewById(R.id.uxNavPush).setVisibility(com.github.tvbox.osc.car.CarHomeNavigationPreferences.isVisible(com.github.tvbox.osc.car.CarHomeNavigationPreferences.PUSH) ? View.VISIBLE : View.GONE);
+        findViewById(R.id.uxNavCategories).setVisibility(View.VISIBLE);
+        findViewById(R.id.uxNavSettings).setVisibility(View.VISIBLE);
+    }
     private void selectCarPage(int position) {
         if (position < 0 || position >= fragments.size()) return;
         sortFocused = position;
@@ -850,7 +834,12 @@ public class HomeActivity extends BaseActivity {
     void showSiteSwitch() {
         if (isActivityUnavailable()) return;
         List<SourceBean> sites = ApiConfig.get().getSwitchSourceBeanList();
-        if (sites.isEmpty()) return;
+        if (sites.isEmpty()) {
+            Bundle data = new Bundle();
+            data.putInt("uxSettingCategory", 5);
+            jumpActivity(SettingActivity.class, data);
+            return;
+        }
         int select = sites.indexOf(ApiConfig.get().getHomeSourceBean());
         if (select < 0 || select >= sites.size()) select = 0;
         if (mSiteSwitchDialog == null) {

@@ -1,8 +1,6 @@
 package com.github.tvbox.osc.ui.activity;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -10,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.speech.RecognizerIntent;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -82,7 +79,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @description:
  */
 public class SearchActivity extends BaseActivity {
-    private static final int UX_SEARCH_SPEECH = 2044;
     private static final String HOT_SEARCH_URL = "https://movie.douban.com/j/search_subjects?type=tv&tag=%E7%83%AD%E9%97%A8&sort=recommend&page_limit=20&page_start=0";
     private static final int SEARCH_THREAD_COUNT = 6;
     private static final int SEARCH_PUMP_SECONDS = 2;
@@ -185,7 +181,6 @@ public class SearchActivity extends BaseActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         findViewById(R.id.ux_search_back).setOnClickListener(v -> onBackPressed());
         findViewById(R.id.ux_search_ime).setOnClickListener(v -> showSystemKeyboard());
-        findViewById(R.id.ux_search_voice).setOnClickListener(v -> startVoiceSearch());
         findViewById(R.id.ux_search_aggregate).setOnClickListener(v -> {
             String word = etSearch.getText().toString().trim();
             if (TextUtils.isEmpty(word)) {
@@ -414,7 +409,7 @@ public class SearchActivity extends BaseActivity {
         setNormalWordTitle();
         wordsSwitch.setFocusable(true);
         wordsSwitch.setBackgroundResource(R.drawable.ux_setting_choice);
-        mGridViewWord.setLayoutManager(new V7GridLayoutManager(this.mContext, 3));
+        mGridViewWord.setLayoutManager(new V7GridLayoutManager(this.mContext, 7));
         mGridViewWord.setAdapter(aggregateSearchMode ? hotWordAdapter : wordAdapter);
         refreshSearchHistoryWords();
     }
@@ -434,8 +429,8 @@ public class SearchActivity extends BaseActivity {
                 if (isFinishing()) return;
                 ArrayList<String> history = Hawk.get(HawkConfig.SEARCH_HISTORY, new ArrayList<String>());
                 historyWordGrid.removeAllViews();
-                int itemHeight = 70;
-                int itemMargin = 8;
+                int itemHeight = 90;
+                int itemMargin = 2;
                 int paddingH = 24;
                 int minWidth = 190;
                 int availableWidth = historyWordGrid.getWidth();
@@ -1121,26 +1116,4 @@ public class SearchActivity extends BaseActivity {
         etSearch.post(() -> imm.showSoftInput(etSearch, InputMethodManager.SHOW_IMPLICIT));
     }
 
-    private void startVoiceSearch() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, java.util.Locale.getDefault().toLanguageTag());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "说出片名，识别后开始搜索");
-        try {
-            startActivityForResult(intent, UX_SEARCH_SPEECH);
-        } catch (ActivityNotFoundException | SecurityException unavailable) {
-            Toast.makeText(this, "系统未提供可用的语音识别服务，请使用系统输入法或手机扫码输入", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != UX_SEARCH_SPEECH || resultCode != Activity.RESULT_OK) return;
-        ArrayList<String> matches = data == null ? null : data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-        if (matches == null || matches.isEmpty() || TextUtils.isEmpty(matches.get(0).trim())) {
-            Toast.makeText(this, "未识别到片名，请重试或使用键盘输入", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        startSearch(matches.get(0).trim());
-    }
 }

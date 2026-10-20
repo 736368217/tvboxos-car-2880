@@ -123,4 +123,24 @@
     <dimen name="car_touch_row_h">70mm</dimen>
     <dimen name="car_touch_control_h">56mm</dimen>
     <dimen name="car_touch_chip_h">56mm</dimen>
+    <!-- Aether 3K V2 ergonomic tokens (1dp = 1px at mdpi). -->
+    <dimen name="aether_screen_width">2880dp</dimen>
+    <dimen name="aether_screen_height">1620dp</dimen>
+    <dimen name="aether_left_rail_width">256dp</dimen>
+    <dimen name="aether_left_rail_item_height">106dp</dimen>
+    <dimen name="aether_stage_padding_horizontal">48dp</dimen>
+    <dimen name="aether_stage_padding_vertical">34dp</dimen>
+    <dimen name="aether_back_pill_width">180dp</dimen>
+    <dimen name="aether_back_pill_height">88dp</dimen>
+    <dimen name="aether_edge_back_width">26dp</dimen>
+    <dimen name="aether_edge_back_height">200dp</dimen>
+    <dimen name="aether_primary_cta_height">106dp</dimen>
+    <dimen name="aether_secondary_pill_height">88dp</dimen>
+    <dimen name="aether_focus_stroke">3dp</dimen>
+    <dimen name="aether_card_radius">28dp</dimen>
+    <dimen name="aether_touch_gap">20dp</dimen>
+    <dimen name="aether_page_title">44sp</dimen>
+    <dimen name="aether_section_title">34sp</dimen>
+    <dimen name="aether_button_text">26sp</dimen>
+    <dimen name="aether_metadata_text">20sp</dimen>
 </resources>

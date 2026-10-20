@@ -5,6 +5,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -235,12 +236,20 @@ public abstract class BaseController extends BaseVideoController implements Gest
                 || !mIsGestureEnabled //关闭了手势
                 || PlayerUtils.isEdge(getContext(), e)) //处于屏幕边沿
             return true;
-        mStreamVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        mStreamVolume = mAudioManager == null ? 0 : mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         Activity activity = PlayerUtils.scanForActivity(getContext());
         if (activity == null) {
-            mBrightness = 0;
+            mBrightness = 0.5f;
         } else {
             mBrightness = activity.getWindow().getAttributes().screenBrightness;
+            if (mBrightness < 0f || mBrightness > 1f) {
+                try {
+                    int systemBrightness = Settings.System.getInt(activity.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 128);
+                    mBrightness = systemBrightness / 255f;
+                } catch (Throwable ignored) {
+                    mBrightness = 0.5f;
+                }
+            }
         }
         mFirstTouch = true;
         mChangePosition = false;
@@ -341,12 +350,10 @@ public abstract class BaseController extends BaseVideoController implements Gest
         if (activity == null) return;
         Window window = activity.getWindow();
         WindowManager.LayoutParams attributes = window.getAttributes();
-        int height = getMeasuredHeight();
-        if (mBrightness == -1.0f) mBrightness = 0.5f;
+        int height = Math.max(1, getMeasuredHeight());
+        if (mBrightness < 0f || mBrightness > 1f) mBrightness = 0.5f;
         float brightness = deltaY * 2 / height * 1.0f + mBrightness;
-        if (brightness < 0) {
-            brightness = 0f;
-        }
+        if (brightness < 0) brightness = 0f;
         if (brightness > 1.0f) brightness = 1.0f;
         int percent = (int) (brightness * 100);
         attributes.screenBrightness = brightness;
@@ -366,14 +373,18 @@ public abstract class BaseController extends BaseVideoController implements Gest
     }
 
     protected void slideToChangeVolume(float deltaY) {
+        if (mAudioManager == null) return;
         int streamMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        int height = getMeasuredHeight();
+        if (streamMaxVolume <= 0) return;
+        int height = Math.max(1, getMeasuredHeight());
         float deltaV = deltaY * 2 / height * streamMaxVolume;
         float index = mStreamVolume + deltaV;
         if (index > streamMaxVolume) index = streamMaxVolume;
         if (index < 0) index = 0;
-        int percent = (int) (index / streamMaxVolume * 100);
-        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int) index, 0);
+        int targetVolume = Math.round(index);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetVolume, 0);
+        int actualVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        int percent = Math.round(actualVolume * 100f / streamMaxVolume);
         for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
             IControlComponent component = next.getKey();
             if (component instanceof IGestureComponent) {

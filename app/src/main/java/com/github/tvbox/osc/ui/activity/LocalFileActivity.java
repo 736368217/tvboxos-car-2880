@@ -47,6 +47,7 @@ public class LocalFileActivity extends BaseActivity {
         tvPath = findViewById(R.id.tvPath);
         tvEmpty = findViewById(R.id.tvEmpty);
         fileList = findViewById(R.id.fileList);
+        findViewById(R.id.uxPageBack).setOnClickListener(v -> onBackPressed());
         adapter = new LocalFileAdapter();
         fileList.setAdapter(adapter);
         fileList.setLayoutManager(new V7LinearLayoutManager(this, 1, false));

@@ -313,11 +313,12 @@ public class DetailActivity extends BaseActivity {
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
                 if (showPreview) {
-                    enterFullPreview();
-                    if(firstReverse){
+                    boolean playing = playFragment != null && playFragment.getPlayer() != null && playFragment.getPlayer().isPlaying();
+                    if (!playing) {
                         jumpToPlay();
-                        firstReverse=false;
+                        firstReverse = false;
                     }
+                    enterFullPreview();
                 } else {
                     jumpToPlay();
                 }
@@ -1792,7 +1793,8 @@ public class DetailActivity extends BaseActivity {
     }
 
     private boolean isCurrentPreviewPlaying(int position) {
-        if (!showPreview || previewVodInfo == null || vodInfo == null || vodInfo.seriesMap == null || TextUtils.isEmpty(vodInfo.playFlag)) {
+        if (!showPreview || playFragment == null || playFragment.getPlayer() == null || !playFragment.getPlayer().isPlaying()
+                || previewVodInfo == null || vodInfo == null || vodInfo.seriesMap == null || TextUtils.isEmpty(vodInfo.playFlag)) {
             return false;
         }
         if (!TextUtils.equals(vodInfo.playFlag, previewVodInfo.playFlag) || previewVodInfo.playIndex != position) {
@@ -2073,7 +2075,7 @@ public class DetailActivity extends BaseActivity {
         }
         fullWindows = full;
         if (playFragment != null) {
-            playFragment.setAutoSwitchLineEnabled(!fullWindows);
+            playFragment.setImmersiveFullscreen(fullWindows);
             playFragment.setPreviewMode(!fullWindows);
         }
         llPlayerFragmentContainer.setVisibility(fullWindows || showPreview ? View.VISIBLE : View.GONE);

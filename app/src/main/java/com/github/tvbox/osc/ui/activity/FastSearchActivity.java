@@ -236,16 +236,9 @@ public class FastSearchActivity extends BaseActivity {
 
     private void setPosterFocusScale(View itemView, boolean focused) {
         if (itemView == null) return;
-        if (focused) {
-            itemView.bringToFront();
-        }
-        float scale = focused ? POSTER_FOCUS_SCALE : 1.0f;
-        itemView.animate()
-                .scaleX(scale)
-                .scaleY(scale)
-                .setDuration(POSTER_FOCUS_ANIM_DURATION)
-                .setInterpolator(new BounceInterpolator())
-                .start();
+        // Focus is expressed by the selector/outline; scaling would expand outside the fixed grid slot.
+        itemView.setScaleX(1.0f);
+        itemView.setScaleY(1.0f);
     }
 
     private void initViewModel() {

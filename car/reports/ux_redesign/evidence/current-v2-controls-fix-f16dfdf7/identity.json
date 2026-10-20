@@ -1,0 +1,27 @@
+{
+  "evidenceSet": "current-v2-controls-fix-f16dfdf7",
+  "apkSha256": "F16DFDF73F39D0868F166C2AC1F4672C6D1072503AD109ECB3D04BE4C66C982D",
+  "applicationId": "com.github.tvbox.osc.jun",
+  "versionName": "1.0.0-car.7",
+  "device": {
+    "instance": "vm2",
+    "emulator": "MuMu 6.8.7.0",
+    "androidVersion": "15.0",
+    "widthPx": 2880,
+    "heightPx": 1620,
+    "densityDpi": 160,
+    "rotation": "lock 1",
+    "fixedRotation": "enabled"
+  },
+  "installedBaseApkSha256": "f16dfdf73f39d0868f166c2ac1f4672c6d1072503ad109ecb3d04be4c66c982d",
+  "captures": {
+    "homePng": "home.png",
+    "homeXml": "home.xml",
+    "homeStart": "home-start.txt",
+    "homeState": "home-state.txt",
+    "targetCrashExcerpt": "home-crash.txt"
+  },
+  "targetCrashExcerptBytes": 0,
+  "mediaPlaybackGestureDragVerified": false,
+  "reasonNotVerified": "No valid media fixture was available and the MuMu batch was muted."
+}

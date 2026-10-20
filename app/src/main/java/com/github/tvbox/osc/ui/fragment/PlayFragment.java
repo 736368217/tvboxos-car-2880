@@ -288,7 +288,7 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
         mController.mLyricView.setTextSize(previewMode ? 16 : 24);
         mController.setCanChangePosition(true);
         mController.setEnableInNormal(true);
-        mController.setGestureEnabled(true);
+        mController.setGestureEnabled(com.github.tvbox.osc.car.CarPlaybackPreferences.gestures());
         ProgressManager progressManager = new ProgressManager() {
             @Override
             public void saveProgress(String url, long progress) {
@@ -2248,6 +2248,12 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
         if (mController != null) {
             mController.setPreviewMode(previewMode);
             mController.mLyricView.setTextSize(previewMode ? 16 : 24);
+        }
+    }
+
+    public void setImmersiveFullscreen(boolean fullscreen) {
+        if (mController != null) {
+            mController.setImmersiveFullscreen(fullscreen);
         }
     }
 

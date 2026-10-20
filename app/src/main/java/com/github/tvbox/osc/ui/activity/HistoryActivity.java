@@ -72,6 +72,7 @@ public class HistoryActivity extends BaseActivity {
         tvClear = findViewById(R.id.tvClear);
         tvDelTip = findViewById(R.id.tvDelTip);
         mGridView = findViewById(R.id.mGridView);
+        findViewById(R.id.uxPageBack).setOnClickListener(v -> onBackPressed());
         mGridView.setHasFixedSize(true);
         mGridView.setLayoutManager(new V7GridLayoutManager(this.mContext, isBaseOnWidth() ? 5 : 6));
         historyAdapter = new HistoryAdapter();
@@ -103,12 +104,12 @@ public class HistoryActivity extends BaseActivity {
         mGridView.setOnItemListener(new TvRecyclerView.OnItemListener() {
             @Override
             public void onItemPreSelected(TvRecyclerView parent, View itemView, int position) {
-                itemView.animate().scaleX(1.0f).scaleY(1.0f).setDuration(300).setInterpolator(new BounceInterpolator()).start();
+                itemView.setScaleX(1.0f); itemView.setScaleY(1.0f);
             }
 
             @Override
             public void onItemSelected(TvRecyclerView parent, View itemView, int position) {
-                itemView.animate().scaleX(1.05f).scaleY(1.05f).setDuration(300).setInterpolator(new BounceInterpolator()).start();
+                itemView.setScaleX(1.0f); itemView.setScaleY(1.0f);
             }
 
             @Override

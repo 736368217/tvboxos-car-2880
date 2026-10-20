@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TVBox Car 3K 当前界面报告</title>
+<style>
+:root{--bg:#090d13;--panel:#111923;--panel2:#172331;--line:#2a3a4b;--text:#edf4fa;--muted:#9aabba;--cyan:#62d7ee;--green:#62e0a4;--amber:#f4c46a;--red:#ff8c8c;}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Microsoft YaHei,Arial,sans-serif;line-height:1.5} a{color:var(--cyan)}
+.wrap{max-width:1500px;margin:0 auto;padding:32px 28px 72px}.hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:22px}.eyebrow{color:var(--cyan);font-size:13px;letter-spacing:.12em;text-transform:uppercase}.hero h1{font-size:34px;line-height:1.15;margin:8px 0 0}.hero p{margin:8px 0 0;color:var(--muted)}.hash{font-family:Consolas,monospace;font-size:13px;color:var(--green);word-break:break-all;max-width:520px;text-align:right}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px}.card h2{font-size:17px;margin:0 0 12px}.metric{font-size:28px;font-weight:700}.muted{color:var(--muted);font-size:13px}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
+.section{margin-top:28px}.section h2{font-size:22px;margin:0 0 12px}.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.summary .card{min-height:112px}
+.gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.shot{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}.shot a{display:block;background:#05080c}.shot img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}.shot figcaption{padding:12px 14px}.shot strong{display:block;font-size:16px}.shot span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.notice{border-left:3px solid var(--amber);background:#171711;padding:14px 16px;color:#e6d9b5}.notice.red{border-color:var(--red);background:#1b1114}.table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);font-size:14px}.table th,.table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.table th{color:var(--muted);font-weight:600}.table tr:last-child td{border-bottom:0}.mono{font-family:Consolas,monospace;word-break:break-all}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.design img{width:100%;display:block;border:1px solid var(--line);border-radius:6px}.footer{margin-top:32px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+@media(max-width:1000px){.grid,.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{display:block}.hash{text-align:left;margin-top:16px}}@media(max-width:640px){.wrap{padding:20px 14px 48px}.grid,.summary,.gallery,.two{grid-template-columns:1fr}.hero h1{font-size:27px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="hero">
+<div><div class="eyebrow">TVBox Car 3K · Runtime Review</div><h1>当前 App 界面与验收画廊</h1><p>当前源码的 r8 运行截图，按 2880×1620 / 160 dpi 车机基线采集。</p></div>
+<div class="hash">APK SHA-256<br><strong>1C0AD382B2A1C9244BEE1ACE49849A2FC734D94E9CDA1D9412C4E16316C652D5</strong></div>
+</header>
+<section class="summary">
+<div class="card"><div class="muted">页面矩阵</div><div class="metric ok">15 / 15</div><div class="muted">XML 可解析，PNG 2880×1620</div></div>
+<div class="card"><div class="muted">目标崩溃</div><div class="metric ok">0</div><div class="muted">所有矩阵 crash 摘要为空</div></div>
+<div class="card"><div class="muted">交互热区</div><div class="metric warn">3 / 15</div><div class="muted">均为设置页可滚动尾部碎片</div></div>
+<div class="card"><div class="muted">显示门禁</div><div class="metric ok">PASS</div><div class="muted">2880×1620，物理 160 dpi</div></div>
+</section>
+<section class="section">
+<h2>先看结论</h2>
+<div class="notice">当前可直接检查的重点：Home、Search、7 个设置分类、历史、收藏、推送、本地文件、直播和详情空态。页面截图全部来自同一个 r8 SHA。搜索 Back、系统输入法、热词、历史清空、页面 Back、画面预设和直播全屏提示的主热区已提升到 90px 以上。</div>
+<div class="notice red" style="margin-top:12px">仍需区分：设置页底部 `llDns`、`uxNavHistoryRow`、`switchAdvancedHaptic` 是可滚动页面的尾部可视碎片，不是主入口尺寸；clun/xiaosa 的远端内容结果不能只用静态截图替代。</div>
+</section>
+<section class="section">
+<h2>当前运行截图</h2>
+<div class="gallery">
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/home.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/home.png" loading="lazy"></a><figcaption><strong>Home</strong><span>品牌、左侧导航、推荐卡、顶部源站/搜索/日期</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/search.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/search.png" loading="lazy"></a><figcaption><strong>Search</strong><span>车载键盘、热词、历史与结果区</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/settings-0-picture.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/settings-0-picture.png" loading="lazy"></a><figcaption><strong>设置 · 画面</strong><span>画面预设、SGSR1、时域平滑</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/settings-1-audio.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/settings-1-audio.png" loading="lazy"></a><figcaption><strong>设置 · 音效</strong><span>座舱声场与音效</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/settings-2-playback.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/settings-2-playback.png" loading="lazy"></a><figcaption><strong>设置 · 播放</strong><span>播放器、后台行为、网络和字幕</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/settings-3-touch.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/settings-3-touch.png" loading="lazy"></a><figcaption><strong>设置 · 触控</strong><span>手势、长按倍速与首页入口</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/settings-4-back.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/settings-4-back.png" loading="lazy"></a><figcaption><strong>设置 · 返回</strong><span>应用内返回控件和双模策略</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/settings-5-sources.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/settings-5-sources.png" loading="lazy"></a><figcaption><strong>设置 · 源站</strong><span>配置地址、历史、线路和首页站源</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/settings-6-about.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/settings-6-about.png" loading="lazy"></a><figcaption><strong>设置 · 关于</strong><span>版本、备份、缓存</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/history.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/history.png" loading="lazy"></a><figcaption><strong>播放历史</strong><span>历史列表与页面返回</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/collect.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/collect.png" loading="lazy"></a><figcaption><strong>收藏</strong><span>收藏空态与返回</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/push.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/push.png" loading="lazy"></a><figcaption><strong>推送</strong><span>AirPush 页面</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/localfile.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/localfile.png" loading="lazy"></a><figcaption><strong>本地文件</strong><span>本地配置与媒体入口</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/live.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/live.png" loading="lazy"></a><figcaption><strong>直播</strong><span>无频道时的真实空态</span></figcaption></figure>
+<figure class="shot"><a href="../../evidence/ux3k/final-1c0ad382/matrix/detail-empty.png"><img src="../../evidence/ux3k/final-1c0ad382/matrix/detail-empty.png" loading="lazy"></a><figcaption><strong>详情空态</strong><span>没有详情数据时的真实页面状态</span></figcaption></figure>
+</div>
+</section>
+<section class="section">
+<h2>源与内容状态</h2>
+<table class="table"><thead><tr><th>路径</th><th>当前 r8 证据</th><th>解释</th></tr></thead><tbody>
+<tr><td>Home</td><td class="ok">已渲染</td><td>当前页面可以看到推荐卡和车机导航。</td></tr>
+<tr><td>Search</td><td class="ok">已渲染</td><td>七列热词布局避免底部裁切；搜索结果区仍需远端数据才能形成正向结果。</td></tr>
+<tr><td>xiaosa</td><td class="warn">源状态已配置，正向内容证据使用上一版同布局 runtime</td><td>布局 r8 只改变热区和搜索列数；HTML 的当前页面矩阵绑定 r8 SHA。</td></tr>
+<tr><td>clun</td><td class="warn">runtime 404 曾复现</td><td>host probe 200 与 App runtime 结果不一致，保留为远端边界。</td></tr>
+<tr><td>Python HTTP</td><td class="bad">环境阻塞</td><td>测试收集前缺少 `requests`。</td></tr>
+</tbody></table>
+</section>
+<section class="section two">
+<div class="card"><h2>当前问题定位</h2><ul><li>设置页初始视口底部仍有 3 个可滚动内容尾部碎片。</li><li>Live/Detail 空态不等于内容功能失败。</li><li>远端源需要单独按 runtime 结果判断。</li></ul></div>
+<div class="card design"><h2>设计参考：播放器</h2><img src="../../reports/ux_redesign/TVBox-Car3K-Frontend-Design-Package/assets/design/aether-v2/v2-03-player.png"><div class="muted" style="margin-top:8px">这是设计包参考图，不是 r8 runtime 证明。</div></div>
+</section>
+<footer class="footer">报告生成于最终 r8 SHA，设备清理已完成；本次大任务已汇总为一个 commit 并推送到 GitHub。所有截图与状态文件位于 `car/evidence/ux3k/final-1c0ad382/`。</footer>
+</main>
+</body>
+</html>

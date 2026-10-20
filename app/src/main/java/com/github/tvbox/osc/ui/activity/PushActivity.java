@@ -33,6 +33,7 @@ public class PushActivity extends BaseActivity {
     private void initView() {
         ivQRCode = findViewById(R.id.ivQRCode);
         tvAddress = findViewById(R.id.tvAddress);
+        findViewById(R.id.uxPageBack).setOnClickListener(v -> onBackPressed());
         refreshQRCode();
         findViewById(R.id.pushLocal).setOnClickListener(new View.OnClickListener() {
             @Override

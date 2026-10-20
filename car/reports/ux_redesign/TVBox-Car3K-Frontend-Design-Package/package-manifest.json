@@ -1,0 +1,55 @@
+{
+  "package": "TVBox-Car3K-Frontend-Design-Package",
+  "packageType": "frontend-design-handoff",
+  "createdFor": "TVBox Car 3K 17.3-inch head-unit UI",
+  "display": {
+    "width": 2880,
+    "height": 1620,
+    "densityDpi": 160,
+    "orientation": "landscape"
+  },
+  "sourceCodeIncluded": false,
+  "sourceCodeModified": false,
+  "uploaded": false,
+  "evidenceSets": [
+    {
+      "id": "final-bdf3f447",
+      "apkSha256": "BDF3F447317C27EE2E3C234347BBAFDE28043E23EA1E0386946862201EEC135",
+      "role": "comprehensive historical page/playback screenshot reference"
+    },
+    {
+      "id": "current-final-4587c0c3",
+      "apkSha256": "4587C0C3C479D6D433622901420A80CD4D2F0991399FBFD64F13FED998F0A821",
+      "role": "historical final-round page evidence"
+    },
+    {
+      "id": "current-v2-final-3b43babd",
+      "apkSha256": "3B43BABD362C2413E64F8B0AB1CB5D1592889B097FF4B80E9520B600C5E955C1",
+      "role": "intermediate V2 runtime evidence; not the latest source build"
+    },
+    {
+      "id": "current-v2-final-2edb3147",
+      "apkSha256": "2EDB3147385C2D5639DE35E6A9CB7A56C4FBC4F571D5D4C3F03A6C57E888CD35",
+      "role": "latest V2 runtime evidence with empty-data and geometry limits recorded"
+    }
+  ],
+  "designImages": 6,
+  "comprehensiveEvidencePngs": 73,
+  "aetherV2DesignImages": 16,
+  "aetherV2SvgFiles": 25,
+  "aetherV2SvgIconsMappedToAndroidVectors": 24,
+  "currentV2FinalEvidencePngs": 22,
+  "currentV2FinalEvidenceXmls": 22,
+  "documents": [
+    "docs/00-framework.md",
+    "docs/01-information-architecture.md",
+    "docs/02-page-specs.md",
+    "docs/03-interaction-flows.md",
+    "docs/04-state-and-navigation.md",
+    "docs/05-design-system.md",
+    "docs/06-frontend-implementation-plan.md",
+    "docs/07-acceptance-and-open-items.md",
+    "docs/08-evidence-index.md",
+    "docs/09-package-map.md"
+  ]
+}

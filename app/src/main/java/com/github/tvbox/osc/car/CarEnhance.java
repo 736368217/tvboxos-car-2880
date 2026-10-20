@@ -31,6 +31,7 @@ import xyz.doikki.videoplayer.render.VideoPostProcessPolicy;
  */
 public final class CarEnhance {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
+    private static java.lang.ref.WeakReference<MyVideoView> activeVideo = new java.lang.ref.WeakReference<>(null);
 
     private CarEnhance() {
     }
@@ -45,8 +46,10 @@ public final class CarEnhance {
     /** Persist the preset; call applyAudio(view) to update an active session. */
     public static void setAudioMode(int mode) {
         Hawk.put(HawkConfig.HIFI_AUDIO, mode);
-    }
+        MyVideoView view = activeVideo.get();
+        if (view != null) applyAudio(view);
 
+    }
     /**
      * Attach (or refresh) the effect chain for the engine's current audio session. Safe to call on
      * every playback state change: it is a no-op when the mode and session did not change.
@@ -81,8 +84,9 @@ public final class CarEnhance {
 
     public static void setVideoMode(int mode) {
         Hawk.put(HawkConfig.VIDEO_ENHANCE, VideoEnhancePreset.forMode(mode).id);
-    }
+        refreshActiveVideo();
 
+    }
     public static void setVideoEnhanceEnabled(boolean enabled) {
         setVideoMode(enabled ? VideoEnhancePreset.VIVID_COLOR : VideoEnhancePreset.ORIGINAL);
     }
@@ -97,15 +101,34 @@ public final class CarEnhance {
 
     public static void setVideoSrEnabled(boolean enabled) {
         Hawk.put(HawkConfig.VIDEO_SR, enabled ? 1 : 0);
+        refreshActiveVideo();
     }
 
     public static void setVideoInterpEnabled(boolean enabled) {
         Hawk.put(HawkConfig.VIDEO_INTERP, enabled ? 1 : 0);
+        refreshActiveVideo();
     }
 
-    /** Apply all independent persisted video settings to this decoder, including HDR bypass. */
     public static void applyVideo(MyVideoView view) {
-        if (view != null) view.setVideoEnhancements(videoMode(), videoSrEnabled(), videoInterpEnabled());
+        if (view == null) return;
+        activeVideo = new java.lang.ref.WeakReference<>(view);
+        view.setVideoEnhancements(videoMode(), videoSrEnabled(), videoInterpEnabled());
+    }
+
+    private static void refreshActiveVideo() {
+        MyVideoView view = activeVideo.get();
+        if (view != null) applyVideo(view);
+    }
+
+    public static String videoAppliedStatus() {
+        MyVideoView view = activeVideo.get();
+        return view == null
+                ? "当前无播放画面；设置将在下次播放时应用，HDR 调色会自动旁路"
+                : view.getVideoEnhancementRuntimeStatus();
+    }
+
+    public static void releaseVideo(MyVideoView view) {
+        if (activeVideo.get() == view) activeVideo = new java.lang.ref.WeakReference<>(null);
     }
 
     /** HDR colour grading is disabled in prepared(); spatial/temporal switches remain independent. */

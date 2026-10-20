@@ -15,6 +15,7 @@ import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.car.AudioEffectController;
 import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.car.CarPlaybackPreferences;
+import com.github.tvbox.osc.car.CarHomeNavigationPreferences;
 import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
@@ -33,7 +34,7 @@ public final class ux_setting_Pages {
     private final List<View> pages = new ArrayList<>();
     private final List<TextView> videoButtons = new ArrayList<>();
     private final List<TextView> audioButtons = new ArrayList<>();
-    private TextView videoValue, audioValue, backMode, backSide, backSkin, backHide;
+    private TextView videoValue, videoAppliedState, audioValue, backMode, backSide, backSkin, backHide;
     private SwitchCompat sr, interp, enabled, large, haptic, rootHide;
 
     public ux_setting_Pages(Activity context, LinearLayout host) {
@@ -73,6 +74,12 @@ public final class ux_setting_Pages {
         heading(touch, "触控手势与长按倍速", "车载原生触摸 · 保留遥控器与输入法能力");
         toggle(touch, R.id.uxLongPressRow, R.id.uxLongPressSwitch, "全屏长按 2.0x", "长按加速，松手或取消恢复原速", CarPlaybackPreferences.longPress(), CarPlaybackPreferences::setLongPress);
         toggle(touch, R.id.uxGestureRow, R.id.uxGestureSwitch, "左右分屏滑动手势", "左侧亮度、右侧媒体音量；不改变系统全局亮度", CarPlaybackPreferences.gestures(), CarPlaybackPreferences::setGestures);
+        heading(touch, "首页入口显示", "分类专题与系统设置固定保留；其他入口可按使用场景隐藏");
+        toggle(touch, R.id.uxNavHomeRow, R.id.uxNavHomeSwitch, "精选推荐入口", "显示或隐藏首页推荐入口", CarHomeNavigationPreferences.isVisible(CarHomeNavigationPreferences.HOME), value -> CarHomeNavigationPreferences.setVisible(CarHomeNavigationPreferences.HOME, value));
+        toggle(touch, R.id.uxNavLiveRow, R.id.uxNavLiveSwitch, "电视直播入口", "显示或隐藏直播入口", CarHomeNavigationPreferences.isVisible(CarHomeNavigationPreferences.LIVE), value -> CarHomeNavigationPreferences.setVisible(CarHomeNavigationPreferences.LIVE, value));
+        toggle(touch, R.id.uxNavHistoryRow, R.id.uxNavHistorySwitch, "播放历史入口", "显示或隐藏历史入口", CarHomeNavigationPreferences.isVisible(CarHomeNavigationPreferences.HISTORY), value -> CarHomeNavigationPreferences.setVisible(CarHomeNavigationPreferences.HISTORY, value));
+        toggle(touch, R.id.uxNavCollectRow, R.id.uxNavCollectSwitch, "我的收藏入口", "显示或隐藏收藏入口", CarHomeNavigationPreferences.isVisible(CarHomeNavigationPreferences.COLLECT), value -> CarHomeNavigationPreferences.setVisible(CarHomeNavigationPreferences.COLLECT, value));
+        toggle(touch, R.id.uxNavPushRow, R.id.uxNavPushSwitch, "多端推送入口", "显示或隐藏推送入口", CarHomeNavigationPreferences.isVisible(CarHomeNavigationPreferences.PUSH), value -> CarHomeNavigationPreferences.setVisible(CarHomeNavigationPreferences.PUSH, value));
         heading(touch, "搜索、首页与历史", "以下选项均使用现有配置与处理函数");
         legacy(touch, R.id.llSearchView, "搜索展示", R.id.tvSearchView);
         legacy(touch, R.id.showFastSearch, "聚合搜索", R.id.showFastSearchText);
@@ -200,17 +207,32 @@ public final class ux_setting_Pages {
     }
 
     private void video(LinearLayout page) {
+        FrameLayout preview = card(page, 330);
+        place(preview, text("处理链示意（非实时截图）", 34, true, R.color.aether_text_primary), 40, 20, 1500, 52);
+        TextView source = text("原始输入帧 · 播放时", 30, true, R.color.aether_text_primary);
+        source.setGravity(Gravity.CENTER);
+        source.setBackgroundResource(R.drawable.car_surface_card);
+        place(preview, source, 40, 92, 930, 150);
+        TextView output = text("GL 处理输出 · 播放时", 30, true, R.color.aether_cyan_focus);
+        output.setGravity(Gravity.CENTER);
+        output.setBackgroundResource(R.drawable.car_surface_card_raised);
+        place(preview, output, 980, 92, 930, 150);
+        videoAppliedState = text("", 24, false, R.color.aether_emerald_ready);
+        videoAppliedState.setId(R.id.tvAdvancedVideoApplied);
+        videoAppliedState.setMaxLines(2);
+        place(preview, videoAppliedState, 40, 258, 2010, 48);
+
         FrameLayout presets = card(page, 340);
         presets.setId(R.id.llAdvancedVideo);
         place(presets, text("SDR / HDR 画面调优预设", 34, true, R.color.car_text), 40, 20, 1500, 50);
         videoValue = text("", 28, true, R.color.car_accent_cyan);
         videoValue.setId(R.id.tvAdvancedVideo);
         place(presets, videoValue, 1620, 20, 440, 50);
-        place(presets, text("11 组真实 GLSL 预设 · HDR 颜色旁路 · 不重启解码器", 26, false, R.color.car_text_muted), 40, 78, 2010, 40);
+        place(presets, text("11 组 GLSL 预设 · HDR 会旁路调色 · 不重启解码器", 26, false, R.color.car_text_muted), 40, 78, 2010, 40);
         for (VideoEnhancePreset preset : VideoEnhancePreset.all()) {
             final int mode = preset.id;
             videoButtons.add(choice(presets, preset.name, 40 + (videoButtons.size() % 6) * 338,
-                    130 + (videoButtons.size() / 6) * 96, 320, 82, () -> CarEnhance.setVideoMode(mode)));
+                    130 + (videoButtons.size() / 6) * 106, 320, 96, () -> CarEnhance.setVideoMode(mode)));
         }
         sr = toggle(page, R.id.llAdvancedSr, R.id.switchAdvancedSr, "SGSR1 边缘超分辨率",
                 "空间边缘检测与锐化；720P / 1080P 放大时增强清晰度", CarEnhance.videoSrEnabled(), CarEnhance::setVideoSrEnabled);
@@ -308,6 +330,7 @@ public final class ux_setting_Pages {
         for (int i = 0; i < videoButtons.size(); i++) videoButtons.get(i).setSelected(VideoEnhancePreset.all().get(i).id == CarEnhance.videoMode());
         for (int i = 0; i < audioButtons.size(); i++) audioButtons.get(i).setSelected(i == CarEnhance.audioMode());
         if (videoValue != null) videoValue.setText("当前：" + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
+        if (videoAppliedState != null) videoAppliedState.setText(CarEnhance.videoAppliedStatus());
         if (audioValue != null) audioValue.setText("当前：" + AudioEffectController.name(CarEnhance.audioMode()));
         sync(sr, CarEnhance.videoSrEnabled());
         sync(interp, CarEnhance.videoInterpEnabled());

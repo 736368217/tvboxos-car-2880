@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TVBox Aether 3K (V2.0) Ergonomic Touch & Typography Tokens for 17.3" 2880x1620 (160dpi mdpi) -->
+<resources>
+    <dimen name="car_screen_width">2880dp</dimen>
+    <dimen name="car_screen_height">1620dp</dimen>
+    <dimen name="car_left_rail_width">256dp</dimen>
+    <dimen name="car_left_rail_item_height">106dp</dimen>
+    <dimen name="car_stage_padding_horizontal">48dp</dimen>
+    <dimen name="car_stage_padding_vertical">34dp</dimen>
+    <dimen name="car_top_back_pill_width">180dp</dimen>
+    <dimen name="car_top_back_pill_height">88dp</dimen>
+    <dimen name="car_edge_back_handle_width">26dp</dimen>
+    <dimen name="car_edge_back_handle_height">200dp</dimen>
+    <dimen name="car_primary_cta_height">106dp</dimen>
+    <dimen name="car_secondary_pill_height">88dp</dimen>
+    <dimen name="car_touch_min_gap">20dp</dimen>
+    <dimen name="car_card_corner_radius">28dp</dimen>
+    <dimen name="car_focus_stroke_width">3dp</dimen>
+    <dimen name="car_text_h1_page_title">44sp</dimen>
+    <dimen name="car_text_h2_section_title">34sp</dimen>
+    <dimen name="car_text_b1_button_body">26sp</dimen>
+    <dimen name="car_text_m1_metadata_badge">20sp</dimen>
+</resources>

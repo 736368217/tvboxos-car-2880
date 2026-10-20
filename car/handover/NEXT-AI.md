@@ -45,3 +45,7 @@
 ## 建议给用户的首条接手汇报
 
 简要说明已读文档、实际Git commit与包是否一致、本地已通过项、未解决的源/真车边界，以及当前是否持有设备租约。不要说“所有功能/全部外站已正常”，也不要因为旧car.7报告写7/8而忽略r2的8/8。
+
+## Trial subscription source memory
+
+The user-requested trial source ledger is [`TRIAL-SOURCES.md`](TRIAL-SOURCES.md). It records the two URLs, sanitized HTTP/JSON probe results, body SHA-256 values, and the boundary between configuration loading and real site/content acceptance. Configure and test both through Settings -> Subscriptions and sources in a future device batch; do not treat the 200 configuration probes as proof of source playback.

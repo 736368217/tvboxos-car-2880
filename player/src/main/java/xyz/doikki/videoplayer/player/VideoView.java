@@ -328,6 +328,10 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
         applyVideoEnhancements();
     }
 
+    public VideoEnhanceConfig getVideoEnhancementConfig() {
+        return mVideoEnhancementConfig;
+    }
+
     private boolean usesEnhancementSurface(VideoEnhanceConfig configuration) {
         // IJK MediaCodec corrupts its first output after runtime consumer replacement on
         // some drivers. Keep its OES producer; all-off is identity OES with no FBO/loop.

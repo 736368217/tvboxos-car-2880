@@ -1,0 +1,3 @@
+PID=2411
+    topResumedActivity=ActivityRecord{127894881 u0 com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.HomeActivity t47}
+FRESH_XML_SAVED

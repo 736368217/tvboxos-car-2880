@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TVBox Car 3K Frontend Design Package</title>
+<style>
+:root{--bg:#0b0f17;--surface:#141d2b;--surface2:#1b2738;--line:#2d3c55;--text:#f3f4f6;--muted:#9eacbf;--cyan:#00d2ff;--blue:#2563eb;--green:#10b981;--amber:#f59e0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI","Microsoft YaHei",sans-serif}main{max-width:1440px;margin:auto;padding:32px}header{padding:28px 32px;border:1px solid var(--line);background:linear-gradient(135deg,#18243a,#101722);border-radius:14px;margin-bottom:24px}h1{margin:0 0 8px;font-size:30px}h2{margin:34px 0 14px;font-size:23px;border-left:4px solid var(--cyan);padding-left:12px}h3{margin:8px 0;font-size:18px}p{color:var(--muted);margin:6px 0}.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.pill{border:1px solid var(--line);background:var(--surface);padding:6px 10px;border-radius:7px;color:var(--cyan);font-size:13px}.notice{padding:14px 16px;border-left:3px solid var(--amber);background:rgba(245,158,11,.08);color:#f7d58a;margin:18px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}.card img{display:block;width:100%;height:auto;background:#000}.body{padding:14px 16px}.tag{display:inline-block;color:var(--green);font-size:12px;margin-top:6px}.design{border-color:#226a83}.evidence{border-color:#2f4a76}.current{border-color:#2d725d}.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}.compare img{width:100%;display:block;background:#000;border-radius:6px}.compare figcaption{color:var(--muted);font-size:12px;margin-top:4px}.links{display:flex;flex-wrap:wrap;gap:10px}.links a{color:var(--cyan);text-decoration:none;border:1px solid var(--line);padding:7px 10px;border-radius:6px;background:var(--surface)}footer{margin-top:40px;color:#718096;font-size:13px;border-top:1px solid var(--line);padding-top:16px}@media(max-width:700px){main{padding:16px}.compare{grid-template-columns:1fr}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>TVBox Car 3K 前端设计方案整合包</h1>
+<p>17.3 英寸车机 · 2880×1620 · 160 dpi · 横屏固定</p>
+<div class="meta"><span class="pill">原设计稿 6 张 · V2 设计图 16 张</span><span class="pill">综合历史证据 73 张 PNG</span><span class="pill">V2 当前轮 22 张 PNG + 22 份 XML</span><span class="pill">不含源码</span><span class="pill">不上传</span></div>
+</header>
+<div class="notice">证据身份分开保存：BDF3F447 和 4587C0C3 为历史轮次；3B43BABD 是 V2 中间构建；2EDB3147 是最新 V2 APK。不同 SHA 的截图不会混作同一运行快照。</div>
+<h2>设计参考稿</h2>
+<div class="grid">
+<article class="card design"><img src="../assets/design/scheme1-01-home.png"><div class="body"><h3>01 Home / 流媒体中心</h3><p>Rail、续播 Hero、推荐和分类横滑。</p></div></article>
+<article class="card design"><img src="../assets/design/scheme1-02-detail.png"><div class="body"><h3>02 Detail / 详情选集</h3><p>预览、主操作、源线路和剧集矩阵。</p></div></article>
+<article class="card design"><img src="../assets/design/scheme1-03-player.png"><div class="body"><h3>03 Player / 全屏播控岛</h3><p>核心控制、进度、画面和音效。</p></div></article>
+<article class="card design"><img src="../assets/design/scheme1-04-search.png"><div class="body"><h3>04 Search / 搜索键盘</h3><p>36 键车机键盘、输入法、语音和结果。</p></div></article>
+<article class="card design"><img src="../assets/design/scheme1-05-settings.png"><div class="body"><h3>05 Settings / 设置中心</h3><p>双栏分类、增强、音效和行为配置。</p></div></article>
+<article class="card design"><img src="../assets/design/scheme1-06-live.png"><div class="body"><h3>06 Live / 直播 EPG</h3><p>频道、EPG、预览、换源和全屏。</p></div></article>
+</div>
+<h2>完整页面证据 · BDF3F447</h2>
+<div class="grid">
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-home.png"><div class="body"><h3>Home</h3><span class="tag">final-bdf3f447 comprehensive evidence</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-category.png"><div class="body"><h3>Home / 分类专题</h3><span class="tag">Home pager state</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-search.png"><div class="body"><h3>Search</h3><span class="tag">input and result page</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-fastsearch.png"><div class="body"><h3>Fast Search</h3><span class="tag">aggregated search</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-detail.png"><div class="body"><h3>Detail</h3><span class="tag">preview/source/episode</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-player-controls.png"><div class="body"><h3>Player controls</h3><span class="tag">core playback chrome</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-player-more.png"><div class="body"><h3>Player More</h3><span class="tag">advanced horizontal layer</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-history.png"><div class="body"><h3>History</h3><span class="tag">history page</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-collect.png"><div class="body"><h3>Collect</h3><span class="tag">collection page</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-localfile.png"><div class="body"><h3>Local File</h3><span class="tag">configuration file picker</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-push.png"><div class="body"><h3>Push</h3><span class="tag">QR/LAN push entry</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-live.png"><div class="body"><h3>Live</h3><span class="tag">live preview</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-live-channels.png"><div class="body"><h3>Live channels</h3><span class="tag">channel group and list</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/pages/page-live-settings.png"><div class="body"><h3>Live settings</h3><span class="tag">live settings panel</span></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-live-fullscreen.png"><div class="body"><h3>Live fullscreen</h3><span class="tag">fullscreen state</span></div></article>
+</div>
+<h2>设置七分类</h2>
+<div class="grid">
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-settings-category-0.png"><div class="body"><h3>01 画面色彩与超分引擎</h3><p>预设、SGSR1、时域平滑。</p></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-settings-category-1.png"><div class="body"><h3>02 座舱声场与音效</h3><p>EQ、低频和虚拟声场。</p></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-settings-category-2.png"><div class="body"><h3>03 播放解码与后台行为</h3><p>播放器、解码和后台音频。</p></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-settings-category-3.png"><div class="body"><h3>04 触控手势与长按倍速</h3><p>触控、D-pad、长按开关。</p></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-settings-category-4.png"><div class="body"><h3>05 双模应用内返回控件</h3><p>返回模式、皮肤、位置和触感。</p></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-settings-category-5.png"><div class="body"><h3>06 订阅源与多仓管理</h3><p>配置地址、历史和首页站源。</p></div></article>
+<article class="card evidence"><img src="../assets/evidence/final-bdf3f447/ux3k/ux-settings-category-6.png"><div class="body"><h3>07 关于 TVBox</h3><p>关于、备份恢复和能力说明。</p></div></article>
+</div>
+<h2>当前轮页面对照 · 4587C0C3</h2>
+<div class="grid">
+<article class="card current"><img src="../assets/evidence/current-final-4587c0c3/final-home.png"><div class="body"><h3>Home · current round</h3></div></article>
+<article class="card current"><img src="../assets/evidence/current-final-4587c0c3/search.png"><div class="body"><h3>Search · current round</h3></div></article>
+<article class="card current"><img src="../assets/evidence/current-final-4587c0c3/live.png"><div class="body"><h3>Live · current round</h3></div></article>
+<article class="card current"><img src="../assets/evidence/current-final-4587c0c3/history.png"><div class="body"><h3>History · current round</h3></div></article>
+<article class="card current"><img src="../assets/evidence/current-final-4587c0c3/collect-rerun.png"><div class="body"><h3>Collect · current round</h3></div></article>
+<article class="card current"><img src="../assets/evidence/current-final-4587c0c3/push-rerun.png"><div class="body"><h3>Push · current round</h3></div></article>
+</div>
+<h2>V2 最终运行证据 · 2EDB3147</h2>
+<p style="overflow-wrap:anywhere;word-break:break-word">APK SHA-256: 2EDB3147385C2D5639DE35E6A9CB7A56C4FBC4F571D5D4C3F03A6C57E888CD35 · Installed base APK SHA matches · CAR_DISPLAY_PASS · 2880×1620 / 160 dpi</p>
+<div class="grid">
+<article class="card current"><img alt="V2 Home" src="../assets/evidence/current-v2-final-2edb3147/home.png"><div class="body"><h3>Home</h3><span class="tag">final V2 SHA</span></div></article>
+<article class="card current"><img alt="Home before voice search" src="../assets/evidence/current-v2-final-2edb3147/home-voice-before.png"><div class="body"><h3>Home · Voice entry</h3><span class="tag">before touch</span></div></article>
+<article class="card current"><img alt="Search opened from voice" src="../assets/evidence/current-v2-final-2edb3147/home-voice-after.png"><div class="body"><h3>Search · Voice route</h3><span class="tag">same PID · no crash</span></div></article>
+<article class="card current"><img alt="Search page" src="../assets/evidence/current-v2-final-2edb3147/search.png"><div class="body"><h3>Search</h3><span class="tag">no source results claimed</span></div></article>
+<article class="card current"><img alt="Search field before key input" src="../assets/evidence/current-v2-final-2edb3147/search-input-before.png"><div class="body"><h3>Search · Before input</h3></div></article>
+<article class="card current"><img alt="Search field after A key input" src="../assets/evidence/current-v2-final-2edb3147/search-input-after.png"><div class="body"><h3>Search · A entered</h3><span class="tag">etSearch contains A</span></div></article>
+<article class="card current"><img alt="Picture settings" src="../assets/evidence/current-v2-final-2edb3147/settings-0-picture.png"><div class="body"><h3>01 Picture</h3></div></article>
+<article class="card current"><img alt="Audio settings" src="../assets/evidence/current-v2-final-2edb3147/settings-1-audio.png"><div class="body"><h3>02 Audio</h3></div></article>
+<article class="card current"><img alt="Playback settings" src="../assets/evidence/current-v2-final-2edb3147/settings-2-playback.png"><div class="body"><h3>03 Playback</h3></div></article>
+<article class="card current"><img alt="Touch settings" src="../assets/evidence/current-v2-final-2edb3147/settings-3-touch.png"><div class="body"><h3>04 Touch</h3></div></article>
+<article class="card current"><img alt="In-app Back settings" src="../assets/evidence/current-v2-final-2edb3147/settings-4-back.png"><div class="body"><h3>05 In-app Back</h3></div></article>
+<article class="card current"><img alt="Source settings" src="../assets/evidence/current-v2-final-2edb3147/settings-5-sources.png"><div class="body"><h3>06 Sources</h3></div></article>
+<article class="card current"><img alt="About settings" src="../assets/evidence/current-v2-final-2edb3147/settings-6-about.png"><div class="body"><h3>07 About</h3></div></article>
+<article class="card current"><img alt="Home Settings entry" src="../assets/evidence/current-v2-final-2edb3147/home-settings-before.png"><div class="body"><h3>Home · Settings entry</h3></div></article>
+<article class="card current"><img alt="Settings opened from Home" src="../assets/evidence/current-v2-final-2edb3147/settings-route.png"><div class="body"><h3>Settings route</h3></div></article>
+<article class="card current"><img alt="Home after Settings Back" src="../assets/evidence/current-v2-final-2edb3147/settings-back-after.png"><div class="body"><h3>Settings · Back to Home</h3><span class="tag">same PID</span></div></article>
+<article class="card current"><img alt="History page" src="../assets/evidence/current-v2-final-2edb3147/history.png"><div class="body"><h3>History</h3></div></article>
+<article class="card current"><img alt="Collect page" src="../assets/evidence/current-v2-final-2edb3147/collect.png"><div class="body"><h3>Collect</h3></div></article>
+<article class="card current"><img alt="Push page" src="../assets/evidence/current-v2-final-2edb3147/push.png"><div class="body"><h3>Push</h3></div></article>
+<article class="card current"><img alt="Local file page" src="../assets/evidence/current-v2-final-2edb3147/localfile.png"><div class="body"><h3>Local File</h3></div></article>
+<article class="card current"><img alt="Live no-source state" src="../assets/evidence/current-v2-final-2edb3147/live.png"><div class="body"><h3>Live · Empty source</h3><span class="tag">not a content pass</span></div></article>
+<article class="card current"><img alt="Detail no-source state" src="../assets/evidence/current-v2-final-2edb3147/detail.png"><div class="body"><h3>Detail · No item</h3><span class="tag">not a playback pass</span></div></article>
+</div>
+<div class="notice">Geometry: 17/22 snapshots have an interactive node under 90 px; no partial bounds. See the evidence geometry.json for node IDs and bounds. No valid media fixture was available, so playback/enhancement visuals are not included in this SHA set.</div>
+<h2>前后对比</h2>
+<div class="grid">
+<article class="card"><div class="body"><h3>Home</h3><div class="compare"><figure><img src="../assets/evidence/before-823b6448/ux-home.png"><figcaption>before · 823b...</figcaption></figure><figure><img src="../assets/evidence/current-final-4587c0c3/final-home.png"><figcaption>after · 4587...</figcaption></figure></div></div></article>
+<article class="card"><div class="body"><h3>Search</h3><div class="compare"><figure><img src="../assets/evidence/before-823b6448/ux-search-results.png"><figcaption>before · 823b...</figcaption></figure><figure><img src="../assets/evidence/current-final-4587c0c3/search.png"><figcaption>after · 4587...</figcaption></figure></div></div></article>
+<article class="card"><div class="body"><h3>Settings</h3><div class="compare"><figure><img src="../assets/evidence/before-823b6448/ux-settings-picture.png"><figcaption>before · 823b...</figcaption></figure><figure><img src="../assets/evidence/current-final-4587c0c3/settings-1-picture.png"><figcaption>after · 4587...</figcaption></figure></div></div></article>
+<article class="card"><div class="body"><h3>Live</h3><div class="compare"><figure><img src="../assets/evidence/before-823b6448/ux-live.png"><figcaption>before · 823b...</figcaption></figure><figure><img src="../assets/evidence/current-final-4587c0c3/live.png"><figcaption>after · 4587...</figcaption></figure></div></div></article>
+</div>
+<h2>设计文档</h2>
+<div class="links"><a href="../docs/00-framework.md">产品框架</a><a href="../docs/01-information-architecture.md">信息架构</a><a href="../docs/02-page-specs.md">页面设计说明</a><a href="../docs/03-interaction-flows.md">使用路径</a><a href="../docs/04-state-and-navigation.md">状态机与返回</a><a href="../docs/05-design-system.md">设计系统</a><a href="../docs/06-frontend-implementation-plan.md">前端实现方案</a><a href="../docs/08-evidence-index.md">证据索引</a></div>
+<footer>Offline package. No network assets. No source code included. No upload performed.</footer>
+</main>
+</body>
+</html>
