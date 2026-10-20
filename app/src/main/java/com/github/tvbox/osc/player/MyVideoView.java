@@ -61,6 +61,20 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
         return 0f;
     }
 
+    public float getRendererSourceFrameRate() {
+        if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
+            return ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).getSourceFrameRate();
+        }
+        return getSourceFrameRate();
+    }
+
+    public float getRendererOutputFrameRate() {
+        if (mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView) {
+            return ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).getOutputFrameRate();
+        }
+        return 0f;
+    }
+
     /**
      * Car edition: audio session id of the current engine (EXO or IJK), 0 when the engine is not
      * running or does not expose one (the system player is intentionally unsupported).
@@ -122,20 +136,33 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
 
     public String getVideoEnhancementRuntimeStatus() {
         VideoEnhanceConfig effective = getVideoEnhancementConfig();
-        int[] source = getVideoSize();
-        View output = mRenderView == null ? this : mRenderView.getView();
         boolean gl = mRenderView instanceof xyz.doikki.videoplayer.render.GlEnhanceRenderView;
+        xyz.doikki.videoplayer.render.GlEnhanceRenderView renderer = gl
+                ? (xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView : null;
         boolean hdrBypass = isHdrVideo() && CarEnhance.videoMode() != xyz.doikki.videoplayer.render.VideoEnhancePreset.ORIGINAL;
-        boolean srEligible = gl && xyz.doikki.videoplayer.render.VideoPostProcessPolicy.superResolutionActive(
-                CarEnhance.videoSrEnabled(), source[0], source[1], output.getWidth(), output.getHeight());
-        String srState = !CarEnhance.videoSrEnabled() ? "关闭"
-                : !gl ? "renderer 不支持"
-                : srEligible ? "已提交到 SGSR1 输出分支"
-                : "等待低分辨率放大条件";
-        String interpState = !CarEnhance.videoInterpEnabled() ? "关闭"
-                : !gl ? "renderer 不支持"
-                : isPlaying() ? "播放中，按相邻有效帧混合" : "开启，播放时生效";
-        return "请求：" + xyz.doikki.videoplayer.render.VideoEnhancePreset.forMode(CarEnhance.videoMode()).name
+        String colourState = effective.preset.id == xyz.doikki.videoplayer.render.VideoEnhancePreset.ORIGINAL
+                ? "原画"
+                : renderer != null && renderer.isColourActive() ? "已生效" : "等待画面";
+        String srState;
+        if (!CarEnhance.videoSrEnabled()) srState = "关闭";
+        else if (renderer == null) srState = "renderer 不支持";
+        else if (!renderer.isPostProcessSupported()) {
+            String failure = renderer.getPostProcessFailure();
+            srState = failure.isEmpty() ? "等待 GL 初始化" : "失败：" + failure;
+        }
+        else if (renderer.isSuperResolutionActive()) srState = "已生效";
+        else srState = "等待视频帧";
+        String interpState;
+        if (!CarEnhance.videoInterpEnabled()) interpState = "关闭";
+        else if (renderer == null) interpState = "renderer 不支持";
+        else if (!renderer.isPostProcessSupported()) {
+            String failure = renderer.getPostProcessFailure();
+            interpState = failure.isEmpty() ? "等待 GL 初始化" : "失败：" + failure;
+        }
+        else if (renderer.isInterpolationActive()) interpState = "已生效";
+        else interpState = "等待第二个源帧";
+        return "滤镜：" + colourState
+                + " · 请求：" + xyz.doikki.videoplayer.render.VideoEnhancePreset.forMode(CarEnhance.videoMode()).name
                 + " · 实际 renderer：" + effective.preset.name + (hdrBypass ? "（HDR 旁路调色）" : "")
                 + " · SGSR1：" + srState + " · 时域平滑：" + interpState;
     }

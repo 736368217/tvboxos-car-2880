@@ -38,7 +38,7 @@ public final class Car6PostProcessTest {
         timing.onSourceFrame(t,t);check(timing.blendAlpha(t,true,true)==0,"First frame no blend");
         timing.onSourceFrame(t+step,t+step);
         check(Math.abs(timing.blendAlpha(t+step,true,true)-.28f)<.00001f,"Max previous weight");
-        check(timing.blendAlpha(t+step+20_000_000L,true,true)==0,"Hold current after phase");
+        check(timing.blendAlpha(t+step+20_000_000L,true,true)>0,"Temporal blend remains active through source interval");
         check(timing.blendAlpha(t+step,true,false)==0 && timing.blendAlpha(t+step,false,true)==0,"Pause/off no blend");
         timing.onSourceFrame(t-1,t+2*step);check(timing.blendAlpha(t+2*step,true,true)==0,"Seek backwards cuts history");
         timing.reset();check(timing.blendAlpha(t,true,true)==0,"Explicit seek reset");
@@ -49,8 +49,8 @@ public final class Car6PostProcessTest {
         check(VideoPostProcessPolicy.frameBufferBytes(3840,2160)==66_355_200L,"4K actual bytes");
         check(VideoPostProcessPolicy.superResolutionActive(true,1920,1080,2880,1620),"1080p->3K SR");
         check(!VideoPostProcessPolicy.superResolutionActive(false,640,360,2880,1620),"SR off");
-        check(!VideoPostProcessPolicy.superResolutionActive(true,3840,2160,2880,1620),"4K SR bypass");
-        check(!VideoPostProcessPolicy.superResolutionActive(true,1920,1080,1057,594),"No SR in small viewport");
+        check(VideoPostProcessPolicy.superResolutionActive(true,3840,2160,2880,1620),"4K SR remains active when output exists");
+        check(VideoPostProcessPolicy.superResolutionActive(true,1920,1080,1057,594),"SR remains active at 1:1 or smaller viewport");
         check(VideoPostProcessPolicy.enabledFromPreference(null,true),"New switch default on");
         check(!VideoPostProcessPolicy.enabledFromPreference(0,true),"Persisted off");
         System.out.println("PASS: exact old/new audio and video curves, immutable data, linked SGSR sharpness, temporal cut/pause/seek, 4K policy and switches");

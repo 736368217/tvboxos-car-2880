@@ -21,6 +21,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -43,6 +44,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private final MeasureHelper mMeasureHelper = new MeasureHelper();
     private final Handler mMain = new Handler(Looper.getMainLooper());
     private final AtomicBoolean mFrameAvailable = new AtomicBoolean();
+    private final AtomicLong mSourceFrameArrivals = new AtomicLong();
     private final AtomicBoolean mResetHistory = new AtomicBoolean();
     private final FloatBuffer mPositions = buffer(-1,-1, 1,-1, -1,1, 1,1);
     private final FloatBuffer mCoordinates = buffer(0,0, 1,0, 0,1, 1,1);
@@ -85,6 +87,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private int cPosition, cCoordinate, cMatrix, cSat, cCon, cBri, cRgb;
     private int oPosition, oCoordinate, oViewport, oParams;
     private long mSourceFrames, mOutputFrames, mMixedOutputs;
+    private volatile float mSourceFps, mOutputFps;
+    private volatile boolean mRuntimeSrActive, mRuntimeInterpolationActive, mRuntimeColourActive;
+    private volatile long mLastBlendNs;
+    private volatile String mPostProcessFailure = "";
     private long mLastOutputNs, mStatsStartNs, mStatsSource, mStatsOutput, mStatsMixed;
     private boolean mLoggedSr, mLastSrActive;
     private int mDrawErrors;
@@ -281,7 +287,14 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
 
     @Override public void setVideoSize(int width, int height) {
         if (width <= 0 || height <= 0) return;
-        if (mVideoWidth != width || mVideoHeight != height) mResetHistory.set(true);
+        boolean sizeChanged = mVideoWidth != width || mVideoHeight != height;
+        if (sizeChanged) {
+            mResetHistory.set(true);
+            if (mPostProcessFailure.startsWith("FBO ")) {
+                mPostProcessFailure = "";
+                mFailedWidth = mFailedHeight = 0;
+            }
+        }
         mVideoWidth = width;
         mVideoHeight = height;
         mMeasureHelper.setVideoSize(width, height);
@@ -343,9 +356,19 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         Log.i(TAG, "runtime_config requested " + configuration);
     }
 
+    private boolean isRuntimePostProcessAvailable() {
+        return mPostProcessSupported && mPostProcessFailure.length() == 0;
+    }
     private boolean shouldAnimate() {
-        return mConfiguration.interpolation && mPostProcessSupported && mPlaybackActive && mAttached
+        return mConfiguration.interpolation && isRuntimePostProcessAvailable() && mPlaybackActive && mAttached
                 && mWindowVisible && !mViewPaused && !mReleased && !mReleaseRequested;
+    }
+    private void resetFpsStats() {
+        mSourceFps = mOutputFps = 0f;
+        mStatsStartNs = mLastOutputNs = 0;
+        mStatsSource = mStatsOutput = mStatsMixed = 0;
+        mSourceFrameArrivals.set(0);
+        mLastBlendNs = 0;
     }
     private void updateRenderMode() {
         if (Looper.myLooper() != Looper.getMainLooper()) { mMain.post(this::updateRenderMode); return; }
@@ -373,12 +396,14 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     }
     @Override public void onPause() {
         mViewPaused = true;
+        resetFpsStats();
         updateRenderMode();
         super.onPause();
     }
     @Override public void onResume() {
         super.onResume();
         mViewPaused = false;
+        resetFpsStats();
         resetFrameHistory();
         updateRenderMode();
     }
@@ -470,11 +495,21 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         releaseGlResources();
         mDrawErrors = 0;
         mSourceFrames = mOutputFrames = mMixedOutputs = 0;
+        mSourceFps = mOutputFps = 0f;
+        mSourceFrameArrivals.set(0);
+        mLastBlendNs = 0;
+        mRuntimeSrActive = mRuntimeInterpolationActive = mRuntimeColourActive = false;
+        mPostProcessFailure = "";
         mStatsStartNs = mLastOutputNs = 0;
         mStatsSource = mStatsOutput = mStatsMixed = 0;
         mFailedWidth = mFailedHeight = 0;
+        mPostProcessSupported = false;
+        mDrawConfiguration = null;
         mColourProgram = VideoShaders.createProgram(VideoShaders.OES_VERTEX, VideoShaders.colourFragment(true));
-        if (mColourProgram == 0) throw new IllegalStateException("OES colour shader unavailable");
+        if (mColourProgram == 0) {
+            mPostProcessFailure = "OES shader 编译或链接失败";
+            throw new IllegalStateException("OES colour shader unavailable");
+        }
         cPosition = GLES20.glGetAttribLocation(mColourProgram, "aPosition");
         cCoordinate = GLES20.glGetAttribLocation(mColourProgram, "aTexCoord");
         cMatrix = GLES20.glGetUniformLocation(mColourProgram, "uTexMatrix");
@@ -494,7 +529,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             GLES20.glUseProgram(mOutputProgram);
             GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uCurrFrameTex"), 0);
             GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uPrevFrameTex"), 1);
-        } else Log.w(TAG, "POSTPROCESS_FALLBACK output shader failed; direct OES colour only");
+        } else {
+            mPostProcessFailure = "输出 shader 编译或链接失败";
+            Log.w(TAG, "POSTPROCESS_FALLBACK output shader failed; direct OES colour only");
+        }
         createProducerSurface();
         Log.i(TAG, "GL ready version=" + GLES20.glGetString(GLES20.GL_VERSION)
                 + " renderer=" + GLES20.glGetString(GLES20.GL_RENDERER));
@@ -503,6 +541,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     }
     @Override public void onSurfaceChanged(GL10 gl, int width, int height) {
         mViewportWidth = width;
+        if (mPostProcessFailure.startsWith("FBO ")) {
+            mPostProcessFailure = "";
+            mFailedWidth = mFailedHeight = 0;
+        }
         mViewportHeight = height;
         mLoggedSr = false;
         requestRender();
@@ -527,6 +569,11 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                 mDrawConfiguration = configuration;
                 mLoggedSr = false;
                 mFboHasFrame = false;
+                if (mPostProcessSupported && (mPostProcessFailure.startsWith("FBO ") || "GL 绘制错误".equals(mPostProcessFailure))) {
+                    mPostProcessFailure = "";
+                    mFailedWidth = mFailedHeight = 0;
+                    mDrawErrors = 0;
+                }
                 Log.i(TAG, "runtime_config applied (GL thread) " + configuration);
                 logConfiguration(configuration);
             }
@@ -541,7 +588,9 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                 texture.getTransformMatrix(mTextureMatrix);
                 mHasFrame = true;
                 mSourceFrames++;
-                mTiming.onSourceFrame(texture.getTimestamp(), System.nanoTime());
+                long arrivalNs = mFrameArrivalNs;
+                if (arrivalNs <= 0) arrivalNs = System.nanoTime();
+                mTiming.onSourceFrame(texture.getTimestamp(), arrivalNs);
             }
             int width = mViewportWidth, height = mViewportHeight;
             if (width <= 0 || height <= 0) return;
@@ -550,7 +599,11 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             GLES20.glClearColor(0, 0, 0, 1);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
             if (!mHasFrame) return;
-            boolean postProcess = mPostProcessSupported && (configuration.superResolution || configuration.interpolation);
+            boolean postProcessRequested = configuration.superResolution || configuration.interpolation;
+            boolean postProcess = isRuntimePostProcessAvailable() && postProcessRequested;
+            mRuntimeColourActive = configuration.preset.id != VideoEnhancePreset.ORIGINAL;
+            mRuntimeSrActive = false;
+            mRuntimeInterpolationActive = false;
             if (postProcess) {
                 int sw = mVideoWidth > 0 ? mVideoWidth : width;
                 int sh = mVideoHeight > 0 ? mVideoHeight : height;
@@ -568,9 +621,14 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                     }
                     float alpha = mHasPrevious ? mTiming.blendAlpha(System.nanoTime(), configuration.interpolation, shouldAnimate()) : 0;
                     boolean sr = VideoPostProcessPolicy.superResolutionActive(configuration.superResolution,
-                            mVideoWidth, mVideoHeight, width, height);
+                            sw, sh, width, height);
                     drawOutput(width, height, sr, alpha, configuration.preset);
-                    if (alpha > 0.001f) mMixedOutputs++;
+                    mRuntimeSrActive = sr;
+                    if (alpha > 0.001f) {
+                        mRuntimeInterpolationActive = configuration.interpolation;
+                        mLastBlendNs = System.nanoTime();
+                        mMixedOutputs++;
+                    }
                     if (!mLoggedSr || mLastSrActive != sr) {
                         mLoggedSr = true;
                         mLastSrActive = sr;
@@ -592,6 +650,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             if (mDrawErrors++ < 3) Log.e(TAG, "draw failed", error);
             if (mDrawErrors == 3) {
                 mPostProcessSupported = false;
+                mPostProcessFailure = "GL 绘制错误";
                 releaseFrameBuffers();
                 updateRenderMode();
                 Log.w(TAG, "POSTPROCESS_FALLBACK repeated draw errors; direct OES colour only");
@@ -602,6 +661,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     @Override public void onFrameAvailable(SurfaceTexture texture) {
         if (mReleased || texture != mSurfaceTexture) return;
         mFrameArrivalNs = System.nanoTime();
+        mSourceFrameArrivals.incrementAndGet();
         mFrameAvailable.set(true);
         requestRender();
     }
@@ -646,8 +706,8 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private void failFrameBuffers(int width,int height,String reason) {
         releaseFrameBuffers();
         mFailedWidth=width; mFailedHeight=height;
-        Log.w(TAG,"POSTPROCESS_FALLBACK FBO "+width+"x"+height+" "+reason);
-        mPostProcessSupported = false;
+        mPostProcessFailure = "FBO " + width + "x" + height + " " + reason;
+        Log.w(TAG,"POSTPROCESS_FALLBACK " + mPostProcessFailure);
         updateRenderMode();
     }
     private void drawColour(int framebuffer,int width,int height,VideoEnhancePreset p) {
@@ -738,11 +798,23 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         long elapsed=now-mStatsStartNs;
         if (elapsed<2_000_000_000L) return;
         float seconds=elapsed/1_000_000_000f;
-        Log.i(TAG,"frame_stats seconds="+seconds+" sourceFps="+(mSourceFrames-mStatsSource)/seconds
-                +" outputFps="+(mOutputFrames-mStatsOutput)/seconds+" blended="+(mMixedOutputs-mStatsMixed)
+        long sourceArrivals = mSourceFrameArrivals.get();
+        mSourceFps=(sourceArrivals-mStatsSource)/seconds;
+        mOutputFps=(mOutputFrames-mStatsOutput)/seconds;
+        Log.i(TAG,"frame_stats seconds="+seconds+" sourceFps="+mSourceFps
+                +" outputFps="+mOutputFps+" blended="+(mMixedOutputs-mStatsMixed)
                 +" intervalNs="+mTiming.frameIntervalNs()+" active="+mPlaybackActive);
-        mStatsStartNs=now; mStatsSource=mSourceFrames; mStatsOutput=mOutputFrames; mStatsMixed=mMixedOutputs;
+        mStatsStartNs=now; mStatsSource=sourceArrivals; mStatsOutput=mOutputFrames; mStatsMixed=mMixedOutputs;
     }
+    public float getSourceFrameRate() { return mSourceFps; }
+    public float getOutputFrameRate() { return mOutputFps; }
+    public boolean isSuperResolutionActive() { return mRuntimeSrActive; }
+    public boolean isInterpolationActive() {
+        return mRuntimeInterpolationActive || (mLastBlendNs > 0 && System.nanoTime() - mLastBlendNs < 2_000_000_000L);
+    }
+    public boolean isColourActive() { return mRuntimeColourActive; }
+    public boolean isPostProcessSupported() { return isRuntimePostProcessAvailable(); }
+    public String getPostProcessFailure() { return mPostProcessFailure; }
     private void releaseFrameBuffers() {
         boolean allocated=mFbos[0]!=0 || mFrameTextures[0]!=0;
         GLES20.glDeleteFramebuffers(2,mFbos,0); GLES20.glDeleteTextures(2,mFrameTextures,0);

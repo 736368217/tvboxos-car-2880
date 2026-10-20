@@ -42,9 +42,14 @@ public final class VideoPostProcessPolicy {
     public float blendAlpha(long nowNs, boolean enabled, boolean playing) {
         if (!enabled || !playing || !previousAvailable) return 0f;
         long elapsed = nowNs - lastArrivalNs;
-        if (elapsed < 0) return 0f;
-        float phase = (float) elapsed / averageIntervalNs;
-        return phase < 0.35f ? MAX_BLEND_ALPHA * (1f - phase / 0.35f) : 0f;
+        if (elapsed <= 0) return MAX_BLEND_ALPHA;
+        long intervalNs = Math.max(MIN_INTERVAL_NS, averageIntervalNs);
+        float phase = (float) elapsed / intervalNs;
+        if (phase >= 1f) return 0f;
+        // Keep a bounded previous-frame contribution over the whole source interval so
+        // 24/25/30fps material produces a visible 60Hz temporal output path.
+        float smooth = phase * phase * (3f - 2f * phase);
+        return MAX_BLEND_ALPHA * (1f - smooth);
     }
 
     public long frameIntervalNs() { return averageIntervalNs; }
@@ -56,8 +61,9 @@ public final class VideoPostProcessPolicy {
 
     public static boolean superResolutionActive(boolean enabled, int sourceWidth, int sourceHeight,
                                                  int viewportWidth, int viewportHeight) {
-        return enabled && sourceWidth > 0 && sourceHeight > 0 && sourceWidth < 2560
-                && (viewportWidth > sourceWidth || viewportHeight > sourceHeight);
+        // SGSR is also useful as an edge reconstruction pass at 1:1 output. Do not
+        // silently disable it merely because the source already covers the viewport.
+        return enabled && sourceWidth > 0 && sourceHeight > 0 && viewportWidth > 0 && viewportHeight > 0;
     }
 
     public static long frameBufferBytes(int width, int height) {
@@ -72,4 +78,5 @@ public final class VideoPostProcessPolicy {
         if ("0".equals(value) || "false".equalsIgnoreCase(String.valueOf(value))) return false;
         return defaultValue;
     }
+
 }

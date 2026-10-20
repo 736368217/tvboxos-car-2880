@@ -31,6 +31,7 @@
    <TextView android:id="@+id/curr_time" style="@style/UxSceneText" android:layout_width="190px" android:layout_height="80px" android:gravity="center" android:text="00:00:00" android:textSize="30px"/>
    <SeekBar android:id="@+id/seekBar" android:layout_width="0px" android:layout_weight="1" android:layout_height="88px" android:max="1000" android:maxHeight="16px" android:minHeight="16px" android:progressDrawable="@drawable/shape_player_control_vod_seek" android:thumb="@drawable/shape_player_control_vod_seek_thumb" android:splitTrack="false" android:focusable="true" android:focusableInTouchMode="true" android:nextFocusLeft="@id/seekBar" android:nextFocusRight="@id/seekBar"/>
    <TextView android:id="@+id/total_time" style="@style/UxSceneText" android:layout_width="190px" android:layout_height="80px" android:gravity="center" android:text="00:00:00" android:textSize="30px"/>
+   <TextView android:id="@+id/tv_framerate_bottom" style="@style/UxSceneText" android:layout_width="520px" android:layout_height="80px" android:layout_marginLeft="20px" android:background="@drawable/car_badge_dark" android:gravity="center" android:padding="10px" android:text="片源 -- fps · 输出 -- fps" android:textColor="@color/car_accent_cyan" android:textSize="24px"/>
   </LinearLayout>
   <LinearLayout android:layout_width="match_parent" android:layout_height="132px" android:gravity="center_vertical">
    <TextView android:id="@+id/uxPlayPause" style="@style/UxPlayerButton" android:layout_width="160px" android:layout_height="112px" android:text="暂停" android:contentDescription="播放或暂停"/>

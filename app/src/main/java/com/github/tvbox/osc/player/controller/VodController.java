@@ -247,6 +247,7 @@ public class VodController extends BaseController {
     TextView mCarInterpBtn;
     TextView mCarAudioBtn;
     TextView mVideoFrameRate;
+    TextView mVideoFrameRateBottom;
     private MyVideoView mCarVideoView;
     TextView mPlayerRetry;
     TextView mPlayrefresh;
@@ -373,19 +374,18 @@ public class VodController extends BaseController {
         updateFrameRateDisplay();
     }
     private void updateFrameRateDisplay() {
-        if (mVideoFrameRate == null) return;
-        float sourceFrameRate = mCarVideoView == null ? 0f : mCarVideoView.getSourceFrameRate();
-        if (sourceFrameRate <= 0f || Float.isNaN(sourceFrameRate) || Float.isInfinite(sourceFrameRate)) {
-            mVideoFrameRate.setText("帧率 --");
-            return;
-        }
-        String source = formatFrameRate(sourceFrameRate);
-        if (CarEnhance.videoInterpEnabled()) {
-            mVideoFrameRate.setText("片源 " + source + " fps · 补帧目标 "
-                    + formatFrameRate(VideoPostProcessPolicy.INTERPOLATION_OUTPUT_FPS) + " fps");
-        } else {
-            mVideoFrameRate.setText("片源 " + source + " fps");
-        }
+        if (mVideoFrameRate == null && mVideoFrameRateBottom == null) return;
+        float sourceFrameRate = mCarVideoView == null ? 0f : mCarVideoView.getRendererSourceFrameRate();
+        float outputFrameRate = mCarVideoView == null ? 0f : mCarVideoView.getRendererOutputFrameRate();
+        String source = isUsableFrameRate(sourceFrameRate) ? formatFrameRate(sourceFrameRate) : "--";
+        String output = isUsableFrameRate(outputFrameRate) ? formatFrameRate(outputFrameRate) : "--";
+        String text = "片源 " + source + " fps · 输出 " + output + " fps";
+        if (mVideoFrameRate != null) mVideoFrameRate.setText(text);
+        if (mVideoFrameRateBottom != null) mVideoFrameRateBottom.setText(text);
+    }
+
+    private boolean isUsableFrameRate(float frameRate) {
+        return frameRate > 0f && !Float.isNaN(frameRate) && !Float.isInfinite(frameRate);
     }
 
     private String formatFrameRate(float frameRate) {
@@ -479,6 +479,7 @@ public class VodController extends BaseController {
         mPlayPauseTime = findViewById(R.id.tv_sys_time);
         mPlayLoadNetSpeed = findViewById(R.id.tv_play_load_net_speed);
         mVideoFrameRate = findViewById(R.id.tv_framerate);
+        mVideoFrameRateBottom = findViewById(R.id.tv_framerate_bottom);
         updateFrameRateDisplay();
         bindCarPlaybackControls();
         mVideoSize = findViewById(R.id.tv_videosize);
