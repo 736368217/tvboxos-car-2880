@@ -60,6 +60,15 @@ public final class InAppBackButton {
 
     /** Wake only: never synchronously move a hit box under the initiating page touch. */
     public static void wake(Activity activity) { update(activity, WAKE); }
+    public static void setPlaybackHidden(Activity activity, boolean hidden) {
+        if (activity == null) return;
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            new Handler(Looper.getMainLooper()).post(() -> setPlaybackHidden(activity, hidden));
+            return;
+        }
+        InAppBackHostLayout host = find(activity);
+        if (host != null) host.setPlaybackHidden(hidden);
+    }
 
     public static void release(Activity activity) { update(activity, RELEASE); }
 
@@ -221,16 +230,35 @@ public final class InAppBackButton {
     }
 
     public static boolean isEnabled() { return bool(HawkConfig.IN_APP_BACK, true); }
-    public static String getMode() { return mode(text(HawkConfig.BACK_MODE, HawkConfig.BACK_MODE_EDGE)); }
+    public static String getMode() {
+        String raw = text(HawkConfig.BACK_MODE, "");
+        String normalized = mode(raw);
+        if (!bool(HawkConfig.BACK_MODE_EXPLICIT, false)
+                && (raw.length() == 0 || HawkConfig.BACK_MODE_FLOATING.equals(normalized))) {
+            return HawkConfig.BACK_MODE_EDGE;
+        }
+        return raw.length() == 0 ? HawkConfig.BACK_MODE_EDGE : normalized;
+    }
     public static String getSide() { return side(text(HawkConfig.BACK_SIDE, HawkConfig.BACK_SIDE_LEFT)); }
     public static boolean isLarge() { return bool(HawkConfig.BACK_LARGE, false); }
     public static boolean isHapticEnabled() { return bool(HawkConfig.BACK_HAPTIC, true); }
-    public static boolean isHideOnRoot() { return bool(HawkConfig.BACK_HIDE_ON_ROOT, true); }
-    public static String getEdgeSkin() { return skin(text(HawkConfig.BACK_EDGE_SKIN, HawkConfig.BACK_SKIN_CAPSULE)); }
+    public static boolean isHideOnRoot() { return bool(HawkConfig.BACK_HIDE_ON_ROOT, false); }
+    public static String getEdgeSkin() {
+        String raw = text(HawkConfig.BACK_EDGE_SKIN, "");
+        String normalized = skin(raw);
+        if (!bool(HawkConfig.BACK_EDGE_SKIN_EXPLICIT, false)
+                && (raw.length() == 0 || HawkConfig.BACK_SKIN_CAPSULE.equals(normalized))) {
+            return HawkConfig.BACK_SKIN_TEARDROP;
+        }
+        return raw.length() == 0 ? HawkConfig.BACK_SKIN_TEARDROP : normalized;
+    }
     public static int getHideSeconds() { return validHideSeconds(integer(HawkConfig.BACK_HIDE_SECONDS, 4)); }
 
     public static void setEnabled(Activity a, boolean value) { put(a, HawkConfig.IN_APP_BACK, value); }
-    public static void setMode(Activity a, String value) { put(a, HawkConfig.BACK_MODE, mode(value)); }
+    public static void setMode(Activity a, String value) {
+        Hawk.put(HawkConfig.BACK_MODE_EXPLICIT, true);
+        put(a, HawkConfig.BACK_MODE, mode(value));
+    }
     public static void setSide(Activity a, String value) {
         String next = side(value);
         if (!HawkConfig.BACK_SIDE_BOTH.equals(next)) {
@@ -241,7 +269,10 @@ public final class InAppBackButton {
     public static void setLarge(Activity a, boolean value) { put(a, HawkConfig.BACK_LARGE, value); }
     public static void setHapticEnabled(Activity a, boolean value) { put(a, HawkConfig.BACK_HAPTIC, value); }
     public static void setHideOnRoot(Activity a, boolean value) { put(a, HawkConfig.BACK_HIDE_ON_ROOT, value); }
-    public static void setEdgeSkin(Activity a, String value) { put(a, HawkConfig.BACK_EDGE_SKIN, skin(value)); }
+    public static void setEdgeSkin(Activity a, String value) {
+        Hawk.put(HawkConfig.BACK_EDGE_SKIN_EXPLICIT, true);
+        put(a, HawkConfig.BACK_EDGE_SKIN, skin(value));
+    }
     public static void setHideSeconds(Activity a, int value) { put(a, HawkConfig.BACK_HIDE_SECONDS, validHideSeconds(value)); }
 
     private static <T> void put(Activity activity, String key, T value) {

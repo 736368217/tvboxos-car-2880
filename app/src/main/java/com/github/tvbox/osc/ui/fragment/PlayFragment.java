@@ -2255,6 +2255,8 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
         if (mController != null) {
             mController.setImmersiveFullscreen(fullscreen);
         }
+        Activity activity = getActivity();
+        if (activity != null) com.github.tvbox.osc.car.InAppBackButton.setPlaybackHidden(activity, fullscreen);
     }
 
     public void pauseForHidden() {

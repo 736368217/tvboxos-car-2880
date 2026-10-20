@@ -7,7 +7,7 @@
    <TextView android:id="@+id/tv_info_name1" style="@style/UxSceneText" android:layout_width="match_parent" android:layout_height="65px" android:textSize="36px" android:textStyle="bold" android:maxLines="1"/>
    <LinearLayout android:layout_width="match_parent" android:layout_height="60px" android:orientation="horizontal">
     <TextView android:id="@+id/tv_videosize" style="@style/UxSceneText" android:layout_height="60px" android:background="@drawable/car_badge_dark" android:gravity="center" android:padding="10px" android:tag="vod_video_size" android:textSize="24px"/>
-    <TextView android:id="@+id/tv_framerate" style="@style/UxSceneText" android:layout_height="60px" android:layout_marginLeft="20px" android:background="@drawable/car_badge_dark" android:gravity="center" android:padding="10px" android:text="帧率 --" android:textColor="@color/car_accent_cyan" android:textSize="24px"/>
+    <TextView android:id="@+id/tv_framerate" style="@style/UxSceneText" android:layout_height="60px" android:layout_marginLeft="20px" android:background="@drawable/car_badge_dark" android:gravity="center" android:padding="10px" android:text="片源 -- fps · 输出 -- fps" android:textColor="@color/car_accent_cyan" android:textSize="24px"/>
    </LinearLayout>
   </LinearLayout>
  </LinearLayout>
@@ -26,37 +26,40 @@
  <com.github.tvbox.osc.subtitle.widget.SimpleSubtitleView android:id="@+id/subtitle_view" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="bottom" android:padding="30px" android:gravity="center" android:textColor="#FFFFFF" android:textSize="40px"/>
  <com.google.android.exoplayer2.ui.SubtitleView android:id="@+id/exo_subtitle_view" android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="gone"/>
  <com.github.tvbox.osc.subtitle.widget.SimpleSubtitleView android:id="@+id/lyric_view" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:textColor="#FFFFFF" android:textSize="40px" android:visibility="gone"/>
- <LinearLayout android:id="@+id/bottom_container" android:layout_width="2760px" android:layout_height="wrap_content" android:layout_marginLeft="60px" android:layout_gravity="bottom" android:layout_marginBottom="60px" android:background="@drawable/car_surface_card_raised" android:padding="16px" android:orientation="vertical" android:visibility="gone">
+ <LinearLayout android:id="@+id/bottom_container" android:layout_width="2760px" android:layout_height="wrap_content" android:layout_marginLeft="60px" android:layout_gravity="bottom" android:layout_marginBottom="60px" android:background="@drawable/car_surface_card_raised" android:padding="18px" android:orientation="vertical" android:visibility="gone">
   <LinearLayout android:layout_width="match_parent" android:layout_height="88px" android:gravity="center_vertical">
    <TextView android:id="@+id/curr_time" style="@style/UxSceneText" android:layout_width="190px" android:layout_height="80px" android:gravity="center" android:text="00:00:00" android:textSize="30px"/>
    <SeekBar android:id="@+id/seekBar" android:layout_width="0px" android:layout_weight="1" android:layout_height="88px" android:max="1000" android:maxHeight="16px" android:minHeight="16px" android:progressDrawable="@drawable/shape_player_control_vod_seek" android:thumb="@drawable/shape_player_control_vod_seek_thumb" android:splitTrack="false" android:focusable="true" android:focusableInTouchMode="true" android:nextFocusLeft="@id/seekBar" android:nextFocusRight="@id/seekBar"/>
    <TextView android:id="@+id/total_time" style="@style/UxSceneText" android:layout_width="190px" android:layout_height="80px" android:gravity="center" android:text="00:00:00" android:textSize="30px"/>
-   <TextView android:id="@+id/tv_framerate_bottom" style="@style/UxSceneText" android:layout_width="520px" android:layout_height="80px" android:layout_marginLeft="20px" android:background="@drawable/car_badge_dark" android:gravity="center" android:padding="10px" android:text="片源 -- fps · 输出 -- fps" android:textColor="@color/car_accent_cyan" android:textSize="24px"/>
+   <TextView android:id="@+id/tv_framerate_bottom" style="@style/UxSceneText" android:layout_width="520px" android:layout_height="80px" android:layout_marginLeft="24px" android:background="@drawable/car_badge_blue" android:gravity="center" android:padding="10px" android:text="片源 -- fps · 输出 -- fps" android:textColor="@color/aether_text_primary" android:textSize="24px"/>
   </LinearLayout>
+  <View android:layout_width="match_parent" android:layout_height="2px" android:layout_marginTop="8px" android:layout_marginBottom="8px" android:background="@color/car_outline_soft"/>
   <LinearLayout android:layout_width="match_parent" android:layout_height="132px" android:gravity="center_vertical">
-   <TextView android:id="@+id/uxPlayPause" style="@style/UxPlayerButton" android:layout_width="160px" android:layout_height="112px" android:text="暂停" android:contentDescription="播放或暂停"/>
-   <TextView android:id="@+id/uxRewind" style="@style/UxPlayerButton" android:layout_width="170px" android:layout_height="112px" android:layout_marginLeft="12px" android:text="后退 15 秒" android:contentDescription="后退 15 秒"/>
-   <TextView android:id="@+id/uxForward" style="@style/UxPlayerButton" android:layout_width="170px" android:layout_height="112px" android:layout_marginLeft="12px" android:text="前进 15 秒" android:contentDescription="前进 15 秒"/>
-   <TextView android:id="@+id/play_pre" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="112px" android:layout_marginLeft="12px" android:text="上一集" android:contentDescription="上一集"/>
-   <TextView android:id="@+id/play_next" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="112px" android:layout_marginLeft="12px" android:text="下一集" android:contentDescription="下一集"/>
-   <TextView android:id="@+id/play_car_video" style="@style/UxPlayerButton" android:layout_width="220px" android:layout_height="112px" android:layout_marginLeft="12px" android:text="画面预设" android:textColor="@color/aether_cyan_focus"/>
-   <TextView android:id="@+id/play_car_audio" style="@style/UxPlayerButton" android:layout_width="220px" android:layout_height="112px" android:layout_marginLeft="12px" android:text="座舱音效" android:textColor="@color/aether_amber_atmos"/>
+   <TextView android:id="@+id/uxPlayPause" style="@style/UxPlayerPrimaryButton" android:layout_width="210px" android:layout_height="116px" android:text="暂停" android:contentDescription="播放或暂停"/>
+   <TextView android:id="@+id/uxRewind" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="后退 15 秒" android:contentDescription="后退 15 秒"/>
+   <TextView android:id="@+id/uxForward" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="前进 15 秒" android:contentDescription="前进 15 秒"/>
+   <TextView android:id="@+id/play_pre" style="@style/UxPlayerButton" android:layout_width="160px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="上一集" android:contentDescription="上一集"/>
+   <TextView android:id="@+id/play_next" style="@style/UxPlayerButton" android:layout_width="160px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="下一集" android:contentDescription="下一集"/>
+   <TextView android:id="@+id/uxEpisodes" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="选集" android:contentDescription="选择剧集"/>
    <Space android:layout_width="0px" android:layout_height="1px" android:layout_weight="1"/>
-   <TextView android:id="@+id/play_speed" style="@style/UxPlayerButton" android:layout_width="110px" android:layout_height="96px" android:layout_marginLeft="10px" android:text="1.0x"/>
-   <TextView android:id="@+id/uxEpisodes" style="@style/UxPlayerButton" android:layout_width="110px" android:layout_height="96px" android:layout_marginLeft="10px" android:text="选集"/>
-   <TextView android:id="@+id/play_scale" style="@style/UxPlayerButton" android:layout_width="110px" android:layout_height="96px" android:layout_marginLeft="10px" android:text="画面"/>
-   <TextView android:id="@+id/uxChangeSource" style="@style/UxPlayerButton" android:layout_width="110px" android:layout_height="96px" android:layout_marginLeft="10px" android:text="换源"/>
-   <TextView android:id="@+id/uxMore" style="@style/UxPlayerButton" android:layout_width="100px" android:layout_height="96px" android:layout_marginLeft="10px" android:text="更多"/>
+   <TextView android:id="@+id/uxMore" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="更多" android:contentDescription="更多播放工具"/>
+  </LinearLayout>
+  <LinearLayout android:layout_width="match_parent" android:layout_height="124px" android:gravity="center_vertical">
+   <TextView android:id="@+id/play_label" style="@style/UxSceneText" android:layout_width="220px" android:layout_height="88px" android:gravity="center_vertical" android:text="画质与播放" android:textColor="@color/car_text_dim" android:textSize="24px" android:textStyle="bold"/>
+   <TextView android:id="@+id/play_car_video" style="@style/UxPlayerButton" android:layout_width="230px" android:layout_height="104px" android:layout_marginLeft="12px" android:maxLines="2" android:ellipsize="none" android:text="画面预设" android:textColor="@color/aether_cyan_focus"/>
+   <TextView android:id="@+id/play_car_sr" style="@style/UxPlayerButton" android:layout_width="170px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="超分" android:textColor="@color/aether_cyan_focus"/>
+   <TextView android:id="@+id/play_car_interp" style="@style/UxPlayerButton" android:layout_width="170px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="补帧" android:textColor="@color/aether_cyan_focus"/>
+   <TextView android:id="@+id/play_car_audio" style="@style/UxPlayerButton" android:layout_width="230px" android:layout_height="104px" android:layout_marginLeft="12px" android:maxLines="2" android:ellipsize="none" android:text="座舱音效" android:textColor="@color/aether_amber_atmos"/>
+   <TextView android:id="@+id/uxChangeSource" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="换源"/>
+   <TextView android:id="@+id/play_scale" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="画面"/>
+   <TextView android:id="@+id/play_speed" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="1.0x"/>
   </LinearLayout>
   <HorizontalScrollView android:id="@+id/uxAdvancedControls" android:layout_width="match_parent" android:layout_height="96px" android:scrollbars="none" android:visibility="gone">
    <LinearLayout android:id="@+id/play_btn_group" android:layout_width="wrap_content" android:layout_height="96px" android:gravity="center_vertical">
-    <TextView android:id="@+id/play_label" style="@style/UxSceneText" android:padding="12px" android:text="播放"/>
     <TextView android:id="@+id/play_retry" style="@style/UxPlayerButton" android:text="重播"/>
     <TextView android:id="@+id/play_refresh" style="@style/UxPlayerButton" android:text="刷新"/>
     <TextView android:id="@+id/play_player" style="@style/UxPlayerButton" android:text="播放器"/>
     <TextView android:id="@+id/play_ijk" style="@style/UxPlayerButton" android:text="解码"/>
-    <TextView android:id="@+id/play_car_sr" style="@style/UxPlayerButton" android:text="超分"/>
-    <TextView android:id="@+id/play_car_interp" style="@style/UxPlayerButton" android:text="补帧"/>
     <TextView android:id="@+id/play_time_start_end_text" style="@style/UxSceneText" android:text="片头尾" android:visibility="gone"/>
     <TextView android:id="@+id/play_time_start" style="@style/UxPlayerButton" android:text="片头"/>
     <TextView android:id="@+id/play_time_end" style="@style/UxPlayerButton" android:text="片尾"/>
@@ -82,5 +85,5 @@
  <ProgressBar android:layout_width="80px" android:layout_height="80px" android:layout_gravity="center" android:indeterminateDrawable="@drawable/anim_loading" android:tag="vod_control_loading" android:visibility="gone"/>
  <TextView android:id="@+id/tv_play_load_net_speed" style="@style/UxSceneText" android:layout_gravity="center" android:layout_marginTop="100px" android:tag="play_load_net_speed" android:textSize="28px"/>
  <FrameLayout android:id="@+id/play_speed_3_container" android:layout_width="440px" android:layout_height="80px" android:layout_gravity="center_horizontal" android:layout_marginTop="500px" android:background="@drawable/ux_search_outline" android:visibility="gone"><TextView android:id="@+id/tv_speed_3" style="@style/UxSceneText" android:layout_width="match_parent" android:layout_height="match_parent" android:text="长按 2.0x 极速快进" android:textSize="28px" android:gravity="center"/></FrameLayout>
- </FrameLayout>
+</FrameLayout>
 </com.github.tvbox.osc.car.CarSceneLayout>

@@ -16,11 +16,19 @@
     </style>
     <style name="UxPlayerButton" parent="UxSceneText">
         <item name="android:layout_width">160px</item><item name="android:layout_height">112px</item>
-        <item name="android:gravity">center</item><item name="android:background">@drawable/car_player_button_selector</item>
+        <item name="android:minHeight">96px</item><item name="android:gravity">center</item>
+        <item name="android:background">@drawable/car_player_button_selector</item>
         <item name="android:focusable">true</item><item name="android:clickable">true</item>
-        <item name="android:maxLines">1</item><item name="android:textStyle">normal</item>
-        <item name="android:textSize">26px</item>
-        <item name="android:paddingLeft">12px</item><item name="android:paddingRight">12px</item>
+        <item name="android:maxLines">1</item><item name="android:textStyle">bold</item>
+        <item name="android:textSize">25px</item>
+        <item name="android:paddingLeft">14px</item><item name="android:paddingRight">14px</item>
+    </style>
+    <style name="UxPlayerPrimaryButton" parent="UxSceneButton">
+        <item name="android:background">@drawable/car_player_primary_selector</item>
+        <item name="android:textColor">@color/aether_text_primary</item>
+        <item name="android:textSize">30px</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">112px</item>
     </style>
     <style name="UxSceneNav">
         <item name="android:layout_width">208px</item><item name="android:layout_height">106px</item>

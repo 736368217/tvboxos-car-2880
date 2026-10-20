@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 
 import java.util.Map;
 
+import com.github.tvbox.osc.car.CarPlaybackPreferences;
 import xyz.doikki.videoplayer.controller.BaseVideoController;
 import xyz.doikki.videoplayer.controller.IControlComponent;
 import xyz.doikki.videoplayer.controller.IGestureComponent;
@@ -159,7 +160,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
      * 是否在竖屏模式下开始手势控制，默认关闭
      */
     public void setEnableInNormal(boolean enableInNormal) {
-        mEnableInNormal = enableInNormal;
+        mCanSlide = enableInNormal;
     }
 
     /**
@@ -217,6 +218,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
     protected boolean canHandleGesture(MotionEvent event) {
         return isInPlaybackState()
                 && mIsGestureEnabled
+                && CarPlaybackPreferences.gestures()
                 && mCanSlide
                 && !isLocked()
                 && !PlayerUtils.isEdge(getContext(), event);
@@ -234,6 +236,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
     public boolean onDown(MotionEvent e) {
         if (!isInPlaybackState() //不处于播放状态
                 || !mIsGestureEnabled //关闭了手势
+                || !CarPlaybackPreferences.gestures()
                 || PlayerUtils.isEdge(getContext(), e)) //处于屏幕边沿
             return true;
         mStreamVolume = mAudioManager == null ? 0 : mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);

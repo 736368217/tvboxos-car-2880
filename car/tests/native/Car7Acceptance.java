@@ -81,6 +81,8 @@ public final class Car7Acceptance extends Instrumentation {
                     section("subscription", this::subscriptionChecks);
                 } else if (arguments != null && "playback".equals(arguments.getString("mode"))) {
                     section("playback", this::playbackChecks);
+                } else if (arguments != null && "gestures".equals(arguments.getString("mode"))) {
+                    section("gestures", this::gestureChecks);
                 } else if (arguments != null && "pages".equals(arguments.getString("mode"))) {
                     section("pages", this::pagesChecks);
                 } else if (arguments != null && "ux3k".equals(arguments.getString("mode"))) {
@@ -466,6 +468,77 @@ public final class Car7Acceptance extends Instrumentation {
                 main(() -> { call(video, "stopFullScreen"); call(video, "release"); if (((View) video).getParent() instanceof ViewGroup) ((ViewGroup) ((View) video).getParent()).removeView((View) video); });
                 SystemClock.sleep(400);
             }
+        }
+    }
+
+    private void gestureChecks() throws Exception {
+        final Object video = ui(() -> {
+            Object v = type("com.github.tvbox.osc.player.MyVideoView").getConstructor(Context.class).newInstance(home);
+            FrameLayout content = home.findViewById(android.R.id.content);
+            FrameLayout.LayoutParams layout = new FrameLayout.LayoutParams(1280, 720);
+            layout.leftMargin = 800; layout.topMargin = 450;
+            content.addView((View) v, layout);
+            JSONObject cfg = new JSONObject(); cfg.put("pl", 2); cfg.put("pr", 0); cfg.put("ijk", "硬解码"); cfg.put("sc", 0);
+            call(type("com.github.tvbox.osc.util.PlayerHelper"), "updateCfg", v, cfg, 2);
+            call(v, "setMute", true); call(v, "setUrl", "/sdcard/TVBoxCar5/motion.mp4"); call(v, "start");
+            return v;
+        });
+        try {
+            check("gesture fixture playback", waitPlaying(video, 15000));
+            final Object controller = ui(() -> {
+                Object c = type("com.github.tvbox.osc.player.controller.VodController").getConstructor(Context.class).newInstance(home);
+                JSONObject controllerCfg = new JSONObject(); controllerCfg.put("pl", 2); controllerCfg.put("pr", 0); controllerCfg.put("ijk", "硬解码"); controllerCfg.put("sc", 0); controllerCfg.put("sp", 1.0f); controllerCfg.put("st", 0); controllerCfg.put("et", 0);
+                call(c, "setPlayerConfig", controllerCfg);
+                call(video, "setVideoController", c);
+                call(c, "setEnableInNormal", true); call(c, "setGestureEnabled", true);
+                call(c, "setPlayState", 3);
+                return c;
+            });
+            final android.media.AudioManager audio = (android.media.AudioManager) home.getSystemService(Context.AUDIO_SERVICE);
+            final int maxVolume = audio == null ? 0 : audio.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC);
+            final int initialVolume = audio == null ? 0 : Math.min(maxVolume, 4);
+            main(() -> {
+                if (audio != null) audio.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, initialVolume, 0);
+                android.view.WindowManager.LayoutParams lp = home.getWindow().getAttributes();
+                lp.screenBrightness = .35f; home.getWindow().setAttributes(lp);
+            });
+            float brightnessBefore = ui(() -> home.getWindow().getAttributes().screenBrightness);
+            int volumeBefore = audio == null ? 0 : audio.getStreamVolume(android.media.AudioManager.STREAM_MUSIC);
+            long t = SystemClock.uptimeMillis();
+            main(() -> {
+                MotionEvent down = MotionEvent.obtain(t, t, MotionEvent.ACTION_DOWN, 180, 520, 0);
+                MotionEvent move = MotionEvent.obtain(t, t + 120, MotionEvent.ACTION_MOVE, 180, 160, 0);
+                MotionEvent up = MotionEvent.obtain(t, t + 240, MotionEvent.ACTION_UP, 180, 160, 0);
+                call(controller, "onTouchEvent", down); call(controller, "onTouchEvent", move); call(controller, "onTouchEvent", up);
+                down.recycle(); move.recycle(); up.recycle();
+            });
+            pause(350);
+            float brightnessAfter = ui(() -> home.getWindow().getAttributes().screenBrightness);
+            check("left gesture changes window brightness", brightnessAfter > brightnessBefore + .03f);
+            long t2 = SystemClock.uptimeMillis();
+            main(() -> {
+                MotionEvent down = MotionEvent.obtain(t2, t2, MotionEvent.ACTION_DOWN, 2200, 520, 0);
+                MotionEvent move = MotionEvent.obtain(t2, t2 + 120, MotionEvent.ACTION_MOVE, 2200, 160, 0);
+                MotionEvent up = MotionEvent.obtain(t2, t2 + 240, MotionEvent.ACTION_UP, 2200, 160, 0);
+                call(controller, "onTouchEvent", down); call(controller, "onTouchEvent", move); call(controller, "onTouchEvent", up);
+                down.recycle(); move.recycle(); up.recycle();
+            });
+            pause(350);
+            int volumeAfter = audio == null ? volumeBefore : audio.getStreamVolume(android.media.AudioManager.STREAM_MUSIC);
+            check("right gesture changes music volume", volumeAfter > volumeBefore);
+            write("gesture-values.json", new JSONObject().put("brightnessBefore", brightnessBefore).put("brightnessAfter", brightnessAfter).put("volumeBefore", volumeBefore).put("volumeAfter", volumeAfter).toString(2));
+            String defaultMode = String.valueOf(ui(() -> call(type("com.github.tvbox.osc.car.InAppBackButton"), "getMode")));
+            String defaultSkin = String.valueOf(ui(() -> call(type("com.github.tvbox.osc.car.InAppBackButton"), "getEdgeSkin")));
+            check("default back mode is edge", "edge".equals(defaultMode));
+            check("default back skin is fluid teardrop", "teardrop".equals(defaultSkin));
+            View edgeView = edge(home);
+            View backHost = host(home);
+            main(() -> call(type("com.github.tvbox.osc.car.InAppBackButton"), "setPlaybackHidden", home, true));
+            check("fullscreen hides edge back strip", ui(() -> edgeView.getVisibility()) != View.VISIBLE);
+            main(() -> call(type("com.github.tvbox.osc.car.InAppBackButton"), "setPlaybackHidden", home, false));
+            check("leaving fullscreen restores edge back strip", ui(() -> edgeView.getVisibility()) == View.VISIBLE);
+        } finally {
+            main(() -> { call(video, "release"); if (((View) video).getParent() instanceof ViewGroup) ((ViewGroup) ((View) video).getParent()).removeView((View) video); });
         }
     }
 

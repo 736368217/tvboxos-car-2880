@@ -26,7 +26,7 @@ final class InAppBackHostLayout extends FrameLayout {
     private final ViewTreeObserver.OnGlobalLayoutListener layoutObserver = this::onPageLayout;
     private ViewTreeObserver observedTree;
     private String mode, side;
-    private boolean resumed, disposed, hideOnRoot, haptic, geometryDirty = true;
+    private boolean resumed, disposed, hideOnRoot, playbackHidden, haptic, geometryDirty = true;
     private float displayDensity = 1f, tokenScale = 1f;
     private float insetLeft, insetTop, insetRight, insetBottom;
     private float safeLeft, safeTop, safeRight, safeBottom;
@@ -114,6 +114,11 @@ final class InAppBackHostLayout extends FrameLayout {
         // Defer visibility changes until after the initiating DOWN has reached its original target.
         recheckRootAfterNavigation();
     }
+    void setPlaybackHidden(boolean hidden) {
+        if (playbackHidden == hidden) return;
+        playbackHidden = hidden;
+        applyVisibility();
+    }
 
     void recheckRootAfterNavigation() {
         removeCallbacks(rootCheck);
@@ -137,7 +142,7 @@ final class InAppBackHostLayout extends FrameLayout {
     private void applyVisibility() {
         if (disposed) return;
         boolean rootHidden = hideOnRoot && InAppBackButton.atRoot(owner.get());
-        boolean show = resumed && InAppBackButton.alive(owner.get()) && !rootHidden;
+        boolean show = resumed && !playbackHidden && InAppBackButton.alive(owner.get()) && !rootHidden;
         boolean showBall = show && !HawkConfig.BACK_MODE_EDGE.equals(mode);
         boolean showEdge = show && !HawkConfig.BACK_MODE_FLOATING.equals(mode);
         ball.setVisibility(showBall ? VISIBLE : INVISIBLE);

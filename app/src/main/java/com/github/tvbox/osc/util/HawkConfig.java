@@ -70,7 +70,8 @@ public class HawkConfig {
     public static final String IN_APP_BACK = "inapp_back"; // default true
     public static final String BACK_HIDE_SECONDS = "hide_seconds"; // 4/6/8, 0 = always visible
     // Car.7 Back: positions are normalized to 0..10000 within the current safe bounds.
-    public static final String BACK_MODE = "inapp_back_mode"; // default floating
+    public static final String BACK_MODE = "inapp_back_mode"; // default edge pull
+    public static final String BACK_MODE_EXPLICIT = "inapp_back_mode_explicit";
     public static final String BACK_POSITION_X = "inapp_back_x";
     public static final String BACK_POSITION_Y = "inapp_back_y";
     public static final String BACK_EDGE_POSITION_Y = "inapp_back_edge_y";
@@ -85,6 +86,7 @@ public class HawkConfig {
     public static final String BACK_HAPTIC = "inapp_back_haptic"; // default true
     public static final String BACK_HIDE_ON_ROOT = "inapp_back_hide_on_root"; // default false
     public static final String BACK_EDGE_SKIN = "inapp_back_edge_skin";
+    public static final String BACK_EDGE_SKIN_EXPLICIT = "inapp_back_skin_explicit";
     public static final String BACK_SKIN_TEARDROP = "teardrop";
     public static final String BACK_SKIN_CAPSULE = "capsule";
     // Car edition: audio IDs 0..8 and stable SDR preset IDs (car.5 IDs remain unchanged).

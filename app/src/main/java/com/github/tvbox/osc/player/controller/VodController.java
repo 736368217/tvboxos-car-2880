@@ -1930,8 +1930,11 @@ public class VodController extends BaseController {
             mLongPressRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (CarPlaybackPreferences.longPress()) speedPlayStart();
-                    isLongPressTriggered = true;
+                    if (CarPlaybackPreferences.longPress() && isInPlaybackState()
+                            && videoPlayState != VideoView.STATE_PAUSED) {
+                        speedPlayStart();
+                        isLongPressTriggered = true;
+                    }
                 }
             };
             mmHandler.postDelayed(mLongPressRunnable, LONG_PRESS_DELAY);
