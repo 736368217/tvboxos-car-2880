@@ -1,0 +1,16 @@
+{
+  "apk": "TVBox-1.0.0-car.7-regress-r5.apk",
+  "sha256": "87B9806E07114FA7D49EEF18BAA99BCAE360C156516908D03BB581888C95B29A",
+  "bytes": 52901996,
+  "package": "com.github.tvbox.osc.jun",
+  "versionName": "1.0.0-car.7",
+  "versionCode": 8,
+  "device": {
+    "emulator": "MuMu",
+    "instance": 1,
+    "physical": "1620x2880",
+    "density": 160,
+    "rotation": "lock 1",
+    "displayGate": "CAR_DISPLAY_PASS"
+  }
+}

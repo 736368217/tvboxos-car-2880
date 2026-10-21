@@ -268,6 +268,7 @@ public class VodController extends BaseController {
     TextView mDanmuSearchUiBtn;
     public TextView mLandscapePortraitBtn;
     private View backBtn;//返回键
+    private View fullscreenBackBtn;
     private boolean isClickBackBtn;
     TextView seekTime; //右上角进度时间显示
     TextView mScreenDisplay; //增加屏显开关
@@ -356,6 +357,19 @@ public class VodController extends BaseController {
         hidePauseRoot();
         if (backBtn != null) backBtn.setVisibility(INVISIBLE);
         if (mLockView != null) mLockView.setVisibility(INVISIBLE);
+        if (fullscreenBackBtn != null) fullscreenBackBtn.setVisibility(immersiveFullscreen ? VISIBLE : GONE);
+    }
+
+    private void handlePlayerBack() {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setLandscapePortrait();
+            hideBottom();
+            return;
+        }
+        if (getContext() instanceof Activity) {
+            isClickBackBtn = true;
+            ((Activity) getContext()).onBackPressed();
+        }
     }
 
     @Override
@@ -373,6 +387,7 @@ public class VodController extends BaseController {
         if (mCarAudioBtn != null) mCarAudioBtn.setText("音效 · " + AudioEffectController.name(CarEnhance.audioMode()));
         updateFrameRateDisplay();
     }
+
     private void updateFrameRateDisplay() {
         if (mVideoFrameRate == null && mVideoFrameRateBottom == null) return;
         float sourceFrameRate = mCarVideoView == null ? 0f : mCarVideoView.getRendererSourceFrameRate();
@@ -380,8 +395,15 @@ public class VodController extends BaseController {
         String source = isUsableFrameRate(sourceFrameRate) ? formatFrameRate(sourceFrameRate) : "--";
         String output = isUsableFrameRate(outputFrameRate) ? formatFrameRate(outputFrameRate) : "--";
         String text = "片源 " + source + " fps · 输出 " + output + " fps";
-        if (mVideoFrameRate != null) mVideoFrameRate.setText(text);
-        if (mVideoFrameRateBottom != null) mVideoFrameRateBottom.setText(text);
+        int visibility = CarEnhance.videoInterpEnabled() ? VISIBLE : GONE;
+        if (mVideoFrameRate != null) {
+            mVideoFrameRate.setText(text);
+            mVideoFrameRate.setVisibility(visibility);
+        }
+        if (mVideoFrameRateBottom != null) {
+            mVideoFrameRateBottom.setText(text);
+            mVideoFrameRateBottom.setVisibility(visibility);
+        }
     }
 
     private boolean isUsableFrameRate(float frameRate) {
@@ -399,6 +421,8 @@ public class VodController extends BaseController {
     private void showCarVideoDialog() {
         final SelectDialog<String> dialog = new SelectDialog<>(mActivity, R.layout.dialog_video_presets);
         dialog.setTip("画面预设");
+        TextView hint = dialog.findViewById(R.id.tvPresetHint);
+        if (hint != null) hint.setText("上下滑动选择 · HDR 视频自动保留原始色彩");
         View cancel = dialog.findViewById(R.id.btnVideoPresetCancel);
         if (cancel != null) cancel.setOnClickListener(v -> dialog.dismiss());
         List<String> options = new ArrayList<>();
@@ -412,6 +436,29 @@ public class VodController extends BaseController {
             }
             @Override public String getDisplay(String value) { return value; }
         }, SelectDialogAdapter.stringDiff, options, CarEnhance.videoMode());
+        dialog.show();
+    }
+
+    private void showCarAudioDialog() {
+        final SelectDialog<String> dialog = new SelectDialog<>(mActivity, R.layout.dialog_video_presets);
+        dialog.setTip("座舱音效");
+        TextView hint = dialog.findViewById(R.id.tvPresetHint);
+        if (hint != null) hint.setText("上下滑动选择 · 座舱音效即时生效");
+        View cancel = dialog.findViewById(R.id.btnVideoPresetCancel);
+        if (cancel != null) cancel.setOnClickListener(v -> dialog.dismiss());
+        List<String> options = new ArrayList<>();
+        for (int mode = 0; mode < AudioEffectController.MODE_COUNT; mode++) {
+            options.add(AudioEffectController.name(mode));
+        }
+        dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
+            @Override public void click(String value, int pos) {
+                CarEnhance.setAudioMode(pos);
+                CarEnhance.applyAudio(mCarVideoView);
+                updateCarEnhanceButtons();
+                dialog.dismiss();
+            }
+            @Override public String getDisplay(String value) { return value; }
+        }, SelectDialogAdapter.stringDiff, options, CarEnhance.audioMode());
         dialog.show();
     }
 
@@ -455,22 +502,20 @@ public class VodController extends BaseController {
         updateCarEnhanceButtons();
         mCarVideoBtn.setOnClickListener(v -> showCarVideoDialog());
         mCarSrBtn.setOnClickListener(v -> {
-            CarEnhance.setVideoSrEnabled(!CarEnhance.videoSrEnabled());
+            boolean enable = !CarEnhance.videoSrEnabled();
+            CarEnhance.setVideoSrEnabled(enable);
             CarEnhance.applyVideo(mCarVideoView);
             updateCarEnhanceButtons();
+            CarEnhance.toast(getContext(), enable ? "超分已开启 · SGSR1" : "超分已关闭");
         });
         mCarInterpBtn.setOnClickListener(v -> {
-            CarEnhance.setVideoInterpEnabled(!CarEnhance.videoInterpEnabled());
+            boolean enable = !CarEnhance.videoInterpEnabled();
+            CarEnhance.setVideoInterpEnabled(enable);
             CarEnhance.applyVideo(mCarVideoView);
             updateCarEnhanceButtons();
+            CarEnhance.toast(getContext(), enable ? "补帧已开启 · 目标 60fps" : "补帧已关闭");
         });
-        mCarAudioBtn.setOnClickListener(v -> {
-            int next = (CarEnhance.audioMode() + 1) % AudioEffectController.MODE_COUNT;
-            CarEnhance.setAudioMode(next);
-            CarEnhance.applyAudio(mCarVideoView);
-            updateCarEnhanceButtons();
-            CarEnhance.toast(getContext(), AudioEffectController.label(next));
-        });
+        mCarAudioBtn.setOnClickListener(v -> showCarAudioDialog());
 
         mPlayerTimeStartEndText = findViewById(R.id.play_time_start_end_text);
         mPlayerTimeStartBtn = findViewById(R.id.play_time_start);
@@ -501,17 +546,18 @@ public class VodController extends BaseController {
         backBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    setLandscapePortrait();
-                    hideBottom();
-                    return;
-                }
-                if (getContext() instanceof Activity) {
-                    isClickBackBtn = true;
-                    ((Activity) getContext()).onBackPressed();
-                }
+                handlePlayerBack();
             }
         });
+        fullscreenBackBtn = findViewById(R.id.tv_back_fullscreen);
+        if (fullscreenBackBtn != null) {
+            fullscreenBackBtn.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    handlePlayerBack();
+                }
+            });
+        }
         mLockView = findViewById(R.id.tv_lock);
         mLockView.setOnClickListener(new OnClickListener() {
             @Override

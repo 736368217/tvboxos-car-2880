@@ -160,6 +160,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
      * 是否在竖屏模式下开始手势控制，默认关闭
      */
     public void setEnableInNormal(boolean enableInNormal) {
+        mEnableInNormal = enableInNormal;
         mCanSlide = enableInNormal;
     }
 

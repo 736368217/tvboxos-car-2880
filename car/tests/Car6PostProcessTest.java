@@ -37,14 +37,14 @@ public final class Car6PostProcessTest {
         long t=1_000_000_000L,step=41_708_333L;
         timing.onSourceFrame(t,t);check(timing.blendAlpha(t,true,true)==0,"First frame no blend");
         timing.onSourceFrame(t+step,t+step);
-        check(Math.abs(timing.blendAlpha(t+step,true,true)-.28f)<.00001f,"Max previous weight");
+        check(Math.abs(timing.blendAlpha(t+step,true,true)-.5f)<.00001f,"Max previous weight");
         check(timing.blendAlpha(t+step+20_000_000L,true,true)>0,"Temporal blend remains active through source interval");
         check(timing.blendAlpha(t+step,true,false)==0 && timing.blendAlpha(t+step,false,true)==0,"Pause/off no blend");
         timing.onSourceFrame(t-1,t+2*step);check(timing.blendAlpha(t+2*step,true,true)==0,"Seek backwards cuts history");
         timing.reset();check(timing.blendAlpha(t,true,true)==0,"Explicit seek reset");
-        check(VideoPostProcessPolicy.adaptiveAlpha(.28f,.11f)==0,"High motion/cut no blend");
-        check(VideoPostProcessPolicy.adaptiveAlpha(.28f,.01f)==.28f,"Low motion blend");
-        check(VideoPostProcessPolicy.adaptiveAlpha(.28f,.05f)>0 && VideoPostProcessPolicy.adaptiveAlpha(.28f,.05f)<.28f,"Adaptive transition");
+        check(VideoPostProcessPolicy.adaptiveAlpha(.5f,.11f)==0,"High motion/cut no blend");
+        check(VideoPostProcessPolicy.adaptiveAlpha(.5f,.01f)==.5f,"Low motion blend");
+        check(VideoPostProcessPolicy.adaptiveAlpha(.5f,.05f)>0 && VideoPostProcessPolicy.adaptiveAlpha(.5f,.05f)<.5f,"Adaptive transition");
         check(VideoPostProcessPolicy.frameBufferBytes(1920,1080)==16_588_800L,"1080p bytes");
         check(VideoPostProcessPolicy.frameBufferBytes(3840,2160)==66_355_200L,"4K actual bytes");
         check(VideoPostProcessPolicy.superResolutionActive(true,1920,1080,2880,1620),"1080p->3K SR");

@@ -1,0 +1,48 @@
+{
+  "passed": 7,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "gesture fixture playback",
+      "detail": "",
+      "at": 1792601151932
+    },
+    {
+      "pass": true,
+      "test": "left gesture changes window brightness",
+      "detail": "",
+      "at": 1792601152367
+    },
+    {
+      "pass": true,
+      "test": "right gesture changes music volume",
+      "detail": "",
+      "at": 1792601152728
+    },
+    {
+      "pass": true,
+      "test": "default back mode is edge",
+      "detail": "",
+      "at": 1792601152729
+    },
+    {
+      "pass": true,
+      "test": "default back skin is fluid teardrop",
+      "detail": "",
+      "at": 1792601152729
+    },
+    {
+      "pass": true,
+      "test": "fullscreen hides edge back strip",
+      "detail": "",
+      "at": 1792601152731
+    },
+    {
+      "pass": true,
+      "test": "leaving fullscreen restores edge back strip",
+      "detail": "",
+      "at": 1792601152748
+    }
+  ]
+}

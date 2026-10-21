@@ -1363,7 +1363,11 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
         ApiConfig.get().setCurrentPlaySourceKey(sourceKey);
         initPlayerCfg();
         triedLineFlags.clear();
+        long startPosition = bundle.getLong("startPosition", -1L);
         play(false);
+        if (startPosition > 0 && mVideoView != null) {
+            mVideoView.seekTo(startPosition);
+        }
     }
 
     private void initData() {
@@ -1535,11 +1539,22 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
     @Override
     public void onPause() {
         super.onPause();
+        maybeSaveFullscreenSession();
         carLifecyclePaused = mVideoView != null && mVideoView.isPlaying()
                 && !exitingPreview && !hasAudioOnlyPlayback()
                 && !com.github.tvbox.osc.car.CarPlaybackPreferences.backgroundAudio();
         if (carLifecyclePaused) mVideoView.pause();
         updateMusicSession();
+    }
+
+    private void maybeSaveFullscreenSession() {
+        if (mVideoView == null || mVodInfo == null || getActivity() == null) return;
+        if (!(getActivity() instanceof DetailActivity)) return;
+        DetailActivity detail = (DetailActivity) getActivity();
+        if (!detail.isFullWindows()) return;
+        com.github.tvbox.osc.car.CarPlaybackSession.save(
+                mVodInfo.id, sourceKey, mVodInfo.name, mVodInfo.pic,
+                mVodInfo.playFlag, mVodInfo.playIndex, mVideoView.getCurrentPosition());
     }
 
     @Override
@@ -1571,6 +1586,9 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
 
     @Override
     public void onDestroyView() {
+        if (getActivity() instanceof DetailActivity && getActivity().isFinishing()) {
+            com.github.tvbox.osc.car.CarPlaybackSession.clear();
+        }
         com.github.tvbox.osc.car.CarPlaybackPreferences.unregisterBackgroundAudioListener((com.github.tvbox.osc.car.CarPlaybackPreferences.BackgroundAudioListener) this);
         audioPlayback = false;
         switchingPlayback = false;
@@ -2256,9 +2274,13 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
             mController.setImmersiveFullscreen(fullscreen);
         }
         Activity activity = getActivity();
-        if (activity != null) com.github.tvbox.osc.car.InAppBackButton.setPlaybackHidden(activity, fullscreen);
+        // The in-app Back affordance is part of the "always return one page" contract and must
+        // stay reachable during fullscreen playback; never hide it with the playback chrome.
+        if (activity != null) {
+            com.github.tvbox.osc.car.InAppBackButton.setPlaybackHidden(activity, false);
+            com.github.tvbox.osc.car.InAppBackButton.wake(activity);
+        }
     }
-
     public void pauseForHidden() {
         cancelPlayTimeout();
         stopParse();

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.github.tvbox.osc.car.CarSceneLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/rootView" android:layout_width="match_parent" android:layout_height="match_parent">
 <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
+ <ImageView android:id="@+id/tv_back_fullscreen" android:layout_width="180px" android:layout_height="90px" android:layout_marginLeft="60px" android:layout_marginTop="40px" android:background="@drawable/car_button_selector" android:src="@drawable/aether_back" android:padding="28px" android:contentDescription="退出全屏" android:clickable="true" android:focusable="true" android:visibility="gone"/>
  <LinearLayout android:id="@+id/tv_top_l_container" android:layout_width="1800px" android:layout_height="150px" android:layout_marginLeft="60px" android:layout_marginTop="40px" android:orientation="horizontal" android:gravity="center_vertical" android:tag="tv_top_container" android:visibility="gone">
   <ImageView android:id="@+id/tv_back" android:layout_width="180px" android:layout_height="90px" android:background="@drawable/car_button_selector" android:src="@drawable/aether_back" android:padding="28px" android:contentDescription="退出全屏" android:clickable="true" android:focusable="true"/>
   <LinearLayout android:layout_width="1580px" android:layout_height="match_parent" android:layout_marginLeft="40px" android:orientation="vertical">

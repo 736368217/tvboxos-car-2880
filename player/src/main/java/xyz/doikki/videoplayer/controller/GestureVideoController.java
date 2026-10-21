@@ -82,6 +82,7 @@ public abstract class GestureVideoController extends BaseVideoController impleme
      */
     public void setEnableInNormal(boolean enableInNormal) {
         mEnableInNormal = enableInNormal;
+        mCanSlide = enableInNormal;
     }
 
     /**

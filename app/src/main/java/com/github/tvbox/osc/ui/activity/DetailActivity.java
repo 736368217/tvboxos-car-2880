@@ -160,6 +160,7 @@ public class DetailActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             fullWindows = savedInstanceState.getBoolean(STATE_FULL_WINDOWS, false);
+            restorePlaybackAfterRecreate = fullWindows;
         }
         super.onCreate(savedInstanceState);
     }
@@ -653,6 +654,7 @@ public class DetailActivity extends BaseActivity {
             insertVod(firstsourceKey, vodInfo);
         //   insertVod(sourceKey, vodInfo);
             bundle.putString("sourceKey", sourceKey);
+            bundle.putLong("startPosition", getIntent().getLongExtra("startPosition", -1L));
 //            bundle.putSerializable("VodInfo", vodInfo);
             App.getInstance().setVodInfo(vodInfo);
             if (showPreview) {
@@ -984,7 +986,10 @@ public class DetailActivity extends BaseActivity {
                             llPlayerFragmentContainer.setVisibility(View.VISIBLE);
                             llPlayerFragmentContainerBlock.setVisibility(View.VISIBLE);
                             toggleSubtitleTextSize();
-                            if (getIntent().getBooleanExtra("uxResume", false)) {
+                            if (restorePlaybackAfterRecreate) {
+                                restorePlaybackAfterRecreate = false;
+                                enterFullPreview();
+                            } else if (getIntent().getBooleanExtra("uxResume", false)) {
                                 getIntent().removeExtra("uxResume");
                                 enterFullPreview();
                             }
@@ -1955,6 +1960,7 @@ public class DetailActivity extends BaseActivity {
             exitFullPreview();
             return;
         }
+        com.github.tvbox.osc.car.CarPlaybackSession.clear();
         if (!inAppBackStep && mGridView != null && mGridView.hasFocus()
                 && mGridViewFlag != null && mGridViewFlag.getVisibility() == View.VISIBLE) {
             try {
@@ -2017,6 +2023,7 @@ public class DetailActivity extends BaseActivity {
     // preview
     VodInfo previewVodInfo = null;
     boolean fullWindows = false;
+    private boolean restorePlaybackAfterRecreate;
     private int previewOrientation;
     private boolean previewOrientationChanged;
     ViewGroup.LayoutParams windowsPreview = null;
@@ -2151,6 +2158,10 @@ public class DetailActivity extends BaseActivity {
 
     public PlayFragment getPlayFragment() {
         return playFragment;
+    }
+
+    public boolean isFullWindows() {
+        return fullWindows;
     }
 
     private void setTvPlayUrl(String url)

@@ -33,6 +33,7 @@ import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.base.BaseActivity;
 import com.github.tvbox.osc.base.BaseLazyFragment;
+import com.github.tvbox.osc.car.CarPlaybackSession;
 import com.github.tvbox.osc.bean.AbsSortXml;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.bean.MovieSort;
@@ -662,12 +663,38 @@ public class HomeActivity extends BaseActivity {
     protected void onResume() {
         applyCarNavigationVisibility();
         super.onResume();
+        maybeRestorePlaybackSession();
         refreshTopInfoTextSize();
         mHandler.removeCallbacks(refreshTopInfoTextSizeRunnable);
         mHandler.postDelayed(refreshTopInfoTextSizeRunnable, 350);
         mHandler.removeCallbacks(refreshTopLayoutRunnable);
         mHandler.postDelayed(refreshTopLayoutRunnable, 450);
         mHandler.post(mRunnable);
+    }
+
+    /** Restores the fullscreen player page after Android had to recreate the task. */
+    private void maybeRestorePlaybackSession() {
+        maybeRestorePlaybackSession(0);
+    }
+
+    private void maybeRestorePlaybackSession(int attempt) {
+        CarPlaybackSession.Snapshot snapshot = CarPlaybackSession.peek();
+        if (snapshot == null) return;
+        // ApiConfig loads asynchronously after a cold start; do not open a detail page before
+        // its source registry exists, otherwise the restore lands on an empty detail page.
+        if (ApiConfig.get().getSource(snapshot.sourceKey) == null && attempt < 40) {
+            mHandler.postDelayed(() -> maybeRestorePlaybackSession(attempt + 1), 500);
+            return;
+        }
+        CarPlaybackSession.consume();
+        Bundle data = new Bundle();
+        data.putString("id", snapshot.id);
+        data.putString("sourceKey", snapshot.sourceKey);
+        data.putString("title", snapshot.title);
+        data.putString("picture", snapshot.picture);
+        data.putBoolean("uxResume", true);
+        data.putLong("startPosition", snapshot.position);
+        jumpActivity(DetailActivity.class, data);
     }
 
 

@@ -41,6 +41,7 @@
             app:tv_verticalSpacingWithMargins="12mm" />
 
         <TextView
+            android:id="@+id/tvPresetHint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="12mm"

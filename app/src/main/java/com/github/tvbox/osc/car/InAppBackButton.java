@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
 
+import androidx.annotation.Keep;
 import com.github.tvbox.osc.base.BaseActivity;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.orhanobut.hawk.Hawk;
@@ -26,6 +27,7 @@ import java.lang.ref.WeakReference;
 import java.util.Locale;
 
 /** Ordinary Activity-decor children; no overlay window, service or permission is involved. */
+@Keep
 public final class InAppBackButton {
     private static final String HOST_TAG = "tvbox.car.back.host";
     private static final int ATTACH = 0, WAKE = 1, RELEASE = 2, REFRESH = 3;

@@ -2,7 +2,8 @@ package xyz.doikki.videoplayer.render;
 
 /** Pure timing/policy model shared by the renderer and host acceptance tests. */
 public final class VideoPostProcessPolicy {
-    public static final float MAX_BLEND_ALPHA = 0.28f;
+    /** A 50/50 temporal blend at the source-frame boundary is the clearest 24/30->60 cadence. */
+    public static final float MAX_BLEND_ALPHA = 0.5f;
     /** The renderer's interpolation presentation cadence is capped at the display target. */
     public static final float INTERPOLATION_OUTPUT_FPS = 60f;
     public static final float DIFF_LOW = 0.015f;
@@ -45,11 +46,11 @@ public final class VideoPostProcessPolicy {
         if (elapsed <= 0) return MAX_BLEND_ALPHA;
         long intervalNs = Math.max(MIN_INTERVAL_NS, averageIntervalNs);
         float phase = (float) elapsed / intervalNs;
-        if (phase >= 1f) return 0f;
-        // Keep a bounded previous-frame contribution over the whole source interval so
-        // 24/25/30fps material produces a visible 60Hz temporal output path.
-        float smooth = phase * phase * (3f - 2f * phase);
-        return MAX_BLEND_ALPHA * (1f - smooth);
+        if (phase >= 0.5f) return 0f;
+        // Fade the previous frame out over the first half of the source interval: the
+        // midpoint is a true 50/50 temporal sample, then the new frame takes over.
+        float linear = phase / 0.5f;
+        return MAX_BLEND_ALPHA * (1f - linear);
     }
 
     public long frameIntervalNs() { return averageIntervalNs; }
