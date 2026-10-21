@@ -73,6 +73,7 @@
             <TextView
                 android:id="@+id/tvName"
                 style="@style/CarGridItemTitle"
+                android:background="@drawable/car_badge_scrim"
                 android:ellipsize="end"
                 android:text="Title" />
 

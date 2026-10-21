@@ -48,10 +48,10 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         tvRate.setText(tvRateValue);
 
         TextView tvNote = helper.getView(R.id.tvNote);
-        if (item.note == null || item.note.isEmpty()) {
+        if (!hasMeaningfulNote(item.note)) {
             tvNote.setVisibility(View.GONE);
         } else {
-            tvNote.setText(item.note);
+            tvNote.setText(item.note.trim());
             tvNote.setVisibility(View.VISIBLE);
         }
         helper.setText(R.id.tvName, item.name);
@@ -83,6 +83,20 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
             ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
         }
         helper.itemView.setContentDescription(item.name);
+    }
+    public static boolean hasMeaningfulNote(String note) {
+        if (TextUtils.isEmpty(note)) return false;
+        String value = note.trim().replaceFirst("(?i)^评分\\s*[:：]?\\s*", "").replaceFirst("\\s*(分|/10)$", "").trim();
+        if (!value.matches("[-+]?\\d+(\\.\\d+)?")) return true;
+        try {
+            return Double.parseDouble(value) > 0d;
+        } catch (NumberFormatException ignored) {
+            return true;
+        }
+    }
+
+    public static String readableFeatureNote(String note) {
+        return hasMeaningfulNote(note) ? note.trim() : "站点推荐 · 点击查看详情";
     }
 
 }

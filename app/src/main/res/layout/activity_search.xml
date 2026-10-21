@@ -33,8 +33,8 @@
                 android:textSize="28px" android:textColor="@color/car_accent_cyan" android:gravity="center"
                 android:focusable="true" android:background="@drawable/ux_setting_choice" />
             <com.github.tvbox.osc.ui.tv.widget.SearchKeyboard android:id="@+id/keyBoardRoot"
-                android:layout_width="1210px" android:layout_height="660px"
-                android:layout_marginLeft="40px" android:layout_marginTop="120px" />
+                android:layout_width="1260px" android:layout_height="660px"
+                android:layout_marginLeft="15px" android:layout_marginTop="120px" />
             <TextView android:id="@+id/tvSearchCheckboxBtn" android:layout_width="590px" android:layout_height="90px"
                 android:layout_marginLeft="40px" android:layout_marginTop="805px" android:text="指定搜索源  ›"
                 android:textSize="30px" android:textColor="@color/car_accent_cyan" android:gravity="center"
@@ -43,13 +43,13 @@
                 android:layout_marginLeft="660px" android:layout_marginTop="805px" android:text="全屏聚合搜索  ›"
                 android:textSize="30px" android:textColor="@color/car_text" android:gravity="center"
                 android:focusable="true" android:background="@drawable/ux_setting_choice" />
-            <LinearLayout android:id="@+id/llWord" android:layout_width="1210px" android:layout_height="400px"
+            <LinearLayout android:id="@+id/llWord" android:layout_width="1210px" android:layout_height="520px"
                 android:layout_marginLeft="40px" android:layout_marginTop="920px" android:orientation="vertical">
                 <TextView android:id="@+id/wordSwitch" android:layout_width="match_parent" android:layout_height="90px"
                     android:text="热词 | 历史" android:gravity="center_vertical" android:textSize="28px"
                     android:textStyle="bold" android:textColor="@color/car_text" android:focusable="true" />
                 <com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/mGridViewWord"
-                    android:layout_width="match_parent" android:layout_height="310px" android:clipToPadding="false"
+                    android:layout_width="match_parent" android:layout_height="420px" android:clipToPadding="false"
                     app:tv_verticalSpacingWithMargins="12px" app:tv_horizontalSpacingWithMargins="12px" />
             </LinearLayout>
             <LinearLayout android:id="@+id/remoteRoot" android:layout_width="1210px" android:layout_height="wrap_content"
@@ -85,6 +85,21 @@
                 <com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/mGridView"
                     android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="invisible"
                     android:clipToPadding="false" app:tv_verticalSpacingWithMargins="25px" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/uxSearchEmpty" android:layout_width="1340px" android:layout_height="560px"
+                android:layout_marginLeft="40px" android:layout_marginTop="430px" android:background="@drawable/car_surface_card_raised"
+                android:gravity="center" android:orientation="vertical" android:visibility="gone">
+                <ImageView android:layout_width="96px" android:layout_height="96px" android:src="@drawable/aether_search"
+                    android:contentDescription="" android:alpha="0.7" />
+                <TextView android:layout_width="match_parent" android:layout_height="70px" android:layout_marginTop="20px"
+                    android:gravity="center" android:text="暂无匹配结果" android:textColor="@color/car_text"
+                    android:textSize="38px" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="60px" android:gravity="center"
+                    android:text="试试完整片名或首字母简拼" android:textColor="@color/car_text_muted" android:textSize="28px" />
+                <TextView android:id="@+id/uxSearchEmptyClear" android:layout_width="300px" android:layout_height="88px"
+                    android:layout_marginTop="24px" android:background="@drawable/car_button_selector" android:clickable="true"
+                    android:focusable="true" android:gravity="center" android:text="清空搜索" android:textColor="@color/car_text"
+                    android:textSize="28px" />
             </LinearLayout>
         </FrameLayout>
     </FrameLayout>

@@ -68,6 +68,8 @@ public class FastSearchActivity extends BaseActivity {
     private static final String SEARCH_ALL_NAME = "\u5168\u90e8";
     private LinearLayout llLayout;
     private TextView mSearchTitle;
+    private TextView mSearchQueryTitle;
+    private View mFastSearchEmpty;
     private TvRecyclerView mGridView;
     private TvRecyclerView mGridViewFilter;
     private TvRecyclerView mGridViewWord;
@@ -113,13 +115,41 @@ public class FastSearchActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void showEmpty() {
+        if (mFastSearchEmpty == null) {
+            super.showEmpty();
+            return;
+        }
+        super.showSuccess();
+        mGridView.setVisibility(View.INVISIBLE);
+        mGridViewFilter.setVisibility(View.GONE);
+        mFastSearchEmpty.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void showLoading() {
+        if (mFastSearchEmpty != null) mFastSearchEmpty.setVisibility(View.GONE);
+        super.showLoading();
+    }
+
+    @Override
+    protected void showSuccess() {
+        if (mFastSearchEmpty != null) mFastSearchEmpty.setVisibility(View.GONE);
+        super.showSuccess();
+    }
+
     private void initView() {
         EventBus.getDefault().register(this);
         llLayout = findViewById(R.id.llLayout);
         mSearchTitle = findViewById(R.id.mSearchTitle);
         mGridView = findViewById(R.id.mGridView);
+        mSearchQueryTitle = findViewById(R.id.uxFastSearchQuery);
         mGridViewWord = findViewById(R.id.mGridViewWord);
         mGridViewFilter = findViewById(R.id.mGridViewFilter);
+        mFastSearchEmpty = findViewById(R.id.uxFastSearchEmpty);
+        findViewById(R.id.uxFastSearchBack).setOnClickListener(v -> onBackPressed());
+        findViewById(R.id.uxFastSearchBackToEdit).setOnClickListener(v -> finish());
 
         mGridViewWord.setHasFixedSize(true);
         mGridViewWord.setLayoutManager(new V7LinearLayoutManager(this.mContext, 1, false));
@@ -525,6 +555,8 @@ public class FastSearchActivity extends BaseActivity {
         cancel();
         showLoading();
         this.searchTitle = title;
+        if (mSearchQueryTitle != null) mSearchQueryTitle.setText("关键词 · " + title.trim());
+        if (mFastSearchEmpty != null) mFastSearchEmpty.setVisibility(View.GONE);
         fenci();
         mGridView.setVisibility(View.INVISIBLE);
         mGridViewFilter.setVisibility(View.GONE);
@@ -619,8 +651,10 @@ public class FastSearchActivity extends BaseActivity {
         searchTasks.addAll(blockingSearchTasks);
 
         if (searchTasks.size() <= 0) {
+            ((TextView) findViewById(R.id.uxFastSearchEmptyTitle)).setText("暂无可搜索订阅源");
+            ((TextView) findViewById(R.id.uxFastSearchEmptyMessage)).setText("请先配置支持搜索的订阅源");
             showEmpty();
-            setSearchStatusText("\u65e0\u641c\u7d22\u6e90", "\u7ed3\u679c 0");
+            setSearchStatusText("暂无可搜索订阅源", "请先配置订阅地址");
             cancel();
             return;
         }
@@ -985,23 +1019,21 @@ public class FastSearchActivity extends BaseActivity {
         String firstLine;
         String secondLine;
         if (total <= 0) {
-            firstLine = "\u51c6\u5907\u641c\u7d22";
-            secondLine = "\u7ed3\u679c 0";
+            firstLine = "准备搜索";
+            secondLine = "输入关键词后，将跨站整理匹配结果";
         } else if (searchPaused && pending > 0) {
-            firstLine = "\u5df2\u6682\u505c " + finished + "/" + total;
-            secondLine = "\u7ed3\u679c " + results + " \u00b7 \u5f85 " + pending;
+            firstLine = "搜索已暂停";
+            secondLine = "已找到 " + results + " 部 · 还有 " + pending + " 个站点";
         } else if (pending <= 0) {
-            firstLine = "\u641c\u7d22\u5b8c\u6210 " + results;
-            secondLine = "\u6e90 " + total + "/" + total;
-            if (timeouts > 0) {
-                secondLine += " \u00b7 \u8d85\u65f6 " + timeouts;
-            }
+            firstLine = "搜索完成";
+            secondLine = "已检索 " + total + " 个站点";
+            if (timeouts > 0) secondLine += " · 暂不可用 " + timeouts;
         } else if (started >= total) {
-            firstLine = finished > 0 ? "\u7b49\u6162\u6e90 " + pending : "\u7b49\u5f85\u8fd4\u56de " + pending;
-            secondLine = "\u7ed3\u679c " + results + " \u00b7 \u5b8c\u6210 " + finished + "/" + total;
+            firstLine = "正在等待结果";
+            secondLine = "已找到 " + results + " 部 · 还有 " + pending + " 个站点";
         } else {
-            firstLine = "\u641c\u6e90 " + started + "/" + total;
-            secondLine = "\u7ed3\u679c " + results + " \u00b7 \u5f85 " + pending;
+            firstLine = "正在搜索 " + started + "/" + total;
+            secondLine = "已找到 " + results + " 部 · 等待 " + pending + " 个站点";
         }
         setSearchStatusText(firstLine, secondLine);
     }

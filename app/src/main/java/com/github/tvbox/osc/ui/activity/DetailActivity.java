@@ -810,6 +810,26 @@ public class DetailActivity extends BaseActivity {
                 : Html.fromHtml(text).toString();
         return text.replaceAll("\\s", "");
     }
+    private String formatActorNames(String info) {
+        if (TextUtils.isEmpty(info)) return "";
+        String text = info.replaceAll("\\[a=cr:(?:\\{.*?\\}|\\[.*?\\])\\/](.*?)\\[\\/a]", "$1")
+                .replaceAll("(?i)</(?:a|li|span|p|div)\\s*>", "、")
+                .replaceAll("(?i)<br\\s*/?>", "、");
+        text = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                ? Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY).toString()
+                : Html.fromHtml(text).toString();
+        String[] parts = text.split("[,，、;；|/\\n\\r]+");
+        ArrayList<String> names = new ArrayList<>();
+        for (String part : parts) {
+            String name = part.trim().replaceAll("\\s+", " ");
+            if (!name.isEmpty()) names.add(name);
+        }
+        String result = TextUtils.join("、", names);
+        if (result.codePointCount(0, result.length()) > 30) {
+            result = result.substring(0, result.offsetByCodePoints(0, 30)) + "等";
+        }
+        return result;
+    }
 
     private void applyPreviewRoundCorners() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -903,7 +923,7 @@ public class DetailActivity extends BaseActivity {
                     } else {
                     	setTextShow(tvType, "类型：", mVideo.type);
                     }
-                    setTextShow(tvActor, "演员：", removeHtmlTag(mVideo.actor));
+                    setTextShow(tvActor, "演员：", formatActorNames(mVideo.actor));
                     setTextShow(tvDirector, "导演：", removeHtmlTag(mVideo.director));
                     setTextShow(tvDes, "内容简介：", removeHtmlTag(mVideo.des));
                     if (!TextUtils.isEmpty(mVideo.pic)) {

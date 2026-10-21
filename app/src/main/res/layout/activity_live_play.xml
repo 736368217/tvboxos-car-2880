@@ -193,6 +193,47 @@
             android:layout_marginTop="180px"
             android:background="@android:color/black" />
 
+        <LinearLayout
+            android:id="@+id/ux_live_empty_state"
+            android:layout_width="1560px"
+            android:layout_height="680px"
+            android:layout_marginLeft="1200px"
+            android:layout_marginTop="360px"
+            android:background="@drawable/car_surface_card_raised"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="40px"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/ux_live_empty_title"
+                android:layout_width="match_parent"
+                android:layout_height="90px"
+                android:gravity="center"
+                android:text="当前未配置直播源"
+                android:textColor="@color/car_text"
+                android:textSize="42px"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ux_live_empty_message"
+                android:layout_width="match_parent"
+                android:layout_height="100px"
+                android:gravity="center"
+                android:text="导入直播源后，频道列表会显示在左侧。"
+                android:textColor="@color/car_text_muted"
+                android:textSize="30px" />
+            <TextView
+                android:id="@+id/ux_live_empty_action"
+                android:layout_width="500px"
+                android:layout_height="100px"
+                android:layout_marginTop="20px"
+                android:background="@drawable/car_button_selector"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="打开直播设置 / 订阅"
+                android:textColor="@color/car_text"
+                android:textSize="28px" />
+        </LinearLayout>
         <FrameLayout
             android:id="@+id/switchChannelSnapshotOverlay"
             android:layout_width="1632px"

@@ -60,12 +60,13 @@ public class ApiDialog extends BaseDialog {
     public ApiDialog(@NonNull @NotNull Context context) {
         super(context);
         setContentView(R.layout.dialog_api);
-        setCanceledOnTouchOutside(false);
+        setCanceledOnTouchOutside(true);
         ivQRCode = findViewById(R.id.ivQRCode);
         tvAddress = findViewById(R.id.tvAddress);
         inputApi = findViewById(R.id.input);
         inputApiLive = findViewById(R.id.inputLive);
         inputConfirm = findViewById(R.id.inputConfirm);
+        findViewById(R.id.inputCancel).setOnClickListener(v -> dismiss());
         //内置网络接口在此处添加
         inputApi.setText(Hawk.get(HawkConfig.API_URL, ""));
         inputApiLive.setText(Hawk.get(HawkConfig.LIVE_API_URL, Hawk.get(HawkConfig.API_URL)));
@@ -186,18 +187,22 @@ public class ApiDialog extends BaseDialog {
 
     private void refreshQRCode() {
         String address = ControlManager.get().getAddress(false);
-        tvAddress.setText(String.format("手机/电脑扫描上方二维码或者直接浏览器访问地址\n%s", address));
+        tvAddress.setText(String.format("扫描左侧二维码，或在同一局域网浏览器中访问地址\n%s", address));
         ivQRCode.setImageBitmap(QRCodeGen.generateBitmap(address+"api.html", AutoSizeUtils.mm2px(getContext(), 300), AutoSizeUtils.mm2px(getContext(), 300)));
     }
 
     private void saveAndDismiss() {
+        String previousApi = Hawk.get(HawkConfig.API_URL, "");
+        String storedLiveApi = Hawk.get(HawkConfig.LIVE_API_URL, "");
         String newApi = inputApi.getText().toString().trim();
         String newLiveApi = inputApiLive.getText().toString().trim();
         if (!newApi.isEmpty()) {
             HistoryHelper.setApiHistory(newApi);
-            if (!newApi.equals(Hawk.get(HawkConfig.API_URL, newApi))) {
-                inputApiLive.setText(newApi);
+            boolean untouchedDefaultLive = android.text.TextUtils.isEmpty(storedLiveApi)
+                    && android.text.TextUtils.equals(newLiveApi, previousApi);
+            if (!android.text.TextUtils.equals(newApi, previousApi) && untouchedDefaultLive) {
                 newLiveApi = newApi;
+                inputApiLive.setText(newApi);
             }
         }
         if (!newLiveApi.isEmpty()) {

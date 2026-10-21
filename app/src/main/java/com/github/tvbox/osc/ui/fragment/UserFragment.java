@@ -284,19 +284,27 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         resumeRecord = records.isEmpty() ? null : records.get(0);
         TextView title = findViewById(R.id.uxResumeTitle);
         TextView note = findViewById(R.id.uxResumeNote);
+        View play = findViewById(R.id.homeResumeButton);
+        View episodes = findViewById(R.id.uxResumeEpisodes);
         if (resumeRecord == null) {
             title.setText("暂无观看记录");
-            note.setText("播放后可在这里继续上次观看");
+            note.setText("发现新片后，播放进度会显示在这里");
+            ((TextView) play).setText("去发现好片");
+            play.setEnabled(true);
+            episodes.setVisibility(View.GONE);
         } else {
             title.setText(resumeRecord.name);
             note.setText("上次看到 " + (resumeRecord.playNote == null ? "" : resumeRecord.playNote));
             bindPoster((ImageView) findViewById(R.id.uxResumePoster), resumeRecord.pic, resumeRecord.name, 440, 470);
+            ((TextView) play).setText("▶ 继续播放");
+            play.setEnabled(true);
+            episodes.setVisibility(View.VISIBLE);
+            episodes.setEnabled(true);
         }
-        findViewById(R.id.uxResumeEpisodes).setEnabled(resumeRecord != null);
-    }
 
+    }
     private void openResume(boolean play) {
-        if (resumeRecord == null) { jumpActivity(HistoryActivity.class); return; }
+        if (resumeRecord == null) { jumpActivity(SearchActivity.class); return; }
         Bundle data = new Bundle();
         data.putString("id", resumeRecord.id);
         data.putString("sourceKey", resumeRecord.sourceKey);
@@ -311,7 +319,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         List<Movie.Video> videos = homeHotVodAdapter.getData();
         Movie.Video first = videos.isEmpty() ? null : videos.get(0);
         ((TextView) findViewById(R.id.uxFeatureTitle)).setText(first == null ? "等待源站推荐" : first.name);
-        ((TextView) findViewById(R.id.uxFeatureNote)).setText(first == null ? "请在顶部选择源站，或配置订阅" : (first.note == null ? "站点推荐 · 点击查看详情" : first.note));
+        ((TextView) findViewById(R.id.uxFeatureNote)).setText(first == null ? "请在顶部选择源站，或配置订阅" : HomeHotVodAdapter.readableFeatureNote(first.note));
         findViewById(R.id.uxFeaturePlay).setEnabled(first != null);
         if (first != null) bindPoster((ImageView) findViewById(R.id.uxFeaturePoster), first.pic, first.name, 420, 470);
     }

@@ -2,7 +2,7 @@ package com.github.tvbox.osc.ui.activity;
 
 import android.Manifest;
 import android.animation.Animator;
-import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.animation.IntEvaluator;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
@@ -81,7 +81,7 @@ import me.jessyan.autosize.utils.AutoSizeUtils;
 
 public class HomeActivity extends BaseActivity {
     private LinearLayout topLayout;
-    private AnimatorSet topAnimator;
+    private ValueAnimator topAnimator;
     private LinearLayout contentLayout;
     private TextView tvDate;
     private TextView tvName;
@@ -768,8 +768,18 @@ public class HomeActivity extends BaseActivity {
         topLayout.setAlpha(1f);
         tvName.setFocusable(true);
         ViewGroup.MarginLayoutParams tabs = (ViewGroup.MarginLayoutParams) mGridView.getLayoutParams();
-        tabs.topMargin = hide ? 160 : 710;
-        mGridView.setLayoutParams(tabs);
+        int targetTop = hide ? 160 : 710;
+        if (tabs.topMargin != targetTop) {
+            topAnimator = ValueAnimator.ofInt(tabs.topMargin, targetTop);
+            topAnimator.setDuration(260L);
+            topAnimator.setInterpolator(new android.view.animation.DecelerateInterpolator());
+            topAnimator.addUpdateListener(animation -> {
+                tabs.topMargin = (Integer) animation.getAnimatedValue();
+                mGridView.setLayoutParams(tabs);
+            });
+            topAnimator.start();
+        }
+        sortAdapter.setCategoryMode(hide);
         findViewById(R.id.uxNavHome).setSelected(!hide);
         findViewById(R.id.uxNavCategories).setSelected(hide);
     }
@@ -787,8 +797,7 @@ public class HomeActivity extends BaseActivity {
         findViewById(R.id.uxNavSettings).setOnClickListener(v -> jumpActivity(SettingActivity.class));
         findViewById(R.id.uxHomeSearch).setOnClickListener(v -> jumpActivity(SearchActivity.class));
         applyCarNavigationVisibility();
-        ((TextView) findViewById(R.id.uxEngineStatus)).setText("播放器就绪\nSGSR1 · "
-                + (com.github.tvbox.osc.car.CarEnhance.videoSrEnabled() ? "开" : "关"));
+        ((TextView) findViewById(R.id.uxEngineStatus)).setText("播放器就绪");
     }
 
     private void applyCarNavigationVisibility() {

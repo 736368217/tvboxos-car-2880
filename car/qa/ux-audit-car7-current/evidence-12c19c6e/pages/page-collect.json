@@ -1,0 +1,209 @@
+[
+  {
+    "class": "com.android.internal.policy.DecorView",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.FrameLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.FitWindowsLinearLayout",
+    "id": 2131361844,
+    "resource": "action_bar_root",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.ContentFrameLayout",
+    "id": 16908290,
+    "resource": "content",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 248,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362641,
+    "resource": "uxPageBack",
+    "x": 113,
+    "y": 102,
+    "w": 180,
+    "h": 96,
+    "alpha": 1,
+    "clickable": true,
+    "text": "返回",
+    "description": "返回上一页"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": -1,
+    "x": 293,
+    "y": 90,
+    "w": 102,
+    "h": 113,
+    "alpha": 1,
+    "clickable": false,
+    "text": "收藏夹"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatImageView",
+    "id": 2131362464,
+    "resource": "tvDelete",
+    "x": 2472,
+    "y": 90,
+    "w": 113,
+    "h": 113,
+    "alpha": 0.3799999952316284,
+    "clickable": true,
+    "description": "删除选中收藏"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatImageView",
+    "id": 2131362457,
+    "resource": "tvClear",
+    "x": 2631,
+    "y": 90,
+    "w": 113,
+    "h": 113,
+    "alpha": 0.3799999952316284,
+    "clickable": true,
+    "description": "清空收藏夹"
+  },
+  {
+    "class": "android.widget.FrameLayout",
+    "id": -1,
+    "x": 0,
+    "y": 248,
+    "w": 2880,
+    "h": 1372,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "com.owen.tvrecyclerview.widget.TvRecyclerView",
+    "id": 2131362197,
+    "resource": "mGridView",
+    "x": 0,
+    "y": 248,
+    "w": 2880,
+    "h": 1372,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": 2131362600,
+    "resource": "uxCollectEmpty",
+    "x": 0,
+    "y": 248,
+    "w": 2880,
+    "h": 1372,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatImageView",
+    "id": -1,
+    "x": 1380,
+    "y": 757,
+    "w": 120,
+    "h": 120,
+    "alpha": 1,
+    "clickable": false,
+    "description": "收藏"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": -1,
+    "x": 0,
+    "y": 901,
+    "w": 2880,
+    "h": 90,
+    "alpha": 1,
+    "clickable": false,
+    "text": "收藏夹还是空的"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362601,
+    "resource": "uxCollectSearch",
+    "x": 1260,
+    "y": 1011,
+    "w": 360,
+    "h": 100,
+    "alpha": 1,
+    "clickable": true,
+    "text": "去搜索影片"
+  },
+  {
+    "class": "androidx.base.vq",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.base.fl",
+    "id": -1,
+    "x": 79,
+    "y": 328,
+    "w": 243,
+    "h": 243,
+    "alpha": 0.8999999761581421,
+    "clickable": true,
+    "description": "应用内返回"
+  }
+]

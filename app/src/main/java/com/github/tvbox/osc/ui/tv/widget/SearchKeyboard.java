@@ -22,28 +22,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
-/**
- * @author pj567
- * @date :2020/12/23
- * @description:
- */
 public class SearchKeyboard extends FrameLayout {
-    private RecyclerView mRecyclerView;
-    // Four complete 10-column rows; callback codes 0/1 retain remote/delete semantics.
-    private List<String> keys = Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-            "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
-            "A", "S", "D", "F", "G", "H", "J", "K", "L", "Del",
+    private static final int COLUMN_COUNT = 12;
+    private final RecyclerView recyclerView;
+    private final List<String> keys = Arrays.asList(
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "", "",
+            "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "", "",
+            "A", "S", "D", "F", "G", "H", "J", "K", "L", "Del", "", "",
             "Z", "X", "C", "V", "B", "N", "M", "，", "。", "空格");
-    private List<Keyboard> keyboardList = new ArrayList<>();
+    private final List<Keyboard> keyboardList = new ArrayList<>();
     private OnSearchKeyListener searchKeyListener;
-    private OnFocusChangeListener focusChangeListener = new OnFocusChangeListener() {
-        @Override
-        public void onFocusChange(View itemView, boolean hasFocus) {
-            if (null != itemView && itemView != mRecyclerView) {
-                itemView.setSelected(hasFocus);
-            }
-        }
+    private final OnFocusChangeListener focusChangeListener = (view, focused) -> {
+        if (view != null) view.setSelected(focused);
     };
 
     public SearchKeyboard(@NonNull Context context) {
@@ -56,45 +46,39 @@ public class SearchKeyboard extends FrameLayout {
 
     public SearchKeyboard(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initView();
-    }
-
-    private void initView() {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.layout_keyborad, this);
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.mRecyclerView);
-        GridLayoutManager manager = new GridLayoutManager(getContext(), 10);
-        mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
+        View view = LayoutInflater.from(context).inflate(R.layout.layout_keyborad, this);
+        recyclerView = view.findViewById(R.id.mRecyclerView);
+        GridLayoutManager manager = new GridLayoutManager(context, COLUMN_COUNT);
+        manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                return "空格".equals(keys.get(position)) ? 3 : 1;
+            }
+        });
+        recyclerView.setLayoutManager(manager);
+        recyclerView.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
             @Override
             public void onChildViewAttachedToWindow(@NonNull View child) {
-                if (child.isFocusable() && null == child.getOnFocusChangeListener()) {
+                if (child.isFocusable() && child.getOnFocusChangeListener() == null) {
                     child.setOnFocusChangeListener(focusChangeListener);
                 }
             }
 
             @Override
-            public void onChildViewDetachedFromWindow(@NonNull View view) {
-
-            }
+            public void onChildViewDetachedFromWindow(@NonNull View child) { }
         });
-        int size = keys.size();
-        for (int i = 0; i < size; i++) {
-            keyboardList.add(new Keyboard(1, keys.get(i)));
-        }
-        final KeyboardAdapter adapter = new KeyboardAdapter(keyboardList);
-        mRecyclerView.setAdapter(adapter);
-        // Additional actions sit below the 36-key matrix, never replacing letters/digits.
+
+        for (String key : keys) keyboardList.add(new Keyboard(key.isEmpty() ? 2 : 1, key));
+        KeyboardAdapter adapter = new KeyboardAdapter(keyboardList);
+        recyclerView.setAdapter(adapter);
         view.findViewById(R.id.ux_search_remote).setOnClickListener(v -> dispatchKey(0, "远程搜索"));
         view.findViewById(R.id.ux_search_left).setOnClickListener(v -> dispatchKey(-1, "左移"));
         view.findViewById(R.id.ux_search_right).setOnClickListener(v -> dispatchKey(-2, "右移"));
-
-        adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                Keyboard keyboard = (Keyboard) adapter.getItem(position);
-                String value = keyboard.getKey();
-                dispatchKey("Del".equals(value) ? 1 : position + 2, "空格".equals(value) ? " " : value);
-            }
+        adapter.setOnItemClickListener((source, itemView, position) -> {
+            Keyboard key = adapter.getItem(position);
+            if (key == null || key.key.isEmpty()) return;
+            dispatchKey("Del".equals(key.key) ? 1 : position + 2,
+                    "空格".equals(key.key) ? " " : key.key);
         });
     }
 
@@ -102,11 +86,11 @@ public class SearchKeyboard extends FrameLayout {
         if (searchKeyListener != null) searchKeyListener.onSearchKey(code, key);
     }
 
-    static class Keyboard implements MultiItemEntity {
-        private int itemType;
-        private String key;
+    static final class Keyboard implements MultiItemEntity {
+        private final int itemType;
+        private final String key;
 
-        private Keyboard(int itemType, String key) {
+        Keyboard(int itemType, String key) {
             this.itemType = itemType;
             this.key = key;
         }
@@ -115,31 +99,32 @@ public class SearchKeyboard extends FrameLayout {
         public int getItemType() {
             return itemType;
         }
-
-        public String getKey() {
-            return key;
-        }
-
-        public void setKey(String key) {
-            this.key = key;
-        }
     }
 
-    private static class KeyboardAdapter extends BaseMultiItemQuickAdapter<Keyboard, BaseViewHolder> {
-
-        private KeyboardAdapter(List<Keyboard> data) {
+    private static final class KeyboardAdapter extends BaseMultiItemQuickAdapter<Keyboard, BaseViewHolder> {
+        KeyboardAdapter(List<Keyboard> data) {
             super(data);
             addItemType(1, R.layout.item_keyboard);
+            addItemType(2, R.layout.item_keyboard_spacer);
         }
 
         @Override
-        protected void convert(BaseViewHolder helper, Keyboard item) {
-            switch (helper.getItemViewType()) {
-                case 1:
-                    helper.setText(R.id.keyName, item.key);
-                    break;
+        protected void convert(BaseViewHolder holder, Keyboard item) {
+            if (holder.getItemViewType() == 1) {
+                holder.setText(R.id.keyName, item.key);
+            } else {
+                holder.itemView.setFocusable(false);
+                holder.itemView.setClickable(false);
             }
         }
+    }
+
+    public void requestFirstKeyFocus() {
+        recyclerView.post(() -> {
+            View firstKey = recyclerView.getChildAt(0);
+            if (firstKey != null && firstKey.isFocusable()) firstKey.requestFocus();
+            else recyclerView.requestFocus();
+        });
     }
 
     public void setOnSearchKeyListener(OnSearchKeyListener listener) {
@@ -147,6 +132,6 @@ public class SearchKeyboard extends FrameLayout {
     }
 
     public interface OnSearchKeyListener {
-        void onSearchKey(int pos, String key);
+        void onSearchKey(int position, String key);
     }
 }

@@ -77,13 +77,13 @@ public class ApiHistoryDialogAdapter extends ListAdapter<String, ApiHistoryDialo
     public void onBindViewHolder(@NonNull @NotNull ApiHistoryDialogAdapter.SelectViewHolder holder, int position) {
         String value = data.get(position);
         String name = value;
-        if (HistoryHelper.isApiLineSource(value))
-            name = "[仓] " + name;
-        if (select.equals(value))
-            name = "√ " + name;
-        ((TextView) holder.itemView.findViewById(R.id.tvName)).setText(name);
-        holder.itemView.findViewById(R.id.tvName).setOnClickListener(new View.OnClickListener() {
-            @Override
+        if (HistoryHelper.isApiLineSource(value)) name = "[仓] " + name;
+        boolean current = select != null && select.equals(value);
+        TextView nameView = holder.itemView.findViewById(R.id.tvName);
+        nameView.setText(name);
+        nameView.setSelected(current);
+        holder.itemView.findViewById(R.id.tvCurrent).setVisibility(current ? View.VISIBLE : View.GONE);
+        nameView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (select.equals(value))
                     return;

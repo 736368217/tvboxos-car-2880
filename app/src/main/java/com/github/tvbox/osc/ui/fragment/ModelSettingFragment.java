@@ -897,15 +897,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
         }
     }
 
-    private void restartAppAfterCacheCleared() {
-        Toast.makeText(mContext, "缓存已清空,即将回到主页!", Toast.LENGTH_LONG).show();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                restartApp();
-            }
-        }, 2500);
-    }
 
     private void refreshApiLineText() {
         if (tvApiLine == null) return;
@@ -1121,24 +1112,26 @@ public class ModelSettingFragment extends BaseLazyFragment {
 
     private void onClickClearCache(View v) {
         FastClickCheckUtil.check(v);
+        new com.github.tvbox.osc.ui.dialog.ConfirmClearCacheDialog(mContext, this::clearCacheInBackground).show();
+    }
+
+    private void clearCacheInBackground() {
         String cachePath = FileUtils.getCachePath();
         File cacheDir = new File(cachePath);
         new Thread(() -> {
+            boolean cleared = true;
             try {
                 ApiConfig.get().clearSpiderCache();
-                if(cacheDir.exists())FileUtils.cleanDirectory(cacheDir);
+                if (cacheDir.exists()) FileUtils.cleanDirectory(cacheDir);
                 FileUtils.clearSpiderCacheFiles();
             } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (mActivity != null) {
-                    mActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            restartAppAfterCacheCleared();
-                        }
-                    });
-                }
+                cleared = false;
+                LOG.i("echo-clear-cache-error:" + e.getClass().getSimpleName());
+            }
+            final boolean result = cleared;
+            if (mActivity != null) {
+                mActivity.runOnUiThread(() -> Toast.makeText(mContext,
+                        result ? "缓存已清理" : "缓存清理失败", Toast.LENGTH_LONG).show());
             }
         }).start();
     }

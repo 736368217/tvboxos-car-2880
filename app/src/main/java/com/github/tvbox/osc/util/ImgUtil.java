@@ -177,8 +177,8 @@ public class ImgUtil {
     }
 
     public static int getRandomColor() {
-        Random random = new Random();
-        return Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
+        int[] palette = {0xFF1B2634, 0xFF27323C, 0xFF26352F, 0xFF353229, 0xFF20343A};
+        return palette[new Random().nextInt(palette.length)];
     }
 
     public static Drawable createTextDrawable(String text) {
@@ -186,28 +186,26 @@ public class ImgUtil {
     }
 
     private static Drawable createTextDrawable(String text, int width, int height, float cornerRadius) {
-        if (TextUtils.isEmpty(text)) text = "TVBox";
         if (width <= 0) width = 180;
         if (height <= 0) height = 240;
         if (cornerRadius <= 0) cornerRadius = 1;
-        String key = text + "_" + width + "x" + height + "_" + (int) cornerRadius;
-        text = text.substring(0, 1);
+        String key = "poster_fallback_" + width + "x" + height + "_" + (int) cornerRadius;
         if (drawableCache.containsKey(key)) return drawableCache.get(key);
-        int randomColor = getRandomColor();
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(randomColor);
-        paint.setStyle(Paint.Style.FILL);
-        RectF rectF = new RectF(0, 0, width, height);
-        canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, paint);
-        paint.setColor(Color.WHITE);
-        paint.setTextSize(60);
-        paint.setTextAlign(Paint.Align.CENTER);
-        Paint.FontMetrics fontMetrics = paint.getFontMetrics();
-        float x = width / 2f;
-        float y = (height - fontMetrics.bottom - fontMetrics.top) / 2f;
-        canvas.drawText(text, x, y, paint);
+        Paint background = new Paint(Paint.ANTI_ALIAS_FLAG);
+        background.setColor(getRandomColor());
+        background.setStyle(Paint.Style.FILL);
+        canvas.drawRoundRect(new RectF(0, 0, width, height), cornerRadius, cornerRadius, background);
+        Bitmap icon = BitmapFactory.decodeResource(App.getInstance().getResources(), com.github.tvbox.osc.R.drawable.icon_img_placeholder);
+        if (icon != null) {
+            float scale = Math.min(width * 0.34f / icon.getWidth(), height * 0.34f / icon.getHeight());
+            float iconWidth = icon.getWidth() * scale;
+            float iconHeight = icon.getHeight() * scale;
+            RectF iconBounds = new RectF((width - iconWidth) / 2f, (height - iconHeight) / 2f,
+                    (width + iconWidth) / 2f, (height + iconHeight) / 2f);
+            canvas.drawBitmap(icon, null, iconBounds, new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
+        }
         Drawable drawable = new BitmapDrawable(App.getInstance().getResources(), bitmap);
         drawableCache.put(key, drawable);
         return drawable;

@@ -101,6 +101,7 @@ public class SearchActivity extends BaseActivity {
     private TvRecyclerView mGridView;
     private TvRecyclerView mGridViewWord;
     private GridLayout historyWordGrid;
+    private View searchEmpty;
     SourceViewModel sourceViewModel;
     private RemoteDialog remoteDialog;
     private EditText etSearch;
@@ -178,6 +179,8 @@ public class SearchActivity extends BaseActivity {
         mGridViewWord = findViewById(R.id.mGridViewWord);
         historyWordGrid = findViewById(R.id.historyWordGrid);
         tvHistoryClear = findViewById(R.id.tvHistoryClear);
+        searchEmpty = findViewById(R.id.uxSearchEmpty);
+        findViewById(R.id.uxSearchEmptyClear).setOnClickListener(v -> tvClear.performClick());
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         findViewById(R.id.ux_search_back).setOnClickListener(v -> onBackPressed());
         findViewById(R.id.ux_search_ime).setOnClickListener(v -> showSystemKeyboard());
@@ -409,7 +412,7 @@ public class SearchActivity extends BaseActivity {
         setNormalWordTitle();
         wordsSwitch.setFocusable(true);
         wordsSwitch.setBackgroundResource(R.drawable.ux_setting_choice);
-        mGridViewWord.setLayoutManager(new V7GridLayoutManager(this.mContext, 7));
+        mGridViewWord.setLayoutManager(new V7GridLayoutManager(this.mContext, 6));
         mGridViewWord.setAdapter(aggregateSearchMode ? hotWordAdapter : wordAdapter);
         refreshSearchHistoryWords();
     }
@@ -537,17 +540,65 @@ public class SearchActivity extends BaseActivity {
     /**
      * 拼音联想
      */
+    private ArrayList<String> localPinyinCandidates(String query) {
+        ArrayList<String> matches = new ArrayList<>();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return matches;
+        String prefix = query.replaceAll("[^A-Za-z0-9]", "").toLowerCase(java.util.Locale.ROOT);
+        if (prefix.isEmpty()) return matches;
+        ArrayList<String> candidates = new ArrayList<>();
+        if (hots != null) candidates.addAll(hots);
+        ArrayList<String> history = Hawk.get(HawkConfig.SEARCH_HISTORY, new ArrayList<String>());
+        if (history != null) candidates.addAll(history);
+        for (String word : DEFAULT_HOT_WORDS) candidates.add(word);
+        HashSet<String> seen = new HashSet<>();
+        android.icu.text.Transliterator transliterator;
+        try {
+            transliterator = android.icu.text.Transliterator.getInstance("Han-Latin; Latin-ASCII");
+        } catch (RuntimeException ignored) {
+            return matches;
+        }
+        for (String candidate : candidates) {
+            if (TextUtils.isEmpty(candidate) || seen.contains(candidate)) continue;
+            seen.add(candidate);
+            String latin = transliterator.transliterate(candidate).toLowerCase(java.util.Locale.ROOT);
+            StringBuilder initials = new StringBuilder();
+            boolean tokenStart = true;
+            for (int i = 0; i < latin.length(); i++) {
+                char value = latin.charAt(i);
+                if (Character.isLetterOrDigit(value)) {
+                    if (tokenStart) initials.append(value);
+                    tokenStart = false;
+                } else {
+                    tokenStart = true;
+                }
+            }
+            if (initials.toString().startsWith(prefix)) {
+                matches.add(candidate);
+                if (matches.size() >= 21) break;
+            }
+        }
+        return matches;
+    }
+
     private void loadRec(String key) {
+        final String requestedKey = key == null ? "" : key.trim();
+        if (requestedKey.isEmpty()) return;
+        ArrayList<String> localSuggestions = localPinyinCandidates(requestedKey);
+        if (!localSuggestions.isEmpty()) {
+            wordsSwitch.setText("猜你想搜");
+            setHotWordsData(localSuggestions);
+        }
         OkGo.get("https://tv.aiseet.atianqi.com/i-tvbin/qtv_video/search/get_search_smart_box")
                 .params("format", "json")
                 .params("page_num", 0)
                 .params("page_size", 20)
-                .params("key", key)
+                .params("key", requestedKey)
                 .execute(new AbsCallback() {
                     @Override
                     public void onSuccess(Response response) {
                         try {
-                            ArrayList hots = new ArrayList<>();
+                            if (!TextUtils.equals(requestedKey, etSearch.getText().toString().trim())) return;
+                            ArrayList<String> remoteSuggestions = new ArrayList<>();
                             String result = (String) response.body();
                             Gson gson = new Gson();
                             JsonElement json = gson.fromJson(result, JsonElement.class);
@@ -562,10 +613,11 @@ public class SearchActivity extends BaseActivity {
                                 String keywordTxt = groupData.getAsJsonObject("dtReportInfo")
                                         .getAsJsonObject("reportData")
                                         .get("keyword_txt").getAsString();
-                                hots.add(keywordTxt.trim());
+                                remoteSuggestions.add(keywordTxt.trim());
                             }
-                            wordsSwitch.setText("猜你 想搜");
-                            setHotWordsData(hots);
+                            if (remoteSuggestions.isEmpty()) return;
+                            wordsSwitch.setText("猜你想搜");
+                            setHotWordsData(remoteSuggestions);
                             mGridViewWord.smoothScrollToPosition(0);
                         } catch (Throwable th) {
                             th.printStackTrace();
@@ -1105,6 +1157,29 @@ public class SearchActivity extends BaseActivity {
         super.onDestroy();
     }
 
+    @Override
+    protected void showEmpty() {
+        if (searchEmpty == null) {
+            super.showEmpty();
+            return;
+        }
+        super.showSuccess();
+        mGridView.setVisibility(View.INVISIBLE);
+        searchEmpty.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void showLoading() {
+        if (searchEmpty != null) searchEmpty.setVisibility(View.GONE);
+        super.showLoading();
+    }
+
+    @Override
+    protected void showSuccess() {
+        if (searchEmpty != null) searchEmpty.setVisibility(View.GONE);
+        super.showSuccess();
+    }
+
     private void showSystemKeyboard() {
         etSearch.requestFocus();
         etSearch.setSelection(etSearch.length());
@@ -1114,6 +1189,19 @@ public class SearchActivity extends BaseActivity {
             return;
         }
         etSearch.post(() -> imm.showSoftInput(etSearch, InputMethodManager.SHOW_IMPLICIT));
+        etSearch.postDelayed(() -> {
+            if (isFinishing() || !etSearch.hasFocus()) return;
+            View decor = getWindow().getDecorView();
+            android.graphics.Rect visible = new android.graphics.Rect();
+            decor.getWindowVisibleDisplayFrame(visible);
+            int hiddenHeight = decor.getRootView().getHeight() - visible.bottom;
+            if (hiddenHeight < 160) {
+                imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0);
+                etSearch.clearFocus();
+                keyboard.requestFirstKeyFocus();
+                Toast.makeText(this, "系统输入法不可见，已切回车载键盘", Toast.LENGTH_LONG).show();
+            }
+        }, 800L);
     }
 
 }

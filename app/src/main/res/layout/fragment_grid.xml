@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/car_bg">
-<com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/mGridView" android:layout_width="2520px" android:layout_height="1280px" android:layout_marginLeft="280px" android:layout_marginTop="125px" android:clipToPadding="true" android:paddingBottom="35px" app:tv_horizontalSpacingWithMargins="20px" app:tv_verticalSpacingWithMargins="20px" app:tv_selectedItemIsCentered="true"/>
+<com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/mGridView" android:layout_width="2520px" android:layout_height="1280px" android:layout_marginLeft="280px" android:layout_marginTop="125px" android:clipToPadding="true" android:paddingBottom="150px" app:tv_horizontalSpacingWithMargins="20px" app:tv_verticalSpacingWithMargins="20px" app:tv_selectedItemIsCentered="true"/>
 </FrameLayout>

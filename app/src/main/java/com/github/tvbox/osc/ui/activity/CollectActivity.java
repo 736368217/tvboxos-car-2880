@@ -35,6 +35,7 @@ public class CollectActivity extends BaseActivity {
     private ImageView tvClear;
     private TextView tvDelTip;
     private TvRecyclerView mGridView;
+    private View emptyState;
     public static CollectAdapter collectAdapter;
     private boolean delMode = false;
 
@@ -50,7 +51,8 @@ public class CollectActivity extends BaseActivity {
     }
 
     private void toggleDelMode() {
-    	HawkConfig.hotVodDelete = !HawkConfig.hotVodDelete;
+        if (collectAdapter == null || collectAdapter.getData().isEmpty()) return;
+        HawkConfig.hotVodDelete = !HawkConfig.hotVodDelete;
         collectAdapter.notifyDataSetChanged();
         delMode = !delMode;
         tvDelTip.setVisibility(delMode ? View.VISIBLE : View.GONE);
@@ -62,6 +64,8 @@ public class CollectActivity extends BaseActivity {
         tvClear = findViewById(R.id.tvClear);
         tvDelTip = findViewById(R.id.tvDelTip);
         mGridView = findViewById(R.id.mGridView);
+        emptyState = findViewById(R.id.uxCollectEmpty);
+        findViewById(R.id.uxCollectSearch).setOnClickListener(v -> jumpActivity(SearchActivity.class));
         findViewById(R.id.uxPageBack).setOnClickListener(v -> onBackPressed());
         mGridView.setHasFixedSize(true);
         mGridView.setLayoutManager(new V7GridLayoutManager(this.mContext, isBaseOnWidth() ? 5 : 6));
@@ -116,6 +120,7 @@ public class CollectActivity extends BaseActivity {
                     if (delMode) {
                         collectAdapter.remove(position);
                         RoomDataManger.deleteVodCollect(vodInfo.getId());
+                        updateEmptyState();
                     } else {
                         if (ApiConfig.get().getSource(vodInfo.sourceKey) != null) {
                             Bundle bundle = new Bundle();
@@ -160,8 +165,31 @@ public class CollectActivity extends BaseActivity {
             vodInfoList.add(vodInfo);
         }
         collectAdapter.setNewData(vodInfoList);
+        updateEmptyState();
     }
 
+
+    private void updateEmptyState() {
+        boolean controlsFocused = tvDelete != null && tvDelete.hasFocus() || tvClear != null && tvClear.hasFocus();
+        boolean empty = collectAdapter == null || collectAdapter.getData().isEmpty();
+        if (emptyState != null) emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
+        if (tvDelete != null) {
+            tvDelete.setEnabled(!empty);
+            tvDelete.setFocusable(!empty);
+            tvDelete.setAlpha(empty ? 0.38f : 1f);
+        }
+        if (tvClear != null) {
+            tvClear.setEnabled(!empty);
+            tvClear.setFocusable(!empty);
+            tvClear.setAlpha(empty ? 0.38f : 1f);
+        }
+        if (empty && delMode) {
+            delMode = false;
+            HawkConfig.hotVodDelete = false;
+        }
+        if (empty && tvDelTip != null) tvDelTip.setVisibility(View.GONE);
+        if (empty && controlsFocused) findViewById(R.id.uxCollectSearch).requestFocus();
+    }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void refresh(RefreshEvent event) {

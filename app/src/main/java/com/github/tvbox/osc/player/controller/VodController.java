@@ -367,10 +367,10 @@ public class VodController extends BaseController {
     }
 
     private void updateCarEnhanceButtons() {
-        if (mCarVideoBtn != null) mCarVideoBtn.setText("画面预设\n" + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
+        if (mCarVideoBtn != null) mCarVideoBtn.setText("画面 · " + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
         if (mCarSrBtn != null) mCarSrBtn.setText("超分·" + (CarEnhance.videoSrEnabled() ? "开" : "关"));
         if (mCarInterpBtn != null) mCarInterpBtn.setText("补帧·" + (CarEnhance.videoInterpEnabled() ? "开" : "关"));
-        if (mCarAudioBtn != null) mCarAudioBtn.setText("座舱音效\n" + AudioEffectController.name(CarEnhance.audioMode()));
+        if (mCarAudioBtn != null) mCarAudioBtn.setText("音效 · " + AudioEffectController.name(CarEnhance.audioMode()));
         updateFrameRateDisplay();
     }
     private void updateFrameRateDisplay() {

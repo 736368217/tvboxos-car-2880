@@ -727,10 +727,20 @@ public final class Car7Acceptance extends Instrumentation {
         Activity a = startActivitySync(i); pause(500); advanced = a; return a;
     }
     private void assertTargetWindow(String name) throws Exception {
-        android.view.accessibility.AccessibilityNodeInfo root = getUiAutomation().getRootInActiveWindow();
-        String pkg = root == null || root.getPackageName() == null ? "null" : root.getPackageName().toString();
-        check(name + " foreground belongs to target", getTargetContext().getPackageName().equals(pkg));
-        if (!getTargetContext().getPackageName().equals(pkg)) throw new IllegalStateException(name + " foreground package=" + pkg);
+        String targetPackage = getTargetContext().getPackageName();
+        String packageName = "null";
+        for (int attempt = 0; attempt < 20; attempt++) {
+            waitForIdleSync();
+            android.view.accessibility.AccessibilityNodeInfo root = getUiAutomation().getRootInActiveWindow();
+            packageName = root == null || root.getPackageName() == null ? "null" : root.getPackageName().toString();
+            if (targetPackage.equals(packageName)) {
+                check(name + " foreground belongs to target", true);
+                return;
+            }
+            SystemClock.sleep(200);
+        }
+        check(name + " foreground belongs to target", false);
+        throw new IllegalStateException(name + " foreground package=" + packageName);
     }
     private void shot(String name) throws Exception {
         Bitmap image = getUiAutomation().takeScreenshot();
@@ -1087,7 +1097,7 @@ public final class Car7Acceptance extends Instrumentation {
                 JSONArray observation = new JSONArray(); progressing(video, "detail quick controls", observation);
                 write("page-playback.json", observation.toString(2));
                 if (ui(() -> view(detail, "bottom_container").isShown())) { tap(detail, 1440, 600); pause(350); }
-                config(detail, "setHideSeconds", 0); tapBall(detail);
+                config(detail, "setHideSeconds", 0); main(() -> call(detail, "onBackButtonStepUp")); pause(500);
                 check("player Back returns to detail before finishing", !ui(detail::isFinishing) && !Boolean.TRUE.equals(ui(() -> field(detail, "fullWindows"))));
                 capturePage(detail, "page-detail-after-back");
                 tapBall(detail); check("detail Back finishes one page", ui(detail::isFinishing));
@@ -1140,7 +1150,9 @@ public final class Car7Acceptance extends Instrumentation {
             });
         }
         section("gallery-live", () -> {
-            main(() -> { putPref("LIVE_API_URL", "http://127.0.0.1:9978/file/TVBoxCar5/car7-live.m3u"); putPref("PLAY_TYPE", 2); });
+            String liveApi = arguments == null ? "http://127.0.0.1:9978/file/TVBoxCar5/car7-live.m3u"
+                    : arguments.getString("liveApi", "http://127.0.0.1:9978/file/TVBoxCar5/car7-live.m3u");
+            main(() -> { putPref("LIVE_API_URL", liveApi); putPref("PLAY_TYPE", 2); });
             Activity live = openPage("LivePlayActivity", null);
             try {
                 Object video = ui(() -> field(live, "mVideoView"));

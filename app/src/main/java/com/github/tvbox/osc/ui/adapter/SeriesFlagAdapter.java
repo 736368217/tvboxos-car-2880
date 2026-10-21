@@ -30,7 +30,7 @@ public class SeriesFlagAdapter extends BaseQuickAdapter<VodInfo.VodSeriesFlag, B
         } else {
             select.setVisibility(View.GONE);
         }
-        helper.setText(R.id.tvSeriesFlag, item.name);
+        helper.setText(R.id.tvSeriesFlag, displaySeriesFlag(item.name));
         View mSeriesGroupTv = ((Activity) helper.itemView.getContext()).findViewById(R.id.mSeriesGroupTv);
         View mGridViewQuality = ((Activity) helper.itemView.getContext()).findViewById(R.id.mGridViewQuality);
         if (mSeriesGroupTv != null && mSeriesGroupTv.getVisibility() == View.VISIBLE) {
@@ -46,5 +46,14 @@ public class SeriesFlagAdapter extends BaseQuickAdapter<VodInfo.VodSeriesFlag, B
         }else {
             helper.itemView.setNextFocusRightId(View.NO_ID);
         }
+    }
+    private String displaySeriesFlag(String name) {
+        if (name == null) return "";
+        int marker = name.lastIndexOf("共(");
+        if (marker <= 0 || !name.endsWith(")集")) return name;
+        String count = name.substring(marker + 2, name.length() - 2);
+        if (!count.matches("\\d+")) return name;
+        String source = name.substring(0, marker).trim().replaceAll("([A-Za-z]+)$", " $1");
+        return source + " · 共 " + count + " 集";
     }
 }

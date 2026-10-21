@@ -94,7 +94,7 @@ public class LocalFileActivity extends BaseActivity {
             }
         });
         adapter.setNewData(files);
-        tvEmpty.setVisibility(files.isEmpty() ? View.VISIBLE : View.GONE);
+        tvEmpty.setVisibility(children == null || children.length == 0 ? View.VISIBLE : View.GONE);
         fileList.postDelayed(new Runnable() {
             @Override
             public void run() {

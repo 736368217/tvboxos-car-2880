@@ -1,0 +1,201 @@
+[
+  {
+    "class": "com.android.internal.policy.DecorView",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.FrameLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.FitWindowsLinearLayout",
+    "id": 2131361844,
+    "resource": "action_bar_root",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.ContentFrameLayout",
+    "id": 16908290,
+    "resource": "content",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.FrameLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362641,
+    "resource": "uxPageBack",
+    "x": 90,
+    "y": 90,
+    "w": 180,
+    "h": 96,
+    "alpha": 1,
+    "clickable": true,
+    "text": "返回",
+    "description": "返回上一页"
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 90,
+    "y": 90,
+    "w": 2700,
+    "h": 1406,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362522,
+    "resource": "tvTitle",
+    "x": 310,
+    "y": 90,
+    "w": 2480,
+    "h": 88,
+    "alpha": 1,
+    "clickable": false,
+    "text": "选择点播配置文件"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362498,
+    "resource": "tvPath",
+    "x": 90,
+    "y": 201,
+    "w": 2700,
+    "h": 61,
+    "alpha": 1,
+    "clickable": false,
+    "text": "\/storage\/emulated\/0\/TVBox"
+  },
+  {
+    "class": "com.owen.tvrecyclerview.widget.TvRecyclerView",
+    "id": 2131362048,
+    "resource": "fileList",
+    "x": 90,
+    "y": 307,
+    "w": 2700,
+    "h": 1100,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 90,
+    "y": 307,
+    "w": 2700,
+    "h": 135,
+    "alpha": 1,
+    "clickable": true
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362523,
+    "resource": "tvType",
+    "x": 135,
+    "y": 307,
+    "w": 180,
+    "h": 135,
+    "alpha": 1,
+    "clickable": false,
+    "text": "目录"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362493,
+    "resource": "tvName",
+    "x": 315,
+    "y": 307,
+    "w": 1935,
+    "h": 135,
+    "alpha": 1,
+    "clickable": false,
+    "text": ".."
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362486,
+    "resource": "tvInfo",
+    "x": 2250,
+    "y": 307,
+    "w": 495,
+    "h": 135,
+    "alpha": 1,
+    "clickable": false,
+    "text": "进入"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362471,
+    "resource": "tvEmpty",
+    "x": 90,
+    "y": 1430,
+    "w": 2700,
+    "h": 66,
+    "alpha": 1,
+    "clickable": false,
+    "text": "当前文件夹为空，可将配置或媒体文件放入 TVBox 文件夹"
+  },
+  {
+    "class": "androidx.base.vq",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.base.fl",
+    "id": -1,
+    "x": 79,
+    "y": 328,
+    "w": 243,
+    "h": 243,
+    "alpha": 0.8999999761581421,
+    "clickable": true,
+    "description": "应用内返回"
+  }
+]

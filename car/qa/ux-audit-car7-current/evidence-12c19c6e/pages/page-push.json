@@ -1,0 +1,166 @@
+[
+  {
+    "class": "com.android.internal.policy.DecorView",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.FrameLayout",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.FitWindowsLinearLayout",
+    "id": 2131361844,
+    "resource": "action_bar_root",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.ContentFrameLayout",
+    "id": 16908290,
+    "resource": "content",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "android.widget.FrameLayout",
+    "id": 2131362296,
+    "resource": "rootLayout",
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362641,
+    "resource": "uxPageBack",
+    "x": 139,
+    "y": 130,
+    "w": 180,
+    "h": 96,
+    "alpha": 1,
+    "clickable": true,
+    "text": "返回",
+    "description": "返回上一页"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": -1,
+    "x": 359,
+    "y": 130,
+    "w": 1800,
+    "h": 88,
+    "alpha": 1,
+    "clickable": false,
+    "text": "多端互联 · AirPush"
+  },
+  {
+    "class": "android.widget.LinearLayout",
+    "id": -1,
+    "x": 79,
+    "y": 210,
+    "w": 2722,
+    "h": 1165,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatImageView",
+    "id": 2131362100,
+    "resource": "ivQRCode",
+    "x": 1102,
+    "y": 210,
+    "w": 675,
+    "h": 675,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362438,
+    "resource": "tvAddress",
+    "x": 79,
+    "y": 930,
+    "w": 2722,
+    "h": 184,
+    "alpha": 1,
+    "clickable": false,
+    "text": "手机\/电脑扫描上方二维码或者直接浏览器访问地址\nhttp:\/\/10.0.2.15:9978\/"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": -1,
+    "x": 79,
+    "y": 1141,
+    "w": 2722,
+    "h": 70,
+    "alpha": 1,
+    "clickable": false,
+    "text": "1. 手机扫码打开投送页  2. 粘贴视频链接  3. 车机立即开播"
+  },
+  {
+    "class": "androidx.appcompat.widget.AppCompatTextView",
+    "id": 2131362284,
+    "resource": "pushLocal",
+    "x": 1228,
+    "y": 1256,
+    "w": 424,
+    "h": 119,
+    "alpha": 1,
+    "clickable": true,
+    "text": "推送剪贴板内容"
+  },
+  {
+    "class": "androidx.base.vq",
+    "id": -1,
+    "x": 0,
+    "y": 0,
+    "w": 2880,
+    "h": 1620,
+    "alpha": 1,
+    "clickable": false
+  },
+  {
+    "class": "androidx.base.fl",
+    "id": -1,
+    "x": 79,
+    "y": 328,
+    "w": 243,
+    "h": 243,
+    "alpha": 0.8999999761581421,
+    "clickable": true,
+    "description": "应用内返回"
+  }
+]

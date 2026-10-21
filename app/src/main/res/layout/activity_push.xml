@@ -3,11 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" android:background="@drawable/car_surface">
+    android:layout_height="match_parent"
+    android:background="@drawable/car_surface"
     android:paddingTop="@dimen/car_top_padding"
     android:paddingBottom="@dimen/car_bottom_padding"
     android:paddingLeft="@dimen/car_side_padding"
-    android:paddingRight="@dimen/car_side_padding"
+    android:paddingRight="@dimen/car_side_padding">
 
     <TextView android:id="@+id/uxPageBack" style="@style/UxSceneButton" android:layout_width="180px" android:layout_height="96px" android:layout_marginLeft="60px" android:layout_marginTop="40px" android:drawableLeft="@drawable/aether_back" android:drawablePadding="10px" android:text="返回" android:textColor="@color/aether_cyan_focus" android:textSize="28px" android:contentDescription="返回上一页" />
     <TextView android:layout_width="1800px" android:layout_height="88px" android:layout_marginLeft="280px" android:layout_marginTop="40px" android:gravity="center_vertical" android:text="多端互联 · AirPush" android:textColor="@color/aether_text_primary" android:textSize="38px" android:textStyle="bold" />
@@ -36,6 +37,14 @@
             android:textSize="@dimen/ts_24"
             tools:text="1111111111111111111111111111111111111111111111111111" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="70px"
+            android:layout_marginTop="@dimen/vs_12"
+            android:gravity="center"
+            android:text="1. 手机扫码打开投送页  2. 粘贴视频链接  3. 车机立即开播"
+            android:textColor="@color/color_FFFFFF"
+            android:textSize="@dimen/ts_24" />
         <TextView
             android:id="@+id/pushLocal"
             android:layout_width="wrap_content"

@@ -451,6 +451,7 @@ public class LivePlayActivity extends BaseActivity {
         uxLiveFavorite = findViewById(R.id.ux_live_favorite);
         uxLiveState = findViewById(R.id.ux_live_preview_state);
         uxLiveEmpty = findViewById(R.id.ux_live_empty);
+        findViewById(R.id.ux_live_empty_action).setOnClickListener(v -> showSettingGroup());
         findViewById(R.id.ux_live_back).setOnClickListener(v -> onBackPressed());
         findViewById(R.id.ux_live_fullscreen).setOnClickListener(v -> uxLiveSetFullscreen(true));
         findViewById(R.id.ux_live_preview_hint).setOnClickListener(v -> uxLiveSetFullscreen(true));
@@ -524,12 +525,34 @@ public class LivePlayActivity extends BaseActivity {
         String group = browsing >= 0 && browsing < liveChannelGroupList.size()
                 ? liveChannelGroupList.get(browsing).getGroupName() : "";
         uxLiveTitle.setText("电视直播" + (TextUtils.isEmpty(group) ? "" : " / " + group));
+
+        TextView emptyTitle = findViewById(R.id.ux_live_empty_title);
+        TextView emptyMessage = findViewById(R.id.ux_live_empty_message);
+        View emptyState = findViewById(R.id.ux_live_empty_state);
+        View emptyAction = findViewById(R.id.ux_live_empty_action);
+        View fullscreenButton = findViewById(R.id.ux_live_fullscreen);
+        View previewHint = findViewById(R.id.ux_live_preview_hint);
+        View epgButton = findViewById(R.id.divLoadEpg);
+        int channelCount = liveChannelItemAdapter == null ? 0 : liveChannelItemAdapter.getItemCount();
+        boolean noGroups = liveChannelGroupList.isEmpty();
+        if (emptyTitle != null) emptyTitle.setText(noGroups ? "当前未配置直播源" : channelCount == 0 ? "当前分组没有可用频道" : "请选择频道");
+        if (emptyMessage != null) emptyMessage.setText(noGroups
+                ? "导入直播源后，频道列表会显示在左侧。"
+                : channelCount == 0 ? "切换左侧分组，或检查直播订阅。" : "从左侧频道列表选择频道后开始播放。");
+        if (emptyState != null) emptyState.setVisibility(!available && !uxLiveFullscreen ? View.VISIBLE : View.GONE);
+        if (emptyAction != null) emptyAction.setVisibility(!available && noGroups && !uxLiveFullscreen ? View.VISIBLE : View.GONE);
+        if (fullscreenButton != null) fullscreenButton.setVisibility(available ? View.VISIBLE : View.GONE);
+        if (previewHint != null) previewHint.setVisibility(available && !uxLiveFullscreen ? View.VISIBLE : View.GONE);
+        if (epgButton != null) epgButton.setVisibility(available ? View.VISIBLE : View.GONE);
+
         String source = available && channel.getSourceNum() > 0
                 ? " · 线路 " + (channel.getSourceIndex() + 1) + "/" + channel.getSourceNum() : "";
-        uxLiveChannel.setText(available ? "当前频道：" + channel.getChannelName() + source : "当前频道：未选择频道");
+        uxLiveChannel.setVisibility(available ? View.VISIBLE : View.GONE);
+        uxLiveChannel.setText(available ? "当前频道：" + channel.getChannelName() + source : "");
         List<Epginfo> programs = uxLiveCachedPrograms(channel);
         int index = findCurrentEpgIndex(programs);
-        uxLiveProgram.setText("正在播出：" + (index < 0 ? "暂无节目单" : uxLiveProgramText(programs.get(index))));
+        uxLiveProgram.setVisibility(available ? View.VISIBLE : View.GONE);
+        uxLiveProgram.setText(available ? "正在播出：" + (index < 0 ? "暂无节目单" : uxLiveProgramText(programs.get(index))) : "");
         Epginfo next = null;
         if (programs != null) {
             long now = System.currentTimeMillis();
@@ -538,26 +561,29 @@ public class LivePlayActivity extends BaseActivity {
                         && (next == null || candidate.startdateTime.before(next.startdateTime))) next = candidate;
             }
         }
-        uxLiveNextProgram.setText("接下来：" + (next == null ? "暂无节目预告" : uxLiveProgramText(next)));
+        uxLiveNextProgram.setVisibility(available ? View.VISIBLE : View.GONE);
+        uxLiveNextProgram.setText(available ? "接下来：" + (next == null ? "暂无节目预告" : uxLiveProgramText(next)) : "");
         int sources = available ? channel.getSourceNum() : 0;
+        uxLiveSource.setVisibility(available ? View.VISIBLE : View.GONE);
         uxLiveSource.setText(sources > 1 ? "切换源 (" + (sources - 1) + "条备用)" : sources == 1 ? "仅一条线路" : "暂无线路");
         uxLiveSource.setEnabled(sources > 1);
+        uxLiveFavorite.setVisibility(available ? View.VISIBLE : View.GONE);
         uxLiveFavorite.setEnabled(available);
         boolean favorite = available && uxLiveFavoriteIds().contains(uxLiveFavoriteId(currentChannelGroupIndex, channel));
         uxLiveFavorite.setText(favorite ? "♥ 已收藏 · 取消" : "♡ 收藏该频道");
         uxLiveFavorite.setTextColor(ContextCompat.getColor(this, favorite ? R.color.car_accent_alt : R.color.car_text));
         int state = mVideoView.getCurrentPlayState();
         boolean playing = available && (state == VideoView.STATE_PLAYING || state == VideoView.STATE_BUFFERED && mVideoView.isPlaying());
-        uxLiveState.setText(!available ? "请选择频道" : state == VideoView.STATE_ERROR ? "播放失败 · 可切换源"
+        uxLiveState.setText(!available ? "" : state == VideoView.STATE_ERROR ? "播放失败 · 可切换源"
                 : state == VideoView.STATE_PAUSED ? "已暂停" : state == VideoView.STATE_PLAYBACK_COMPLETED ? "播放已结束"
                 : playing ? (isSHIYI ? "● 正在回看" : "● 正在直播") : "正在连接 / 缓冲");
+        uxLiveState.setVisibility(available && !uxLiveFullscreen ? View.VISIBLE : View.GONE);
         if (liveChannelItemAdapter != null) {
             liveChannelItemAdapter.setPlaybackState(channel, playing);
-            uxLiveEmpty.setVisibility(liveChannelItemAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
-            uxLiveEmpty.setText(liveChannelGroupList.isEmpty() ? "暂无频道，请在直播设置中配置订阅"
-                    : "该分组暂无可用频道，或需要先输入分组密码");
+            boolean showGroupEmpty = liveChannelItemAdapter.getItemCount() == 0 && !liveChannelGroupList.isEmpty();
+            uxLiveEmpty.setVisibility(showGroupEmpty ? View.VISIBLE : View.GONE);
+            uxLiveEmpty.setText("当前分组暂无可用频道");
         }
-        // Legacy transient chrome must not cover the default preview/browser controls.
         if (!uxLiveFullscreen) {
             ll_epg.setVisibility(View.GONE);
             ll_right_top_loading.setVisibility(View.GONE);

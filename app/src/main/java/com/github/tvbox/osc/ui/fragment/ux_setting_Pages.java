@@ -36,6 +36,7 @@ public final class ux_setting_Pages {
     private final List<TextView> audioButtons = new ArrayList<>();
     private TextView videoValue, videoAppliedState, audioValue, backMode, backSide, backSkin, backHide;
     private SwitchCompat sr, interp, enabled, large, haptic, rootHide;
+    private LinearLayout backPage;
 
     public ux_setting_Pages(Activity context, LinearLayout host) {
         this.context = context;
@@ -222,7 +223,7 @@ public final class ux_setting_Pages {
         videoAppliedState.setMaxLines(2);
         place(preview, videoAppliedState, 40, 258, 2010, 48);
 
-        FrameLayout presets = card(page, 340);
+        FrameLayout presets = card(page, 460);
         presets.setId(R.id.llAdvancedVideo);
         place(presets, text("SDR / HDR 画面调优预设", 34, true, R.color.car_text), 40, 20, 1500, 50);
         videoValue = text("", 28, true, R.color.car_accent_cyan);
@@ -231,8 +232,9 @@ public final class ux_setting_Pages {
         place(presets, text("11 组 GLSL 预设 · HDR 会旁路调色 · 不重启解码器", 26, false, R.color.car_text_muted), 40, 78, 2010, 40);
         for (VideoEnhancePreset preset : VideoEnhancePreset.all()) {
             final int mode = preset.id;
-            videoButtons.add(choice(presets, preset.name, 40 + (videoButtons.size() % 6) * 338,
-                    130 + (videoButtons.size() / 6) * 106, 320, 96, () -> CarEnhance.setVideoMode(mode)));
+            int index = videoButtons.size();
+            videoButtons.add(choice(presets, preset.name, 40 + (index % 4) * 500,
+                    130 + (index / 4) * 100, 480, 90, () -> CarEnhance.setVideoMode(mode)));
         }
         sr = toggle(page, R.id.llAdvancedSr, R.id.switchAdvancedSr, "SGSR1 边缘超分辨率",
                 "空间边缘检测与锐化；720P / 1080P 放大时增强清晰度", CarEnhance.videoSrEnabled(), CarEnhance::setVideoSrEnabled);
@@ -283,8 +285,12 @@ public final class ux_setting_Pages {
     }
 
     private void back(LinearLayout page) {
+        backPage = page;
         heading(page, "双模应用内返回控件", "仅在应用窗口内生效，不申请系统悬浮窗、无障碍或全局按键权限");
-        enabled = toggle(page, R.id.llAdvancedBackEnabled, R.id.switchAdvancedBackEnabled, "应用内返回按钮", "显示或隐藏窗口内的返回控件", InAppBackButton.isEnabled(), v -> InAppBackButton.setEnabled(context, v));
+        enabled = toggle(page, R.id.llAdvancedBackEnabled, R.id.switchAdvancedBackEnabled, "应用内返回按钮", "显示或隐藏窗口内的返回控件", InAppBackButton.isEnabled(), v -> {
+            InAppBackButton.setEnabled(context, v);
+            setBackOptionRowsEnabled(page, v);
+        });
         backMode = option(page, R.id.llAdvancedBackMode, R.id.tvAdvancedBackMode, "返回模式", () -> {
             String[] keys = {HawkConfig.BACK_MODE_FLOATING, HawkConfig.BACK_MODE_EDGE, HawkConfig.BACK_MODE_BOTH};
             options("返回模式", Arrays.asList("悬浮球", "边缘拉出", "双模共存"), Arrays.asList(keys).indexOf(InAppBackButton.getMode()), p -> InAppBackButton.setMode(context, keys[p]));
@@ -303,6 +309,24 @@ public final class ux_setting_Pages {
         });
         haptic = toggle(page, R.id.llAdvancedHaptic, R.id.switchAdvancedHaptic, "触感反馈", "沿用系统可用的触觉反馈能力", InAppBackButton.isHapticEnabled(), v -> InAppBackButton.setHapticEnabled(context, v));
         rootHide = toggle(page, R.id.llAdvancedRootHide, R.id.switchAdvancedRootHide, "首页根状态自动隐藏", "仅影响应用内返回控件", InAppBackButton.isHideOnRoot(), v -> InAppBackButton.setHideOnRoot(context, v));
+        setBackOptionRowsEnabled(page, enabled.isChecked());
+    }
+
+    private void setBackOptionRowsEnabled(LinearLayout page, boolean value) {
+        int[] rowIds = {R.id.llAdvancedBackMode, R.id.llAdvancedBackSide, R.id.llAdvancedBackSkin,
+                R.id.llAdvancedBackSize, R.id.llAdvancedBackHide, R.id.llAdvancedHaptic, R.id.llAdvancedRootHide};
+        int[] switchIds = {R.id.switchAdvancedBackSize, R.id.switchAdvancedHaptic, R.id.switchAdvancedRootHide};
+        for (int id : rowIds) {
+            View row = page.findViewById(id);
+            if (row == null) continue;
+            row.setEnabled(value);
+            row.setFocusable(value);
+            row.setAlpha(value ? 1f : 0.38f);
+        }
+        for (int id : switchIds) {
+            View child = page.findViewById(id);
+            if (child != null) child.setEnabled(value);
+        }
     }
 
     private TextView option(LinearLayout page, int rowId, int valueId, String title, Runnable action) {
@@ -338,6 +362,7 @@ public final class ux_setting_Pages {
         sync(large, InAppBackButton.isLarge());
         sync(haptic, InAppBackButton.isHapticEnabled());
         sync(rootHide, InAppBackButton.isHideOnRoot());
+        if (backPage != null && enabled != null) setBackOptionRowsEnabled(backPage, enabled.isChecked());
         if (backMode != null) backMode.setText(HawkConfig.BACK_MODE_BOTH.equals(InAppBackButton.getMode()) ? "双模共存" : HawkConfig.BACK_MODE_EDGE.equals(InAppBackButton.getMode()) ? "边缘拉出" : "悬浮球");
         if (backSide != null) backSide.setText(HawkConfig.BACK_SIDE_BOTH.equals(InAppBackButton.getSide()) ? "左右两侧" : HawkConfig.BACK_SIDE_RIGHT.equals(InAppBackButton.getSide()) ? "右侧" : "左侧");
         if (backSkin != null) backSkin.setText(HawkConfig.BACK_SKIN_CAPSULE.equals(InAppBackButton.getEdgeSkin()) ? "胶囊抽屉" : "流体水滴");
