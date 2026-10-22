@@ -295,3 +295,37 @@ EdgePullBackView 与 FloatingBackBallView 均按这些值绘制，改完立即 r
 未完成：本轮改动未做真机点测。设备池两次 acquire 均返回
 no instance could be leased（vm0 被其他会话的 com.carweb.tvb 占用）。需要一次实机确认：
 设置页 4 个新行可循环、导引小棍点按返回、小窗单击放大、CPU 徽标按预期隐藏。
+
+---
+
+## 10. r4：返回组件设置收口 + 实机复测
+
+### 10.1 设置结构
+
+原来 6 行（开关/模式/大小/颜色/透明度/隐藏）压成**一行**「返回组件」，右侧显示当前模式。
+点开是 `BackBarSettingsDialog`（BaseDialog 子类，纯代码布局，TV 可聚焦）：
+开关、返回模式、返回杠大小、返回杠颜色、返回杠透明度、自动隐藏，逐行点击循环、即时生效。
+
+### 10.2 实机复测结果（vm1，2880x1620 / d160）
+
+| 项 | 结果 |
+| :--- | :--- |
+| 设置页结构 | 只有一行「返回组件 / 边缘拉出」 |
+| 弹窗 | 六项齐全；连点后变 粗 / 白 / 80% / 6 秒，并持久化 |
+| 外观生效 | 截图左边缘出现 y=144..614、宽约 60px、颜色 (204,205,207) 的竖条 = 18dp×140dp / 白 / 80% |
+| 边缘拉动返回 | swipe (3,566)->(700,566)，日志 `UP back=true`，SettingActivity -> HomeActivity |
+| 上下拖动 | 长按 400ms 进入 REPOSITIONING，松手不误返回 |
+
+### 10.3 环境坑（已定位）
+
+模拟器偶发把应用布局成 1620x2880 竖屏（显示却是横屏），此时导引小棍落在 y≈1400，
+按横屏预期去拉必然"拉不动"。锁定横屏并确认 `dumpsys activity top` 的
+`w2880dp h1620dp land` 后，拉动/拖动/点按全部正常。真车不会出现这种错位。
+
+### 10.4 仍未验证
+
+详情页小窗单击放大：只完成代码接线（VodController.OnPreviewTapListener ->
+PlayFragment -> DetailActivity.enterFullPreview），本机没有可播源，未能真机点测。
+
+产物：`TVBox-Original-Feature-1.0.0-car.7-python-r4.apk`，52,664,093 bytes，
+SHA-256 `D5A76353667D463D09C68CA80A32680DC75A1D1EB8834D8D0A075F2BE66A022B`。
