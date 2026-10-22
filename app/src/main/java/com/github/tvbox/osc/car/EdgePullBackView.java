@@ -213,8 +213,8 @@ final class EdgePullBackView extends View {
             invalidate();
             return;
         }
-        retraction = ValueAnimator.ofFloat(0, .4f);
-        retraction.setDuration(180);
+        retraction = ValueAnimator.ofFloat(0, .45f);
+        retraction.setDuration(220);
         retraction.setInterpolator(new LinearInterpolator());
         retraction.addUpdateListener(animation -> {
             pullDp = Math.max(0, BackNavPolicy.springPosition(start, 0, 0, (float) animation.getAnimatedValue()));
@@ -235,10 +235,19 @@ final class EdgePullBackView extends View {
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (visibleAlpha <= 0.01f) return;
-        if (showsLeft()) drawPill(canvas, true);
-        if (showsRight()) drawPill(canvas, false);
+
+        // 小棍与拉出抽屉是同一个东西的两个状态：拉出时小棍淡出、抽屉淡入，
+        // 避免"杠还在 + 抽屉又画一份"的重叠。
+        float morph = BackNavPolicy.clamp(pullDp / 10f, 0f, 1f);
+        morph = morph * morph * (3f - 2f * morph); // smoothstep
+        if (morph < 0.999f) {
+            if (showsLeft()) drawPill(canvas, true, 1f - morph);
+            if (showsRight()) drawPill(canvas, false, 1f - morph);
+        }
         if (pullDp <= .1f) return;
-        int save = canvas.save();
+
+        int layer = Math.round(255f * morph);
+        int save = canvas.saveLayerAlpha(0, 0, getWidth(), getHeight(), layer);
         canvas.translate(pullLeft ? 0 : getWidth(), centerY);
         if (!pullLeft) canvas.scale(-1, 1);
         float width = dp(pullDp);
@@ -254,7 +263,7 @@ final class EdgePullBackView extends View {
         canvas.restoreToCount(save);
     }
 
-    private void drawPill(Canvas canvas, boolean left) {
+    private void drawPill(Canvas canvas, boolean left, float alphaScale) {
         float inset = dp(2);
         float width = dp(barWidthDp);
         float height = dp(barHeightDp);
@@ -264,7 +273,8 @@ final class EdgePullBackView extends View {
                 && gesture.state() == BackNavPolicy.EdgeGesture.State.REPOSITIONING;
         pill.setColor(adjusting ? 0xFFFBBF24 : barColor);
         // 透明度可配置；调整位置时临时满不透明，便于看清拖动。
-        pill.setAlpha(adjusting ? 255 : Math.round(255f * barAlpha / 100f * visibleAlpha));
+        pill.setAlpha(adjusting ? 255
+                : Math.round(255f * barAlpha / 100f * visibleAlpha * Math.max(0f, alphaScale)));
         canvas.drawRoundRect(rect, width / 2f, width / 2f, pill);
     }
 
