@@ -125,38 +125,25 @@ public class VodController extends BaseController {
                         hidePauseRoot();
                         mPlayTitle.setVisibility(GONE);
                         mBottomRoot.setVisibility(VISIBLE);
-                        mTopRoot1.setVisibility(immersiveFullscreen ? GONE : VISIBLE);
-                        mTopRoot2.setVisibility(immersiveFullscreen ? GONE : VISIBLE);
-                        mPlayLoadNetSpeedRightTop.setVisibility(VISIBLE);
-                        if(Hawk.get(HawkConfig.SCREEN_DISPLAY,GONE)==GONE){
-                            mPlayPauseTime.setVisibility(VISIBLE);
-                        }else {
-                            net_play_speed.setVisibility(GONE);
-                        }
+                        mTopRoot1.setVisibility(VISIBLE);
+                        mTopRoot2.setVisibility(VISIBLE);
+                        applyScreenDisplayVisibility(isScreenDisplayEnabled());
+                        setControlScrimsVisible(true);
                         boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
                         backBtn.setVisibility(immersiveFullscreen || isPortrait ? INVISIBLE : VISIBLE);
                         showLockView();
                         break;
                     }
                     case 1003: { // 隐藏底部菜单
+                        setMorePanelVisible(false, false);
                         mBottomRoot.setVisibility(GONE);
                         mTopRoot1.setVisibility(GONE);
-                        mPlayLoadNetSpeedRightTop.setVisibility(GONE);
-                        if (videoPlayState == VideoView.STATE_PAUSED) {
-                            showPauseRoot();
-                            mPlayTitle.setVisibility(VISIBLE);
-                        } else {
-                            hidePauseRoot();
-                            mPlayTitle.setVisibility(GONE);
-                        }
-                        if(Hawk.get(HawkConfig.SCREEN_DISPLAY,GONE)==GONE){
-                            mPlayPauseTime.setVisibility(GONE);
-                        }else {
-                            net_play_speed.setVisibility(VISIBLE);
-                        }
+                        mTopRoot2.setVisibility(GONE);
+                        setControlScrimsVisible(false);
+                        mPlayTitle.setVisibility(GONE);
+                        hidePauseRoot();
                         backBtn.setVisibility(INVISIBLE);
                         mHandler.removeCallbacks(lockRunnable);
-                        if (isLock && !immersiveFullscreen) mTopRoot2.setVisibility(VISIBLE);
                         if (mLockView != null) {
                             mLockView.setVisibility(INVISIBLE);
                         }
@@ -236,9 +223,10 @@ public class VodController extends BaseController {
     TextView mPlayTitle;
     TextView mPlayTitle1;
     TextView mPlayLabel;
-    TextView mPlayLoadNetSpeedRightTop;
     TextView mNextBtn;
     TextView mPreBtn;
+    TextView mEpisodesBtn;
+    TextView mMoreBtn;
     TextView mPlayerScaleBtn;
     public TextView mPlayerSpeedBtn;
     TextView mPlayerBtn;
@@ -259,6 +247,13 @@ public class VodController extends BaseController {
     TextView mPlayPauseTime;
     TextView mPlayLoadNetSpeed;
     TextView mVideoSize;
+    private View mAdvancedControls;
+    private View mMoreOverlay;
+    private TextView mExpertToggle;
+    private View mExpertControls;
+    TextView mPlayLoadNetSpeedRightTop;
+    private View mTopScrim;
+    private View mBottomScrim;
     public SimpleSubtitleView mSubtitleView;
     public SimpleSubtitleView mLyricView;
     public SubtitleView mExoSubtitleView;
@@ -342,7 +337,7 @@ public class VodController extends BaseController {
         }
     }
 
-    /** Fullscreen playback keeps only the video surface; controls remain available through the host back key. */
+    /** Fullscreen playback keeps a tap-to-reveal control layer plus an always-visible Back action. */
     public void setImmersiveFullscreen(boolean immersiveFullscreen) {
         this.immersiveFullscreen = immersiveFullscreen;
         if (mTopRoot1 == null || mTopRoot2 == null) return;
@@ -351,12 +346,11 @@ public class VodController extends BaseController {
         mHandler.removeCallbacks(lockRunnable);
         speedPlayEnd();
         isLock = false;
+        setMorePanelVisible(false, false);
         if (mBottomRoot != null) mBottomRoot.setVisibility(GONE);
+        setControlScrimsVisible(false);
         mTopRoot1.setVisibility(GONE);
         mTopRoot2.setVisibility(GONE);
-        if (mPlayLoadNetSpeedRightTop != null) mPlayLoadNetSpeedRightTop.setVisibility(GONE);
-        if (mPlayPauseTime != null) mPlayPauseTime.setVisibility(GONE);
-        if (net_play_speed != null) net_play_speed.setVisibility(GONE);
         if (mProgressRoot != null) mProgressRoot.setVisibility(GONE);
         if (mPlayTitle != null) mPlayTitle.setVisibility(GONE);
         hidePauseRoot();
@@ -388,52 +382,55 @@ public class VodController extends BaseController {
     private void updateCarEnhanceButtons() {
         if (mCarVideoBtn != null) {
             mCarVideoBtn.setText("画面 · " + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
-            setTopIcon(mCarVideoBtn, R.drawable.ic_tvbox_player_picture);
+            setStartIcon(mCarVideoBtn, R.drawable.ic_tvbox_player_picture, 30);
         }
         if (mCarSrBtn != null) {
             boolean enabled = CarEnhance.videoSrEnabled();
-            mCarSrBtn.setText("超分·" + (enabled ? "开" : "关"));
-            setTopIcon(mCarSrBtn, enabled ? R.drawable.ic_tvbox_player_sr_active : R.drawable.ic_tvbox_player_sr);
+            mCarSrBtn.setText("超分 · " + (enabled ? "开" : "关"));
+            setStartIcon(mCarSrBtn, enabled ? R.drawable.ic_tvbox_player_sr_active : R.drawable.ic_tvbox_player_sr, 30);
         }
         if (mCarInterpBtn != null) {
             boolean enabled = CarEnhance.videoInterpEnabled();
-            mCarInterpBtn.setText("补帧·" + (enabled ? "开" : "关"));
-            setTopIcon(mCarInterpBtn, enabled ? R.drawable.ic_tvbox_player_interp_active : R.drawable.ic_tvbox_player_interp);
+            mCarInterpBtn.setText("补帧 · " + (enabled ? "开" : "关"));
+            setStartIcon(mCarInterpBtn, enabled ? R.drawable.ic_tvbox_player_interp_active : R.drawable.ic_tvbox_player_interp, 30);
         }
         if (mCarAudioBtn != null) {
             mCarAudioBtn.setText("音效 · " + AudioEffectController.name(CarEnhance.audioMode()));
-            setTopIcon(mCarAudioBtn, R.drawable.ic_tvbox_player_audio);
+            setStartIcon(mCarAudioBtn, R.drawable.ic_tvbox_player_audio, 30);
         }
         TextView background = findViewById(R.id.uxBackgroundPlayback);
         if (background != null) {
-            setLeftIcon(background, CarPlaybackPreferences.backgroundAudio()
-                    ? R.drawable.ic_tvbox_player_bg_audio_active : R.drawable.ic_tvbox_player_bg_audio);
+            setStartIcon(background, CarPlaybackPreferences.backgroundAudio()
+                    ? R.drawable.ic_tvbox_player_bg_audio_active : R.drawable.ic_tvbox_player_bg_audio, 30);
         }
         updateFrameRateDisplay();
     }
 
     private void updateCarPlayPauseIcon(TextView button, boolean playing) {
         if (button == null) return;
-        setTopIcon(button, playing ? R.drawable.ic_tvbox_content_pause : R.drawable.ic_tvbox_content_play);
+        setStartIcon(button, playing ? R.drawable.ic_tvbox_content_pause : R.drawable.ic_tvbox_content_play, 42);
     }
 
-    private void setTopIcon(TextView view, int resId) {
+    private void setStartIcon(TextView view, int resId) {
+        setStartIcon(view, resId, 30);
+    }
+
+    private void setStartIcon(TextView view, int resId, int sizeDp) {
         if (view == null) return;
         Drawable drawable = ContextCompat.getDrawable(getContext(), resId);
         if (drawable != null) {
-            int size = Math.round(26f * getResources().getDisplayMetrics().density);
+            int size = Math.round(sizeDp * getResources().getDisplayMetrics().density);
             drawable.setBounds(0, 0, size, size);
         }
-        view.setCompoundDrawables(null, drawable, null, null);
+        view.setCompoundDrawables(drawable, null, null, null);
     }
 
-    private void setLeftIcon(TextView view, int resId) {
+    private void resizeStartIcon(TextView view, int sizeDp) {
         if (view == null) return;
-        Drawable drawable = ContextCompat.getDrawable(getContext(), resId);
-        if (drawable != null) {
-            int size = Math.round(24f * getResources().getDisplayMetrics().density);
-            drawable.setBounds(0, 0, size, size);
-        }
+        Drawable drawable = view.getCompoundDrawables()[0];
+        if (drawable == null) return;
+        int size = Math.round(sizeDp * getResources().getDisplayMetrics().density);
+        drawable.setBounds(0, 0, size, size);
         view.setCompoundDrawables(drawable, null, null, null);
     }
 
@@ -532,6 +529,14 @@ public class VodController extends BaseController {
         mTopRoot1 = findViewById(R.id.tv_top_l_container);
         mTopRoot2 = findViewById(R.id.tv_top_r_container);
         mPlayBtnGroup = findViewById(R.id.play_btn_group);
+        mEpisodesBtn = findViewById(R.id.uxEpisodes);
+        mMoreBtn = findViewById(R.id.uxMore);
+        mTopScrim = findViewById(R.id.player_top_scrim);
+        mBottomScrim = findViewById(R.id.player_bottom_scrim);
+        mAdvancedControls = findViewById(R.id.uxAdvancedControls);
+        mMoreOverlay = findViewById(R.id.uxMoreOverlay);
+        mExpertToggle = findViewById(R.id.uxExpertToggle);
+        mExpertControls = findViewById(R.id.uxExpertControls);
         tv_screen_display = findViewById(R.id.tv_screen_display);
         net_play_speed = findViewById(R.id.net_play_speed);
         mParseRoot = findViewById(R.id.parse_root);
@@ -573,7 +578,6 @@ public class VodController extends BaseController {
         mPlayPauseTime = findViewById(R.id.tv_sys_time);
         mPlayLoadNetSpeed = findViewById(R.id.tv_play_load_net_speed);
         mVideoFrameRate = findViewById(R.id.tv_framerate);
-        mVideoFrameRateBottom = findViewById(R.id.tv_framerate_bottom);
         updateFrameRateDisplay();
         bindCarPlaybackControls();
         mVideoSize = findViewById(R.id.tv_videosize);
@@ -590,6 +594,8 @@ public class VodController extends BaseController {
         seekTime = findViewById(R.id.tv_seek_time);
         mScreenDisplay = findViewById(R.id.screen_display);
         mCastBtn = findViewById(R.id.play_cast);
+        normalizePlayerIcons();
+        applyScreenDisplayVisibility(isScreenDisplayEnabled());
         updateDanmuBtn();
         updateDanmuSearchUiBtn();
         backBtn.setOnClickListener(new OnClickListener() {
@@ -720,8 +726,6 @@ public class VodController extends BaseController {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    boolean hasParse = mParseRoot.getVisibility() == VISIBLE && mGridParseView.getAdapter() != null && mGridParseView.getAdapter().getItemCount() > 0;
-                    mSeekBar.setNextFocusUpId(hasParse ? R.id.mGridParseView : R.id.play_next);
                     keepSeekBarActive();
                     v.setSelected(true);
                     v.refreshDrawableState();
@@ -1161,23 +1165,13 @@ public class VodController extends BaseController {
                 hideBottom();
             }
         });
-        //屏显
-        int disPlay = Hawk.get(HawkConfig.SCREEN_DISPLAY, GONE);
-        mTopRoot2.setVisibility(disPlay);
-        seekTime.setVisibility(disPlay);
-        net_play_speed.setVisibility(disPlay);
-        mPlayPauseTime.setVisibility(disPlay);
-        mScreenDisplay.setTextColor(disPlay==VISIBLE?getResources().getColor(R.color.color_02F8E1): Color.WHITE);
+        // 屏显是可选信息层，默认只保留返回、标题与主控。
         mScreenDisplay.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                int disPlay =(Hawk.get(HawkConfig.SCREEN_DISPLAY, GONE) == VISIBLE) ? GONE : VISIBLE;
-                seekTime.setVisibility(disPlay);
-                net_play_speed.setVisibility(disPlay);
-                if(disPlay==VISIBLE)mPlayPauseTime.setVisibility(disPlay);
-                Hawk.put(HawkConfig.SCREEN_DISPLAY, disPlay);
-                mScreenDisplay.setTextColor(disPlay==VISIBLE?getResources().getColor(R.color.color_02F8E1): Color.WHITE);
-                hideBottom();
+                boolean enable = !isScreenDisplayEnabled();
+                Hawk.put(HawkConfig.SCREEN_DISPLAY, enable ? VISIBLE : GONE);
+                applyScreenDisplayVisibility(enable);
             }
         });
         mCastBtn.setOnClickListener(new OnClickListener() {
@@ -1191,8 +1185,16 @@ public class VodController extends BaseController {
         } else {
             mCastBtn.setVisibility(VISIBLE);
         }
-        mPreBtn.setNextFocusRightId(R.id.play_next);
-        mNextBtn.setNextFocusLeftId(R.id.play_pre);
+        mPreBtn.setNextFocusRightId(R.id.uxRewind);
+        ((View) findViewById(R.id.uxRewind)).setNextFocusRightId(R.id.uxPlayPause);
+        ((View) findViewById(R.id.uxPlayPause)).setNextFocusLeftId(R.id.uxRewind);
+        ((View) findViewById(R.id.uxPlayPause)).setNextFocusRightId(R.id.uxForward);
+        ((View) findViewById(R.id.uxForward)).setNextFocusRightId(R.id.play_next);
+        mNextBtn.setNextFocusLeftId(R.id.uxForward);
+        ((View) findViewById(R.id.uxPlayPause)).setNextFocusUpId(R.id.seekBar);
+        mSeekBar.setNextFocusDownId(R.id.uxPlayPause);
+        mEpisodesBtn.setNextFocusRightId(R.id.uxMore);
+        mMoreBtn.setNextFocusLeftId(R.id.uxEpisodes);
     }
 
     private void showScaleDialog() {
@@ -1401,16 +1403,15 @@ public class VodController extends BaseController {
     void updatePlayerCfgView() {
         try {
             int playerType = mPlayerConfig.getInt("pl");
-            mPlayerBtn.setText(getPlayerShortName(playerType));
-            mPlayerScaleBtn.setText(PlayerHelper.getScaleName(mPlayerConfig.getInt("sc")));
-            mPlayerIJKBtn.setText(getCodecShortName(mPlayerConfig.getString("ijk")));
+            mPlayerBtn.setText("播放器 · " + getPlayerShortName(playerType));
+            mPlayerScaleBtn.setText("比例 · " + PlayerHelper.getScaleName(mPlayerConfig.getInt("sc")));
+            mPlayerIJKBtn.setText("解码 · " + getCodecShortName(mPlayerConfig.getString("ijk")));
             mPlayerIJKBtn.setVisibility(playerType == 1 ? VISIBLE : GONE);
-            mPlayerScaleBtn.setText(PlayerHelper.getScaleName(mPlayerConfig.getInt("sc")));
-            mPlayerSpeedBtn.setText(mPlayerConfig.getDouble("sp") + "x");
+            mPlayerSpeedBtn.setText("倍速 · " + mPlayerConfig.getDouble("sp") + "x");
             int start = mPlayerConfig.getInt("st");
             int end = mPlayerConfig.getInt("et");
-            mPlayerTimeStartBtn.setText(start == 0 ? "片头" : stringForTime(start * 1000));
-            mPlayerTimeSkipBtn.setText(end == 0 ? "片尾" : stringForTime(end * 1000));
+            mPlayerTimeStartBtn.setText(start == 0 ? "片头" : "片头 · " + stringForTime(start * 1000));
+            mPlayerTimeSkipBtn.setText(end == 0 ? "片尾" : "片尾 · " + stringForTime(end * 1000));
             mAudioTrackBtn.setVisibility((playerType == 1 || playerType == 2) ? VISIBLE : GONE);
             mVideoTrackBtn.setVisibility((playerType == 1 || playerType == 2) ? VISIBLE : GONE);
         } catch (JSONException e) {
@@ -1467,22 +1468,22 @@ public class VodController extends BaseController {
     }
 
     private void updatePlayLabelVisibility() {
-        if (mPlayLabel == null || mPlayBtnGroup == null) return;
-        boolean isDanmuMenuVisible = false;
-        boolean isScreenDisplayNext = false;
-        for (int i = 0; i < mPlayBtnGroup.getChildCount(); i++) {
-            View child = mPlayBtnGroup.getChildAt(i);
-            if (child.getVisibility() != VISIBLE) continue;
-            if (child == mDanmuSettingBtn) {
-                isDanmuMenuVisible = true;
-                continue;
-            }
-            if (isDanmuMenuVisible) {
-                isScreenDisplayNext = child == mScreenDisplay;
-                break;
-            }
+        if (mPlayLabel != null) mPlayLabel.setVisibility(VISIBLE);
+    }
+
+    /** Hides episode chrome for films and disables impossible edge navigation. */
+    public void setEpisodeNavigation(boolean hasEpisodes, boolean hasPrevious, boolean hasNext) {
+        if (mPreBtn != null) {
+            mPreBtn.setVisibility(hasEpisodes ? VISIBLE : GONE);
+            mPreBtn.setEnabled(hasPrevious);
         }
-        mPlayLabel.setVisibility(isDanmuMenuVisible && !isScreenDisplayNext ? GONE : VISIBLE);
+        if (mNextBtn != null) {
+            mNextBtn.setVisibility(hasEpisodes ? VISIBLE : GONE);
+            mNextBtn.setEnabled(hasNext);
+        }
+        if (mEpisodesBtn != null) {
+            mEpisodesBtn.setVisibility(hasEpisodes ? VISIBLE : GONE);
+        }
     }
 
     public interface VodControlListener {
@@ -1727,16 +1728,18 @@ public class VodController extends BaseController {
             case VideoView.STATE_PLAYING:
                 initLandscapePortraitBtnInfo();
                 startProgress();
+                if (isBottomVisible() && !isMorePanelVisible()) {
+                    myHandle.removeCallbacks(myRunnable);
+                    myHandle.postDelayed(myRunnable, myHandleSeconds);
+                }
                 break;
             case VideoView.STATE_PAUSED:
-                mTopRoot1.setVisibility(GONE);
-//                mTopRoot2.setVisibility(GONE);
-                mPlayLoadNetSpeedRightTop.setVisibility(GONE);
-                if (isBottomVisible()) {
-                    hideBottom();
+                hidePauseRoot();
+                mPlayTitle.setVisibility(GONE);
+                if (!previewMode) {
+                    showBottom();
+                    myHandle.removeCallbacks(myRunnable);
                 }
-                showPauseRoot();
-                mPlayTitle.setVisibility(VISIBLE);
                 break;
             case VideoView.STATE_ERROR:
                 listener.errReplay();
@@ -1770,7 +1773,7 @@ public class VodController extends BaseController {
     void showUpBottom() {
         mHandler.removeMessages(1003);
         mHandler.sendEmptyMessage(1002);
-        mPlayerTimeStartBtn.requestFocus();
+        mSeekBar.requestFocus();
     }
 
     void hideBottom() {
@@ -1794,7 +1797,11 @@ public class VodController extends BaseController {
         if (isBottomVisible()) {
             mHandler.removeMessages(1002);
             mHandler.removeMessages(1003);
-            myHandle.postDelayed(myRunnable, myHandleSeconds);
+            if (isMorePanelVisible()) {
+                myHandle.removeCallbacks(myRunnable);
+            } else {
+                myHandle.postDelayed(myRunnable, myHandleSeconds);
+            }
             return super.dispatchKeyEvent(event);
         }
         if (action == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0
@@ -1898,20 +1905,103 @@ public class VodController extends BaseController {
         findViewById(R.id.uxChangeSource).setOnClickListener(v -> {
             Activity activity = xyz.doikki.videoplayer.util.PlayerUtils.scanForActivity(getContext());
             View source = activity == null ? null : activity.findViewById(R.id.tvChangeSource);
+            hideMorePanel();
             if (source != null) source.performClick();
             else CarEnhance.toast(getContext(), "请返回影片详情切换源站");
         });
-        findViewById(R.id.uxMore).setOnClickListener(v -> {
-            View advanced = findViewById(R.id.uxAdvancedControls);
-            advanced.setVisibility(advanced.getVisibility() == VISIBLE ? GONE : VISIBLE);
-            keepSeekBarActive();
-        });
+        View close = findViewById(R.id.uxMoreClose);
+        if (close != null) close.setOnClickListener(v -> hideMorePanel());
+        if (mMoreOverlay != null) mMoreOverlay.setOnClickListener(v -> hideMorePanel());
+        if (mExpertToggle != null) mExpertToggle.setOnClickListener(v -> toggleExpertControls());
+
         TextView background = findViewById(R.id.uxBackgroundPlayback);
         background.setText("后台播放 · " + (CarPlaybackPreferences.backgroundAudio() ? "开" : "关"));
         background.setOnClickListener(v -> {
             CarPlaybackPreferences.setBackgroundAudio(!CarPlaybackPreferences.backgroundAudio());
             background.setText("后台播放 · " + (CarPlaybackPreferences.backgroundAudio() ? "开" : "关"));
+            setStartIcon(background, CarPlaybackPreferences.backgroundAudio()
+                    ? R.drawable.ic_tvbox_player_bg_audio_active : R.drawable.ic_tvbox_player_bg_audio, 30);
         });
+        if (mMoreBtn != null) mMoreBtn.setOnClickListener(v -> {
+            if (isMorePanelVisible()) hideMorePanel();
+            else showMorePanel();
+        });
+    }
+
+    private void normalizePlayerIcons() {
+        resizeStartIcon(mPreBtn, 34);
+        resizeStartIcon(mNextBtn, 34);
+        resizeStartIcon((TextView) findViewById(R.id.uxRewind), 36);
+        resizeStartIcon((TextView) findViewById(R.id.uxForward), 36);
+        resizeStartIcon(mEpisodesBtn, 30);
+        resizeStartIcon(mMoreBtn, 30);
+        int optionIcon = 28;
+        for (int id : new int[]{
+                R.id.play_car_video, R.id.play_car_audio, R.id.play_car_sr, R.id.play_car_interp,
+                R.id.play_scale, R.id.play_speed, R.id.uxChangeSource, R.id.zimu_select,
+                R.id.audio_track_select, R.id.video_track_select, R.id.danmu_setting,
+                R.id.danmu_search_ui, R.id.uxBackgroundPlayback, R.id.screen_display,
+                R.id.play_player, R.id.play_ijk, R.id.play_retry, R.id.play_refresh,
+                R.id.play_cast, R.id.play_time_reset
+        }) {
+            resizeStartIcon(findViewById(id), optionIcon);
+        }
+        if (mExpertToggle != null) resizeStartIcon(mExpertToggle, 26);
+    }
+
+    private boolean isScreenDisplayEnabled() {
+        return Hawk.get(HawkConfig.SCREEN_DISPLAY, GONE) == VISIBLE;
+    }
+
+    private void applyScreenDisplayVisibility(boolean visible) {
+        int visibility = visible ? VISIBLE : GONE;
+        if (seekTime != null) seekTime.setVisibility(visibility);
+        if (net_play_speed != null) net_play_speed.setVisibility(visibility);
+        if (mPlayPauseTime != null) mPlayPauseTime.setVisibility(visibility);
+        if (mPlayLoadNetSpeedRightTop != null) mPlayLoadNetSpeedRightTop.setVisibility(GONE);
+        if (mScreenDisplay != null) {
+            mScreenDisplay.setText(visible ? "屏显 · 开" : "屏显 · 关");
+            setStartIcon(mScreenDisplay, visible
+                    ? R.drawable.ic_tvbox_settings_display_active : R.drawable.ic_tvbox_settings_display, 30);
+        }
+    }
+
+    private void setControlScrimsVisible(boolean visible) {
+        int visibility = visible ? VISIBLE : GONE;
+        if (mTopScrim != null) mTopScrim.setVisibility(visibility);
+        if (mBottomScrim != null) mBottomScrim.setVisibility(visibility);
+    }
+
+    private void showMorePanel() {
+        setMorePanelVisible(true, false);
+        myHandle.removeCallbacks(myRunnable);
+        if (mCarVideoBtn != null) mCarVideoBtn.requestFocus();
+    }
+
+    private void hideMorePanel() {
+        if (!isMorePanelVisible()) return;
+        setMorePanelVisible(false, true);
+        keepSeekBarActive();
+    }
+
+    private boolean isMorePanelVisible() {
+        return mMoreOverlay != null && mMoreOverlay.getVisibility() == VISIBLE;
+    }
+
+    private void setMorePanelVisible(boolean visible, boolean restoreFocus) {
+        if (mMoreOverlay == null) return;
+        mMoreOverlay.setVisibility(visible ? VISIBLE : GONE);
+        if (mMoreBtn != null) mMoreBtn.setSelected(visible);
+        if (!visible && restoreFocus && isBottomVisible() && mMoreBtn != null) {
+            mMoreBtn.requestFocus();
+        }
+    }
+
+    private void toggleExpertControls() {
+        if (mExpertControls == null || mExpertToggle == null) return;
+        boolean show = mExpertControls.getVisibility() != VISIBLE;
+        mExpertControls.setVisibility(show ? VISIBLE : GONE);
+        mExpertToggle.setText(show ? "收起" : "高级");
     }
 
     private void seekCarOffset(long delta) {
@@ -2002,21 +2092,11 @@ public class VodController extends BaseController {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (isBottomVisible()) {
-            if (keyCode == KeyEvent.KEYCODE_DPAD_UP ) {
-                if(mPlayerTimeStartBtn.hasFocus()){
-                    if(setMinPlayTimeChange("st",true)){
-                        return true;
-                    }
-                }
-                View focusedView = mPlayBtnGroup.findFocus();
-                if (focusedView instanceof TextView) {
-                    return true;
-                }
+            if (keyCode == KeyEvent.KEYCODE_DPAD_UP && mPlayerTimeStartBtn.hasFocus()) {
+                if (setMinPlayTimeChange("st", true)) return true;
             }
-            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN ) {
-                if(mPlayerTimeStartBtn.hasFocus()){
-                    if(setMinPlayTimeChange("st",false))return true;
-                }
+            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && mPlayerTimeStartBtn.hasFocus()) {
+                if (setMinPlayTimeChange("st", false)) return true;
             }
             return super.onKeyDown(keyCode, event);
         }
@@ -2089,6 +2169,10 @@ public class VodController extends BaseController {
                 hideBottom();
             }
             return false;
+        }
+        if (isMorePanelVisible()) {
+            hideMorePanel();
+            return true;
         }
         if (super.onBackPressed()) {
             return true;

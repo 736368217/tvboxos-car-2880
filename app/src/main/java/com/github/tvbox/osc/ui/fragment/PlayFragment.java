@@ -1983,6 +1983,11 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
         playArtwork = "";
         exitingPreview = false;
         VodInfo.VodSeries vs = mVodInfo.seriesMap.get(mVodInfo.playFlag).get(mVodInfo.playIndex);
+        List<VodInfo.VodSeries> navEpisodes = mVodInfo.seriesMap.get(mVodInfo.playFlag);
+        int navCount = navEpisodes == null ? 0 : navEpisodes.size();
+        mController.setEpisodeNavigation(navCount > 1,
+                mVodInfo.playIndex > 0,
+                mVodInfo.playIndex + 1 < navCount);
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH, mVodInfo));
         if (reusePlayer) {
             mPlayLoadTip.setVisibility(View.GONE);

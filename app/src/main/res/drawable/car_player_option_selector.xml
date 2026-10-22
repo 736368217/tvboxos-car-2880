@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_sm" />
+            <solid android:color="#6612261D" />
+            <stroke android:width="@dimen/car_stroke_hair" android:color="#269AB8AB" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_sm" />
+            <solid android:color="@color/car_surface_control_pressed" />
+            <stroke android:width="@dimen/car_stroke_mid" android:color="@color/car_outline_focused" />
+        </shape>
+    </item>
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_sm" />
+            <gradient android:angle="90" android:startColor="@color/car_accent_blue" android:endColor="@color/car_accent_blue_deep" />
+            <stroke android:width="@dimen/car_stroke_focus" android:color="@color/car_outline_focused" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/car_radius_sm" />
+            <solid android:color="#CC12261D" />
+            <stroke android:width="@dimen/car_stroke_hair" android:color="#339AB8AB" />
+        </shape>
+    </item>
+</selector>

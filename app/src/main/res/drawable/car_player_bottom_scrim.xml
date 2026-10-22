@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom scrim separates the compact control dock from the video. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:startColor="#0006100E"
+        android:centerColor="#8C06100E"
+        android:endColor="#F206100E" />
+</shape>

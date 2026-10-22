@@ -946,7 +946,7 @@ public final class Car7Acceptance extends Instrumentation {
                 check("fullscreen keeps decoder", decoder == ui(() -> call(video, "getMediaPlayer")));
                 pause(1500);
                 check("source frame-rate badge present", ui(() -> ((TextView) view(detail, "tv_framerate")).getText().toString()).contains("fps"));
-                check("primary playback targets 190px", ui(() -> view(detail, "uxPlayPause").getHeight()) == 190);
+                check("primary playback targets 124px", ui(() -> view(detail, "uxPlayPause").getHeight()) == 124);
                 capturePage(detail, "ux-player");
                 clickView(detail, "uxPlayPause"); pause(300);
                 check("pause primary control", !Boolean.TRUE.equals(ui(() -> call(video, "isPlaying"))));
@@ -959,6 +959,7 @@ public final class Car7Acceptance extends Instrumentation {
                 check("legacy advanced controls reachable", ui(() -> view(detail, "uxAdvancedControls").isShown()));
                 capturePage(detail, "ux-player-more");
                 clickView(detail, "uxMore");
+                main(() -> call(type("com.orhanobut.hawk.Hawk"), "put", "car_ux_long_press", true));
                 long down = SystemClock.uptimeMillis();
                 main(() -> { MotionEvent press = MotionEvent.obtain(down, down, MotionEvent.ACTION_DOWN, 1440, 600, 0); call(controller, "onLongPress", press); press.recycle(); });
                 check("long press speed 2x", Math.abs(((Number) ui(() -> call(video, "getSpeed"))).floatValue() - 2f) < .05f);
@@ -1085,7 +1086,7 @@ public final class Car7Acceptance extends Instrumentation {
                 check("SR button updates current renderer", Boolean.TRUE.equals(ui(() -> field(field(field(video, "mRenderView"), "mConfiguration"), "superResolution"))));
                 wakePlayerControls(detail); clickView(detail, "play_car_interp");
                 check("interpolation button updates current renderer", Boolean.TRUE.equals(ui(() -> field(field(field(video, "mRenderView"), "mConfiguration"), "interpolation"))));
-                wakePlayerControls(detail); clickView(detail, "play_car_audio");
+                wakePlayerControls(detail); clickView(detail, "play_car_audio"); selectOption("影院");
                 check("audio button uses same current session", ((Number) pref("HIFI_AUDIO")).intValue() == 1
                         && session == ((Number) ui(() -> call(video, "getAudioSessionId"))).intValue());
                 wakePlayerControls(detail); clickView(detail, "play_car_video");

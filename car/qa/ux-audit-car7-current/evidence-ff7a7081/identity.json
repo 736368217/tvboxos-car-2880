@@ -1,0 +1,29 @@
+{
+  "apk": "C:\\Users\\WIN10\\.pi-desktop\\scratch\\1fc58544-545a-4f33-9c56-de975a6fb08b\\TVBox-1.0.0-car.7-player-redesign.apk",
+  "sha256": "ff7a7081e6e3ea44463ccc4530e4f55b66c829638176810f7a599bb247f5f1ee",
+  "bytes": 53670931,
+  "package": "com.github.tvbox.osc.jun",
+  "versionCode": 8,
+  "versionName": "1.0.0-car.7",
+  "signature": {
+    "v1": true,
+    "v2": true,
+    "v3": true
+  },
+  "device": {
+    "vmIndex": 0,
+    "physicalWidth": 1620,
+    "physicalHeight": 2880,
+    "displayWidth": 2880,
+    "displayHeight": 1620,
+    "density": 160,
+    "rotation": "lock 1",
+    "carDisplayPass": true
+  },
+  "tests": {
+    "playback": { "passed": 101, "failed": 0 },
+    "ux3k": { "passed": 94, "failed": 5, "failedScope": "live fixture only" },
+    "pages": { "passed": 74, "failed": 6, "failedScope": "live fixture/favorite and gallery-live back host" },
+    "gestures": { "passed": 4, "failed": 3, "failedScope": "persisted back-mode/skin defaults; brightness and volume passed" }
+  }
+}

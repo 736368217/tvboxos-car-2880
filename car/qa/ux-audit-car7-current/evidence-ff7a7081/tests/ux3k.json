@@ -1,0 +1,600 @@
+{
+  "passed": 94,
+  "failed": 5,
+  "events": [
+    {
+      "pass": true,
+      "test": "uxNavHome native touch geometry",
+      "detail": "",
+      "at": 1792643377746
+    },
+    {
+      "pass": true,
+      "test": "uxNavCategories native touch geometry",
+      "detail": "",
+      "at": 1792643377746
+    },
+    {
+      "pass": true,
+      "test": "uxNavLive native touch geometry",
+      "detail": "",
+      "at": 1792643377746
+    },
+    {
+      "pass": true,
+      "test": "uxNavHistory native touch geometry",
+      "detail": "",
+      "at": 1792643377746
+    },
+    {
+      "pass": true,
+      "test": "uxNavCollect native touch geometry",
+      "detail": "",
+      "at": 1792643377746
+    },
+    {
+      "pass": true,
+      "test": "uxNavPush native touch geometry",
+      "detail": "",
+      "at": 1792643377746
+    },
+    {
+      "pass": true,
+      "test": "uxNavSettings native touch geometry",
+      "detail": "",
+      "at": 1792643377746
+    },
+    {
+      "pass": true,
+      "test": "home native 3K scene",
+      "detail": "",
+      "at": 1792643377747
+    },
+    {
+      "pass": true,
+      "test": "ux-home foreground belongs to target",
+      "detail": "",
+      "at": 1792643377853
+    },
+    {
+      "pass": true,
+      "test": "uxNavCategories reachable",
+      "detail": "",
+      "at": 1792643378337
+    },
+    {
+      "pass": true,
+      "test": "category rail selects category",
+      "detail": "",
+      "at": 1792643379379
+    },
+    {
+      "pass": true,
+      "test": "ux-category foreground belongs to target",
+      "detail": "",
+      "at": 1792643379382
+    },
+    {
+      "pass": true,
+      "test": "uxNavHome reachable",
+      "detail": "",
+      "at": 1792643379798
+    },
+    {
+      "pass": true,
+      "test": "recommendation rail returns home",
+      "detail": "",
+      "at": 1792643380045
+    },
+    {
+      "pass": true,
+      "test": "SettingActivity has in-app Back host",
+      "detail": "",
+      "at": 1792643381412
+    },
+    {
+      "pass": true,
+      "test": "settings seven real categories",
+      "detail": "",
+      "at": 1792643381413
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-picture foreground belongs to target",
+      "detail": "",
+      "at": 1792643381414
+    },
+    {
+      "pass": true,
+      "test": "settings category 0 selected",
+      "detail": "",
+      "at": 1792643382162
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-0 foreground belongs to target",
+      "detail": "",
+      "at": 1792643382165
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-0-scroll-0 foreground belongs to target",
+      "detail": "",
+      "at": 1792643383513
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-0-scroll-1 foreground belongs to target",
+      "detail": "",
+      "at": 1792643384946
+    },
+    {
+      "pass": true,
+      "test": "settings category 1 selected",
+      "detail": "",
+      "at": 1792643385691
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-1 foreground belongs to target",
+      "detail": "",
+      "at": 1792643385696
+    },
+    {
+      "pass": true,
+      "test": "settings category 2 selected",
+      "detail": "",
+      "at": 1792643386573
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-2 foreground belongs to target",
+      "detail": "",
+      "at": 1792643386574
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-2-scroll-0 foreground belongs to target",
+      "detail": "",
+      "at": 1792643387933
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-2-scroll-1 foreground belongs to target",
+      "detail": "",
+      "at": 1792643389347
+    },
+    {
+      "pass": true,
+      "test": "uxBackgroundRow reachable",
+      "detail": "",
+      "at": 1792643390128
+    },
+    {
+      "pass": true,
+      "test": "background switch persists",
+      "detail": "",
+      "at": 1792643390356
+    },
+    {
+      "pass": true,
+      "test": "uxBackgroundRow reachable",
+      "detail": "",
+      "at": 1792643390765
+    },
+    {
+      "pass": true,
+      "test": "settings category 3 selected",
+      "detail": "",
+      "at": 1792643391422
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-3 foreground belongs to target",
+      "detail": "",
+      "at": 1792643391424
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-3-scroll-0 foreground belongs to target",
+      "detail": "",
+      "at": 1792643392834
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-3-scroll-1 foreground belongs to target",
+      "detail": "",
+      "at": 1792643394297
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-3-scroll-2 foreground belongs to target",
+      "detail": "",
+      "at": 1792643395779
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-3-scroll-3 foreground belongs to target",
+      "detail": "",
+      "at": 1792643397181
+    },
+    {
+      "pass": true,
+      "test": "uxLongPressRow reachable",
+      "detail": "",
+      "at": 1792643397811
+    },
+    {
+      "pass": true,
+      "test": "long press switch toggles",
+      "detail": "",
+      "at": 1792643398037
+    },
+    {
+      "pass": true,
+      "test": "uxLongPressRow reachable",
+      "detail": "",
+      "at": 1792643398429
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-touch foreground belongs to target",
+      "detail": "",
+      "at": 1792643398657
+    },
+    {
+      "pass": true,
+      "test": "settings category 4 selected",
+      "detail": "",
+      "at": 1792643399268
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-4 foreground belongs to target",
+      "detail": "",
+      "at": 1792643399274
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-4-scroll-0 foreground belongs to target",
+      "detail": "",
+      "at": 1792643400696
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-4-scroll-1 foreground belongs to target",
+      "detail": "",
+      "at": 1792643402080
+    },
+    {
+      "pass": true,
+      "test": "settings category 5 selected",
+      "detail": "",
+      "at": 1792643402828
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-5 foreground belongs to target",
+      "detail": "",
+      "at": 1792643402830
+    },
+    {
+      "pass": true,
+      "test": "settings category 6 selected",
+      "detail": "",
+      "at": 1792643403707
+    },
+    {
+      "pass": true,
+      "test": "ux-settings-category-6 foreground belongs to target",
+      "detail": "",
+      "at": 1792643403709
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792643405578
+    },
+    {
+      "pass": true,
+      "test": "search native split panels",
+      "detail": "",
+      "at": 1792643405579
+    },
+    {
+      "pass": true,
+      "test": "keyboard includes A",
+      "detail": "",
+      "at": 1792643405579
+    },
+    {
+      "pass": true,
+      "test": "keyboard includes Z",
+      "detail": "",
+      "at": 1792643405579
+    },
+    {
+      "pass": true,
+      "test": "keyboard includes 0",
+      "detail": "",
+      "at": 1792643405579
+    },
+    {
+      "pass": true,
+      "test": "keyboard includes 9",
+      "detail": "",
+      "at": 1792643405579
+    },
+    {
+      "pass": true,
+      "test": "native keyboard inserts at cursor",
+      "detail": "",
+      "at": 1792643406230
+    },
+    {
+      "pass": true,
+      "test": "tvSearch reachable",
+      "detail": "",
+      "at": 1792643406498
+    },
+    {
+      "pass": true,
+      "test": "search positive fixture returns five results",
+      "detail": "results=5",
+      "at": 1792643406724
+    },
+    {
+      "pass": true,
+      "test": "search completed pending sources",
+      "detail": "",
+      "at": 1792643406724
+    },
+    {
+      "pass": true,
+      "test": "ux-search-results foreground belongs to target",
+      "detail": "",
+      "at": 1792643406725
+    },
+    {
+      "pass": true,
+      "test": "search result opens detail by touch",
+      "detail": "",
+      "at": 1792643407254
+    },
+    {
+      "pass": true,
+      "test": "search detail metadata loaded",
+      "detail": "",
+      "at": 1792643409054
+    },
+    {
+      "pass": true,
+      "test": "ux-search-opened-detail foreground belongs to target",
+      "detail": "",
+      "at": 1792643409062
+    },
+    {
+      "pass": true,
+      "test": "DetailActivity has in-app Back host",
+      "detail": "",
+      "at": 1792643411346
+    },
+    {
+      "pass": true,
+      "test": "detail fixture preview playing",
+      "detail": "",
+      "at": 1792643414846
+    },
+    {
+      "pass": true,
+      "test": "detail true 16:9 preview",
+      "detail": "",
+      "at": 1792643414847
+    },
+    {
+      "pass": true,
+      "test": "detail eight-column episodes",
+      "detail": "",
+      "at": 1792643414847
+    },
+    {
+      "pass": true,
+      "test": "detail no raw address in metadata",
+      "detail": "",
+      "at": 1792643414847
+    },
+    {
+      "pass": true,
+      "test": "ux-detail foreground belongs to target",
+      "detail": "",
+      "at": 1792643414849
+    },
+    {
+      "pass": true,
+      "test": "tvPlay reachable",
+      "detail": "",
+      "at": 1792643415320
+    },
+    {
+      "pass": true,
+      "test": "fullscreen keeps decoder",
+      "detail": "",
+      "at": 1792643416977
+    },
+    {
+      "pass": true,
+      "test": "source frame-rate badge present",
+      "detail": "",
+      "at": 1792643418478
+    },
+    {
+      "pass": true,
+      "test": "primary playback targets 124px",
+      "detail": "",
+      "at": 1792643418478
+    },
+    {
+      "pass": true,
+      "test": "ux-player foreground belongs to target",
+      "detail": "",
+      "at": 1792643418479
+    },
+    {
+      "pass": true,
+      "test": "uxPlayPause reachable",
+      "detail": "",
+      "at": 1792643418985
+    },
+    {
+      "pass": true,
+      "test": "pause primary control",
+      "detail": "",
+      "at": 1792643419514
+    },
+    {
+      "pass": true,
+      "test": "uxForward reachable",
+      "detail": "",
+      "at": 1792643419765
+    },
+    {
+      "pass": true,
+      "test": "forward 15s primary control",
+      "detail": "",
+      "at": 1792643420394
+    },
+    {
+      "pass": true,
+      "test": "uxRewind reachable",
+      "detail": "",
+      "at": 1792643420645
+    },
+    {
+      "pass": true,
+      "test": "rewind 15s primary control",
+      "detail": "",
+      "at": 1792643421272
+    },
+    {
+      "pass": true,
+      "test": "uxPlayPause reachable",
+      "detail": "",
+      "at": 1792643421523
+    },
+    {
+      "pass": true,
+      "test": "resume primary control",
+      "detail": "",
+      "at": 1792643421750
+    },
+    {
+      "pass": true,
+      "test": "uxMore reachable",
+      "detail": "",
+      "at": 1792643422028
+    },
+    {
+      "pass": true,
+      "test": "legacy advanced controls reachable",
+      "detail": "",
+      "at": 1792643422255
+    },
+    {
+      "pass": true,
+      "test": "ux-player-more foreground belongs to target",
+      "detail": "",
+      "at": 1792643422256
+    },
+    {
+      "pass": true,
+      "test": "uxMore reachable",
+      "detail": "",
+      "at": 1792643422713
+    },
+    {
+      "pass": true,
+      "test": "long press speed 2x",
+      "detail": "",
+      "at": 1792643422951
+    },
+    {
+      "pass": true,
+      "test": "cancel restores speed",
+      "detail": "",
+      "at": 1792643422962
+    },
+    {
+      "pass": true,
+      "test": "Back leaves fullscreen before detail",
+      "detail": "",
+      "at": 1792643423465
+    },
+    {
+      "pass": true,
+      "test": "Back leaves detail",
+      "detail": "",
+      "at": 1792643423969
+    },
+    {
+      "pass": true,
+      "test": "LivePlayActivity has in-app Back host",
+      "detail": "",
+      "at": 1792643425711
+    },
+    {
+      "pass": false,
+      "test": "live fixture playing",
+      "detail": "",
+      "at": 1792643445772
+    },
+    {
+      "pass": true,
+      "test": "live 16:9 preview",
+      "detail": "",
+      "at": 1792643445773
+    },
+    {
+      "pass": true,
+      "test": "ux-live foreground belongs to target",
+      "detail": "",
+      "at": 1792643445775
+    },
+    {
+      "pass": false,
+      "test": "ux_live_fullscreen reachable",
+      "detail": "",
+      "at": 1792643446210
+    },
+    {
+      "pass": false,
+      "test": "live fullscreen keeps same VideoView and decoder",
+      "detail": "",
+      "at": 1792643447437
+    },
+    {
+      "pass": false,
+      "test": "live fullscreen playback advances",
+      "detail": "",
+      "at": 1792643447438
+    },
+    {
+      "pass": true,
+      "test": "ux-live-fullscreen foreground belongs to target",
+      "detail": "",
+      "at": 1792643447440
+    },
+    {
+      "pass": false,
+      "test": "live Back returns preview without decoder restart",
+      "detail": "",
+      "at": 1792643448140
+    },
+    {
+      "pass": true,
+      "test": "ux-live-after-back foreground belongs to target",
+      "detail": "",
+      "at": 1792643448141
+    }
+  ]
+}

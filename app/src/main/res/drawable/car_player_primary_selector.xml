@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Single hero action in the transport row: filled lavender, mint focus rim. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/car_radius_xs" />
-            <solid android:color="@color/car_surface_control" />
-            <stroke android:width="@dimen/car_stroke_hair" android:color="@color/car_outline_idle" />
+            <corners android:radius="@dimen/car_radius_pill" />
+            <solid android:color="#6612261D" />
+            <stroke android:width="@dimen/car_stroke_hair" android:color="#269AB8AB" />
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/car_radius_xs" />
-            <solid android:color="@color/car_accent_blue_deep" />
-            <stroke android:width="@dimen/car_stroke_mid" android:color="@color/car_accent_cyan" />
+            <corners android:radius="@dimen/car_radius_pill" />
+            <gradient android:angle="90" android:startColor="#6C5CE7" android:endColor="#4B3FA8" />
+            <stroke android:width="@dimen/car_stroke_mid" android:color="@color/car_outline_focused" />
         </shape>
     </item>
     <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/car_radius_xs" />
-            <solid android:color="@color/car_accent_blue" />
-            <stroke android:width="@dimen/car_stroke_focus" android:color="@color/car_accent_cyan" />
+            <corners android:radius="@dimen/car_radius_pill" />
+            <gradient android:angle="90" android:startColor="#B9A9FF" android:endColor="#7C6CF0" />
+            <stroke android:width="@dimen/car_stroke_focus" android:color="@color/car_outline_focused" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/car_radius_xs" />
-            <solid android:color="@color/car_accent_blue_deep" />
-            <stroke android:width="@dimen/car_stroke_hair" android:color="@color/car_accent_cyan" />
+            <corners android:radius="@dimen/car_radius_pill" />
+            <gradient android:angle="90" android:startColor="#9B8BFF" android:endColor="#6C5CE7" />
+            <stroke android:width="@dimen/car_stroke_hair" android:color="#80A78BFA" />
         </shape>
     </item>
 </selector>

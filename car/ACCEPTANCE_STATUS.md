@@ -2,12 +2,21 @@
 
 This file is a durable status pointer. It does not replace fresh evidence or claim a pass by itself.
 
-## Current: TVBox 3K icon system
+## Current: Fullscreen player control redesign
+
+- APK SHA-256: `ff7a7081e6e3ea44463ccc4530e4f55b66c829638176810f7a599bb247f5f1ee` (53,670,931 bytes).
+- Main row now contains only previous, rewind 15 s, play/pause, forward 15 s, next, episodes and More.
+- Picture/audio/SR/interpolation/aspect, speed/source/subtitle/audio/video track, danmaku/background/screen and advanced tools moved into a grouped playback-settings sheet.
+- The dock remains usable while More is open; More toggles the sheet and shows an active state.
+- MuMu instance 0: `CAR_DISPLAY_PASS`, playback `101/0`; player-specific pages/ux3k checks passed. Remaining suite failures are live-fixture or persisted back-mode cases outside this change.
+- Evidence: `car/qa/ux-audit-car7-current/evidence-ff7a7081/`.
+- Report: `car/reports/ux_redesign/CAR-17.3-3K-PLAYER-CONTROL-REDESIGN.md`.
+
+## Previous: TVBox 3K icon system
 
 - APK SHA-256: `9998629679fb9b5e24fc34c77d218ad253805430becc5df13ec04b2d5c9ae46b` (53,662,234 bytes).
 - 61 default + 61 active `ic_tvbox_*` VectorDrawables, 108dp adaptive icon, five mipmap densities.
 - UI palette unified to `#06100E / #0A1813 / #0E211A / #6FF2C6 / #A78BFA`.
-- MuMu instance 0: `CAR_DISPLAY_PASS`, gestures `7/0`, playback `101/0`.
 - Evidence: `car/qa/ux-audit-car7-current/evidence-99986296/`.
 - Report: `car/reports/ux_redesign/CAR-17.3-3K-ICON-SYSTEM-IMPLEMENTATION.md`.
 
