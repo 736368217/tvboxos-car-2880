@@ -48,14 +48,8 @@ $script:adbExe = "D:\Program Files\Netease\MuMu\nx_device\15.0\shell\adb.exe"
 if (-not (Test-Path $script:adbExe)) { $script:adbExe = "adb" }
 
 function Adb([string[]]$adbArgs) {
-    $outFile = Join-Path $outDir "adb.out"
-    $errFile = Join-Path $outDir "adb.err"
     $argList = @("-s", $script:serial) + $adbArgs
-    $p = Start-Process -FilePath $script:adbExe -ArgumentList $argList -NoNewWindow -Wait -PassThru `
-        -RedirectStandardOutput $outFile -RedirectStandardError $errFile
-    $text = ""
-    if (Test-Path $outFile) { $text += (Get-Content $outFile -Raw -Encoding UTF8) }
-    if (Test-Path $errFile) { $text += (Get-Content $errFile -Raw -Encoding UTF8) }
+    $text = (& $script:adbExe @argList 2>&1 | Out-String)
     return [string]$text
 }
 
@@ -133,6 +127,49 @@ function NormalizeBackBarState() {
 }
 
 
+function UiXml() {
+    $dump = Join-Path $outDir "ui.xml"
+    if (Test-Path $dump) { Remove-Item $dump -Force }
+    Sh "uiautomator dump /sdcard/ui.xml" | Out-Null
+    Adb @("pull", "/sdcard/ui.xml", $dump) | Out-Null
+    if (-not (Test-Path $dump)) { return "" }
+    return (Get-Content $dump -Raw -Encoding UTF8)
+}
+
+function TapResId([string]$id) {
+    $xml = UiXml
+    $m = [regex]::Match($xml, 'resource-id="[^"]*' + [regex]::Escape($id) + '"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"')
+    if (-not $m.Success) { return $false }
+    $x = ([int]$m.Groups[1].Value + [int]$m.Groups[3].Value) / 2
+    $y = ([int]$m.Groups[2].Value + [int]$m.Groups[4].Value) / 2
+    Sh ("input tap {0} {1}" -f [int]$x, [int]$y) | Out-Null
+    return $true
+}
+
+# 把实例自举成"有普通配置"的状态：写入订阅地址 -> 回到首页
+function BootstrapConfig([string]$url) {
+    # 干净实例首次启动会直接弹"配置地址"对话框；没有就退回设置页路径
+    if (-not (TapResId "input")) {
+        if (-not (OpenSettings)) { return $false }
+        if (-not (TapText "配置地址")) { return $false }
+        Start-Sleep -Milliseconds 1500
+        if (-not (TapResId "input")) { return $false }
+    }
+    Start-Sleep -Milliseconds 500
+    Sh "input keyevent 123" | Out-Null
+    $del = ""
+    for ($i = 0; $i -lt 90; $i++) { $del += "input keyevent 67; " }
+    Sh $del | Out-Null
+    Sh ("input text '" + $url + "'") | Out-Null
+    Start-Sleep -Milliseconds 600
+    if (-not (TapText "确定")) { return $false }
+    Start-Sleep -Seconds 4
+    # 首次配置会弹存储权限，按文本点允许
+    TapText "允许" | Out-Null
+    Start-Sleep -Seconds 3
+    return ((TopActivity) -eq "HomeActivity")
+}
+
 function Screenshot([string]$name) {
     $remote = "/sdcard/$name.png"
     Sh "screencap -p $remote" | Out-Null
@@ -183,6 +220,8 @@ try {
     Adb @("push", $Apk, "/data/local/tmp/car-ui-check.apk") | Out-Null
     Log "install"
     Sh "pm install -r /data/local/tmp/car-ui-check.apk" | Out-Null
+    Log "clear app data (first-run state)"
+    Sh "pm clear com.github.tvbox.osc.jun" | Out-Null
 
     # ---------- 3. 几何门禁 ----------
     $geometryOk = $false
@@ -230,6 +269,15 @@ try {
         exit 2
     }
     Log "screenshot geometry ok (2880x1620)"
+
+    # ---------- 3.5 自举配置（让干净实例变成可测状态） ----------
+    Log "bootstrap config (clun.top)"
+    if (BootstrapConfig "https://clun.top/box.json") {
+        Log "  config bootstrapped, waiting for sites"
+        Start-Sleep -Seconds 8
+    } else {
+        Log "  WARN: 配置自举失败，后续用例可能不可用"
+    }
 
     # ---------- 4. 用例 1：返回杠可见 + 自动隐藏 + 触摸唤醒 ----------
     Log "normalize back-bar state (edge mode / hide 4s)"
