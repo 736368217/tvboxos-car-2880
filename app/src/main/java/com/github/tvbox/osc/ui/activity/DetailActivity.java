@@ -371,11 +371,11 @@ public class DetailActivity extends BaseActivity {
                 if ("加入收藏".equals(text)) {
                     RoomDataManger.insertVodCollect(sourceKey, vodInfo);
                     Toast.makeText(DetailActivity.this, "已加入收藏夹", Toast.LENGTH_SHORT).show();
-                    tvCollect.setText("取消收藏");
+                    updateCollectButton(true);
                 } else {
                     RoomDataManger.deleteVodCollect(sourceKey, vodInfo);
                     Toast.makeText(DetailActivity.this, "已移除收藏夹", Toast.LENGTH_SHORT).show();
-                    tvCollect.setText("加入收藏");
+                    updateCollectButton(false);
                 }
             }
         });
@@ -1073,10 +1073,19 @@ public class DetailActivity extends BaseActivity {
         sourceViewModel.getDetail(sourceKey, vodId, fallback && detailFallbackActive);
         boolean isVodCollect = RoomDataManger.isVodCollect(sourceKey, vodId);
         if (isVodCollect) {
-            tvCollect.setText("取消收藏");
+            updateCollectButton(true);
         } else {
-            tvCollect.setText("加入收藏");
+            updateCollectButton(false);
         }
+    }
+
+    private void updateCollectButton(boolean collected) {
+        if (tvCollect == null) return;
+        tvCollect.setText(collected ? "取消收藏" : "加入收藏");
+        tvCollect.setCompoundDrawablesWithIntrinsicBounds(
+                collected ? R.drawable.ic_tvbox_content_heart_on : R.drawable.ic_tvbox_nav_favorites,
+                0, 0, 0);
+        tvCollect.setCompoundDrawablePadding(10);
     }
 
     private void handleEmptyDetail(AbsXml data) {

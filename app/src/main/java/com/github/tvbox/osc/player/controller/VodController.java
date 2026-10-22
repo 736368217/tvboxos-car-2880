@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -307,7 +308,11 @@ public class VodController extends BaseController {
             mVideoSize.setText(width + " X " + height);
             updateFrameRateDisplay();
             TextView pauseButton = findViewById(R.id.uxPlayPause);
-            if (pauseButton != null) pauseButton.setText(mControlWrapper.isPlaying() ? "暂停" : "播放");
+            if (pauseButton != null) {
+                boolean playing = mControlWrapper.isPlaying();
+                pauseButton.setText(playing ? "暂停" : "播放");
+                updateCarPlayPauseIcon(pauseButton, playing);
+            }
 
             mHandler.postDelayed(this, 1000);
         }
@@ -381,11 +386,55 @@ public class VodController extends BaseController {
     }
 
     private void updateCarEnhanceButtons() {
-        if (mCarVideoBtn != null) mCarVideoBtn.setText("画面 · " + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
-        if (mCarSrBtn != null) mCarSrBtn.setText("超分·" + (CarEnhance.videoSrEnabled() ? "开" : "关"));
-        if (mCarInterpBtn != null) mCarInterpBtn.setText("补帧·" + (CarEnhance.videoInterpEnabled() ? "开" : "关"));
-        if (mCarAudioBtn != null) mCarAudioBtn.setText("音效 · " + AudioEffectController.name(CarEnhance.audioMode()));
+        if (mCarVideoBtn != null) {
+            mCarVideoBtn.setText("画面 · " + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
+            setTopIcon(mCarVideoBtn, R.drawable.ic_tvbox_player_picture);
+        }
+        if (mCarSrBtn != null) {
+            boolean enabled = CarEnhance.videoSrEnabled();
+            mCarSrBtn.setText("超分·" + (enabled ? "开" : "关"));
+            setTopIcon(mCarSrBtn, enabled ? R.drawable.ic_tvbox_player_sr_active : R.drawable.ic_tvbox_player_sr);
+        }
+        if (mCarInterpBtn != null) {
+            boolean enabled = CarEnhance.videoInterpEnabled();
+            mCarInterpBtn.setText("补帧·" + (enabled ? "开" : "关"));
+            setTopIcon(mCarInterpBtn, enabled ? R.drawable.ic_tvbox_player_interp_active : R.drawable.ic_tvbox_player_interp);
+        }
+        if (mCarAudioBtn != null) {
+            mCarAudioBtn.setText("音效 · " + AudioEffectController.name(CarEnhance.audioMode()));
+            setTopIcon(mCarAudioBtn, R.drawable.ic_tvbox_player_audio);
+        }
+        TextView background = findViewById(R.id.uxBackgroundPlayback);
+        if (background != null) {
+            setLeftIcon(background, CarPlaybackPreferences.backgroundAudio()
+                    ? R.drawable.ic_tvbox_player_bg_audio_active : R.drawable.ic_tvbox_player_bg_audio);
+        }
         updateFrameRateDisplay();
+    }
+
+    private void updateCarPlayPauseIcon(TextView button, boolean playing) {
+        if (button == null) return;
+        setTopIcon(button, playing ? R.drawable.ic_tvbox_content_pause : R.drawable.ic_tvbox_content_play);
+    }
+
+    private void setTopIcon(TextView view, int resId) {
+        if (view == null) return;
+        Drawable drawable = ContextCompat.getDrawable(getContext(), resId);
+        if (drawable != null) {
+            int size = Math.round(26f * getResources().getDisplayMetrics().density);
+            drawable.setBounds(0, 0, size, size);
+        }
+        view.setCompoundDrawables(null, drawable, null, null);
+    }
+
+    private void setLeftIcon(TextView view, int resId) {
+        if (view == null) return;
+        Drawable drawable = ContextCompat.getDrawable(getContext(), resId);
+        if (drawable != null) {
+            int size = Math.round(24f * getResources().getDisplayMetrics().density);
+            drawable.setBounds(0, 0, size, size);
+        }
+        view.setCompoundDrawables(drawable, null, null, null);
     }
 
     private void updateFrameRateDisplay() {
@@ -563,7 +612,7 @@ public class VodController extends BaseController {
             @Override
             public void onClick(View v) {
                 isLock = !isLock;
-                mLockView.setImageResource(isLock ? R.drawable.icon_lock : R.drawable.icon_unlock);
+                mLockView.setImageResource(isLock ? R.drawable.ic_tvbox_player_lock_active : R.drawable.ic_tvbox_player_lock);
                 if (isLock) {
                     Message obtain = Message.obtain();
                     obtain.what = 1003;//隐藏底部菜单
@@ -1658,9 +1707,9 @@ public class VodController extends BaseController {
     protected void updateSeekUI(int curr, int seekTo, int duration) {
         super.updateSeekUI(curr, seekTo, duration);
         if (seekTo > curr) {
-            mProgressIcon.setImageResource(R.drawable.exo_icon_fastforward);
+            mProgressIcon.setImageResource(R.drawable.ic_tvbox_player_forward15);
         } else {
-            mProgressIcon.setImageResource(R.drawable.exo_icon_rewind);
+            mProgressIcon.setImageResource(R.drawable.ic_tvbox_player_replay15);
         }
         mProgressText.setText(stringForTime(seekTo) + " / " + stringForTime(duration));
         mHandler.sendEmptyMessage(1000);

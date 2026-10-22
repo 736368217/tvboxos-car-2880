@@ -197,7 +197,7 @@ public class ImgUtil {
         background.setColor(getRandomColor());
         background.setStyle(Paint.Style.FILL);
         canvas.drawRoundRect(new RectF(0, 0, width, height), cornerRadius, cornerRadius, background);
-        Bitmap icon = BitmapFactory.decodeResource(App.getInstance().getResources(), com.github.tvbox.osc.R.drawable.icon_img_placeholder);
+        Bitmap icon = BitmapFactory.decodeResource(App.getInstance().getResources(), com.github.tvbox.osc.R.drawable.ic_tvbox_placeholder);
         if (icon != null) {
             float scale = Math.min(width * 0.34f / icon.getWidth(), height * 0.34f / icon.getHeight());
             float iconWidth = icon.getWidth() * scale;
@@ -221,7 +221,7 @@ public class ImgUtil {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
 
-        Bitmap icon = BitmapFactory.decodeResource(App.getInstance().getResources(), com.github.tvbox.osc.R.drawable.icon_img_placeholder);
+        Bitmap icon = BitmapFactory.decodeResource(App.getInstance().getResources(), com.github.tvbox.osc.R.drawable.ic_tvbox_placeholder);
         if (icon != null) {
             float left = (width - icon.getWidth()) / 2f;
             float top = (height - icon.getHeight()) / 2f;

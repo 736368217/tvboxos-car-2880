@@ -2,6 +2,17 @@
 
 This file is a durable status pointer. It does not replace fresh evidence or claim a pass by itself.
 
+## Current: TVBox 3K icon system
+
+- APK SHA-256: `9998629679fb9b5e24fc34c77d218ad253805430becc5df13ec04b2d5c9ae46b` (53,662,234 bytes).
+- 61 default + 61 active `ic_tvbox_*` VectorDrawables, 108dp adaptive icon, five mipmap densities.
+- UI palette unified to `#06100E / #0A1813 / #0E211A / #6FF2C6 / #A78BFA`.
+- MuMu instance 0: `CAR_DISPLAY_PASS`, gestures `7/0`, playback `101/0`.
+- Evidence: `car/qa/ux-audit-car7-current/evidence-99986296/`.
+- Report: `car/reports/ux_redesign/CAR-17.3-3K-ICON-SYSTEM-IMPLEMENTATION.md`.
+
+## Previous: r8 final baseline
+
 - [x] Final r8 Java Release built and signed.
 - [x] Final APK SHA bound: `1C0AD382B2A1C9244BEE1ACE49849A2FC734D94E9CDA1D9412C4E16316C652D5`.
 - [x] Final r8 APK installed on vm1 and guest `base.apk` SHA matched.

@@ -296,7 +296,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
             title.setText(resumeRecord.name);
             note.setText("上次看到 " + (resumeRecord.playNote == null ? "" : resumeRecord.playNote));
             bindPoster((ImageView) findViewById(R.id.uxResumePoster), resumeRecord.pic, resumeRecord.name, 440, 470);
-            ((TextView) play).setText("▶ 继续播放");
+            ((TextView) play).setText("继续播放");
             play.setEnabled(true);
             episodes.setVisibility(View.VISIBLE);
             episodes.setEnabled(true);

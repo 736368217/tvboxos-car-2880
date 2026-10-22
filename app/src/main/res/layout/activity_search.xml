@@ -6,7 +6,7 @@
     <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
         <TextView android:id="@+id/ux_search_back" android:layout_width="180px" android:layout_height="96px"
             android:layout_marginLeft="60px" android:layout_marginTop="40px" android:text="返回"
-            android:drawableLeft="@drawable/aether_back" android:drawablePadding="10px" android:textSize="28px" android:textColor="@color/aether_cyan_focus" android:gravity="center"
+            android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="10px" android:textSize="28px" android:textColor="@color/aether_cyan_focus" android:gravity="center"
             android:contentDescription="返回上一页" android:focusable="true" android:background="@drawable/ux_setting_choice" />
         <EditText android:id="@+id/etSearch" android:layout_width="2100px" android:layout_height="140px"
             android:layout_marginLeft="250px" android:layout_marginTop="40px"
@@ -15,10 +15,10 @@
             android:imeOptions="actionSearch" android:textSize="42px" android:textStyle="bold"
             android:textColor="@color/car_text" android:textColorHint="@color/car_text_muted" />
         <TextView android:id="@+id/tvSearch" android:layout_width="210px" android:layout_height="140px"
-            android:layout_marginLeft="2390px" android:layout_marginTop="40px" android:drawableTop="@drawable/aether_search" android:drawablePadding="4px" android:text="搜索"
+            android:layout_marginLeft="2390px" android:layout_marginTop="40px" android:drawableTop="@drawable/ic_tvbox_action_search" android:drawablePadding="4px" android:text="搜索"
             android:textSize="28px" android:textStyle="bold" android:textColor="@color/aether_text_primary"
             android:gravity="center" android:focusable="true" android:background="@drawable/ux_search_primary" />
-        <TextView android:id="@+id/tvClear" android:layout_width="190px" android:layout_height="140px"
+        <TextView android:id="@+id/tvClear" android:drawableLeft="@drawable/ic_tvbox_action_clear" android:drawablePadding="8px" android:layout_width="190px" android:layout_height="140px"
             android:layout_marginLeft="2630px" android:layout_marginTop="40px" android:text="清空"
             android:textSize="30px" android:textColor="@color/car_text_muted" android:gravity="center"
             android:focusable="true" android:background="@drawable/ux_setting_choice" />
@@ -28,24 +28,24 @@
                 android:layout_marginLeft="40px" android:layout_marginTop="20px"
                 android:text="车载大键盘 · 简拼 / 全拼 / 首字母" android:gravity="center_vertical"
                 android:textSize="28px" android:textStyle="bold" android:textColor="@color/car_text" />
-            <TextView android:id="@+id/ux_search_ime" android:layout_width="350px" android:layout_height="90px"
-                android:layout_marginLeft="900px" android:layout_marginTop="20px" android:text="⌨ 系统输入法"
+            <TextView android:id="@+id/ux_search_ime" android:drawableLeft="@drawable/ic_tvbox_action_keyboard" android:drawablePadding="10px" android:layout_width="350px" android:layout_height="90px"
+                android:layout_marginLeft="900px" android:layout_marginTop="20px" android:text="系统输入法"
                 android:textSize="28px" android:textColor="@color/car_accent_cyan" android:gravity="center"
                 android:focusable="true" android:background="@drawable/ux_setting_choice" />
             <com.github.tvbox.osc.ui.tv.widget.SearchKeyboard android:id="@+id/keyBoardRoot"
                 android:layout_width="1260px" android:layout_height="660px"
                 android:layout_marginLeft="15px" android:layout_marginTop="120px" />
-            <TextView android:id="@+id/tvSearchCheckboxBtn" android:layout_width="590px" android:layout_height="90px"
+            <TextView android:id="@+id/tvSearchCheckboxBtn" android:drawableLeft="@drawable/ic_tvbox_action_filter" android:drawablePadding="10px" android:layout_width="590px" android:layout_height="90px"
                 android:layout_marginLeft="40px" android:layout_marginTop="805px" android:text="指定搜索源  ›"
                 android:textSize="30px" android:textColor="@color/car_accent_cyan" android:gravity="center"
                 android:focusable="true" android:background="@drawable/ux_setting_choice" />
-            <TextView android:id="@+id/ux_search_aggregate" android:layout_width="590px" android:layout_height="90px"
+            <TextView android:id="@+id/ux_search_aggregate" android:drawableLeft="@drawable/ic_tvbox_content_quick_search" android:drawablePadding="10px" android:layout_width="590px" android:layout_height="90px"
                 android:layout_marginLeft="660px" android:layout_marginTop="805px" android:text="全屏聚合搜索  ›"
                 android:textSize="30px" android:textColor="@color/car_text" android:gravity="center"
                 android:focusable="true" android:background="@drawable/ux_setting_choice" />
             <LinearLayout android:id="@+id/llWord" android:layout_width="1210px" android:layout_height="520px"
                 android:layout_marginLeft="40px" android:layout_marginTop="920px" android:orientation="vertical">
-                <TextView android:id="@+id/wordSwitch" android:layout_width="match_parent" android:layout_height="90px"
+                <TextView android:id="@+id/wordSwitch" android:drawableLeft="@drawable/ic_tvbox_action_hot" android:drawablePadding="10px" android:layout_width="match_parent" android:layout_height="90px"
                     android:text="热词 | 历史" android:gravity="center_vertical" android:textSize="28px"
                     android:textStyle="bold" android:textColor="@color/car_text" android:focusable="true" />
                 <com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/mGridViewWord"
@@ -69,7 +69,7 @@
                         android:text="最近搜索" android:gravity="center_vertical" android:textSize="28px"
                         android:textStyle="bold" android:textColor="@color/car_text" />
                     <ImageView android:id="@+id/tvHistoryClear" android:layout_width="90px" android:layout_height="90px"
-                        android:layout_gravity="right" android:padding="15px" android:src="@drawable/icon_delete"
+                        android:layout_gravity="right" android:padding="15px" android:src="@drawable/ic_tvbox_action_delete"
                         android:contentDescription="清空搜索历史" android:focusable="true" android:background="@drawable/ux_setting_choice" />
                 </FrameLayout>
                 <ScrollView android:layout_width="match_parent" android:layout_height="95px" android:fillViewport="true">
@@ -89,7 +89,7 @@
             <LinearLayout android:id="@+id/uxSearchEmpty" android:layout_width="1340px" android:layout_height="560px"
                 android:layout_marginLeft="40px" android:layout_marginTop="430px" android:background="@drawable/car_surface_card_raised"
                 android:gravity="center" android:orientation="vertical" android:visibility="gone">
-                <ImageView android:layout_width="96px" android:layout_height="96px" android:src="@drawable/aether_search"
+                <ImageView android:layout_width="96px" android:layout_height="96px" android:src="@drawable/ic_tvbox_action_search"
                     android:contentDescription="" android:alpha="0.7" />
                 <TextView android:layout_width="match_parent" android:layout_height="70px" android:layout_marginTop="20px"
                     android:gravity="center" android:text="暂无匹配结果" android:textColor="@color/car_text"

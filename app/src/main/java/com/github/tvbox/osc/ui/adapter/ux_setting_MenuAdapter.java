@@ -15,6 +15,8 @@ public final class ux_setting_MenuAdapter extends SettingMenuAdapter {
 
     @Override protected void convert(BaseViewHolder holder, String item) {
         super.convert(holder, item);
-        holder.itemView.setSelected(holder.getAdapterPosition() == selectedCategory);
+        boolean selected = holder.getAdapterPosition() == selectedCategory;
+        holder.itemView.setSelected(selected);
+        setMenuIcon(holder, holder.getAdapterPosition(), selected);
     }
 }

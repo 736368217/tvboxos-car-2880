@@ -34,7 +34,7 @@
         android:clickable="true"
         android:focusable="true"
         android:padding="@dimen/vs_10"
-        android:src="@drawable/icon_delete"
+        android:src="@drawable/ic_tvbox_action_delete"
         android:visibility="visible" />
 
 </LinearLayout>

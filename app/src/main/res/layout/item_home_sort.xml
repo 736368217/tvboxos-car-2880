@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="wrap_content" android:minWidth="240px" android:layout_height="90px" android:background="@drawable/car_chip_selector" android:clickable="true" android:focusable="true" android:focusableInTouchMode="true" android:gravity="center" android:paddingLeft="24px" android:paddingRight="24px" android:orientation="horizontal">
 <TextView android:id="@+id/tvTitle" style="@style/UxSceneText" android:maxLines="1" android:textSize="26px" android:textStyle="bold"/>
-<ImageView android:id="@+id/tvFilter" android:layout_width="30px" android:layout_height="30px" android:layout_marginLeft="10px" android:src="@drawable/icon_filter" android:visibility="gone"/>
-<ImageView android:id="@+id/tvFilterColor" android:layout_width="30px" android:layout_height="30px" android:layout_marginLeft="10px" android:src="@drawable/icon_filter_color" android:visibility="gone"/>
+<ImageView android:id="@+id/tvFilter" android:layout_width="30px" android:layout_height="30px" android:layout_marginLeft="10px" android:src="@drawable/ic_tvbox_action_filter" android:visibility="gone"/>
+<ImageView android:id="@+id/tvFilterColor" android:layout_width="30px" android:layout_height="30px" android:layout_marginLeft="10px" android:src="@drawable/ic_tvbox_action_filter_active" android:visibility="gone"/>
 </LinearLayout>

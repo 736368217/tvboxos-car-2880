@@ -1,0 +1,22 @@
+{
+  "apk": "C:\\Users\\WIN10\\.pi-desktop\\scratch\\1fc58544-545a-4f33-9c56-de975a6fb08b\\TVBox-1.0.0-car.7-icon-system-final2.apk",
+  "sha256": "9998629679fb9b5e24fc34c77d218ad253805430becc5df13ec04b2d5c9ae46b",
+  "bytes": 53662234,
+  "package": "com.github.tvbox.osc.jun",
+  "versionCode": 8,
+  "versionName": "1.0.0-car.7",
+  "branch": "feature/car-ux-redesign-3k-fps",
+  "sourceHead": "44b948f9d3b695bd0bd07f3012f1abdbd6216f68",
+  "display": "2880x1620 mdpi landscape",
+  "device": "MuMu instance 0",
+  "iconDefaults": 61,
+  "iconActiveVariants": 61,
+  "adaptiveLayers": 3,
+  "mipmapDensities": [
+    "mdpi",
+    "hdpi",
+    "xhdpi",
+    "xxhdpi",
+    "xxxhdpi"
+  ]
+}

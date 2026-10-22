@@ -184,7 +184,13 @@ public final class ux_setting_Pages {
         row.setId(id);
         row.setFocusable(true);
         row.setBackgroundResource(R.drawable.ux_setting_choice);
-        place(row, text(label, 30, true, R.color.car_text), 40, 25, 640, 80);
+        TextView labelView = text(label, 30, true, R.color.car_text);
+        int icon = iconForRow(id);
+        if (icon != 0) {
+            labelView.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0);
+            labelView.setCompoundDrawablePadding(14);
+        }
+        place(row, labelView, 40, 25, 640, 80);
         if (valueId != 0) {
             TextView value = text("", 28, false, R.color.car_accent_cyan);
             value.setSingleLine(true);
@@ -257,13 +263,63 @@ public final class ux_setting_Pages {
         note(page, "播放时应用", "选择保存到 CarEnhance 原有音效配置，播放时由现有音频会话链路应用。效果器不受设备支持时保持原有回退行为。");
     }
 
+    private int iconForRow(int id) {
+        if (id == R.id.llScale) return R.drawable.ic_tvbox_player_aspect;
+        if (id == R.id.showPreview) return R.drawable.ic_tvbox_player_picture;
+        if (id == R.id.llWp) return R.drawable.ic_tvbox_settings_display;
+        if (id == R.id.llWpRecovery) return R.drawable.ic_tvbox_action_refresh;
+        if (id == R.id.uxBackgroundRow) return R.drawable.ic_tvbox_player_bg_audio;
+        if (id == R.id.llPlay) return R.drawable.ic_tvbox_player_decoder;
+        if (id == R.id.llMediaCodec) return R.drawable.ic_tvbox_player_decoder;
+        if (id == R.id.llRender) return R.drawable.ic_tvbox_player_picture;
+        if (id == R.id.llIjkCachePlay) return R.drawable.ic_tvbox_file_loading;
+        if (id == R.id.m3u8Ad) return R.drawable.ic_tvbox_action_filter;
+        if (id == R.id.autoSwitchLine) return R.drawable.ic_tvbox_content_swap;
+        if (id == R.id.llDns) return R.drawable.ic_tvbox_settings_subscribe;
+        if (id == R.id.llParseWebVew) return R.drawable.ic_tvbox_action_search;
+        if (id == R.id.danmuOpen) return R.drawable.ic_tvbox_player_danmaku;
+        if (id == R.id.danmuApi) return R.drawable.ic_tvbox_content_source;
+        if (id == R.id.uxLongPressRow) return R.drawable.ic_tvbox_player_speed;
+        if (id == R.id.uxGestureRow) return R.drawable.ic_tvbox_settings_gesture;
+        if (id == R.id.uxNavHomeRow) return R.drawable.ic_tvbox_nav_recommend;
+        if (id == R.id.uxNavLiveRow) return R.drawable.ic_tvbox_nav_live;
+        if (id == R.id.uxNavHistoryRow) return R.drawable.ic_tvbox_nav_history;
+        if (id == R.id.uxNavCollectRow) return R.drawable.ic_tvbox_nav_favorites;
+        if (id == R.id.uxNavPushRow) return R.drawable.ic_tvbox_nav_push;
+        if (id == R.id.llSearchView) return R.drawable.ic_tvbox_action_search;
+        if (id == R.id.showFastSearch) return R.drawable.ic_tvbox_content_quick_search;
+        if (id == R.id.llHomeRec) return R.drawable.ic_tvbox_nav_recommend;
+        if (id == R.id.llHomeRecStyle) return R.drawable.ic_tvbox_nav_categories;
+        if (id == R.id.tvHomeLive) return R.drawable.ic_tvbox_nav_live;
+        if (id == R.id.llHistoryMerge) return R.drawable.ic_tvbox_nav_history;
+        if (id == R.id.llHistoryNum) return R.drawable.ic_tvbox_nav_history;
+        if (id == R.id.llCarBack) return R.drawable.ic_tvbox_action_back;
+        if (id == R.id.llCarBackHide) return R.drawable.ic_tvbox_action_back;
+        if (id == R.id.llCarAdvanced) return R.drawable.ic_tvbox_settings_display;
+        if (id == R.id.llApi) return R.drawable.ic_tvbox_settings_subscribe;
+        if (id == R.id.llApiHistory) return R.drawable.ic_tvbox_nav_history;
+        if (id == R.id.llApiLine) return R.drawable.ic_tvbox_content_source;
+        if (id == R.id.llHomeApi) return R.drawable.ic_tvbox_nav_recommend;
+        if (id == R.id.llAbout) return R.drawable.ic_tvbox_content_info;
+        if (id == R.id.llBackup) return R.drawable.ic_tvbox_file_archive;
+        if (id == R.id.llClearCache) return R.drawable.ic_tvbox_action_clear;
+        if (id == R.id.llDebug) return R.drawable.ic_tvbox_player_decoder;
+        return 0;
+    }
+
     private interface Changed { void apply(boolean value); }
     private SwitchCompat toggle(LinearLayout page, int rowId, int switchId, String title, String description,
                                 boolean initial, Changed changed) {
         FrameLayout row = card(page, 220);
         row.setId(rowId);
         row.setFocusable(true);
-        place(row, text(title, 32, true, R.color.car_text), 40, 35, 1690, 60);
+        TextView titleView = text(title, 32, true, R.color.car_text);
+        int icon = iconForRow(rowId);
+        if (icon != 0) {
+            titleView.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0);
+            titleView.setCompoundDrawablePadding(14);
+        }
+        place(row, titleView, 40, 35, 1690, 60);
         place(row, text(description, 26, false, R.color.car_text_muted), 40, 112, 1690, 75);
         SwitchCompat toggle = new SwitchCompat(context);
         toggle.setId(switchId);

@@ -3,8 +3,8 @@
     android:layout_width="match_parent" android:layout_height="match_parent" android:tag="2880,1620"
     android:background="@color/car_bg">
     <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
-        <TextView android:id="@+id/ux_setting_back" android:layout_width="160px" android:layout_height="90px"
-            android:layout_marginLeft="60px" android:layout_marginTop="40px" android:text="‹ 返回"
+        <TextView android:id="@+id/ux_setting_back" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="8px" android:layout_width="160px" android:layout_height="90px"
+            android:layout_marginLeft="60px" android:layout_marginTop="40px" android:text="返回"
             android:textSize="32px" android:textColor="@color/car_text" android:gravity="center"
             android:focusable="true" android:background="@drawable/ux_setting_choice" />
         <TextView android:layout_width="2400px" android:layout_height="90px" android:layout_marginLeft="260px"
@@ -12,15 +12,15 @@
             android:textSize="38px" android:textStyle="bold" android:textColor="@color/car_text" android:gravity="center_vertical" />
         <FrameLayout android:layout_width="620px" android:layout_height="1400px"
             android:layout_marginLeft="60px" android:layout_marginTop="160px" android:background="@drawable/ux_setting_card">
-            <TextView android:id="@+id/ux_setting_video_tab" android:layout_width="580px" android:layout_height="130px"
+            <TextView android:id="@+id/ux_setting_video_tab" android:drawableLeft="@drawable/ic_tvbox_settings_display" android:drawablePadding="12px" android:layout_width="580px" android:layout_height="130px"
                 android:layout_marginLeft="20px" android:layout_marginTop="40px" android:text="01  画面色彩与超分引擎"
                 android:textSize="28px" android:textStyle="bold" android:textColor="@color/car_text" android:gravity="center_vertical"
                 android:paddingLeft="28px" android:focusable="true" android:background="@drawable/ux_setting_choice" />
-            <TextView android:id="@+id/ux_setting_audio_tab" android:layout_width="580px" android:layout_height="130px"
+            <TextView android:id="@+id/ux_setting_audio_tab" android:drawableLeft="@drawable/ic_tvbox_player_audio" android:drawablePadding="12px" android:layout_width="580px" android:layout_height="130px"
                 android:layout_marginLeft="20px" android:layout_marginTop="195px" android:text="02  座舱声场与音效"
                 android:textSize="28px" android:textStyle="bold" android:textColor="@color/car_text" android:gravity="center_vertical"
                 android:paddingLeft="28px" android:focusable="true" android:background="@drawable/ux_setting_choice" />
-            <TextView android:id="@+id/ux_setting_return_tab" android:layout_width="580px" android:layout_height="130px"
+            <TextView android:id="@+id/ux_setting_return_tab" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="12px" android:layout_width="580px" android:layout_height="130px"
                 android:layout_marginLeft="20px" android:layout_marginTop="350px" android:text="03  双模应用内返回控件"
                 android:textSize="28px" android:textStyle="bold" android:textColor="@color/car_text" android:gravity="center_vertical"
                 android:paddingLeft="28px" android:focusable="true" android:background="@drawable/ux_setting_choice" />

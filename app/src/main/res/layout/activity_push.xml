@@ -10,8 +10,8 @@
     android:paddingLeft="@dimen/car_side_padding"
     android:paddingRight="@dimen/car_side_padding">
 
-    <TextView android:id="@+id/uxPageBack" style="@style/UxSceneButton" android:layout_width="180px" android:layout_height="96px" android:layout_marginLeft="60px" android:layout_marginTop="40px" android:drawableLeft="@drawable/aether_back" android:drawablePadding="10px" android:text="返回" android:textColor="@color/aether_cyan_focus" android:textSize="28px" android:contentDescription="返回上一页" />
-    <TextView android:layout_width="1800px" android:layout_height="88px" android:layout_marginLeft="280px" android:layout_marginTop="40px" android:gravity="center_vertical" android:text="多端互联 · AirPush" android:textColor="@color/aether_text_primary" android:textSize="38px" android:textStyle="bold" />
+    <TextView android:id="@+id/uxPageBack" style="@style/UxSceneButton" android:layout_width="180px" android:layout_height="96px" android:layout_marginLeft="60px" android:layout_marginTop="40px" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="10px" android:text="返回" android:textColor="@color/aether_cyan_focus" android:textSize="28px" android:contentDescription="返回上一页" />
+    <TextView android:layout_width="1800px" android:layout_height="88px" android:layout_marginLeft="280px" android:layout_marginTop="40px" android:gravity="center_vertical" android:drawableLeft="@drawable/ic_tvbox_nav_push" android:drawablePadding="14px" android:text="多端互联 · AirPush" android:textColor="@color/aether_text_primary" android:textSize="38px" android:textStyle="bold" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
             android:layout_gravity="center" />
 
         <TextView
-            android:id="@+id/tvAddress"
+            android:id="@+id/tvAddress" android:drawableLeft="@drawable/ic_tvbox_file_qr" android:drawablePadding="10px"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -46,7 +46,7 @@
             android:textColor="@color/color_FFFFFF"
             android:textSize="@dimen/ts_24" />
         <TextView
-            android:id="@+id/pushLocal"
+            android:id="@+id/pushLocal" android:drawableLeft="@drawable/ic_tvbox_action_copy" android:drawablePadding="10px"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

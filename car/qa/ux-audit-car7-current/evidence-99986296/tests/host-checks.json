@@ -1,0 +1,54 @@
+{
+  "exit": 0,
+  "scope": "core",
+  "repo": "D:\\github\\tvboxos-car-2880",
+  "checks": [
+    {
+      "name": "resource_xml",
+      "exit": 0,
+      "files": 321
+    },
+    {
+      "name": "diff_whitespace",
+      "exit": 0,
+      "stdout": ""
+    },
+    {
+      "name": "compile_core",
+      "exit": 0,
+      "stdout": ""
+    },
+    {
+      "name": "VideoEnhancePresetTest",
+      "exit": 0,
+      "stdout": "PASS: 11 presets, stable IDs, legacy migration, corrupt preference fallback, distinct immutable curves"
+    },
+    {
+      "name": "Car6PostProcessTest",
+      "exit": 0,
+      "stdout": "PASS: exact old/new audio and video curves, immutable data, linked SGSR sharpness, temporal cut/pause/seek, 4K policy and switches"
+    },
+    {
+      "name": "Car7RuntimeConfigTest",
+      "exit": 0,
+      "stdout": "PASS: 44 runtime configurations, 88 SDR/HDR cases, 1936 transition comparisons, independent switches and immutable publication"
+    },
+    {
+      "name": "Car7SearchSessionTest",
+      "exit": 0,
+      "stdout": "PASS Car7SearchSessionTest assertions=1237"
+    },
+    {
+      "name": "com.github.tvbox.osc.car.BackNavPolicyHostTest",
+      "exit": 0,
+      "stdout": "PASS: 738 Back navigation policy checks"
+    },
+    {
+      "name": "python_http",
+      "exit": 0,
+      "stdout": "plugin downloaded spider.py"
+    }
+  ],
+  "missing_prerequisites": [],
+  "device_tests_run": false
+}

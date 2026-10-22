@@ -5,11 +5,11 @@
     <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
         <TextView android:id="@+id/ux_setting_back" android:layout_width="180px" android:layout_height="96px"
             android:layout_marginLeft="60px" android:layout_marginTop="40px" android:text="返回"
-            android:drawableLeft="@drawable/aether_back" android:drawablePadding="10px" android:textSize="28px" android:textColor="@color/aether_cyan_focus" android:gravity="center"
+            android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="10px" android:textSize="28px" android:textColor="@color/aether_cyan_focus" android:gravity="center"
             android:contentDescription="返回上一页" android:focusable="true" android:background="@drawable/ux_setting_choice" />
         <TextView android:layout_width="2400px" android:layout_height="90px"
             android:layout_marginLeft="260px" android:layout_marginTop="40px" android:gravity="center_vertical"
-            android:text="播放器设置中心  /  核心解码与音画调优" android:textSize="38px"
+            android:drawableLeft="@drawable/ic_tvbox_nav_settings" android:drawablePadding="14px" android:text="播放器设置中心  /  核心解码与音画调优" android:textSize="38px"
             android:textStyle="bold" android:textColor="@color/car_text" />
         <FrameLayout android:layout_width="620px" android:layout_height="1400px"
             android:layout_marginLeft="60px" android:layout_marginTop="160px" android:background="@drawable/ux_setting_card">

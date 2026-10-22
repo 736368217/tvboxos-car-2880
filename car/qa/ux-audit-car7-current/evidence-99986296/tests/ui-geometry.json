@@ -1,0 +1,81 @@
+{
+  "screen": [
+    2880,
+    1620
+  ],
+  "pages": [
+    {
+      "page": "advanced",
+      "nodes": 48,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "audio-dialog",
+      "nodes": 15,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "collect",
+      "nodes": 19,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "detail",
+      "nodes": 60,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "fast",
+      "nodes": 28,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "history",
+      "nodes": 30,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "home",
+      "nodes": 120,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "live",
+      "nodes": 30,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "localfile",
+      "nodes": 23,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "push",
+      "nodes": 15,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "search",
+      "nodes": 138,
+      "outOfBounds": 0,
+      "examples": []
+    },
+    {
+      "page": "settings",
+      "nodes": 62,
+      "outOfBounds": 0,
+      "examples": []
+    }
+  ],
+  "totalOutOfBounds": 0
+}

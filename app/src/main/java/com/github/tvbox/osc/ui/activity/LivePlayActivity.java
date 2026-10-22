@@ -253,7 +253,7 @@ public class LivePlayActivity extends BaseActivity {
     private TextView tv_currentpos;
     private TextView tv_duration;
     private SeekBar sBar;
-    private View iv_playpause;
+    private ImageView iv_playpause;
     private View iv_play;
     private  boolean show = false;
     private static final int postTimeout = 6000;
@@ -360,7 +360,7 @@ public class LivePlayActivity extends BaseActivity {
                 mVideoView.start();
                 iv_play.setVisibility(View.INVISIBLE);
                 if (countDownTimer != null) countDownTimer.start();
-                iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.vod_pause));
+                iv_playpause.setImageResource(R.drawable.ic_tvbox_content_pause);
             }
         });
 
@@ -371,12 +371,12 @@ public class LivePlayActivity extends BaseActivity {
                     mVideoView.pause();
                     if (countDownTimer != null) countDownTimer.cancel();
                     iv_play.setVisibility(View.VISIBLE);
-                    iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.icon_play));
+                    iv_playpause.setImageResource(R.drawable.ic_tvbox_content_play);
                 }else{
                     mVideoView.start();
                     iv_play.setVisibility(View.INVISIBLE);
                     if (countDownTimer != null) countDownTimer.start();
-                    iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.vod_pause));
+                    iv_playpause.setImageResource(R.drawable.ic_tvbox_content_pause);
                 }
             }
         });
@@ -416,12 +416,12 @@ public class LivePlayActivity extends BaseActivity {
                             mVideoView.pause();
                             if (countDownTimer != null) countDownTimer.cancel();
                             iv_play.setVisibility(View.VISIBLE);
-                            iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.icon_play));
+                            iv_playpause.setImageResource(R.drawable.ic_tvbox_content_play);
                         }else{
                             mVideoView.start();
                             iv_play.setVisibility(View.INVISIBLE);
                             if (countDownTimer != null) countDownTimer.start();
-                            iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.vod_pause));
+                            iv_playpause.setImageResource(R.drawable.ic_tvbox_content_pause);
                         }
                     }
                 }
@@ -570,7 +570,11 @@ public class LivePlayActivity extends BaseActivity {
         uxLiveFavorite.setVisibility(available ? View.VISIBLE : View.GONE);
         uxLiveFavorite.setEnabled(available);
         boolean favorite = available && uxLiveFavoriteIds().contains(uxLiveFavoriteId(currentChannelGroupIndex, channel));
-        uxLiveFavorite.setText(favorite ? "♥ 已收藏 · 取消" : "♡ 收藏该频道");
+        uxLiveFavorite.setText(favorite ? "已收藏 · 取消" : "收藏该频道");
+        uxLiveFavorite.setCompoundDrawablesWithIntrinsicBounds(
+                favorite ? R.drawable.ic_tvbox_content_heart_on_active : R.drawable.ic_tvbox_content_heart_on,
+                0, 0, 0);
+        uxLiveFavorite.setCompoundDrawablePadding(8);
         uxLiveFavorite.setTextColor(ContextCompat.getColor(this, favorite ? R.color.car_accent_alt : R.color.car_text));
         int state = mVideoView.getCurrentPlayState();
         boolean playing = available && (state == VideoView.STATE_PLAYING || state == VideoView.STATE_BUFFERED && mVideoView.isPlaying());
@@ -3678,7 +3682,7 @@ public class LivePlayActivity extends BaseActivity {
                 mVideoView.start();
                 iv_play.setVisibility(View.INVISIBLE);
                 if (countDownTimer != null) countDownTimer.start();
-                iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.vod_pause));
+                iv_playpause.setImageResource(R.drawable.ic_tvbox_content_pause);
             }
         });
 
@@ -3689,12 +3693,12 @@ public class LivePlayActivity extends BaseActivity {
                     mVideoView.pause();
                     if (countDownTimer != null) countDownTimer.cancel();
                     iv_play.setVisibility(View.VISIBLE);
-                    iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.icon_play));
+                    iv_playpause.setImageResource(R.drawable.ic_tvbox_content_play);
                 }else{
                     mVideoView.start();
                     iv_play.setVisibility(View.INVISIBLE);
                     if (countDownTimer != null) countDownTimer.start();
-                    iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.vod_pause));
+                    iv_playpause.setImageResource(R.drawable.ic_tvbox_content_pause);
                 }
             }
         });
@@ -3731,12 +3735,12 @@ public class LivePlayActivity extends BaseActivity {
                             mVideoView.pause();
                             if (countDownTimer != null) countDownTimer.cancel();
                             iv_play.setVisibility(View.VISIBLE);
-                            iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.icon_play));
+                            iv_playpause.setImageResource(R.drawable.ic_tvbox_content_play);
                         }else{
                             mVideoView.start();
                             iv_play.setVisibility(View.INVISIBLE);
                             if (countDownTimer != null) countDownTimer.start();
-                            iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.vod_pause));
+                            iv_playpause.setImageResource(R.drawable.ic_tvbox_content_pause);
                         }
                     }
                 }
@@ -3745,10 +3749,10 @@ public class LivePlayActivity extends BaseActivity {
         });
         if(mVideoView.isPlaying()){
             iv_play.setVisibility(View.INVISIBLE);
-            iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.vod_pause));
+            iv_playpause.setImageResource(R.drawable.ic_tvbox_content_pause);
         }else{
             iv_play.setVisibility(View.VISIBLE);
-            iv_playpause.setBackground(ContextCompat.getDrawable(LivePlayActivity.context, R.drawable.icon_play));
+            iv_playpause.setImageResource(R.drawable.ic_tvbox_content_play);
         }
         if(countDownTimer3==null){
             countDownTimer3 = new CountDownTimer(postTimeout, 1000) {

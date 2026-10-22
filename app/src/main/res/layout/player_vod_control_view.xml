@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.github.tvbox.osc.car.CarSceneLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/rootView" android:layout_width="match_parent" android:layout_height="match_parent">
 <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
- <ImageView android:id="@+id/tv_back_fullscreen" android:layout_width="180px" android:layout_height="90px" android:layout_marginLeft="60px" android:layout_marginTop="40px" android:background="@drawable/car_button_selector" android:src="@drawable/aether_back" android:padding="28px" android:contentDescription="退出全屏" android:clickable="true" android:focusable="true" android:visibility="gone"/>
+ <ImageView android:id="@+id/tv_back_fullscreen" android:layout_width="180px" android:layout_height="90px" android:layout_marginLeft="60px" android:layout_marginTop="40px" android:background="@drawable/car_button_selector" android:src="@drawable/ic_tvbox_action_back" android:padding="28px" android:contentDescription="退出全屏" android:clickable="true" android:focusable="true" android:visibility="gone"/>
  <LinearLayout android:id="@+id/tv_top_l_container" android:layout_width="1800px" android:layout_height="150px" android:layout_marginLeft="60px" android:layout_marginTop="40px" android:orientation="horizontal" android:gravity="center_vertical" android:tag="tv_top_container" android:visibility="gone">
-  <ImageView android:id="@+id/tv_back" android:layout_width="180px" android:layout_height="90px" android:background="@drawable/car_button_selector" android:src="@drawable/aether_back" android:padding="28px" android:contentDescription="退出全屏" android:clickable="true" android:focusable="true"/>
+  <ImageView android:id="@+id/tv_back" android:layout_width="180px" android:layout_height="90px" android:background="@drawable/car_button_selector" android:src="@drawable/ic_tvbox_action_back" android:padding="28px" android:contentDescription="退出全屏" android:clickable="true" android:focusable="true"/>
   <LinearLayout android:layout_width="1580px" android:layout_height="match_parent" android:layout_marginLeft="40px" android:orientation="vertical">
    <TextView android:id="@+id/tv_info_name1" style="@style/UxSceneText" android:layout_width="match_parent" android:layout_height="65px" android:textSize="36px" android:textStyle="bold" android:maxLines="1"/>
    <LinearLayout android:layout_width="match_parent" android:layout_height="60px" android:orientation="horizontal">
@@ -14,8 +14,8 @@
  </LinearLayout>
  <LinearLayout android:id="@+id/tv_top_r_container" android:layout_width="920px" android:layout_height="150px" android:layout_marginLeft="1900px" android:layout_marginTop="40px" android:orientation="vertical" android:gravity="end" android:tag="tv_top_container" android:visibility="gone">
   <LinearLayout android:id="@+id/tv_screen_display" android:layout_width="wrap_content" android:layout_height="90px" android:gravity="center_vertical">
-   <TextView android:id="@+id/uxBackgroundPlayback" style="@style/UxSceneButton" android:layout_width="300px" android:layout_height="80px" android:text="后台播放 · 关" android:textSize="26px" android:visibility="gone"/>
-   <ImageView android:id="@+id/tv_lock" android:layout_width="110px" android:layout_height="80px" android:layout_marginLeft="20px" android:background="@drawable/car_button_selector" android:src="@drawable/aether_lock" android:padding="20px" android:contentDescription="锁屏防触" android:clickable="true" android:focusable="true"/>
+   <TextView android:id="@+id/uxBackgroundPlayback" style="@style/UxSceneButton" android:layout_width="300px" android:layout_height="80px" android:drawableLeft="@drawable/ic_tvbox_player_bg_audio" android:drawablePadding="8px" android:text="后台播放 · 关" android:textSize="26px" android:visibility="gone"/>
+   <ImageView android:id="@+id/tv_lock" android:layout_width="110px" android:layout_height="80px" android:layout_marginLeft="20px" android:background="@drawable/car_button_selector" android:src="@drawable/ic_tvbox_player_lock" android:padding="20px" android:contentDescription="锁屏防触" android:clickable="true" android:focusable="true"/>
    <TextView android:id="@+id/tv_sys_time" style="@style/UxSceneText" android:layout_width="150px" android:layout_height="80px" android:gravity="center" android:tag="vod_control_pause_time" android:textSize="28px"/>
   </LinearLayout>
   <LinearLayout android:layout_width="wrap_content" android:layout_height="50px" android:gravity="center_vertical">
@@ -36,43 +36,43 @@
   </LinearLayout>
   <View android:layout_width="match_parent" android:layout_height="2px" android:layout_marginTop="8px" android:layout_marginBottom="8px" android:background="@color/car_outline_soft"/>
   <LinearLayout android:layout_width="match_parent" android:layout_height="132px" android:gravity="center_vertical">
-   <TextView android:id="@+id/uxPlayPause" style="@style/UxPlayerPrimaryButton" android:layout_width="210px" android:layout_height="116px" android:text="暂停" android:contentDescription="播放或暂停"/>
-   <TextView android:id="@+id/uxRewind" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="后退 15 秒" android:contentDescription="后退 15 秒"/>
-   <TextView android:id="@+id/uxForward" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="前进 15 秒" android:contentDescription="前进 15 秒"/>
-   <TextView android:id="@+id/play_pre" style="@style/UxPlayerButton" android:layout_width="160px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="上一集" android:contentDescription="上一集"/>
-   <TextView android:id="@+id/play_next" style="@style/UxPlayerButton" android:layout_width="160px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="下一集" android:contentDescription="下一集"/>
-   <TextView android:id="@+id/uxEpisodes" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="选集" android:contentDescription="选择剧集"/>
+   <TextView android:id="@+id/uxPlayPause" style="@style/UxPlayerPrimaryButton" android:layout_width="210px" android:layout_height="116px" android:drawableTop="@drawable/ic_tvbox_content_pause" android:drawablePadding="4px" android:text="暂停" android:contentDescription="播放或暂停"/>
+   <TextView android:id="@+id/uxRewind" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="112px" android:layout_marginLeft="14px" android:drawableTop="@drawable/ic_tvbox_player_replay15" android:drawablePadding="4px" android:text="后退 15 秒" android:contentDescription="后退 15 秒"/>
+   <TextView android:id="@+id/uxForward" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="112px" android:layout_marginLeft="14px" android:drawableTop="@drawable/ic_tvbox_player_forward15" android:drawablePadding="4px" android:text="前进 15 秒" android:contentDescription="前进 15 秒"/>
+   <TextView android:id="@+id/play_pre" style="@style/UxPlayerButton" android:layout_width="160px" android:layout_height="112px" android:layout_marginLeft="14px" android:drawableTop="@drawable/ic_tvbox_player_prev" android:drawablePadding="4px" android:text="上一集" android:contentDescription="上一集"/>
+   <TextView android:id="@+id/play_next" style="@style/UxPlayerButton" android:layout_width="160px" android:layout_height="112px" android:layout_marginLeft="14px" android:drawableTop="@drawable/ic_tvbox_player_next" android:drawablePadding="4px" android:text="下一集" android:contentDescription="下一集"/>
+   <TextView android:id="@+id/uxEpisodes" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="112px" android:layout_marginLeft="14px" android:drawableTop="@drawable/ic_tvbox_content_episodes" android:drawablePadding="4px" android:text="选集" android:contentDescription="选择剧集"/>
    <Space android:layout_width="0px" android:layout_height="1px" android:layout_weight="1"/>
-   <TextView android:id="@+id/uxMore" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="112px" android:layout_marginLeft="14px" android:text="更多" android:contentDescription="更多播放工具"/>
+   <TextView android:id="@+id/uxMore" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="112px" android:layout_marginLeft="14px" android:drawableTop="@drawable/ic_tvbox_action_more" android:drawablePadding="4px" android:text="更多" android:contentDescription="更多播放工具"/>
   </LinearLayout>
   <LinearLayout android:layout_width="match_parent" android:layout_height="124px" android:gravity="center_vertical">
    <TextView android:id="@+id/play_label" style="@style/UxSceneText" android:layout_width="220px" android:layout_height="88px" android:gravity="center_vertical" android:text="画质与播放" android:textColor="@color/car_text_dim" android:textSize="24px" android:textStyle="bold"/>
-   <TextView android:id="@+id/play_car_video" style="@style/UxPlayerButton" android:layout_width="280px" android:layout_height="104px" android:layout_marginLeft="12px" android:maxLines="1" android:ellipsize="end" android:text="画面预设" android:textColor="@color/aether_cyan_focus"/>
-   <TextView android:id="@+id/play_car_sr" style="@style/UxPlayerButton" android:layout_width="170px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="超分" android:textColor="@color/aether_cyan_focus"/>
-   <TextView android:id="@+id/play_car_interp" style="@style/UxPlayerButton" android:layout_width="170px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="补帧" android:textColor="@color/aether_cyan_focus"/>
-   <TextView android:id="@+id/play_car_audio" style="@style/UxPlayerButton" android:layout_width="280px" android:layout_height="104px" android:layout_marginLeft="12px" android:maxLines="1" android:ellipsize="end" android:text="座舱音效" android:textColor="@color/aether_amber_atmos"/>
-   <TextView android:id="@+id/uxChangeSource" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="换源"/>
-   <TextView android:id="@+id/play_scale" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="画面"/>
-   <TextView android:id="@+id/play_speed" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="104px" android:layout_marginLeft="12px" android:text="1.0x"/>
+   <TextView android:id="@+id/play_car_video" style="@style/UxPlayerButton" android:layout_width="280px" android:layout_height="104px" android:layout_marginLeft="12px" android:maxLines="1" android:ellipsize="end" android:drawableTop="@drawable/ic_tvbox_player_picture" android:drawablePadding="4px" android:text="画面预设" android:textColor="@color/aether_cyan_focus"/>
+   <TextView android:id="@+id/play_car_sr" style="@style/UxPlayerButton" android:layout_width="170px" android:layout_height="104px" android:layout_marginLeft="12px" android:drawableTop="@drawable/ic_tvbox_player_sr" android:drawablePadding="4px" android:text="超分" android:textColor="@color/aether_cyan_focus"/>
+   <TextView android:id="@+id/play_car_interp" style="@style/UxPlayerButton" android:layout_width="170px" android:layout_height="104px" android:layout_marginLeft="12px" android:drawableTop="@drawable/ic_tvbox_player_interp" android:drawablePadding="4px" android:text="补帧" android:textColor="@color/aether_cyan_focus"/>
+   <TextView android:id="@+id/play_car_audio" style="@style/UxPlayerButton" android:layout_width="280px" android:layout_height="104px" android:layout_marginLeft="12px" android:maxLines="1" android:ellipsize="end" android:drawableTop="@drawable/ic_tvbox_player_audio" android:drawablePadding="4px" android:text="座舱音效" android:textColor="@color/aether_amber_atmos"/>
+   <TextView android:id="@+id/uxChangeSource" style="@style/UxPlayerButton" android:layout_width="180px" android:layout_height="104px" android:layout_marginLeft="12px" android:drawableTop="@drawable/ic_tvbox_content_swap" android:drawablePadding="4px" android:text="换源"/>
+   <TextView android:id="@+id/play_scale" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="104px" android:layout_marginLeft="12px" android:drawableTop="@drawable/ic_tvbox_player_aspect" android:drawablePadding="4px" android:text="画面"/>
+   <TextView android:id="@+id/play_speed" style="@style/UxPlayerButton" android:layout_width="150px" android:layout_height="104px" android:layout_marginLeft="12px" android:drawableTop="@drawable/ic_tvbox_player_speed" android:drawablePadding="4px" android:text="1.0x"/>
   </LinearLayout>
   <HorizontalScrollView android:id="@+id/uxAdvancedControls" android:layout_width="match_parent" android:layout_height="96px" android:scrollbars="none" android:visibility="gone">
    <LinearLayout android:id="@+id/play_btn_group" android:layout_width="wrap_content" android:layout_height="96px" android:gravity="center_vertical">
-    <TextView android:id="@+id/play_retry" style="@style/UxPlayerButton" android:text="重播"/>
-    <TextView android:id="@+id/play_refresh" style="@style/UxPlayerButton" android:text="刷新"/>
-    <TextView android:id="@+id/play_player" style="@style/UxPlayerButton" android:text="播放器"/>
-    <TextView android:id="@+id/play_ijk" style="@style/UxPlayerButton" android:text="解码"/>
+    <TextView android:id="@+id/play_retry" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_action_refresh" android:drawablePadding="6px" android:text="重播"/>
+    <TextView android:id="@+id/play_refresh" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_action_refresh" android:drawablePadding="6px" android:text="刷新"/>
+    <TextView android:id="@+id/play_player" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_player_decoder" android:drawablePadding="6px" android:text="播放器"/>
+    <TextView android:id="@+id/play_ijk" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_player_decoder" android:drawablePadding="6px" android:text="解码"/>
     <TextView android:id="@+id/play_time_start_end_text" style="@style/UxSceneText" android:text="片头尾" android:visibility="gone"/>
     <TextView android:id="@+id/play_time_start" style="@style/UxPlayerButton" android:text="片头"/>
     <TextView android:id="@+id/play_time_end" style="@style/UxPlayerButton" android:text="片尾"/>
-    <TextView android:id="@+id/play_time_reset" style="@style/UxPlayerButton" android:text="重置"/>
-    <TextView android:id="@+id/play_cast" style="@style/UxPlayerButton" android:text="投屏"/>
-    <TextView android:id="@+id/zimu_select" style="@style/UxPlayerButton" android:text="字幕"/>
-    <TextView android:id="@+id/audio_track_select" style="@style/UxPlayerButton" android:text="音轨" android:visibility="gone"/>
-    <TextView android:id="@+id/video_track_select" style="@style/UxPlayerButton" android:text="视轨" android:visibility="gone"/>
-    <TextView android:id="@+id/danmu_setting" style="@style/UxPlayerButton" android:text="弹幕" android:visibility="gone"/>
-    <TextView android:id="@+id/danmu_search_ui" style="@style/UxPlayerButton" android:text="搜弹幕" android:visibility="gone"/>
-    <TextView android:id="@+id/landscape_portrait" style="@style/UxPlayerButton" android:text="横竖屏" android:visibility="gone"/>
-    <TextView android:id="@+id/screen_display" style="@style/UxPlayerButton" android:text="屏显"/>
+    <TextView android:id="@+id/play_time_reset" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_action_refresh" android:drawablePadding="6px" android:text="重置"/>
+    <TextView android:id="@+id/play_cast" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_content_cast" android:drawablePadding="6px" android:text="投屏"/>
+    <TextView android:id="@+id/zimu_select" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_player_subtitle" android:drawablePadding="6px" android:text="字幕"/>
+    <TextView android:id="@+id/audio_track_select" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_player_audio_track" android:drawablePadding="6px" android:text="音轨" android:visibility="gone"/>
+    <TextView android:id="@+id/video_track_select" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_player_video_track" android:drawablePadding="6px" android:text="视轨" android:visibility="gone"/>
+    <TextView android:id="@+id/danmu_setting" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_player_danmaku" android:drawablePadding="6px" android:text="弹幕" android:visibility="gone"/>
+    <TextView android:id="@+id/danmu_search_ui" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_content_quick_search" android:drawablePadding="6px" android:text="搜弹幕" android:visibility="gone"/>
+    <TextView android:id="@+id/landscape_portrait" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_player_fullscreen" android:drawablePadding="6px" android:text="横竖屏" android:visibility="gone"/>
+    <TextView android:id="@+id/screen_display" style="@style/UxPlayerButton" android:drawableLeft="@drawable/ic_tvbox_settings_display" android:drawablePadding="6px" android:text="屏显"/>
    </LinearLayout>
   </HorizontalScrollView>
   <LinearLayout android:id="@+id/parse_root" android:layout_width="match_parent" android:layout_height="96px" android:visibility="gone" android:gravity="center_vertical"><TextView style="@style/UxSceneText" android:text="解析"/><com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/mGridParseView" android:layout_width="0px" android:layout_weight="1" android:layout_height="96px" app:tv_horizontalSpacingWithMargins="12px"/></LinearLayout>

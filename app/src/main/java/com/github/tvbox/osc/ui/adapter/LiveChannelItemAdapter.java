@@ -53,7 +53,7 @@ public class LiveChannelItemAdapter extends BaseQuickAdapter<LiveChannelItem, Ba
         name.setText(item.getChannelName());
         name.setTextColor(ContextCompat.getColor(mContext, R.color.car_text));
         String title = programTitleProvider == null ? null : programTitleProvider.getTitle(item);
-        epg.setText(title == null || title.trim().isEmpty() ? "暂无节目单" : "▶ 正在播出：" + title);
+        epg.setText(title == null || title.trim().isEmpty() ? "暂无节目单" : "正在播出：" + title);
         state.setVisibility(current ? View.VISIBLE : View.GONE);
         state.setText(playing ? "播放中" : "已选择");
     }
