@@ -40,6 +40,7 @@ public class HistoryActivity extends BaseActivity {
     private ImageView tvClear;
     private TextView tvDelTip;
     private TvRecyclerView mGridView;
+    private View emptyState;
     public static HistoryAdapter historyAdapter;
     private boolean delMode = false;
 
@@ -72,6 +73,8 @@ public class HistoryActivity extends BaseActivity {
         tvClear = findViewById(R.id.tvClear);
         tvDelTip = findViewById(R.id.tvDelTip);
         mGridView = findViewById(R.id.mGridView);
+        emptyState = findViewById(R.id.uxHistoryEmpty);
+        findViewById(R.id.uxHistoryHome).setOnClickListener(v -> finish());
         findViewById(R.id.uxPageBack).setOnClickListener(v -> onBackPressed());
         mGridView.setHasFixedSize(true);
         mGridView.setLayoutManager(new V7GridLayoutManager(this.mContext, isBaseOnWidth() ? 5 : 6));
@@ -128,6 +131,7 @@ public class HistoryActivity extends BaseActivity {
                     if (delMode) {
                         historyAdapter.remove(position);
                         RoomDataManger.deleteVodRecord(vodInfo.sourceKey, vodInfo);
+                        updateEmptyState();
                     } else {
                         Bundle bundle = new Bundle();
                         bundle.putString("id", vodInfo.id);
@@ -175,6 +179,27 @@ public class HistoryActivity extends BaseActivity {
             vodInfoList.add(vodInfo);
         }
         historyAdapter.setNewData(vodInfoList);
+        updateEmptyState();
+    }
+
+    private void updateEmptyState() {
+        boolean empty = historyAdapter == null || historyAdapter.getData().isEmpty();
+        if (mGridView != null) mGridView.setVisibility(empty ? View.GONE : View.VISIBLE);
+        if (emptyState != null) emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
+        if (tvDelete != null) {
+            tvDelete.setEnabled(!empty);
+            tvDelete.setFocusable(!empty);
+            tvDelete.setAlpha(empty ? .38f : 1f);
+        }
+        if (tvClear != null) {
+            tvClear.setEnabled(!empty);
+            tvClear.setFocusable(!empty);
+            tvClear.setAlpha(empty ? .38f : 1f);
+        }
+        if (empty && delMode) {
+            delMode = false;
+            if (tvDelTip != null) tvDelTip.setVisibility(View.GONE);
+        }
     }
 
 

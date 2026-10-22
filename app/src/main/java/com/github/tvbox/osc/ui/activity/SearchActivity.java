@@ -432,6 +432,22 @@ public class SearchActivity extends BaseActivity {
                 if (isFinishing()) return;
                 ArrayList<String> history = Hawk.get(HawkConfig.SEARCH_HISTORY, new ArrayList<String>());
                 historyWordGrid.removeAllViews();
+                if (history.isEmpty()) {
+                    TextView hint = new TextView(SearchActivity.this);
+                    hint.setText("暂无搜索记录，输入片名开始搜索");
+                    hint.setTextColor(getResources().getColor(R.color.car_text_dim));
+                    hint.setTextSize(TypedValue.COMPLEX_UNIT_PX, 26);
+                    hint.setGravity(Gravity.CENTER_VERTICAL);
+                    hint.setPadding(24, 0, 24, 0);
+                    GridLayout.LayoutParams hintParams = new GridLayout.LayoutParams(
+                            GridLayout.spec(GridLayout.UNDEFINED), GridLayout.spec(GridLayout.UNDEFINED));
+                    hintParams.width = GridLayout.LayoutParams.MATCH_PARENT;
+                    hintParams.height = 90;
+                    historyWordGrid.addView(hint, hintParams);
+                    if (tvHistoryClear != null) tvHistoryClear.setVisibility(View.GONE);
+                    return;
+                }
+                if (tvHistoryClear != null) tvHistoryClear.setVisibility(View.VISIBLE);
                 int itemHeight = 90;
                 int itemMargin = 2;
                 int paddingH = 24;

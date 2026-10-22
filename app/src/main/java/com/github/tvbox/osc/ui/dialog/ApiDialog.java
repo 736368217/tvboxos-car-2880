@@ -3,6 +3,7 @@ package com.github.tvbox.osc.ui.dialog;
 import android.app.Activity;
 import android.content.Context;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -60,6 +61,11 @@ public class ApiDialog extends BaseDialog {
     public ApiDialog(@NonNull @NotNull Context context) {
         super(context);
         setContentView(R.layout.dialog_api);
+        if (getWindow() != null) {
+            // Keep both inputs and the confirm button visible when an IME is attached.
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
+                    | WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED);
+        }
         setCanceledOnTouchOutside(true);
         ivQRCode = findViewById(R.id.ivQRCode);
         tvAddress = findViewById(R.id.tvAddress);

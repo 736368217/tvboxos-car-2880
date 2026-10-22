@@ -48,6 +48,15 @@ public class SettingActivity extends BaseActivity {
     private int homeRec;
     private String currentLiveApi;
 
+    private static final String[] UX_SETTING_TITLES = {
+            "画面色彩与超分", "座舱声场与音效", "播放解码与后台",
+            "触控手势与首页入口", "应用内返回控件", "订阅源与多仓管理", "关于与数据"
+    };
+    private static final String[] UX_SETTING_SUBTITLES = {
+            "核心解码与音画调优", "真实 EQ 与声场", "播放器、字幕与弹幕",
+            "车载触摸与导航入口", "悬浮球与边缘触发", "配置地址与站源", "版本、备份与缓存"
+    };
+
     @Override
     protected int getLayoutResID() {
         return R.layout.activity_setting;
@@ -151,6 +160,11 @@ public class SettingActivity extends BaseActivity {
     private void selectCategory(int category) {
         defaultSelected = category;
         sortFocused = category;
+        int index = Math.max(0, Math.min(category, UX_SETTING_TITLES.length - 1));
+        TextView title = findViewById(R.id.ux_setting_title);
+        if (title != null) {
+            title.setText("设置中心  /  " + UX_SETTING_TITLES[index] + "  ·  " + UX_SETTING_SUBTITLES[index]);
+        }
         ((ux_setting_MenuAdapter) sortAdapter).setSelectedCategory(category);
         if (!fragments.isEmpty()) ((ModelSettingFragment) fragments.get(0)).showUxCategory(category);
     }

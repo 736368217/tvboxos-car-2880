@@ -2,15 +2,17 @@
 
 This file is a durable status pointer. It does not replace fresh evidence or claim a pass by itself.
 
-## Current: Global visual system + fullscreen player
+## Current: External audit verification + global visual system
 
-- APK SHA-256: `1b0eb5e2dfac4af3dd1c18c6aee76ffeab388f84bdc0f14f135ba4cff580dd61` (53,675,084 bytes).
-- Unified neutral-green surface ladder, mint focus/success, violet primary actions, amber warning, rose error and blue info tokens.
-- Home rail is continuous; settings sections use plain headers and continuous rows; detail/live/search primary actions are explicit; search result actions are secondary.
-- Fullscreen player remains the one-return-entry layout; the in-app floating Back control is compact and mint-toned instead of the previous large cyan ball.
+- APK SHA-256: `5f8b8c747b76f0b1c056e9fce3d029ca39850973eb0f513c6f2404ab7feca8c2` (53,679,180 bytes).
+- Verified the external 30-item audit against this branch: 6 shared issues fixed (zero-config feedback, dialog dim, history empty state, search-history hint, per-site JS spider locks, IME pan), 11 already covered by the current UI, 2 kept as P2 product decisions, 11 not applicable/environment-only.
+- Additional polish: settings title follows the selected section; player option icons group with their labels; video-preset sheet no longer overlaps hint/cancel; edge-back guide uses the mint/neutral palette.
 - MuMu instance 1: `CAR_DISPLAY_PASS`; pages 80/0, ux3k 98/0, playback 101/0, gestures 7/0, state shells 5/0. All results bind the same APK SHA.
-- Evidence: `car/qa/ux-audit-car7-current/evidence-1b0eb5e2/`.
-- Report: `car/reports/ux_redesign/CAR-17.3-3K-GLOBAL-STYLE-REPORT.html`.
+- Evidence: `car/qa/ux-audit-car7-current/evidence-5f8b8c74/`.
+- Report: `car/reports/ux_redesign/CAR-17.3-3K-EXTERNAL-AUDIT-VERIFICATION.md`.
+
+## Previous: Global visual system + fullscreen player
+- APK SHA-256: `1b0eb5e2dfac4af3dd1c18c6aee76ffeab388f84bdc0f14f135ba4cff580dd61` (53,675,084 bytes).
 
 ## Previous: Fullscreen player control redesign
 - APK SHA-256: `d6d0820ccd13a05337465f8247b262feab4da9fd95c785e82b199790956c7d27` (53,670,931 bytes).

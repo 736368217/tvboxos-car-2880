@@ -137,11 +137,27 @@ public class JsLoader {
         return null;
     }
 
-    public synchronized Spider getSpider(String key, String api, String ext, String jar) {
+    /** Per-site locks: one slow jar/init must not serialize every other site. */
+    private final ConcurrentHashMap<String, Object> spiderLocks = new ConcurrentHashMap<>();
+
+    public Spider getSpider(String key, String api, String ext, String jar) {
         recentKey = key;
-        if (spiders.containsKey(key)){
-            Log.i("JSLoader", "echo-getSpider cached "+key);
-            return spiders.get(key);
+        Spider cached = spiders.get(key);
+        if (cached != null) {
+            Log.i("JSLoader", "echo-getSpider cached " + key);
+            return cached;
+        }
+        Object lock = spiderLocks.computeIfAbsent(key, k -> new Object());
+        synchronized (lock) {
+            return loadSpiderLocked(key, api, ext, jar);
+        }
+    }
+
+    private Spider loadSpiderLocked(String key, String api, String ext, String jar) {
+        Spider cached = spiders.get(key);
+        if (cached != null) {
+            Log.i("JSLoader", "echo-getSpider cached " + key);
+            return cached;
         }
         Class<?> classLoader = null;
         if (!jar.isEmpty()) {
@@ -159,7 +175,7 @@ public class JsLoader {
             spiders.put(key, sp);
             return sp;
         } catch (Throwable th) {
-            LOG.i("echo-getSpider-error "+th.getMessage());
+            LOG.i("echo-getSpider-error " + th.getMessage());
         }
         return new SpiderNull();
     }

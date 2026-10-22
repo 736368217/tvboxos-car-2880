@@ -62,13 +62,13 @@
     </style>
     <style name="UxPlayerOptionButton" parent="UxSceneText">
         <item name="android:layout_width">0px</item><item name="android:layout_height">104px</item>
-        <item name="android:gravity">center</item>
+        <item name="android:gravity">center_vertical|start</item>
         <item name="android:background">@drawable/car_player_option_selector</item>
         <item name="android:focusable">true</item><item name="android:clickable">true</item>
         <item name="android:maxLines">1</item><item name="android:ellipsize">end</item>
         <item name="android:textStyle">bold</item><item name="android:textSize">24px</item>
         <item name="android:drawablePadding">12px</item>
-        <item name="android:paddingLeft">18px</item><item name="android:paddingRight">18px</item>
+        <item name="android:paddingLeft">28px</item><item name="android:paddingRight">18px</item>
     </style>
     <style name="UxPlayerSectionLabel" parent="UxSceneText">
         <item name="android:layout_width">match_parent</item>

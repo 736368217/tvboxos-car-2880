@@ -176,11 +176,11 @@ final class EdgePullBackView extends View {
         float width = dp(pullDp);
         boolean capsule = HawkConfig.BACK_SKIN_CAPSULE.equals(skin);
         line.setStrokeWidth(dp(armed ? 2.2f : 1.8f));
-        line.setColor(capsule ? 0xFF38BDF8 : armed ? 0xFF7DD3FC : 0xFF94A3B8);
+        line.setColor(capsule ? 0xFF6FF2C6 : armed ? 0xFFA7F3D0 : 0xFF91AA9E);
         line.setAlpha(255);
         fill.setShader(armed && !capsule ? new LinearGradient(0, 0, Math.max(1, width), 0,
-                0xF20284C7, 0xF238BDF8, Shader.TileMode.CLAMP) : null);
-        fill.setColor(capsule ? 0xF21E293B : 0xE01E293B);
+                0xF2026B57, 0xF26FF2C6, Shader.TileMode.CLAMP) : null);
+        fill.setColor(capsule ? 0xF212251D : 0xE00B1712);
         if (capsule) drawCapsule(canvas, width);
         else drawTeardrop(canvas, width);
         canvas.restoreToCount(save);
@@ -191,7 +191,7 @@ final class EdgePullBackView extends View {
         rect.set(x, centerY - dp(38), x + dp(6), centerY + dp(38));
         boolean adjusting = capturing && left == pullLeft
                 && gesture.state() == BackNavPolicy.EdgeGesture.State.REPOSITIONING;
-        pill.setColor(adjusting ? 0xFFFBBF24 : 0x8C38BDF8);
+        pill.setColor(adjusting ? 0xFFF6C177 : 0x8C6FF2C6);
         // The resting handle always stays fully on-screen at 55%; ball idle never dims it.
         canvas.drawRoundRect(rect, dp(3), dp(3), pill);
     }
@@ -208,9 +208,9 @@ final class EdgePullBackView extends View {
         float cx = width * .56f;
         if (armed) {
             float radius = Math.min(dp(16), width * .36f);
-            pill.setColor(0x600F172A);
+            pill.setColor(0x600B1712);
             canvas.drawCircle(cx, 0, radius, pill);
-            line.setColor(0xFFE0F2FE);
+            line.setColor(0xFFE6FFF6);
             canvas.drawCircle(cx, 0, radius, line);
         }
         drawChevron(canvas, cx, Math.min(dp(8) * (armed ? 1.2f : .85f + .15f * progress), width * .36f));
@@ -229,15 +229,15 @@ final class EdgePullBackView extends View {
         }
         if (armed && capsuleWidth >= dp(76)) {
             float iconRadius = dp(14), iconX = pullLeft ? capsuleWidth - dp(23) : dp(23);
-            pill.setColor(0xFF0284C7);
+            pill.setColor(0xFF0E211A);
             canvas.drawCircle(iconX, 0, iconRadius, pill);
-            line.setColor(0xFF7DD3FC);
+            line.setColor(0xFF6FF2C6);
             line.setStrokeWidth(dp(1));
             canvas.drawCircle(iconX, 0, iconRadius, line);
             float textLeft = pullLeft ? dp(10) : iconX + iconRadius + dp(5);
             float textRight = pullLeft ? iconX - iconRadius - dp(5) : capsuleWidth - dp(10);
             String label = "\u677e\u624b\u8fd4\u56de";
-            text.setColor(0xFFE2E8F0);
+            text.setColor(0xFFE6FFF6);
             text.setTextSize(dp(11));
             float available = Math.max(1, textRight - textLeft);
             text.setTextSize(dp(11) * Math.min(1, available / Math.max(1, text.measureText(label))));

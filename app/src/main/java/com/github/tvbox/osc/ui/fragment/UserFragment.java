@@ -194,8 +194,10 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         homeHotVodAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                if (ApiConfig.get().getSourceBeanList().isEmpty())
+                if (ApiConfig.get().getSourceBeanList().isEmpty()) {
+                    showNoSourceGuide();
                     return;
+                }
                 Movie.Video vod = ((Movie.Video) adapter.getItem(position));
 
                 if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 1 && homeSourceRec != null && vod.action != null) {
@@ -320,12 +322,20 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         Movie.Video first = videos.isEmpty() ? null : videos.get(0);
         ((TextView) findViewById(R.id.uxFeatureTitle)).setText(first == null ? "等待源站推荐" : first.name);
         ((TextView) findViewById(R.id.uxFeatureNote)).setText(first == null ? "请在顶部选择源站，或配置订阅" : HomeHotVodAdapter.readableFeatureNote(first.note));
-        findViewById(R.id.uxFeaturePlay).setEnabled(first != null);
+        findViewById(R.id.uxFeaturePlay).setEnabled(true);
+        findViewById(R.id.uxFeaturePlay).setAlpha(first == null ? .55f : 1f);
         if (first != null) bindPoster((ImageView) findViewById(R.id.uxFeaturePoster), first.pic, first.name, 420, 470);
     }
 
     private void openFeatured() {
-        if (homeHotVodAdapter == null || homeHotVodAdapter.getData().isEmpty()) return;
+        if (ApiConfig.get().getSourceBeanList().isEmpty()) {
+            showNoSourceGuide();
+            return;
+        }
+        if (homeHotVodAdapter == null || homeHotVodAdapter.getData().isEmpty()) {
+            showNoSourceGuide();
+            return;
+        }
         Movie.Video item = homeHotVodAdapter.getItem(0);
         if (item == null) return;
         if (item.action != null && homeSourceRec != null) { sourceViewModel.action(item.sourceKey, item.action); return; }
@@ -334,6 +344,12 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         data.putString("id", item.id); data.putString("sourceKey", item.sourceKey);
         data.putString("title", item.name); data.putString("picture", item.pic);
         jumpActivity(DetailActivity.class, data);
+    }
+
+    private void showNoSourceGuide() {
+        if (mContext == null) return;
+        Toast.makeText(mContext, "还没有配置数据源，请到「设置 → 订阅源 → 配置地址」填入接口",
+                Toast.LENGTH_LONG).show();
     }
 
     private void bindPoster(ImageView image, String url, String name, int width, int height) {

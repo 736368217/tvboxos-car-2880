@@ -28,33 +28,35 @@
             android:textSize="@dimen/ts_24"
             android:textStyle="bold" />
 
-        <com.owen.tvrecyclerview.widget.TvRecyclerView
-            android:id="@+id/list"
-            android:layout_width="match_parent"
-            android:layout_height="350mm"
-            android:clipToPadding="false"
-            android:paddingTop="12mm"
-            android:paddingBottom="12mm"
-            android:orientation="vertical"
-            app:tv_layoutManager="V7LinearLayoutManager"
-            app:tv_selectedItemIsCentered="true"
-            app:tv_verticalSpacingWithMargins="12mm" />
-
         <TextView
             android:id="@+id/tvPresetHint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="12mm"
+            android:paddingTop="8mm"
+            android:paddingBottom="4mm"
             android:text="上下滑动选择 · HDR 视频自动保留原始色彩"
             android:gravity="center"
             android:textColor="@color/dialog_text_primary"
             android:textSize="@dimen/ts_20" />
 
+        <com.owen.tvrecyclerview.widget.TvRecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="380mm"
+            android:clipToPadding="true"
+            android:clipChildren="true"
+            android:paddingTop="8mm"
+            android:paddingBottom="8mm"
+            android:orientation="vertical"
+            app:tv_layoutManager="V7LinearLayoutManager"
+            app:tv_selectedItemIsCentered="true"
+            app:tv_verticalSpacingWithMargins="8mm" />
+
         <TextView
             android:id="@+id/btnVideoPresetCancel"
             android:layout_width="match_parent"
             android:layout_height="50mm"
-            android:layout_marginTop="12mm"
+            android:layout_marginTop="10mm"
             android:background="@drawable/button_danmu_setting"
             android:clickable="true"
             android:focusable="true"
