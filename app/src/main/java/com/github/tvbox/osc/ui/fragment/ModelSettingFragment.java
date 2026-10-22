@@ -76,11 +76,6 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 public class ModelSettingFragment extends BaseLazyFragment {
     private static final int REQUEST_LOCAL_CONFIG = 1001;
     private TextView tvBackBarOpen;
-    private TextView tvBackMode;
-    private TextView tvBackSize;
-    private TextView tvBackColor;
-    private TextView tvBackAlpha;
-    private TextView tvBackHide;
     private TextView tvDebugOpen;
     private TextView tvMediaCodec;
     private TextView tvParseWebView;
@@ -141,14 +136,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? "开启" : "关闭");
         tvDebugOpen = findViewById(R.id.tvDebugOpen);
         tvBackBarOpen = findViewById(R.id.tvBackBarOpen);
-        tvBackBarOpen.setText(InAppBackButton.isEnabled() ? "开启" : "关闭");
-        tvBackMode = findViewById(R.id.tvBackMode);
-        tvBackSize = findViewById(R.id.tvBackSize);
-        tvBackColor = findViewById(R.id.tvBackColor);
-        tvBackAlpha = findViewById(R.id.tvBackAlpha);
-        tvBackHide = findViewById(R.id.tvBackHide);
-        refreshBackModeText();
-        refreshBackLookText();
+        refreshBackSummary();
         tvParseWebView = findViewById(R.id.tvParseWebView);
         tvMediaCodec = findViewById(R.id.tvMediaCodec);
         tvPlay = findViewById(R.id.tvPlay);
@@ -196,44 +184,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                boolean enabled = !InAppBackButton.isEnabled();
-                InAppBackButton.setEnabled(getActivity(), enabled);
-                tvBackBarOpen.setText(enabled ? "开启" : "关闭");
-            }
-        });
-        findViewById(R.id.llBackMode).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                cycleBackMode();
-            }
-        });
-        findViewById(R.id.llBackSize).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                cycleBackSize();
-            }
-        });
-        findViewById(R.id.llBackColor).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                cycleBackColor();
-            }
-        });
-        findViewById(R.id.llBackAlpha).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                cycleBackAlpha();
-            }
-        });
-        findViewById(R.id.llBackHide).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                cycleBackHide();
+                new com.github.tvbox.osc.ui.dialog.BackBarSettingsDialog(getActivity(),
+                        ModelSettingFragment.this::refreshBackSummary).show();
             }
         });
         findViewById(R.id.llParseWebVew).setOnClickListener(new View.OnClickListener() {
@@ -1169,83 +1121,16 @@ public class ModelSettingFragment extends BaseLazyFragment {
         }
     }
 
-    /** 应用内返回组件的当前模式文案（悬浮球 / 边缘拉出 / 双模共存）。 */
-    private void refreshBackModeText() {
-        if (tvBackMode == null) return;
-        String mode = InAppBackButton.getMode();
-        if (HawkConfig.BACK_MODE_FLOATING.equals(mode)) tvBackMode.setText("悬浮球");
-        else if (HawkConfig.BACK_MODE_BOTH.equals(mode)) tvBackMode.setText("双模共存");
-        else tvBackMode.setText("边缘拉出");
-    }
-
-    /** 依次切换：边缘拉出 → 悬浮球 → 双模共存。 */
-    private void cycleBackMode() {
-        String mode = InAppBackButton.getMode();
-        String next;
-        if (HawkConfig.BACK_MODE_EDGE.equals(mode)) next = HawkConfig.BACK_MODE_FLOATING;
-        else if (HawkConfig.BACK_MODE_FLOATING.equals(mode)) next = HawkConfig.BACK_MODE_BOTH;
-        else next = HawkConfig.BACK_MODE_EDGE;
-        InAppBackButton.setMode(getActivity(), next);
-        refreshBackModeText();
-    }
-
-    private static final int[] BACK_BAR_COLORS = {
-            0xFF38BDF8, 0xFFFFFFFF, 0xFFFBBF24, 0xFF34D399, 0xFFF472B6
-    };
-    private static final String[] BACK_BAR_COLOR_NAMES = {"青", "白", "琥珀", "绿", "粉"};
-
-    /** 返回杠外观（大小/颜色/透明度/隐藏时间）文案刷新。 */
-    private void refreshBackLookText() {
-        if (tvBackSize == null) return;
-        int width = InAppBackButton.getBarWidthDp();
-        tvBackSize.setText(width <= 8 ? "细" : width <= 14 ? "中" : "粗");
-        int color = InAppBackButton.getBarColor();
-        String name = "自定义";
-        for (int i = 0; i < BACK_BAR_COLORS.length; i++) {
-            if (BACK_BAR_COLORS[i] == color) {
-                name = BACK_BAR_COLOR_NAMES[i];
-                break;
-            }
+    /** 设置页只保留一个入口，这里显示当前是否开启与模式。 */
+    private void refreshBackSummary() {
+        if (tvBackBarOpen == null) return;
+        if (!InAppBackButton.isEnabled()) {
+            tvBackBarOpen.setText("关闭");
+            return;
         }
-        tvBackColor.setText(name);
-        tvBackAlpha.setText(InAppBackButton.getBarAlpha() + "%");
-        int seconds = InAppBackButton.getHideSeconds();
-        tvBackHide.setText(seconds == 0 ? "常驻" : seconds + " 秒");
-    }
-
-    private void cycleBackSize() {
-        int width = InAppBackButton.getBarWidthDp();
-        int nextWidth = width <= 8 ? 12 : width <= 14 ? 18 : 6;
-        int nextHeight = nextWidth <= 8 ? 64 : nextWidth <= 14 ? 96 : 140;
-        InAppBackButton.setBarWidthDp(getActivity(), nextWidth);
-        InAppBackButton.setBarHeightDp(getActivity(), nextHeight);
-        refreshBackLookText();
-    }
-
-    private void cycleBackColor() {
-        int color = InAppBackButton.getBarColor();
-        int index = 0;
-        for (int i = 0; i < BACK_BAR_COLORS.length; i++) {
-            if (BACK_BAR_COLORS[i] == color) {
-                index = i;
-                break;
-            }
-        }
-        InAppBackButton.setBarColor(getActivity(), BACK_BAR_COLORS[(index + 1) % BACK_BAR_COLORS.length]);
-        refreshBackLookText();
-    }
-
-    private void cycleBackAlpha() {
-        int alpha = InAppBackButton.getBarAlpha();
-        int next = alpha < 50 ? 60 : alpha < 70 ? 80 : alpha < 90 ? 100 : 40;
-        InAppBackButton.setBarAlpha(getActivity(), next);
-        refreshBackLookText();
-    }
-
-    private void cycleBackHide() {
-        int seconds = InAppBackButton.getHideSeconds();
-        int next = seconds == 4 ? 6 : seconds == 6 ? 8 : seconds == 8 ? 0 : 4;
-        InAppBackButton.setHideSeconds(getActivity(), next);
-        refreshBackLookText();
+        String mode = InAppBackButton.getMode();
+        if (HawkConfig.BACK_MODE_FLOATING.equals(mode)) tvBackBarOpen.setText("悬浮球");
+        else if (HawkConfig.BACK_MODE_BOTH.equals(mode)) tvBackBarOpen.setText("双模共存");
+        else tvBackBarOpen.setText("边缘拉出");
     }
 }
