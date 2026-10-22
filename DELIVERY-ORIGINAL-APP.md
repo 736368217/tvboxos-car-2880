@@ -188,3 +188,63 @@ HomeActivity 的两处覆写。设置页新增「应用内返回」开关与「�
 3. 播放页四项 UI 未做真机视觉验收：依赖真实播放（需要可用点播源或把播放探针接入 VodController），
    本轮只完成代码与设备端格式前提核对（/proc/stat 字段结构、ActivityManager 可用）。
 4. 交付 APK（r2）SHA-256：F2DACE98971A5B00566B6FE97B54023D4133836E8383046A28F1A3E11E231460，33,334,877 bytes。
+
+---
+
+## 8. r3：Python 数据源（本次修复）
+
+### 8.1 根因
+
+此前交付的是 java 风味。该风味里 src/normal/java/.../pyLoader.java 是显式桩：
+日志写着 java flavor: Python is not supported，getSpider() 直接返回 SpiderNull，
+所以 py 源只会静默变空，只有 js 源可用。
+
+### 8.2 修复
+
+1. 改打 :app:assemblePythonRelease（python 风味）：含 Chaquopy 12.0.1 的 Python 3.8
+   运行时（arm64-v8a、armeabi-v7a）、stdlib 镜像、真实 pyLoader。
+2. pyramid/build.gradle：buildPython 由写死的 D:/Programs/Python/Python38/python.exe
+   改为 -PbuildPython / TVBOX_BUILD_PYTHON / python3.8 依次回退。
+3. 锁定 Chaquopy 的 Android wheel 版本 lxml==4.6.3、ujson==1.35、pycryptodome==3.9.4；
+   不锁定时旧 pip 会解析新版 sdist 的 pyproject.toml 而失败。
+4. 补齐缺失的 Python 模块 pyramid/src/python/tvbox_http.py（主分支有、白盒没有）。
+   没有它时 app.py 第 12 行 from tvbox_http import install_fallback 抛
+   ModuleNotFoundError，Python 侧整体起不来 —— 这是 py 源不可用的直接原因。
+5. 同步主分支的 pyLoader（pendingConfig 延迟下发）、PythonHttp（base64 体/超时/重定向/
+   header_pairs/二进制响应）、app.py（改为调用 tvbox_http）。
+
+### 8.3 端到端证据（真实 py 源）
+
+用 debug 探针（app/src/debug，仅调试构建）经生产路径 pyLoader.getSpider() 加载本机
+最小 py 源，日志：
+
+```
+PyLoader: echo-getSpider url: http://127.0.0.1:8899/spider.py
+python.stdout: plugin downloaded spider.py
+PyLoader: echo-init path: /data/user/0/com.github.tvbox.osc.jun/cache/py/spider.py
+PythonLoader: pytest: 下載插件成功！
+PyLoader: echo-getSpider 加载spider: pytest
+PyProbe : spider=com.undcover.freedom.pyramid.PythonSpider
+PythonLoader: homeContent-pytest ... {"class": [{"type_id": "1", "type_name": "PY源"}], "list": [{"vod_id": "1", "vod_name": "PY源可用", "vod_pic": ""}]}
+PyProbe : homeContent={"class": [{"type_id": "1", "type_name": "PY源"}], "list": [{"vod_id": "1", "vod_name": "PY源可用", "vod_pic": ""}]}
+```
+
+即：下载 .py → Chaquopy 拉起 Python → PythonSpider 实例化 → Python 侧 homeContent
+执行并返回 JSON。同一轮里播放探针仍显示 srActive=true interpActive=true outFps≈59
+（640×360 源，viewport 2880×1620），说明播放增强未被影响。
+
+### 8.4 r3 产物
+
+| 项 | 值 |
+| :--- | :--- |
+| 文件 | TVBox-Original-Feature-1.0.0-car.7-python-r2.apk |
+| 大小 | 52,659,997 bytes |
+| SHA-256 | 1C117C4A3358ABB629B4D89C60274BEC2182473A7A19EB05A4126CC5719FE80B |
+| 包内容 | lib/{arm64-v8a,armeabi-v7a}/libpython3.8.so、assets/chaquopy/app.imy（17,978 B）、stdlib 镜像 |
+| R8 检查 | PythonHttp / PythonLoader / PythonSpider / pyLoader 均以原名保留（Python→Java 桥安全） |
+| 设备检查 | 安装后 primaryCpuAbi=arm64-v8a，/data/app/.../lib/arm64/libpython3.8.so 就位，冷启动进 HomeActivity 无崩溃 |
+
+### 8.5 仍需注意
+
+- 真车（arm64 原生）表现应优于模拟器：MuMu 是 x86_64 + ARM 转译，Python 走转译执行。
+- 本轮只验证了「py 源能加载并执行」，未逐个验证第三方 py 源的业务逻辑与站点连通性。
