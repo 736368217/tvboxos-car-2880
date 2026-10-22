@@ -388,3 +388,27 @@ maxY = h - bottom     // 1274  (15%–78%)
 `TVBox-Original-Feature-1.0.0-car.7-python-r5.apk`，52,664,093 bytes，
 SHA-256 `2789E0A60C585BDECAB28F7433F8B9BCCB21EEDB2ACE4234B1373C39C717C9B1`。
 已核对 dex 含「返回组件 / 返回杠大小 / 返回杠颜色」字面量，确认新弹窗在包内。
+
+---
+
+## 12. 干净实例上的实测（vm2，r5 release）
+
+启动一台全新实例（index 2）后逐项复测，结论：
+
+| 项 | 结果 | 证据 |
+| :--- | :--- | :--- |
+| 真实订阅加载 | 通过 | 配置改为 https://clun.top/box.json 后首页变为 豆瓣[py]，分类 热门电影/热播剧集/热门动漫/热播综艺 正常渲染 |
+| Python 源解析 | 通过 | 日志：PyLoader: echo-getSpider url: https://clun.top/py/ruyishipin.py → echo-init path: …/cache/py/ruyishipin.py → py_如意: 下載插件成功！；8kvod.py 同样成功 |
+| 返回杠外观 | 通过 | 弹窗里改成 粗/白 后，截图为左边缘 y=1183..1619、宽约 56px、颜色 (140,141,143) 的竖条 = 18dp 宽 / 140dp 高 / 白色 / 55% 不透明 |
+| 边缘拉动返回 | 通过 | SettingActivity 上 swipe (3,1400)->(700,1400) 后 topResumedActivity 变为 HomeActivity |
+| 详情页小窗点击放大 | 通过（像素判定） | 真实详情页点击预览窗后，截图 837KB->1.49MB、详情文本从界面消失只剩播放器标题，判定已进入全屏 |
+
+### 12.1 之前"拉不动/看不到杠"的真正原因
+
+MuMu 实例每次被池子分配时会把 wm user-rotation 重置成 free，应用因此被布局成
+1620x2880（竖屏坐标），导引小棍落到 y≈1500，按横屏直觉去点/去拉必然落空。
+重新 wm user-rotation lock 1 并确认 dumpsys display 为 Rect(0,0-2880,1620)、
+宿主日志 w=2880 h=1620 后，点按/拉动/拖动全部正常。真车是固定横屏，不会出现这个错位。
+
+另外清掉了别人留下的 wm size 2880x1620 强设——显示门禁明确禁止 override，
+它会让 mCurrentDisplayRect 变成带偏移的怪值。
