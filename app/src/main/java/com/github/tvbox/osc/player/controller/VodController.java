@@ -280,6 +280,17 @@ public class VodController extends BaseController {
     LockRunnable lockRunnable = new LockRunnable();
     private boolean isLock = false;
     private boolean previewMode = false;
+
+    /** 详情页小窗单击时回调宿主放大，避免在小窗里弹控制条。 */
+    public interface OnPreviewTapListener {
+        void onPreviewTap();
+    }
+
+    private OnPreviewTapListener previewTapListener;
+
+    public void setOnPreviewTapListener(OnPreviewTapListener listener) {
+        this.previewTapListener = listener;
+    }
     Handler myHandle;
     Runnable myRunnable;
     int myHandleSeconds = 10000;//闲置多少毫秒秒关闭底栏  默认6秒
@@ -309,9 +320,15 @@ public class VodController extends BaseController {
             mVideoSize.setText(buildVideoSizeText(mControlWrapper.getVideoSize()));
             int[] usage = SystemUsage.sample(getContext());
             if (mSysUsageRightTop != null) {
-                mSysUsageRightTop.setText(SystemUsage.describe(usage));
-                mSysUsageRightTop.setTextColor(
-                        SystemUsage.worstPercent(usage) >= 90 ? 0xFFFF6B6B : 0xFFFFFFFF);
+                String usageText = SystemUsage.describeAvailable(usage);
+                if (usageText == null) {
+                    mSysUsageRightTop.setVisibility(GONE);
+                } else {
+                    mSysUsageRightTop.setText(usageText);
+                    mSysUsageRightTop.setTextColor(
+                            SystemUsage.worstPercent(usage) >= 90 ? 0xFFFF6B6B : 0xFFFFFFFF);
+                    mSysUsageRightTop.setVisibility(mPlayLoadNetSpeedRightTop.getVisibility());
+                }
             }
 
             mHandler.postDelayed(this, 1000);
@@ -335,8 +352,7 @@ public class VodController extends BaseController {
     }
 
     public void setPreviewMode(boolean previewMode) {
-        this.previewMode = previewMode;
-        mHandler.removeCallbacks(lockRunnable);
+        this.previewMode = previewMode;        mHandler.removeCallbacks(lockRunnable);
         if (mLockView != null) {
             mLockView.setVisibility(INVISIBLE);
         }
@@ -2018,6 +2034,11 @@ public class VodController extends BaseController {
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
+        // 详情页小窗：单击直接放大，不弹控制条（小窗里控制条太小，没法用）。
+        if (previewMode && previewTapListener != null) {
+            previewTapListener.onPreviewTap();
+            return true;
+        }
         myHandle.removeCallbacks(myRunnable);
         if (!isBottomVisible()) {
             showBottom();

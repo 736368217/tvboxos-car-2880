@@ -2232,6 +2232,11 @@ public class PlayFragment extends BaseLazyFragment {
         }
     }
 
+    /** 详情页小窗单击 → 宿主放大。 */
+    public void setOnPreviewTapListener(com.github.tvbox.osc.player.controller.VodController.OnPreviewTapListener listener) {
+        if (mController != null) mController.setOnPreviewTapListener(listener);
+    }
+
     public void pauseForHidden() {
         cancelPlayTimeout();
         stopParse();

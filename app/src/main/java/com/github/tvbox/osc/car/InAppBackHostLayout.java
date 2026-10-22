@@ -99,8 +99,11 @@ final class InAppBackHostLayout extends FrameLayout {
         safeRight = safeLeft;
         safeTop = Math.max(dp(36), resources.getDimension(R.dimen.car_top_padding));
         safeBottom = Math.max(dp(56), resources.getDimension(R.dimen.car_bottom_padding));
-        ball.configure(tokenScale, InAppBackButton.isLarge(), InAppBackButton.getHideSeconds() * 1000);
-        edge.configure(tokenScale, side, InAppBackButton.getEdgeSkin());
+        ball.configure(tokenScale, InAppBackButton.isLarge(), InAppBackButton.getHideSeconds() * 1000,
+                InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
+        edge.configure(tokenScale, side, InAppBackButton.getEdgeSkin(),
+                InAppBackButton.getBarWidthDp(), InAppBackButton.getBarHeightDp(),
+                InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
         geometryDirty = true;
         requestLayout();
         syncGeometry();
@@ -169,8 +172,11 @@ final class InAppBackHostLayout extends FrameLayout {
             // is too late for the first pass and can leave the cold-start hit box at 72 px.
             displayDensity = density;
             tokenScale = nextScale;
-            ball.configure(tokenScale, InAppBackButton.isLarge(), InAppBackButton.getHideSeconds() * 1000);
-            edge.configure(tokenScale, side, InAppBackButton.getEdgeSkin());
+            ball.configure(tokenScale, InAppBackButton.isLarge(), InAppBackButton.getHideSeconds() * 1000,
+                    InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
+            edge.configure(tokenScale, side, InAppBackButton.getEdgeSkin(),
+                    InAppBackButton.getBarWidthDp(), InAppBackButton.getBarHeightDp(),
+                    InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
             geometryDirty = true;
         }
         super.onMeasure(widthSpec, heightSpec);
@@ -207,7 +213,7 @@ final class InAppBackHostLayout extends FrameLayout {
         float waveHeight = Math.min(160 * tokenScale, getHeight());
         BackNavPolicy.Bounds edgeBounds = new BackNavPolicy.Bounds(getWidth(), getHeight(), 0,
                 waveHeight, 0, top, 0, bottom);
-        edge.syncBounds(edgeBounds.minY + waveHeight / 2f, edgeBounds.maxY + waveHeight / 2f);
+        edge.syncBounds(edgeBounds.minY, edgeBounds.maxY);
     }
 
     private void readInsets(WindowInsets insets) {

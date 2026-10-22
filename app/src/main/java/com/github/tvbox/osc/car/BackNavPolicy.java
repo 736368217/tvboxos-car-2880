@@ -42,8 +42,16 @@ public final class BackNavPolicy {
 
     /** -1 = left local box, +1 = right local box, 0 = pass through. */
     public static int edgeHit(float x, float y, float width, float centerY, boolean left, boolean right) {
-        if (left && contains(x, y, 0, centerY - 60, 28, 120)) return -1;
-        if (right && contains(x, y, width - 28, centerY - 60, 28, 120)) return 1;
+        return edgeHit(x, y, width, centerY, left, right, 32f, 140f);
+    }
+
+    /** 可配置热区：hitWidthDp 从屏幕边缘向内，hitHeightDp 以导引小棍中心上下对称。 */
+    public static int edgeHit(float x, float y, float width, float centerY, boolean left, boolean right,
+                              float hitWidthDp, float hitHeightDp) {
+        float w = Math.max(24f, hitWidthDp);
+        float half = Math.max(48f, hitHeightDp) / 2f;
+        if (left && contains(x, y, 0, centerY - half, w, half * 2f)) return -1;
+        if (right && contains(x, y, width - w, centerY - half, w, half * 2f)) return 1;
         return 0;
     }
 
@@ -133,9 +141,12 @@ public final class BackNavPolicy {
             return true;
         }
 
-        /** A tap, rejected gesture, vertical adjustment or CANCEL can never dispatch Back. */
+        /**
+         * 车机交互：在导引小棍上「点一下」直接返回（无需拖到 48dp），拖到阈值也返回；
+         * 被判定为纵向调位、斜向/向外滑动或 CANCEL 的手势永不返回。
+         */
         public boolean end(boolean cancelled) {
-            boolean back = !cancelled && state == State.PULLING && armed;
+            boolean back = !cancelled && (state == State.WAITING || (state == State.PULLING && armed));
             state = State.IDLE;
             armed = false;
             return back;

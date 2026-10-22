@@ -61,21 +61,24 @@ public final class BackNavPolicyHostTest {
 
     private static void hitBoxes() {
         check(BackNavPolicy.edgeHit(3, 500, 1280, 500, true, false) == -1, "Left pill local box");
-        check(BackNavPolicy.edgeHit(27.99f, 559.99f, 1280, 500, true, true) == -1, "28x120 inclusive interior");
-        check(BackNavPolicy.edgeHit(28, 500, 1280, 500, true, true) == 0, "Outside narrow box passes through");
-        check(BackNavPolicy.edgeHit(0, 560, 1280, 500, true, true) == 0, "Outside local height passes through");
-        check(BackNavPolicy.edgeHit(10, 439, 1280, 500, true, true) == 0, "Other edge height passes through");
+        check(BackNavPolicy.edgeHit(31.99f, 569.99f, 1280, 500, true, true) == -1, "32x140 inclusive interior");
+        check(BackNavPolicy.edgeHit(32, 500, 1280, 500, true, true) == 0, "Outside widened box passes through");
+        check(BackNavPolicy.edgeHit(0, 571, 1280, 500, true, true) == 0, "Outside local height passes through");
+        check(BackNavPolicy.edgeHit(10, 429, 1280, 500, true, true) == 0, "Other edge height passes through");
         check(BackNavPolicy.edgeHit(640, 500, 1280, 500, true, true) == 0, "Blank content passes through");
         check(BackNavPolicy.edgeHit(1277, 500, 1280, 500, false, true) == 1, "Right local box");
         check(BackNavPolicy.edgeHit(1277, 500, 1280, 500, true, false) == 0, "Disabled right side passes through");
         check(BackNavPolicy.edgeHit(-1, 500, 1280, 500, true, true) == 0, "Negative coordinates rejected");
         check(BackNavPolicy.edgeHit(1280, 500, 1280, 500, true, true) == 0, "Outside window rejected");
+        // 可配置热区：随 bar 尺寸放大
+        check(BackNavPolicy.edgeHit(59, 639.5f, 1280, 500, true, false, 60f, 280f) == -1, "Custom hit box interior");
+        check(BackNavPolicy.edgeHit(61, 640, 1280, 500, true, false, 60f, 280f) == 0, "Custom hit box edge passes through");
     }
 
     private static void edgeGestures() {
         BackNavPolicy.EdgeGesture g = new BackNavPolicy.EdgeGesture();
         g.begin(4, 500, true);
-        check(!g.end(false), "Edge tap never goes Back");
+        check(g.end(false), "Edge tap goes Back (car UX: 点按即返回)");
         g.begin(4, 500, true);
         check(!g.move(51.99f, 501), "Below raw 48dp does not arm");
         check(!g.isArmed() && !g.end(false), "Subthreshold release cancels");

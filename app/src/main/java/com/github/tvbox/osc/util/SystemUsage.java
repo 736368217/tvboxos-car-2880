@@ -35,6 +35,22 @@ public final class SystemUsage {
                 + " · 内存 " + (memory < 0 ? "--" : memory + "%");
     }
 
+    /**
+     * 只输出真正取到的指标：取不到 CPU 就不显示 CPU，取不到内存就不显示内存；
+     * 两项都取不到返回 null（调用方应隐藏整个徽标）。
+     */
+    public static String describeAvailable(int[] sample) {
+        int cpu = sample == null || sample.length < 1 ? -1 : sample[0];
+        int memory = sample == null || sample.length < 2 ? -1 : sample[1];
+        StringBuilder builder = new StringBuilder();
+        if (cpu >= 0) builder.append("CPU ").append(cpu).append('%');
+        if (memory >= 0) {
+            if (builder.length() > 0) builder.append(" · ");
+            builder.append("内存 ").append(memory).append('%');
+        }
+        return builder.length() == 0 ? null : builder.toString();
+    }
+
     /** 最紧张的那一项（0-100），用于判断是否需要高亮告警。 */
     public static int worstPercent(int[] sample) {
         if (sample == null) return -1;

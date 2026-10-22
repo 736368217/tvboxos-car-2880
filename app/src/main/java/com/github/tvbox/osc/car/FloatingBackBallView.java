@@ -34,6 +34,7 @@ final class FloatingBackBallView extends View {
     private float idleFraction, drawScale = 1, downX, downY, startX, startY;
     private long downTime;
     private int idleMillis = 4000, pointerId;
+    private int barColor = 0xFF38BDF8, barAlpha = 90;
     private boolean active, touching, dragging, ignoreStream, dockLeft = true;
 
     FloatingBackBallView(InAppBackHostLayout host) {
@@ -56,11 +57,17 @@ final class FloatingBackBallView extends View {
     }
 
     void configure(float unitScale, boolean large, int idleMillis) {
+        configure(unitScale, large, idleMillis, 0xFF38BDF8, 90);
+    }
+
+    void configure(float unitScale, boolean large, int idleMillis, int barColor, int barAlpha) {
         stopMotion();
         this.unitScale = unitScale;
         this.visualSize = (large ? 64 : 56) * unitScale;
         dragOutline = new DashPathEffect(new float[]{3 * unitScale, 2 * unitScale}, 0);
         this.idleMillis = idleMillis;
+        this.barColor = barColor;
+        this.barAlpha = Math.max(10, Math.min(100, barAlpha));
         int box = Math.round((large ? 80 : 72) * unitScale);
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) getLayoutParams();
         if (params.width != box || params.height != box) {
@@ -126,7 +133,7 @@ final class FloatingBackBallView extends View {
         // The offset is always relative to the stable dock; repeated wake/idle cannot accumulate it.
         setX(baseX + BackNavPolicy.idleOffset(visualSize, dockLeft, idleFraction));
         setY(baseY);
-        setAlpha(.9f + (.38f - .9f) * idleFraction);
+        setAlpha((.9f + (.38f - .9f) * idleFraction) * (barAlpha / 100f));
         invalidate();
     }
 
@@ -136,8 +143,8 @@ final class FloatingBackBallView extends View {
         int save = canvas.save();
         canvas.scale(drawScale, drawScale, cx, cy);
         float radius = visualSize / 2f - 1.5f * unitScale;
-        int rim = dragging ? 0xFFF59E0B : blend(0xFF38BDF8, 0xFF94A3B8, idleFraction);
-        int glyph = dragging ? 0xFFFBBF24 : blend(0xFF38BDF8, 0xFFE2E8F0, idleFraction);
+        int rim = dragging ? 0xFFF59E0B : blend(barColor, 0xFF94A3B8, idleFraction);
+        int glyph = dragging ? 0xFFFBBF24 : blend(barColor, 0xFFE2E8F0, idleFraction);
         fill.setColor(isPressed() ? 0xFF26364A : 0xFF1E293B);
         canvas.drawCircle(cx, cy, radius, fill);
         fill.setColor(0xFF0F172A);

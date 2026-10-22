@@ -29,6 +29,7 @@ final class EdgePullBackView extends View {
     private final Path arrow = new Path();
     private ValueAnimator retraction;
     private float unitScale = 1, centerY, minY, maxY, startCenterY, pullDp, progress;
+    private int barWidthDp = 12, barHeightDp = 96, barColor = 0xFF38BDF8, barAlpha = 55;
     private boolean active, capturing, ignoreStream, pullLeft, armed;
     private String side = HawkConfig.BACK_SIDE_LEFT, skin = HawkConfig.BACK_SKIN_TEARDROP;
     private final Runnable longPress = this::beginReposition;
@@ -54,11 +55,16 @@ final class EdgePullBackView extends View {
         text.setFakeBoldText(true);
     }
 
-    void configure(float unitScale, String side, String skin) {
+    void configure(float unitScale, String side, String skin,
+                   int barWidthDp, int barHeightDp, int barColor, int barAlpha) {
         stopMotion();
         this.unitScale = unitScale;
         this.side = side;
         this.skin = skin;
+        this.barWidthDp = Math.max(4, barWidthDp);
+        this.barHeightDp = Math.max(48, barHeightDp);
+        this.barColor = barColor;
+        this.barAlpha = Math.max(10, Math.min(100, barAlpha));
         invalidate();
     }
 
@@ -87,7 +93,8 @@ final class EdgePullBackView extends View {
         int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
             int hitSide = BackNavPolicy.edgeHit(event.getX() / unitScale, event.getY() / unitScale,
-                    getWidth() / unitScale, centerY / unitScale, showsLeft(), showsRight());
+                    getWidth() / unitScale, centerY / unitScale, showsLeft(), showsRight(),
+                    Math.max(36f, barWidthDp * 3f), Math.max(140f, barHeightDp + 56f));
             if (hitSide == 0) return false;
             stopMotion();
             capturing = true;
@@ -187,13 +194,17 @@ final class EdgePullBackView extends View {
     }
 
     private void drawPill(Canvas canvas, boolean left) {
-        float x = left ? dp(3) : getWidth() - dp(9);
-        rect.set(x, centerY - dp(38), x + dp(6), centerY + dp(38));
+        float inset = dp(2);
+        float width = dp(barWidthDp);
+        float height = dp(barHeightDp);
+        float x = left ? inset : getWidth() - inset - width;
+        rect.set(x, centerY - height / 2f, x + width, centerY + height / 2f);
         boolean adjusting = capturing && left == pullLeft
                 && gesture.state() == BackNavPolicy.EdgeGesture.State.REPOSITIONING;
-        pill.setColor(adjusting ? 0xFFFBBF24 : 0x8C38BDF8);
-        // The resting handle always stays fully on-screen at 55%; ball idle never dims it.
-        canvas.drawRoundRect(rect, dp(3), dp(3), pill);
+        pill.setColor(adjusting ? 0xFFFBBF24 : barColor);
+        // 透明度可配置；调整位置时临时满不透明，便于看清拖动。
+        pill.setAlpha(adjusting ? 255 : Math.round(255f * barAlpha / 100f));
+        canvas.drawRoundRect(rect, width / 2f, width / 2f, pill);
     }
 
     private void drawTeardrop(Canvas canvas, float width) {

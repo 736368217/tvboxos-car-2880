@@ -88,6 +88,11 @@ public class HawkConfig {
     public static final String BACK_SKIN_TEARDROP = "teardrop";
     public static final String BACK_SKIN_CAPSULE = "capsule";
     public static final String BACK_HIDE_SECONDS = "hide_seconds"; // 4/6/8，0 = 常驻
+    // 返回杠外观（用户可配置）
+    public static final String BACK_BAR_WIDTH_DP = "inapp_back_bar_width";   // 可视宽度 dp
+    public static final String BACK_BAR_HEIGHT_DP = "inapp_back_bar_height"; // 可视高度 dp
+    public static final String BACK_BAR_COLOR = "inapp_back_bar_color";      // ARGB
+    public static final String BACK_BAR_ALPHA = "inapp_back_bar_alpha";      // 0-100
     public static final String HIFI_AUDIO = "hifi_audio"; // default 0
     public static final String VIDEO_ENHANCE = "video_enhance"; // 0 original, 1 vivid, 8..10 anime
     public static final String VIDEO_SR = "video_sr"; // default 1: SGSR1

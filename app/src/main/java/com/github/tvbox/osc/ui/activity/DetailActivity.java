@@ -2066,6 +2066,7 @@ public class DetailActivity extends BaseActivity {
         if (playFragment != null) {
             playFragment.setAutoSwitchLineEnabled(!fullWindows);
             playFragment.setPreviewMode(!fullWindows);
+            playFragment.setOnPreviewTapListener(this::enterFullPreview);
         }
         llPlayerFragmentContainer.setVisibility(fullWindows || showPreview ? View.VISIBLE : View.GONE);
         llPlayerFragmentContainer.setLayoutParams(fullWindows ? windowsFull : windowsPreview);
@@ -2108,6 +2109,7 @@ public class DetailActivity extends BaseActivity {
         playFragment = new PlayFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.previewPlayer, playFragment).commitNowAllowingStateLoss();
         playFragment.setPreviewMode(!fullWindows);
+        playFragment.setOnPreviewTapListener(this::enterFullPreview);
     }
 
     void releasePlayFragment() {

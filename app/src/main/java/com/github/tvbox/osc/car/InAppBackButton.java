@@ -256,6 +256,24 @@ public final class InAppBackButton {
     }
     public static int getHideSeconds() { return validHideSeconds(integer(HawkConfig.BACK_HIDE_SECONDS, 4)); }
 
+    /** 可视杠宽度 dp（4–28）。 */
+    public static int getBarWidthDp() { return clampInt(integer(HawkConfig.BACK_BAR_WIDTH_DP, 12), 4, 28); }
+    /** 可视杠高度 dp（48–220）。 */
+    public static int getBarHeightDp() { return clampInt(integer(HawkConfig.BACK_BAR_HEIGHT_DP, 96), 48, 220); }
+    /** 杠颜色 ARGB。 */
+    public static int getBarColor() { return integer(HawkConfig.BACK_BAR_COLOR, 0xFF38BDF8); }
+    /** 杠不透明度 10–100（百分比）。 */
+    public static int getBarAlpha() { return clampInt(integer(HawkConfig.BACK_BAR_ALPHA, 55), 10, 100); }
+
+    public static void setBarWidthDp(Activity a, int value) { put(a, HawkConfig.BACK_BAR_WIDTH_DP, clampInt(value, 4, 28)); }
+    public static void setBarHeightDp(Activity a, int value) { put(a, HawkConfig.BACK_BAR_HEIGHT_DP, clampInt(value, 48, 220)); }
+    public static void setBarColor(Activity a, int value) { put(a, HawkConfig.BACK_BAR_COLOR, value); }
+    public static void setBarAlpha(Activity a, int value) { put(a, HawkConfig.BACK_BAR_ALPHA, clampInt(value, 10, 100)); }
+
+    private static int clampInt(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
     public static void setEnabled(Activity a, boolean value) { put(a, HawkConfig.IN_APP_BACK, value); }
     public static void setMode(Activity a, String value) {
         Hawk.put(HawkConfig.BACK_MODE_EXPLICIT, true);
