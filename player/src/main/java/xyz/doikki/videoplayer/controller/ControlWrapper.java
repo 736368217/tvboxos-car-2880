@@ -95,6 +95,14 @@ public class ControlWrapper implements MediaPlayerControl, IVideoController {
         return mPlayerControl.getSpeed();
     }
 
+    /** 应用内播放音量 0..1；不改系统音量，车机无音频权限也能用。 */
+    public void setVolume(float volume) {
+        float v = Math.max(0f, Math.min(1f, volume));
+        if (mPlayerControl instanceof xyz.doikki.videoplayer.player.VideoView) {
+            ((xyz.doikki.videoplayer.player.VideoView) mPlayerControl).setVolume(v, v);
+        }
+    }
+
     @Override
     public long getTcpSpeed() {
         return mPlayerControl.getTcpSpeed();

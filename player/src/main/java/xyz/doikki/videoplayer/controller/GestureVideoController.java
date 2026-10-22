@@ -31,7 +31,7 @@ public abstract class GestureVideoController extends BaseVideoController impleme
     private GestureDetector mGestureDetector;
     private AudioManager mAudioManager;
     private boolean mIsGestureEnabled = true;
-    private int mStreamVolume;
+    private float mAppVolume = 1f;
     private float mBrightness;
     private int mSeekPosition;
     private boolean mFirstTouch;
@@ -138,13 +138,6 @@ public abstract class GestureVideoController extends BaseVideoController impleme
                 || !mIsGestureEnabled //关闭了手势
                 || PlayerUtils.isEdge(getContext(), e)) //处于屏幕边沿
             return true;
-        mStreamVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        Activity activity = PlayerUtils.scanForActivity(getContext());
-        if (activity == null) {
-            mBrightness = 0;
-        } else {
-            mBrightness = activity.getWindow().getAttributes().screenBrightness;
-        }
         mFirstTouch = true;
         mChangePosition = false;
         mChangeBrightness = false;
@@ -193,7 +186,9 @@ public abstract class GestureVideoController extends BaseVideoController impleme
                 if (e2.getX() > halfScreen) {
                     mChangeVolume = true;
                 } else {
-                    mChangeBrightness = true;
+                    // 车机：亮度不再可调。窗口级 screenBrightness 无需权限，
+                    // 但多数车机会被系统/自动亮度固定，滑了没反应，干脆忽略。
+                    mChangeBrightness = false;
                 }
             }
 
@@ -240,37 +235,21 @@ public abstract class GestureVideoController extends BaseVideoController impleme
     }
 
     protected void slideToChangeBrightness(float deltaY) {
-        Activity activity = PlayerUtils.scanForActivity(getContext());
-        if (activity == null) return;
-        Window window = activity.getWindow();
-        WindowManager.LayoutParams attributes = window.getAttributes();
-        int height = getMeasuredHeight();
-        if (mBrightness == -1.0f) mBrightness = 0.5f;
-        float brightness = deltaY * 2 / height * 1.0f + mBrightness;
-        if (brightness < 0) {
-            brightness = 0f;
-        }
-        if (brightness > 1.0f) brightness = 1.0f;
-        int percent = (int) (brightness * 100);
-        attributes.screenBrightness = brightness;
-        window.setAttributes(attributes);
-        for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
-            IControlComponent component = next.getKey();
-            if (component instanceof IGestureComponent) {
-                ((IGestureComponent) component).onBrightnessChange(percent);
-            }
-        }
+        // 车机：亮度不可调。窗口级 screenBrightness 本来就不需要权限，
+        // 但多数车机由系统/自动亮度接管，滑了没有效果，所以这里直接忽略。
     }
 
     protected void slideToChangeVolume(float deltaY) {
-        int streamMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        int height = getMeasuredHeight();
-        float deltaV = deltaY * 2 / height * streamMaxVolume;
-        float index = mStreamVolume + deltaV;
-        if (index > streamMaxVolume) index = streamMaxVolume;
-        if (index < 0) index = 0;
-        int percent = (int) (index / streamMaxVolume * 100);
-        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int) index, 0);
+        // 只调应用内播放音量，不动系统音量（车机没有 MODIFY_AUDIO_SETTINGS 时会失败）。
+        int height = Math.max(1, getMeasuredHeight());
+        float deltaV = deltaY * 2f / height;
+        float volume = mAppVolume + deltaV;
+        if (volume > 1f) volume = 1f;
+        if (volume < 0f) volume = 0f;
+        if (Math.abs(volume - mAppVolume) < 0.001f) return;
+        mAppVolume = volume;
+        mControlWrapper.setVolume(volume);
+        int percent = Math.round(volume * 100);
         for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
             IControlComponent component = next.getKey();
             if (component instanceof IGestureComponent) {

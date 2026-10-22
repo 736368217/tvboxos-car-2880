@@ -113,4 +113,91 @@ public final class SystemUsage {
             return -1;
         }
     }
+
+    private static long lastAppCpuMs = -1L;
+
+    /** 本进程 CPU 占用 0-100（相对全部核心）；首次调用无基准返回 -1。 */
+    public static int appCpuPercent() {
+        try {
+            long now = android.os.Process.getElapsedCpuTime();
+            long previous = lastAppCpuMs;
+            lastAppCpuMs = now;
+            if (previous < 0L) return -1;
+            long delta = now - previous;
+            if (delta < 0L) return -1;
+            int cores = Runtime.getRuntime().availableProcessors();
+            if (cores <= 0) cores = 1;
+            long window = 1000L * cores;
+            return (int) Math.max(0L, Math.min(100L, Math.round(delta * 100d / window)));
+        } catch (Throwable error) {
+            return -1;
+        }
+    }
+
+    /** 本进程 PSS 占用（MB），取不到返回 -1。 */
+    public static int appMemoryMb(Context context) {
+        if (context == null) return -1;
+        try {
+            android.os.Debug.MemoryInfo info = new android.os.Debug.MemoryInfo();
+            android.os.Debug.getMemoryInfo(info);
+            if (info.getTotalPss() <= 0) return -1;
+            return Math.round(info.getTotalPss() / 1024f);
+        } catch (Throwable error) {
+            return -1;
+        }
+    }
+
+    /** 当前进程线程数，取不到返回 -1。 */
+    public static int threads() {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader("/proc/self/status"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("Threads:")) {
+                    return Integer.parseInt(line.substring(8).trim());
+                }
+            }
+        } catch (Throwable ignored) {
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Throwable ignored) {
+                }
+            }
+        }
+        try {
+            return Thread.activeCount();
+        } catch (Throwable error) {
+            return -1;
+        }
+    }
+
+    /** Java 堆占用，例如 "48 / 256 MB"。 */
+    public static String javaHeap() {
+        try {
+            Runtime runtime = Runtime.getRuntime();
+            long used = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+            long max = runtime.maxMemory() / (1024 * 1024);
+            return used + " / " + max + " MB";
+        } catch (Throwable error) {
+            return null;
+        }
+    }
+
+    /** 开机时长，例如 "2h 13m"。 */
+    public static String uptime() {
+        try {
+            long seconds = android.os.SystemClock.elapsedRealtime() / 1000L;
+            long h = seconds / 3600L;
+            long m = (seconds % 3600L) / 60L;
+            long s = seconds % 60L;
+            if (h > 0) return h + "h " + m + "m";
+            if (m > 0) return m + "m " + s + "s";
+            return s + "s";
+        } catch (Throwable error) {
+            return null;
+        }
+    }
 }

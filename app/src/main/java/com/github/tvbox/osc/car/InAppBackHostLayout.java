@@ -104,7 +104,8 @@ final class InAppBackHostLayout extends FrameLayout {
                 InAppBackButton.getBarWidthDp());
         edge.configure(tokenScale, side, InAppBackButton.getEdgeSkin(),
                 InAppBackButton.getBarWidthDp(), InAppBackButton.getBarHeightDp(),
-                InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
+                InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha(),
+                InAppBackButton.getHideSeconds());
         geometryDirty = true;
         requestLayout();
         syncGeometry();
@@ -115,6 +116,7 @@ final class InAppBackHostLayout extends FrameLayout {
     void wake() {
         if (disposed || !resumed) return;
         ball.wake();
+        edge.wake();
         // Defer visibility changes until after the initiating DOWN has reached its original target.
         recheckRootAfterNavigation();
     }
@@ -178,7 +180,8 @@ final class InAppBackHostLayout extends FrameLayout {
                     InAppBackButton.getBarWidthDp());
             edge.configure(tokenScale, side, InAppBackButton.getEdgeSkin(),
                     InAppBackButton.getBarWidthDp(), InAppBackButton.getBarHeightDp(),
-                    InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
+                    InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha(),
+                    InAppBackButton.getHideSeconds());
             geometryDirty = true;
         }
         super.onMeasure(widthSpec, heightSpec);

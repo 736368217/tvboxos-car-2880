@@ -69,8 +69,9 @@
 
             <LinearLayout
                     android:id="@+id/llBackBar"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="@dimen/vs_50"
+                    android:layout_gravity="end"
                     android:layout_marginBottom="@dimen/vs_10"
                     android:background="@drawable/shape_setting_model_focus"
                     android:focusable="true"
@@ -82,20 +83,7 @@
                 <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="返回组件"
-                        android:textColor="@android:color/white"
-                        android:textSize="@dimen/ts_24" />
-
-                <Space
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1" />
-
-                <TextView
-                        android:id="@+id/tvBackBarOpen"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="开启"
+                        android:text="高级"
                         android:textColor="@android:color/white"
                         android:textSize="@dimen/ts_24" />
 

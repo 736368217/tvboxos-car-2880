@@ -33,6 +33,49 @@ final class EdgePullBackView extends View {
     private boolean active, capturing, ignoreStream, pullLeft, armed;
     private String side = HawkConfig.BACK_SIDE_LEFT, skin = HawkConfig.BACK_SKIN_TEARDROP;
     private final Runnable longPress = this::beginReposition;
+    private int idleMillis = 4000;
+    private float visibleAlpha = 1f;
+    private ValueAnimator fade;
+    private final Runnable hideTask = this::fadeOut;
+
+    private void cancelHide() {
+        removeCallbacks(hideTask);
+    }
+
+    /** 闲置到点后淡出；点按/拖动/任何页面触摸都会重新唤醒。 */
+    private void fadeOut() {
+        if (!active || capturing || visibleAlpha <= 0.01f) return;
+        animateAlpha(0f, 220);
+    }
+
+    private void scheduleHide() {
+        removeCallbacks(hideTask);
+        if (active && !capturing && visibleAlpha > 0.01f && idleMillis > 0) {
+            postDelayed(hideTask, idleMillis);
+        }
+    }
+
+    private void animateAlpha(float target, long duration) {
+        if (fade != null) fade.cancel();
+        fade = ValueAnimator.ofFloat(visibleAlpha, target);
+        fade.setDuration(duration);
+        fade.setInterpolator(new LinearInterpolator());
+        fade.addUpdateListener(a -> {
+            visibleAlpha = (float) a.getAnimatedValue();
+            invalidate();
+        });
+        fade.start();
+    }
+
+    /** 供宿主在页面触摸/按键时唤醒。 */
+    void wake() {
+        if (!active || capturing) return;
+        cancelHide();
+        if (visibleAlpha < 1f) {
+            animateAlpha(1f, 120);
+        }
+        scheduleHide();
+    }
 
     private void beginReposition() {
         if (active && capturing && gesture.longPress()) {
@@ -56,7 +99,7 @@ final class EdgePullBackView extends View {
     }
 
     void configure(float unitScale, String side, String skin,
-                   int barWidthDp, int barHeightDp, int barColor, int barAlpha) {
+                   int barWidthDp, int barHeightDp, int barColor, int barAlpha, int hideSeconds) {
         stopMotion();
         this.unitScale = unitScale;
         this.side = side;
@@ -65,6 +108,10 @@ final class EdgePullBackView extends View {
         this.barHeightDp = Math.max(48, barHeightDp);
         this.barColor = barColor;
         this.barAlpha = Math.max(10, Math.min(100, barAlpha));
+        this.idleMillis = Math.max(0, hideSeconds) * 1000;
+        cancelHide();
+        if (visibleAlpha < 1f && !capturing) animateAlpha(1f, 120);
+        scheduleHide();
         invalidate();
     }
 
@@ -79,7 +126,14 @@ final class EdgePullBackView extends View {
     void setActive(boolean value) {
         if (active == value) return;
         active = value;
-        if (!value) stopMotion();
+        if (!value) {
+            stopMotion();
+            cancelHide();
+        } else {
+            visibleAlpha = 1f;
+            scheduleHide();
+        }
+        invalidate();
     }
 
     /** Reference SVG token in the current car viewport, not the Android density bucket. */
@@ -97,6 +151,11 @@ final class EdgePullBackView extends View {
                     Math.max(36f, barWidthDp * 3f), Math.max(140f, barHeightDp + 56f));
             if (hitSide == 0) return false;
             stopMotion();
+            cancelHide();
+            if (visibleAlpha < 1f) {
+                if (fade != null) fade.cancel();
+                visibleAlpha = 1f;
+            }
             capturing = true;
             pullLeft = hitSide < 0;
             startCenterY = centerY;
@@ -139,6 +198,7 @@ final class EdgePullBackView extends View {
         }
         boolean back = gesture.end(cancelled);
         capturing = false;
+        scheduleHide();
         if (getParent() != null) getParent().requestDisallowInterceptTouchEvent(false);
         retract();
         if (back) host.performBack(); // Dispatch on UP, not at the end of the 180ms return animation.
@@ -174,6 +234,7 @@ final class EdgePullBackView extends View {
 
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (visibleAlpha <= 0.01f) return;
         if (showsLeft()) drawPill(canvas, true);
         if (showsRight()) drawPill(canvas, false);
         if (pullDp <= .1f) return;
@@ -203,7 +264,7 @@ final class EdgePullBackView extends View {
                 && gesture.state() == BackNavPolicy.EdgeGesture.State.REPOSITIONING;
         pill.setColor(adjusting ? 0xFFFBBF24 : barColor);
         // 透明度可配置；调整位置时临时满不透明，便于看清拖动。
-        pill.setAlpha(adjusting ? 255 : Math.round(255f * barAlpha / 100f));
+        pill.setAlpha(adjusting ? 255 : Math.round(255f * barAlpha / 100f * visibleAlpha));
         canvas.drawRoundRect(rect, width / 2f, width / 2f, pill);
     }
 

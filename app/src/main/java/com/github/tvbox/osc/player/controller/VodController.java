@@ -236,6 +236,7 @@ public class VodController extends BaseController {
     TextView mPlayLabel;
     TextView mPlayLoadNetSpeedRightTop;
     TextView mSysUsageRightTop;
+    private int mLastCpu = -1, mLastMem = -1, mLastAppCpu = -1;
     TextView mNextBtn;
     TextView mPreBtn;
     TextView mPlayerScaleBtn;
@@ -319,14 +320,16 @@ public class VodController extends BaseController {
             net_play_speed.setText(speedText);
             mVideoSize.setText(buildVideoSizeText(mControlWrapper.getVideoSize()));
             int[] usage = SystemUsage.sample(getContext());
+            mLastCpu = usage != null && usage.length > 0 ? usage[0] : -1;
+            mLastMem = usage != null && usage.length > 1 ? usage[1] : -1;
+            mLastAppCpu = SystemUsage.appCpuPercent();
             if (mSysUsageRightTop != null) {
-                String usageText = SystemUsage.describeAvailable(usage);
+                String usageText = buildUsageText();
                 if (usageText == null) {
                     mSysUsageRightTop.setVisibility(GONE);
                 } else {
                     mSysUsageRightTop.setText(usageText);
-                    mSysUsageRightTop.setTextColor(
-                            SystemUsage.worstPercent(usage) >= 90 ? 0xFFFF6B6B : 0xFFFFFFFF);
+                    mSysUsageRightTop.setTextColor(worstOfLast() >= 90 ? 0xFFFF6B6B : 0xFFFFFFFF);
                     mSysUsageRightTop.setVisibility(mPlayLoadNetSpeedRightTop.getVisibility());
                 }
             }
@@ -409,6 +412,73 @@ public class VodController extends BaseController {
             }
         }
         return text;
+    }
+
+    /** 右上角徽标文案：只显示能取到的项。 */
+    private String buildUsageText() {
+        StringBuilder builder = new StringBuilder();
+        if (mLastCpu >= 0) builder.append("CPU ").append(mLastCpu).append('%');
+        if (mLastAppCpu >= 0) {
+            if (builder.length() > 0) builder.append(" · ");
+            builder.append("应用 ").append(mLastAppCpu).append('%');
+        }
+        if (mLastMem >= 0) {
+            if (builder.length() > 0) builder.append(" · ");
+            builder.append("内存 ").append(mLastMem).append('%');
+        }
+        return builder.length() == 0 ? null : builder.toString();
+    }
+
+    private int worstOfLast() {
+        return Math.max(mLastCpu, Math.max(mLastAppCpu, mLastMem));
+    }
+
+    private void showSystemStats() {
+        if (getContext() == null) return;
+        new com.github.tvbox.osc.ui.dialog.SystemStatsDialog(getContext(), this::collectStats).show();
+    }
+
+    /** 详情弹窗用的全量运行数据；取不到的项直接不放进列表。 */
+    private java.util.List<String[]> collectStats() {
+        java.util.List<String[]> rows = new java.util.ArrayList<>();
+        addStat(rows, "系统 CPU", mLastCpu >= 0 ? mLastCpu + "%" : null);
+        addStat(rows, "应用 CPU", mLastAppCpu >= 0 ? mLastAppCpu + "%" : null);
+        addStat(rows, "系统内存", mLastMem >= 0 ? mLastMem + "%" : null);
+        int pss = SystemUsage.appMemoryMb(getContext());
+        addStat(rows, "应用内存(PSS)", pss >= 0 ? pss + " MB" : null);
+        addStat(rows, "Java 堆", SystemUsage.javaHeap());
+        int threads = SystemUsage.threads();
+        addStat(rows, "线程数", threads >= 0 ? String.valueOf(threads) : null);
+        addStat(rows, "开机时长", SystemUsage.uptime());
+        if (mCarVideoView != null) {
+            float source = mCarVideoView.getRendererSourceFrameRate();
+            float output = mCarVideoView.getRendererOutputFrameRate();
+            if (!isUsableFrameRate(source)) source = mCarVideoView.getSourceFrameRate();
+            addStat(rows, "片源帧率", isUsableFrameRate(source) ? formatFrameRate(source) + " fps" : null);
+            addStat(rows, "输出帧率", isUsableFrameRate(output) ? formatFrameRate(output) + " fps" : null);
+            addStat(rows, "渲染器", mCarVideoView.hasEnhancedRenderer() ? "GL 增强" : "原生");
+            addStat(rows, "超分", mCarVideoView.hasEnhancedRenderer()
+                    ? (mCarVideoView.isSuperResolutionRuntimeActive() ? "生效" : "待帧/关闭") : "不支持");
+            addStat(rows, "时域平滑", mCarVideoView.hasEnhancedRenderer()
+                    ? (mCarVideoView.isInterpolationRuntimeActive() ? "生效" : "待帧/关闭") : "不支持");
+        }
+        try {
+            int[] size = mControlWrapper.getVideoSize();
+            if (size != null && size.length >= 2 && size[0] > 0) {
+                addStat(rows, "片源分辨率", size[0] + " X " + size[1]);
+            }
+        } catch (Throwable ignored) {
+        }
+        try {
+            addStat(rows, "实时速率", PlayerHelper.getDisplaySpeedBytes(mControlWrapper.getTcpSpeed(), true));
+        } catch (Throwable ignored) {
+        }
+        return rows;
+    }
+
+    private void addStat(java.util.List<String[]> rows, String label, String value) {
+        if (rows == null || label == null || value == null || value.length() == 0) return;
+        rows.add(new String[]{label, value});
     }
 
     private boolean isUsableFrameRate(float frameRate) {
@@ -500,6 +570,9 @@ public class VodController extends BaseController {
         mPlayLabel = findViewById(R.id.play_label);
         mPlayLoadNetSpeedRightTop = findViewById(R.id.tv_play_load_net_speed_right_top);
         mSysUsageRightTop = findViewById(R.id.tv_sys_usage_right_top);
+        if (mSysUsageRightTop != null) {
+            mSysUsageRightTop.setOnClickListener(v -> showSystemStats());
+        }
         mSeekBar = findViewById(R.id.seekBar);
         CircleThumbDrawable seekThumb = new CircleThumbDrawable(getContext());
         mSeekBar.setThumb(seekThumb);
