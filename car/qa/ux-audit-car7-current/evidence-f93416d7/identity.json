@@ -1,0 +1,47 @@
+{
+  "apk": "TVBox-1.0.0-car.7-audit-r6.apk",
+  "sha256": "f93416d784de3f463485421fc5f35c75f0e2fbc049592cf59dc90d6a1e54dba3",
+  "bytes": 53679236,
+  "package": "com.github.tvbox.osc.jun",
+  "versionCode": 8,
+  "versionName": "1.0.0-car.7",
+  "device": {
+    "vmIndex": 1,
+    "adb": "127.0.0.1:16416",
+    "owner": "tvbox-external-audit-r2-20261023",
+    "physicalWidth": 1620,
+    "physicalHeight": 2880,
+    "displayWidth": 2880,
+    "displayHeight": 1620,
+    "density": 160,
+    "rotation": "lock 1",
+    "carDisplayPass": true
+  },
+  "tests": {
+    "pages": { "passed": 80, "failed": 0 },
+    "ux3k": { "passed": 98, "failed": 0 },
+    "playback": { "passed": 101, "failed": 0 },
+    "gestures": { "passed": 7, "failed": 0 },
+    "states": { "passed": 5, "failed": 0 }
+  },
+  "screenshots": [
+    "advanced.png", "category-ux.png", "category.png", "collect.png",
+    "detail-ux.png", "detail.png", "fast-search.png", "history.png",
+    "home.png", "live-channels.png", "live-ux.png", "live.png",
+    "local-file.png", "player-advanced.png", "player-hidden.png",
+    "player-more.png", "player-paused.png", "player-presets.png",
+    "player.png", "push.png", "search-results.png", "search.png",
+    "settings-source.png", "settings.png", "state-empty.png",
+    "state-error.png", "state-loading.png", "state-offline.png"
+  ],
+  "manualScreenshots": [
+    "manual/history-empty.png",
+    "manual/search-empty.png",
+    "manual/nosource-toast.png",
+    "manual/detail-retry.png",
+    "manual/search-source-dialog.png",
+    "manual/api-dialog.png",
+    "manual/api-dialog-focused.png"
+  ],
+  "note": "All screenshots are native 2880x1620 Android captures. Background colour bars are the local acceptance video, not product UI."
+}

@@ -13,6 +13,27 @@
         android:orientation="vertical">
 
 
+        <TextView
+            android:id="@+id/uxSearchSourceTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/vs_24"
+            android:paddingBottom="@dimen/vs_6"
+            android:gravity="center"
+            android:text="选择搜索源"
+            android:textColor="@color/dialog_text_primary"
+            android:textSize="@dimen/ts_30"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/vs_15"
+            android:gravity="center"
+            android:text="勾选参与本次搜索的站点"
+            android:textColor="@color/dialog_text_hint"
+            android:textSize="@dimen/ts_20" />
+
         <LinearLayout
             android:orientation="horizontal"
             android:weightSum="2"

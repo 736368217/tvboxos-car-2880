@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="@dimen/vs_90"
+            android:layout_height="@dimen/vs_90"
+            android:alpha="0.72"
+            android:contentDescription="暂无内容"
+            android:src="@drawable/ic_tvbox_file_empty" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_18"
+            android:gravity="center"
+            android:text="暂时没有内容"
+            android:textColor="@color/car_text_strong"
+            android:textSize="@dimen/ts_34"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_8"
+            android:gravity="center"
+            android:text="检查网络连接，或切换源站后重试"
+            android:textColor="@color/car_text_dim"
+            android:textSize="@dimen/ts_24" />
+
+        <TextView
+            android:id="@+id/uxEmptyRetry"
+            android:layout_width="320px"
+            android:layout_height="96px"
+            android:layout_marginTop="24px"
+            android:background="@drawable/car_player_primary_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="重新加载"
+            android:textColor="@color/car_text_strong"
+            android:textSize="28px" />
+
+        <TextView
+            android:id="@+id/uxEmptyBack"
+            android:layout_width="280px"
+            android:layout_height="96px"
+            android:layout_marginTop="14px"
+            android:background="@drawable/car_button_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="返回上一页"
+            android:textColor="@color/car_text"
+            android:textSize="26px" />
+    </LinearLayout>
+</FrameLayout>

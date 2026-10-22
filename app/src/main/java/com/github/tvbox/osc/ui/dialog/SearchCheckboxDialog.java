@@ -73,6 +73,8 @@ public class SearchCheckboxDialog extends BaseDialog{
         mGridView.setHasFixedSize(true);
 
         int size = mSourceList.size();
+        TextView title = findViewById(R.id.uxSearchSourceTitle);
+        if (title != null) title.setText(size == 0 ? "选择搜索源" : "选择搜索源 · " + size + " 个站点");
         int spanCount = (int) Math.floor(size / 10);
         if (spanCount <= 0) spanCount = 1;
         if (spanCount > 3) spanCount = 3;
@@ -136,6 +138,7 @@ public class SearchCheckboxDialog extends BaseDialog{
         if (windowHeight <= 0) windowHeight = getContext().getResources().getDisplayMetrics().heightPixels;
         View header = checkAll == null ? null : (View) checkAll.getParent();
         int reserved = header == null ? 0 : header.getMeasuredHeight();
+        reserved += getContext().getResources().getDimensionPixelSize(R.dimen.vs_50);
         reserved += getContext().getResources().getDimensionPixelSize(R.dimen.vs_30);
         int available = Math.max(getContext().getResources().getDimensionPixelSize(R.dimen.vs_160), windowHeight - reserved);
         int desired = mGridView.getMeasuredHeight();

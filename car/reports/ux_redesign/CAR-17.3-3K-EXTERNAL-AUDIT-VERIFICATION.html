@@ -21,7 +21,7 @@ ul{padding-left:22px}li{margin:6px 0}.muted{color:var(--muted)}code{background:#
 <h1>TVBox 车机版 · 外部 30 条走查复核</h1>
 <p class="lede">外部报告测试的是 <code>origin/main @ 6ce0d5ad</code> 的另一套首页/设置/播放器结构；本次按当前 <code>feature/car-ux-redesign-3k-fps</code> 逐条复核，只修真实存在且影响当前分支的问题，不照搬不适用的视觉结论。</p>
 <div class="meta">
-<span class="chip">APK SHA-256 <code>5f8b8c747b76f0b1c056e9fce3d029ca39850973eb0f513c6f2404ab7feca8c2</code></span>
+<span class="chip">APK SHA-256 <code>f93416d784de3f463485421fc5f35c75f0e2fbc049592cf59dc90d6a1e54dba3</code></span>
 <span class="chip">versionCode 8 / 1.0.0-car.7</span>
 <span class="chip">MuMu 1 · 2880×1620 · density 160</span>
 <span class="chip">CAR_DISPLAY_PASS</span>
@@ -29,9 +29,9 @@ ul{padding-left:22px}li{margin:6px 0}.muted{color:var(--muted)}code{background:#
 
 <h2>结论</h2>
 <div class="grid">
-<div class="card"><b>6</b><span>当前分支真实存在，本轮已修复</span></div>
+<div class="card"><b>8</b><span>当前分支真实存在，本轮已修复</span></div>
 <div class="card"><b>11</b><span>当前分支已具备 / 已由其他实现解决</span></div>
-<div class="card"><b>2</b><span>部分解决，保留 P2 产品决策</span></div>
+<div class="card"><b>0</b><span>保留 P2 产品决策（本轮已清零）</span></div>
 <div class="card"><b>11</b><span>页面结构不同不适用，或外部构建环境</span></div>
 </div>
 <div class="note">外部报告中的 P1 不能直接继承为本分支的 P1。当前分支没有为了“清零”而改动已经稳定的返回链、全屏播放器和分区设置结构。</div>
@@ -42,9 +42,9 @@ ul{padding-left:22px}li{margin:6px 0}.muted{color:var(--muted)}code{background:#
 <tr><td>M-01</td><td>零配置点卡片静默无效</td><td>空源时 Toast 指引“设置 → 订阅源 → 配置地址”；“立即观看”不再静默。</td></tr>
 <tr><td>M-02</td><td>配置弹窗软键盘遮挡</td><td>ApiDialog 使用 <code>SOFT_INPUT_ADJUST_PAN</code>，键盘出现时整体上移。车机主路径无软键盘。</td></tr>
 <tr><td>M-09</td><td>全站弹窗无背景压暗</td><td><code>CustomDialogStyle</code> 开启 dim，<code>backgroundDimAmount=0.62</code>。</td></tr>
-<tr><td>M-18</td><td>历史记录无空态</td><td>图标 + 标题 + 说明 + “去首页看看”主按钮；删除最后一条同步切换。</td></tr>
+<tr><td>M-11</td><td>搜索源弹窗标题缺失/错误</td><td>正确搜索源列表 + “选择搜索源 · N 个站点”标题与说明。</td></tr><tr><td>M-18</td><td>历史记录无空态</td><td>图标 + 标题 + 说明 + “去首页看看”主按钮；删除最后一条同步切换。</td></tr>
 <tr><td>M-19</td><td>搜索历史空白无提示</td><td>显示“暂无搜索记录，输入片名开始搜索”，空时隐藏清空图标。</td></tr>
-<tr><td>M-25</td><td>JS 蜘蛛全局串行</td><td><code>JsLoader.getSpider</code> 按 siteKey 分段加锁，缓存命中直接返回。</td></tr>
+<tr><td>M-24</td><td>详情兜底失败无重试</td><td>统一空态 + “重新加载”“返回上一页”双入口。</td></tr><tr><td>M-25</td><td>JS 蜘蛛全局串行</td><td><code>JsLoader.getSpider</code> 按 siteKey 分段加锁，缓存命中直接返回。</td></tr>
 </table>
 
 <h3>同时补齐的 P2</h3>
@@ -52,21 +52,21 @@ ul{padding-left:22px}li{margin:6px 0}.muted{color:var(--muted)}code{background:#
 <li>设置页标题随 7 个分区动态变化，不再固定为“播放器设置中心”。</li>
 <li>播放器宽卡选项：图标与文字同侧成组，消除短标签时的大段空距。</li>
 <li>画面预设弹窗：提示移到列表上方，列表裁剪/滚动与取消按钮分离。</li>
-<li>返回边缘引导：硬编码青蓝色改为薄荷/中性色，和全局语义一致。</li>
+<li>返回边缘引导：硬编码青蓝色改为薄荷/中性色，和全局语义一致。</li><li>详情兜底失败：新增“重新加载”“返回上一页”双入口。</li><li>搜索源弹窗：新增标题、站点数量与说明。</li>
 </ul>
 
 <h2>关键截图</h2>
 <div class="gallery">
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/manual/nosource-toast.png" alt="零配置提示"><div>零配置：点击热播卡出现明确配置指引</div></div>
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/screenshots/settings-source.png" alt="设置订阅源"><div>设置页标题随分区变化，配置地址显示当前值</div></div>
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/manual/history-empty.png" alt="历史空态"><div>历史记录空态：说明 + 可执行入口</div></div>
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/manual/search-empty.png" alt="搜索历史空态"><div>最近搜索为空时的提示</div></div>
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/screenshots/player-more.png" alt="播放器 More"><div>播放器 More：宽卡图标与文字同侧成组</div></div>
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/screenshots/player-presets.png" alt="画面预设"><div>画面预设：提示上移，取消按钮不再被遮挡</div></div>
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/screenshots/detail.png" alt="详情"><div>详情：紫色唯一主操作 + 次级操作</div></div>
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/screenshots/live.png" alt="直播"><div>直播：主操作明确，EPG 区留出安全边距</div></div>
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/screenshots/state-empty.png" alt="空状态"><div>统一空状态壳</div></div>
-<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-5f8b8c74/screenshots/state-loading.png" alt="加载状态"><div>统一加载状态壳</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/manual/nosource-toast.png" alt="零配置提示"><div>零配置：点击热播卡出现明确配置指引</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/screenshots/settings-source.png" alt="设置订阅源"><div>设置页标题随分区变化，配置地址显示当前值</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/manual/history-empty.png" alt="历史空态"><div>历史记录空态：说明 + 可执行入口</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/manual/search-empty.png" alt="搜索历史空态"><div>最近搜索为空时的提示</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/screenshots/player-more.png" alt="播放器 More"><div>播放器 More：宽卡图标与文字同侧成组</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/screenshots/player-presets.png" alt="画面预设"><div>画面预设：提示上移，取消按钮不再被遮挡</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/manual/detail-retry.png" alt="详情失败重试"><div>详情兜底失败：重新加载 + 返回上一页</div></div><div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/manual/search-source-dialog.png" alt="搜索源"><div>搜索源弹窗：标题、数量与可勾选站点</div></div><div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/screenshots/detail.png" alt="详情"><div>详情：紫色唯一主操作 + 次级操作</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/screenshots/live.png" alt="直播"><div>直播：主操作明确，EPG 区留出安全边距</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/screenshots/state-empty.png" alt="空状态"><div>统一空状态壳</div></div>
+<div class="shot"><img src="../../qa/ux-audit-car7-current/evidence-f93416d7/screenshots/state-loading.png" alt="加载状态"><div>统一加载状态壳</div></div>
 </div>
 
 <h2>回归</h2>
@@ -93,7 +93,7 @@ ul{padding-left:22px}li{margin:6px 0}.muted{color:var(--muted)}code{background:#
 <tr><td>M-08</td><td><span class="tag na">不适用</span></td><td>无该自绘弹窗；行文本 28px</td></tr>
 <tr><td>M-09</td><td><span class="tag fixed">已修</span></td><td>全局 dim 0.62</td></tr>
 <tr><td>M-10</td><td><span class="tag has">已具备</span></td><td>SelectDialog maxHeight 410 + 滚动</td></tr>
-<tr><td>M-11</td><td><span class="tag partial">部分</span></td><td>搜索源列表正确；弹窗缺标题，保留 P2</td></tr>
+<tr><td>M-11</td><td><span class="tag fixed">已修</span></td><td>正确搜索源列表 + “选择搜索源 · N 个站点”标题</td></tr>
 <tr><td>M-12</td><td><span class="tag na">不适用</span></td><td>固定 TVBOX 3K 品牌位</td></tr>
 <tr><td>M-13</td><td><span class="tag na">不适用</span></td><td>左导航 + 双 hero</td></tr>
 <tr><td>M-14</td><td><span class="tag na">不同实现</span></td><td>25px peek，不是 149px 半卡</td></tr>
@@ -106,7 +106,7 @@ ul{padding-left:22px}li{margin:6px 0}.muted{color:var(--muted)}code{background:#
 <tr><td>M-21</td><td><span class="tag has">已具备</span></td><td>紫色唯一主操作 + 次级按钮</td></tr>
 <tr><td>M-22</td><td><span class="tag na">不适用</span></td><td>1360px 左内容 + 1360px 右选集</td></tr>
 <tr><td>M-23</td><td><span class="tag has">已具备</span></td><td>复制播放地址按钮，不露 URL</td></tr>
-<tr><td>M-24</td><td><span class="tag partial">部分</span></td><td>统一空态 + 换源指引；无独立重试按钮</td></tr>
+<tr><td>M-24</td><td><span class="tag fixed">已修</span></td><td>统一空态 + “重新加载”“返回上一页”双入口</td></tr>
 <tr><td>M-25</td><td><span class="tag fixed">已修</span></td><td>JsLoader 按 siteKey 分段加锁</td></tr>
 <tr><td>M-26</td><td><span class="tag has">已具备</span></td><td>播放器重构；playback 101/0</td></tr>
 <tr><td>M-27</td><td><span class="tag na">环境</span></td><td>外部 x86_64 自编包；arm 包有 .so，且已有 try/catch 降级</td></tr>
@@ -117,7 +117,7 @@ ul{padding-left:22px}li{margin:6px 0}.muted{color:var(--muted)}code{background:#
 
 <h2>证据</h2>
 <ul>
-<li><code>car/qa/ux-audit-car7-current/evidence-5f8b8c74/</code>：30 张页面截图 + 3 张专项截图 + 5 份测试 JSON + identity。</li>
+<li><code>car/qa/ux-audit-car7-current/evidence-f93416d7/</code>：28 张页面截图 + 7 张专项截图 + 5 份测试 JSON + identity。</li>
 <li><code>car/reports/ux_redesign/CAR-17.3-3K-EXTERNAL-AUDIT-VERIFICATION.md</code>：逐条文字版。</li>
 <li>背景彩条/灰度块为本地验收视频，不是产品 UI；state-* 为实际 Android 状态组件截图，不是网络事件录像。</li>
 </ul>

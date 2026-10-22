@@ -174,6 +174,9 @@ public class DetailActivity extends BaseActivity {
     protected void init() {
         EventBus.getDefault().register(this);
         initView();
+        setEmptyRetryAction(() -> {
+            if (!isFinishing()) recreate();
+        });
         initViewModel();
         initData();
     }
@@ -895,7 +898,7 @@ public class DetailActivity extends BaseActivity {
                     if(!TextUtils.isEmpty(absXml.msg) && !absXml.msg.equals("数据列表")){
                         resetDetailFallback();
                         Toast.makeText(DetailActivity.this, absXml.msg, Toast.LENGTH_SHORT).show();
-                        showEmpty();
+                        showRetryEmpty();
                         return;
                     }
                     mVideo = absXml.movie.videoList.get(0);
@@ -1499,7 +1502,7 @@ public class DetailActivity extends BaseActivity {
     }
 
     private void showDetailEmpty() {
-        showEmpty();
+        showRetryEmpty();
         llPlayerFragmentContainer.setVisibility(View.GONE);
         llPlayerFragmentContainerBlock.setVisibility(View.GONE);
     }

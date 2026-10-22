@@ -20,6 +20,7 @@ import androidx.core.content.PermissionChecker;
 
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.callback.EmptyCallback;
+import com.github.tvbox.osc.callback.RetryEmptyCallback;
 import com.github.tvbox.osc.callback.LoadingCallback;
 import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.util.AppManager;
@@ -45,6 +46,7 @@ import xyz.doikki.videoplayer.util.CutoutUtil;
 public abstract class BaseActivity extends AppCompatActivity implements CustomAdapt {
     protected Context mContext;
     private LoadService mLoadService;
+    private Runnable emptyRetryAction;
 
     private static float screenRatio = -100.0f;
     private final Runnable refreshAutoSizeRunnable = new Runnable() {
@@ -240,6 +242,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
             mLoadService = LoadSir.getDefault().register(view, new Callback.OnReloadListener() {
                 @Override
                 public void onReload(View v) {
+                    if (emptyRetryAction != null) emptyRetryAction.run();
                 }
             });
         }
@@ -261,6 +264,16 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
     protected void showEmpty() {
         if (null != mLoadService) {
             mLoadService.showCallback(EmptyCallback.class);
+        }
+    }
+
+    protected void setEmptyRetryAction(Runnable action) {
+        emptyRetryAction = action;
+    }
+
+    protected void showRetryEmpty() {
+        if (mLoadService != null) {
+            mLoadService.showCallback(RetryEmptyCallback.class);
         }
     }
 
