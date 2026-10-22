@@ -100,7 +100,8 @@ final class InAppBackHostLayout extends FrameLayout {
         safeTop = Math.max(dp(36), resources.getDimension(R.dimen.car_top_padding));
         safeBottom = Math.max(dp(56), resources.getDimension(R.dimen.car_bottom_padding));
         ball.configure(tokenScale, InAppBackButton.isLarge(), InAppBackButton.getHideSeconds() * 1000,
-                InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
+                InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha(),
+                InAppBackButton.getBarWidthDp());
         edge.configure(tokenScale, side, InAppBackButton.getEdgeSkin(),
                 InAppBackButton.getBarWidthDp(), InAppBackButton.getBarHeightDp(),
                 InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
@@ -173,7 +174,8 @@ final class InAppBackHostLayout extends FrameLayout {
             displayDensity = density;
             tokenScale = nextScale;
             ball.configure(tokenScale, InAppBackButton.isLarge(), InAppBackButton.getHideSeconds() * 1000,
-                    InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
+                    InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha(),
+                    InAppBackButton.getBarWidthDp());
             edge.configure(tokenScale, side, InAppBackButton.getEdgeSkin(),
                     InAppBackButton.getBarWidthDp(), InAppBackButton.getBarHeightDp(),
                     InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha());
@@ -209,10 +211,9 @@ final class InAppBackHostLayout extends FrameLayout {
         BackNavPolicy.Bounds bounds = new BackNavPolicy.Bounds(getWidth(), getHeight(), box, box,
                 left, top, right, bottom);
         ball.syncBounds(bounds, getWidth(), HawkConfig.BACK_SIDE_RIGHT.equals(side));
-        // The full fluid wave scales with the same reference tokens as the pill and trigger.
-        float waveHeight = Math.min(160 * tokenScale, getHeight());
+        // 导引小棍的可停范围 = 整个安全区（不再预留波形高度，否则只能在上半屏移动）。
         BackNavPolicy.Bounds edgeBounds = new BackNavPolicy.Bounds(getWidth(), getHeight(), 0,
-                waveHeight, 0, top, 0, bottom);
+                0, 0, top, 0, bottom);
         edge.syncBounds(edgeBounds.minY, edgeBounds.maxY);
     }
 

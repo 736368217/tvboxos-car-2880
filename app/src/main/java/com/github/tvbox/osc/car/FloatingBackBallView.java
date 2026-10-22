@@ -61,14 +61,22 @@ final class FloatingBackBallView extends View {
     }
 
     void configure(float unitScale, boolean large, int idleMillis, int barColor, int barAlpha) {
+        configure(unitScale, large, idleMillis, barColor, barAlpha, 12);
+    }
+
+    /** barWidthDp 与返回杠同档位：细/中/粗 → 球的 48/56/68dp，改设置即时生效。 */
+    void configure(float unitScale, boolean large, int idleMillis,
+                   int barColor, int barAlpha, int barWidthDp) {
         stopMotion();
         this.unitScale = unitScale;
-        this.visualSize = (large ? 64 : 56) * unitScale;
+        float base = barWidthDp <= 8 ? 48f : barWidthDp <= 14 ? 56f : 68f;
+        if (large) base += 8f;
+        this.visualSize = base * unitScale;
         dragOutline = new DashPathEffect(new float[]{3 * unitScale, 2 * unitScale}, 0);
         this.idleMillis = idleMillis;
         this.barColor = barColor;
         this.barAlpha = Math.max(10, Math.min(100, barAlpha));
-        int box = Math.round((large ? 80 : 72) * unitScale);
+        int box = Math.round(base * 1.28f * unitScale);
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) getLayoutParams();
         if (params.width != box || params.height != box) {
             params.width = params.height = box;

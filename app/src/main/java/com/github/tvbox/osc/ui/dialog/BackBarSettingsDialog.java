@@ -197,5 +197,10 @@ public class BackBarSettingsDialog extends BaseDialog {
         int seconds = InAppBackButton.getHideSeconds();
         tvHide.setText(seconds == 0 ? "常驻" : seconds + " 秒");
         if (onChanged != null) onChanged.run();
+        // 下一帧再刷一次：弹窗刚打开时宿主可能还没完成测量，第一次 configure 会用错尺寸。
+        final android.app.Activity activity = ownerActivity();
+        if (activity != null && activity.getWindow() != null) {
+            activity.getWindow().getDecorView().post(() -> InAppBackButton.refresh(activity));
+        }
     }
 }
