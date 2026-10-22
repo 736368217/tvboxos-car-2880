@@ -190,8 +190,9 @@ public class ImgUtil {
         if (width <= 0) width = 180;
         if (height <= 0) height = 240;
         if (cornerRadius <= 0) cornerRadius = 1;
-        String key = text + "_" + width + "x" + height + "_" + (int) cornerRadius;
+        // 只画首字，key 也按首字收敛：几十个标题最多几十张位图，列表滚动时不再反复建 bitmap/画字。
         text = text.substring(0, 1);
+        String key = text + "_" + width + "x" + height + "_" + (int) cornerRadius;
         if (drawableCache.containsKey(key)) return drawableCache.get(key);
         int randomColor = getRandomColor();
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -209,6 +210,7 @@ public class ImgUtil {
         float y = (height - fontMetrics.bottom - fontMetrics.top) / 2f;
         canvas.drawText(text, x, y, paint);
         Drawable drawable = new BitmapDrawable(App.getInstance().getResources(), bitmap);
+        if (drawableCache.size() > 96) drawableCache.clear();
         drawableCache.put(key, drawable);
         return drawable;
     }

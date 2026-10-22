@@ -52,7 +52,7 @@ public class BackBarSettingsDialog extends BaseDialog {
 
     private View buildContent() {
         Context context = getContext();
-        float titleSize = context.getResources().getDimension(R.dimen.ts_30);
+        float titleSize = context.getResources().getDisplayMetrics().heightPixels * 0.034f;
         int padding = (int) context.getResources().getDimension(R.dimen.vs_30);
 
         LinearLayout root = new LinearLayout(context);
@@ -142,7 +142,7 @@ public class BackBarSettingsDialog extends BaseDialog {
         Context context = getContext();
         int rowHeight = (int) context.getResources().getDimension(R.dimen.vs_60);
         int side = (int) context.getResources().getDimension(R.dimen.vs_20);
-        float textSize = context.getResources().getDimension(R.dimen.ts_24);
+        float textSize = context.getResources().getDisplayMetrics().heightPixels * 0.026f;
 
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.HORIZONTAL);

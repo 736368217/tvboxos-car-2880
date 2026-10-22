@@ -137,11 +137,27 @@ public class JsLoader {
         return null;
     }
 
-    public synchronized Spider getSpider(String key, String api, String ext, String jar) {
+    /** 每个站点一把锁：避免所有站点共用一把全局锁，把网络/初始化串成队列。 */
+    private final ConcurrentHashMap<String, Object> spiderLocks = new ConcurrentHashMap<>();
+
+    public Spider getSpider(String key, String api, String ext, String jar) {
         recentKey = key;
-        if (spiders.containsKey(key)){
-            Log.i("JSLoader", "echo-getSpider cached "+key);
-            return spiders.get(key);
+        Spider cached = spiders.get(key);
+        if (cached != null) {
+            Log.i("JSLoader", "echo-getSpider cached " + key);
+            return cached;
+        }
+        Object lock = spiderLocks.computeIfAbsent(key, k -> new Object());
+        synchronized (lock) {
+            return loadSpiderLocked(key, api, ext, jar);
+        }
+    }
+
+    private Spider loadSpiderLocked(String key, String api, String ext, String jar) {
+        Spider cached = spiders.get(key);
+        if (cached != null) {
+            Log.i("JSLoader", "echo-getSpider cached " + key);
+            return cached;
         }
         Class<?> classLoader = null;
         if (!jar.isEmpty()) {

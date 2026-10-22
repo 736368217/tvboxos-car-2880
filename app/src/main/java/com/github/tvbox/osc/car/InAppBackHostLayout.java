@@ -214,10 +214,11 @@ final class InAppBackHostLayout extends FrameLayout {
         BackNavPolicy.Bounds bounds = new BackNavPolicy.Bounds(getWidth(), getHeight(), box, box,
                 left, top, right, bottom);
         ball.syncBounds(bounds, getWidth(), HawkConfig.BACK_SIDE_RIGHT.equals(side));
-        // 导引小棍的可停范围 = 整个安全区（不再预留波形高度，否则只能在上半屏移动）。
-        BackNavPolicy.Bounds edgeBounds = new BackNavPolicy.Bounds(getWidth(), getHeight(), 0,
-                0, 0, top, 0, bottom);
-        edge.syncBounds(edgeBounds.minY, edgeBounds.maxY);
+        // 导引小棍的可停范围 = 安全区内，且保证小棍本体不越过上下安全线（含系统手势/导航条区域）。
+        float halfBar = InAppBackButton.getBarHeightDp() * tokenScale / 2f;
+        float edgeMin = Math.max(top, halfBar);
+        float edgeMax = Math.max(edgeMin, getHeight() - bottom - halfBar);
+        edge.syncBounds(edgeMin, edgeMax);
     }
 
     private void readInsets(WindowInsets insets) {

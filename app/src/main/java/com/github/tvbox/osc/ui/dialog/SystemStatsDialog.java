@@ -69,7 +69,7 @@ public class SystemStatsDialog extends BaseDialog {
     private android.view.View buildContent() {
         Context context = getContext();
         int padding = (int) context.getResources().getDimension(R.dimen.vs_30);
-        float titleSize = context.getResources().getDimension(R.dimen.ts_30);
+        float titleSize = context.getResources().getDisplayMetrics().heightPixels * 0.034f;
 
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -121,7 +121,7 @@ public class SystemStatsDialog extends BaseDialog {
         list.removeAllViews();
         if (rows == null || rows.isEmpty()) return;
         Context context = getContext();
-        float textSize = context.getResources().getDimension(R.dimen.ts_24);
+        float textSize = context.getResources().getDisplayMetrics().heightPixels * 0.026f;
         int rowPadding = (int) context.getResources().getDimension(R.dimen.vs_10);
         for (String[] row : rows) {
             if (row == null || row.length < 2 || row[0] == null) continue;

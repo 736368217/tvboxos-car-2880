@@ -189,8 +189,10 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         homeHotVodAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                if (ApiConfig.get().getSourceBeanList().isEmpty())
+                if (ApiConfig.get().getSourceBeanList().isEmpty()) {
+                    Toast.makeText(getActivity(), "还没有配置数据源，请到 设置 → 配置地址 填入接口", Toast.LENGTH_LONG).show();
                     return;
+                }
                 Movie.Video vod = ((Movie.Video) adapter.getItem(position));
 
                 if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 1 && homeSourceRec != null && vod.action != null) {
