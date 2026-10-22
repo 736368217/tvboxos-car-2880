@@ -329,3 +329,62 @@ PlayFragment -> DetailActivity.enterFullPreview），本机没有可播源，未
 
 产物：`TVBox-Original-Feature-1.0.0-car.7-python-r4.apk`，52,664,093 bytes，
 SHA-256 `D5A76353667D463D09C68CA80A32680DC75A1D1EB8834D8D0A075F2BE66A022B`。
+
+---
+
+## 11. r5：拖动范围修复 / 设置实时生效 / 分支收敛
+
+### 11.1 导引小棍只能拖到中间 —— 是 bug
+
+`syncGeometry()` 里计算可停范围时把「波形高度(160dp)」当成底部预留：
+
+```
+availableY = h - waveHeight      // 1620 - 540 = 1080
+maxY       = availableY - bottom // 1080 - 346 = 734
+```
+
+所以中心点只能在 [252, 734] 之间移动（15%–45% 高度），往下自然"卡在中间"。
+改为整段安全区：
+
+```
+minY = top            // 252
+maxY = h - bottom     // 1274  (15%–78%)
+```
+
+波形半高只有 270px，在最大位置 1274+270=1544 仍在屏内，不会画到屏幕外。
+
+### 11.2 外观设置"没生效"的处理
+
+代码路径本身是通的（`setBarXxx → put() → refresh(activity) → host.refresh() → configure + invalidate`），
+本轮再补两点：
+
+1. **悬浮球也跟随「返回杠大小」**：原来球只有 `isLarge` 两档，改粗细对球无效；
+   现在 细/中/粗 → 48/56/68dp。
+2. **二次刷新**：弹窗刚打开时宿主可能还没测量完，第一次 configure 会拿到旧尺寸；
+   改为 `decorView.post(() -> refresh(activity))`，下一帧再刷一次。
+
+### 11.3 分支收敛（已执行）
+
+| 项 | 值 |
+| :--- | :--- |
+| 旧 main | `494b989d`（已丢弃） |
+| 新 main | `475a325f`（本分支内容，force 推送） |
+| 保留分支 | `main` + `feature/car-ux-redesign-3k-fps`（远端仅此 2 个） |
+| 已删除 | `feature/original-app-feature-handover`、`feature/car-ux-redesign-3k`、`feature/upstream-feature-pack` |
+
+### 11.4 订阅源（文档记录）
+
+历史文档里记录的两个订阅：
+
+- `https://clun.top/box.json`（当日 97 站 / 44 个 PY 站）
+- `https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/api.json`
+
+本轮**未能实际用它们跑通**：分到的 vm0 上另一个会话的 `com.carweb.tvb` 反复抢占前台，
+且该实例的配置是"车机界面验收（本地素材）"（首页只有素材网格、没有设置入口），
+无法在应用内改订阅，也无法稳定点测。下一轮换干净实例再补。
+
+### 11.5 产物
+
+`TVBox-Original-Feature-1.0.0-car.7-python-r5.apk`，52,664,093 bytes，
+SHA-256 `2789E0A60C585BDECAB28F7433F8B9BCCB21EEDB2ACE4234B1373C39C717C9B1`。
+已核对 dex 含「返回组件 / 返回杠大小 / 返回杠颜色」字面量，确认新弹窗在包内。
