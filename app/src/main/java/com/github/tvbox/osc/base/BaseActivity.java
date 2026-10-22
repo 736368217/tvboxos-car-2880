@@ -10,6 +10,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -17,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.PermissionChecker;
 
 import com.github.tvbox.osc.R;
+import com.github.tvbox.osc.backbar.BackBarController;
 import com.github.tvbox.osc.callback.EmptyCallback;
 import com.github.tvbox.osc.callback.LoadingCallback;
 import com.github.tvbox.osc.util.AppManager;
@@ -88,6 +91,24 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
             refreshAutoSize();
             scheduleRefreshAutoSize();
         }
+        BackBarController.attach(this);
+    }
+
+    /** 返回杠跟随每个页面显示；用户触摸或按键时重新唤醒。 */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event != null && event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            BackBarController.wake(this);
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event != null && event.getAction() == KeyEvent.ACTION_DOWN) {
+            BackBarController.wake(this);
+        }
+        return super.dispatchKeyEvent(event);
     }
 
     public void hideSysBar() {

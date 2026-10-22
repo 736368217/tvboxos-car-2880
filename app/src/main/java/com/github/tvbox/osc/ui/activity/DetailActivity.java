@@ -2069,6 +2069,12 @@ public class DetailActivity extends BaseActivity {
         }
         llPlayerFragmentContainer.setVisibility(fullWindows || showPreview ? View.VISIBLE : View.GONE);
         llPlayerFragmentContainer.setLayoutParams(fullWindows ? windowsFull : windowsPreview);
+        if (full) {
+            // The detail page is a full-screen sibling; bring the player above it so the
+            // in-player buttons receive touches in full-screen playback.
+            llPlayerFragmentContainer.bringToFront();
+            if (Build.VERSION.SDK_INT >= 21) llPlayerFragmentContainer.setTranslationZ(1000f);
+        }
         setPreviewRoundClip(!fullWindows);
         llPlayerFragmentContainerBlock.setVisibility(!fullWindows && showPreview ? View.VISIBLE : View.GONE);
         mGridView.setVisibility(fullWindows ? View.GONE : View.VISIBLE);

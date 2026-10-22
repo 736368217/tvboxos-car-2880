@@ -36,6 +36,8 @@ import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.bean.IJKCode;
 import com.github.tvbox.osc.bean.ParseBean;
 import com.github.tvbox.osc.bean.SourceBean;
+import com.github.tvbox.osc.car.AudioEffectController;
+import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.server.ControlManager;
 import com.github.tvbox.osc.server.RemoteServer;
 import com.github.tvbox.osc.subtitle.widget.SimpleSubtitleView;
@@ -81,7 +83,10 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Locale;
 
+import com.github.tvbox.osc.player.MyVideoView;
+import xyz.doikki.videoplayer.controller.MediaPlayerControl;
 import xyz.doikki.videoplayer.player.VideoView;
+import xyz.doikki.videoplayer.render.VideoEnhancePreset;
 
 import static xyz.doikki.videoplayer.util.PlayerUtils.stringForTime;
 import static xyz.doikki.videoplayer.util.PlayerUtils.safeTimeMs;
@@ -258,6 +263,13 @@ public class VodController extends BaseController {
     LinearLayout tv_screen_display; //增加屏显布局
     TextView mCastBtn;
     TextView net_play_speed;
+    private MyVideoView mCarVideoView;
+    private TextView mCarVideoBtn;
+    private TextView mCarSrBtn;
+    private TextView mCarInterpBtn;
+    private TextView mCarAudioBtn;
+    private TextView mVideoFrameRate;
+    private boolean mFpsTickerRunning;
     private boolean hasDanmu = false;
     private boolean showParse;
 
@@ -269,6 +281,13 @@ public class VodController extends BaseController {
     int myHandleSeconds = 10000;//闲置多少毫秒秒关闭底栏  默认6秒
 
     int videoPlayState = 0;
+    private final Runnable mFpsTicker = new Runnable() {
+        @Override
+        public void run() {
+            updateFrameRateDisplay();
+            if (mFpsTickerRunning) mHandler.postDelayed(this, 1000L);
+        }
+    };
 
     private final Runnable myRunnable2 = new Runnable() {
         @SuppressLint("SetTextI18n")
@@ -317,6 +336,126 @@ public class VodController extends BaseController {
     }
 
     @Override
+    public void setMediaPlayer(MediaPlayerControl mediaPlayer) {
+        mCarVideoView = mediaPlayer instanceof MyVideoView ? (MyVideoView) mediaPlayer : null;
+        super.setMediaPlayer(mediaPlayer);
+        updateCarEnhanceButtons();
+    }
+
+    private void updateCarEnhanceButtons() {
+        if (mCarVideoBtn != null) {
+            mCarVideoBtn.setText("画面 · " + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
+        }
+        if (mCarSrBtn != null) {
+            mCarSrBtn.setText("超分·" + (CarEnhance.videoSrEnabled() ? "开" : "关"));
+        }
+        if (mCarInterpBtn != null) {
+            mCarInterpBtn.setText("平滑·" + (CarEnhance.videoInterpEnabled() ? "开" : "关"));
+        }
+        if (mCarAudioBtn != null) {
+            mCarAudioBtn.setText("音效 · " + AudioEffectController.name(CarEnhance.audioMode()));
+        }
+        updateFrameRateDisplay();
+    }
+
+    private void updateFrameRateDisplay() {
+        if (mVideoFrameRate == null) return;
+        float source = mCarVideoView == null ? 0f : mCarVideoView.getRendererSourceFrameRate();
+        float output = mCarVideoView == null ? 0f : mCarVideoView.getRendererOutputFrameRate();
+        if (!isUsableFrameRate(source) && mCarVideoView != null) {
+            source = mCarVideoView.getSourceFrameRate();
+        }
+        // Output submissions are a renderer diagnostic. Never copy source FPS into it.
+        String post = "";
+        if (mCarVideoView != null && mCarVideoView.hasEnhancedRenderer()) {
+            post = " · SR " + (mCarVideoView.isSuperResolutionRuntimeActive() ? "生效" : "待帧")
+                    + " · 平滑 " + (mCarVideoView.isInterpolationRuntimeActive() ? "生效" : "待帧");
+        }
+        mVideoFrameRate.setText("片源 " + formatFrameRate(source) + " fps · 输出 "
+                + formatFrameRate(output) + " fps" + post);
+        mVideoFrameRate.setVisibility(VISIBLE);
+    }
+
+    private boolean isUsableFrameRate(float frameRate) {
+        return frameRate > 0f && !Float.isNaN(frameRate) && !Float.isInfinite(frameRate);
+    }
+
+    private String formatFrameRate(float frameRate) {
+        if (!isUsableFrameRate(frameRate)) return "--";
+        String value = String.format(Locale.US, "%.2f", frameRate);
+        while (value.endsWith("0")) value = value.substring(0, value.length() - 1);
+        if (value.endsWith(".")) value = value.substring(0, value.length() - 1);
+        return value;
+    }
+
+    private void startFpsTicker() {
+        if (mFpsTickerRunning) return;
+        mFpsTickerRunning = true;
+        updateFrameRateDisplay();
+        mHandler.postDelayed(mFpsTicker, 1000L);
+    }
+
+    private void stopFpsTicker() {
+        mFpsTickerRunning = false;
+        mHandler.removeCallbacks(mFpsTicker);
+    }
+
+    private void showCarVideoDialog() {
+        final SelectDialog<String> dialog = new SelectDialog<>(mActivity);
+        dialog.setTip("滤镜");
+        List<String> options = new ArrayList<>();
+        for (VideoEnhancePreset preset : VideoEnhancePreset.all()) {
+            options.add(preset.name + " · " + preset.description);
+        }
+        dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
+            @Override
+            public void click(String value, int pos) {
+                CarEnhance.setVideoMode(pos);
+                CarEnhance.applyVideo(mCarVideoView);
+                updateCarEnhanceButtons();
+                String state = mCarVideoView == null ? "已保存 · 下次播放生效"
+                        : mCarVideoView.isHdrVideo() && pos != 0 ? "HDR 视频 · 调色旁路"
+                        : "画面预设已应用";
+                CarEnhance.toast(getContext(), state);
+                dialog.dismiss();
+            }
+
+            @Override
+            public String getDisplay(String value) {
+                return value;
+            }
+        }, SelectDialogAdapter.stringDiff, options, CarEnhance.videoMode());
+        dialog.show();
+    }
+
+    private void showCarAudioDialog() {
+        final SelectDialog<String> dialog = new SelectDialog<>(mActivity);
+        dialog.setTip("音效");
+        List<String> options = new ArrayList<>();
+        for (int mode = 0; mode < AudioEffectController.MODE_COUNT; mode++) {
+            options.add(AudioEffectController.name(mode));
+        }
+        dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
+            @Override
+            public void click(String value, int pos) {
+                CarEnhance.setAudioMode(pos);
+                CarEnhance.applyAudio(mCarVideoView);
+                updateCarEnhanceButtons();
+                String state = pos == 0 ? "音效已关闭"
+                        : mCarVideoView == null ? "已保存 · 下次播放生效"
+                        : AudioEffectController.isActive() ? "音效已应用" : "设备未接受该音效 · 已跳过";
+                CarEnhance.toast(getContext(), state);
+                dialog.dismiss();
+            }
+
+            @Override
+            public String getDisplay(String value) {
+                return value;
+            }
+        }, SelectDialogAdapter.stringDiff, options, CarEnhance.audioMode());
+        dialog.show();
+    }
+
     protected void initView() {
         super.initView();
         mCurrentTime = findViewById(R.id.curr_time);
@@ -355,6 +494,54 @@ public class VodController extends BaseController {
         mPlayPauseTime = findViewById(R.id.tv_sys_time);
         mPlayLoadNetSpeed = findViewById(R.id.tv_play_load_net_speed);
         mVideoSize = findViewById(R.id.tv_videosize);
+        mVideoFrameRate = findViewById(R.id.tv_framerate);
+        mCarVideoBtn = findViewById(R.id.play_car_video);
+        mCarSrBtn = findViewById(R.id.play_car_sr);
+        mCarInterpBtn = findViewById(R.id.play_car_interp);
+        mCarAudioBtn = findViewById(R.id.play_car_audio);
+        mCarVideoBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                showCarVideoDialog();
+            }
+        });
+        mCarSrBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                boolean enable = !CarEnhance.videoSrEnabled();
+                CarEnhance.setVideoSrEnabled(enable);
+                CarEnhance.applyVideo(mCarVideoView);
+                updateCarEnhanceButtons();
+                boolean active = enable && mCarVideoView != null
+                        && mCarVideoView.isSuperResolutionRuntimeActive();
+                CarEnhance.toast(getContext(), !enable ? "超分已关闭"
+                        : active ? "超分已生效 · SGSR1" : "超分已请求 · 等待画面");
+            }
+        });
+        mCarInterpBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                boolean enable = !CarEnhance.videoInterpEnabled();
+                CarEnhance.setVideoInterpEnabled(enable);
+                CarEnhance.applyVideo(mCarVideoView);
+                updateCarEnhanceButtons();
+                boolean active = enable && mCarVideoView != null
+                        && mCarVideoView.isInterpolationRuntimeActive();
+                CarEnhance.toast(getContext(), !enable ? "时域平滑已关闭"
+                        : active ? "时域平滑已生效" : "时域平滑已请求 · 等待相邻帧");
+            }
+        });
+        mCarAudioBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                showCarAudioDialog();
+            }
+        });
+        updateCarEnhanceButtons();
         mSubtitleView = findViewById(R.id.subtitle_view);
         mLyricView = findViewById(R.id.lyric_view);
         mExoSubtitleView = findViewById(R.id.exo_subtitle_view);
@@ -1498,6 +1685,13 @@ public class VodController extends BaseController {
     protected void onPlayStateChanged(int playState) {
         super.onPlayStateChanged(playState);
         videoPlayState = playState;
+        if (playState == VideoView.STATE_PLAYING
+                || playState == VideoView.STATE_PREPARED
+                || playState == VideoView.STATE_BUFFERED) {
+            startFpsTicker();
+        } else {
+            stopFpsTicker();
+        }
         switch (playState) {
             case VideoView.STATE_IDLE:
                 break;

@@ -66,5 +66,10 @@ public class HawkConfig {
     public static final String DANMU_SIZE_SCALE = "danmu_size_scale";
     public static final String DANMU_RANDOM_COLOR = "danmu_random_color";
     public static final String DANMU_API = "danmu_api";
+    public static final String IN_APP_BACK = "inapp_back"; // default true
+    public static final String HIFI_AUDIO = "hifi_audio"; // default 0
+    public static final String VIDEO_ENHANCE = "video_enhance"; // 0 original, 1 vivid, 8..10 anime
+    public static final String VIDEO_SR = "video_sr"; // default 1: SGSR1
+    public static final String VIDEO_INTERP = "video_interp"; // default 1: temporal smoothing
     public static boolean hotVodDelete;
 }

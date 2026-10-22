@@ -17,6 +17,7 @@ import com.google.android.exoplayer2.Tracks;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.Cue;
+import com.google.android.exoplayer2.video.ColorInfo;
 import com.google.android.exoplayer2.text.CueGroup;
 import com.google.android.exoplayer2.text.TextOutput;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
@@ -54,6 +55,46 @@ public class ExoPlayer extends ExoMediaPlayer {
         setRenderersFactory(buildRenderersFactory(context));
         LOG.i("echo-exo-low-memory-load-control");
         memory = AudioTrackMemory.getInstance(context);
+    }
+
+    /**
+     * Car edition: real audio session id of the running EXO engine, or 0 before it exists.
+     * Used by the audio-effect chain (Equalizer/BassBoost/Virtualizer/LoudnessEnhancer).
+     */
+    public int getAudioSessionId() {
+        try {
+            return mInternalPlayer == null ? 0 : mInternalPlayer.getAudioSessionId();
+        } catch (Throwable error) {
+            return 0;
+        }
+    }
+
+    /**
+     * Car edition: true when the selected video track is HDR/HLG/Dolby Vision, in which case the
+     * GPU colour grading must stay off. Reads the same track selector used elsewhere in this class.
+     */
+    public boolean isHdrVideo() {
+        try {
+            if (mInternalPlayer == null) return false;
+            Tracks tracks = mInternalPlayer.getCurrentTracks();
+            for (Tracks.Group group : tracks.getGroups()) {
+                if (group.getType() != C.TRACK_TYPE_VIDEO) continue;
+                for (int i = 0; i < group.length; i++) {
+                    if (!group.isTrackSelected(i)) continue;
+                    Format format = group.getTrackFormat(i);
+                    if (format == null) continue;
+                    String mime = format.sampleMimeType == null ? "" : format.sampleMimeType.toLowerCase();
+                    String codecs = format.codecs == null ? "" : format.codecs.toLowerCase();
+                    if (mime.contains("dolby-vision")) return true;
+                    if (codecs.startsWith("dvhe") || codecs.startsWith("dvh1")
+                            || codecs.startsWith("dovi") || codecs.contains("dolby")) return true;
+                    if (format.colorInfo != null && ColorInfo.isTransferHdr(format.colorInfo)) return true;
+                }
+            }
+        } catch (Throwable error) {
+            // HDR probing must never break playback: unknown is treated as SDR.
+        }
+        return false;
     }
 
     @Override
@@ -150,6 +191,31 @@ public class ExoPlayer extends ExoMediaPlayer {
             }
         }
         return data;
+    }
+
+    public float getVideoFrameRate() {
+        try {
+            if (trackSelector == null) return 0f;
+            MappingTrackSelector.MappedTrackInfo mappedInfo = trackSelector.getCurrentMappedTrackInfo();
+            if (mappedInfo == null) return 0f;
+            float fallback = 0f;
+            for (int rendererIndex = 0; rendererIndex < mappedInfo.getRendererCount(); rendererIndex++) {
+                if (mappedInfo.getRendererType(rendererIndex) != C.TRACK_TYPE_VIDEO) continue;
+                TrackGroupArray groups = mappedInfo.getTrackGroups(rendererIndex);
+                for (int groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+                    TrackGroup group = groups.get(groupIndex);
+                    for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+                        Format format = group.getFormat(trackIndex);
+                        if (format == null || format.frameRate <= 0f || Float.isNaN(format.frameRate)) continue;
+                        if (isCurrentTrackSelected(format, C.TRACK_TYPE_VIDEO)) return format.frameRate;
+                        fallback = Math.max(fallback, format.frameRate);
+                    }
+                }
+            }
+            return fallback;
+        } catch (Throwable ignored) {
+            return 0f;
+        }
     }
 
     public void setTrack(int groupIndex, int trackIndex, String playKey) {

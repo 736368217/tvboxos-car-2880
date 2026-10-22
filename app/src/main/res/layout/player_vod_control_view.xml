@@ -63,6 +63,24 @@
                 android:paddingStart="@dimen/vs_10"
                 tools:ignore="RtlHardcoded,RtlSymmetry" />
 
+            <TextView
+                android:id="@+id/tv_framerate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_marginTop="@dimen/vs_5"
+                android:background="@drawable/shape_live_resolution_badge"
+                android:includeFontPadding="false"
+                android:paddingLeft="@dimen/vs_10"
+                android:paddingTop="@dimen/vs_5"
+                android:paddingRight="@dimen/vs_10"
+                android:paddingBottom="@dimen/vs_5"
+                android:text="原始 -- fps · 输出 -- fps"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_20"
+                android:paddingStart="@dimen/vs_10"
+                tools:ignore="RtlHardcoded,RtlSymmetry" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -240,6 +258,62 @@
                 android:paddingRight="@dimen/vs_10"
                 android:text="播放"
                 android:textColor="@color/color_FFFFFF"
+                android:textSize="@dimen/ts_19" />
+
+            <TextView
+                android:id="@+id/play_car_video"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/vs_5"
+                android:layout_marginRight="@dimen/vs_5"
+                android:background="@drawable/button_dialog_main"
+                android:focusable="true"
+                android:padding="@dimen/vs_10"
+                android:text="滤镜"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_19" />
+
+            <TextView
+                android:id="@+id/play_car_sr"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/vs_5"
+                android:layout_marginRight="@dimen/vs_5"
+                android:background="@drawable/button_dialog_main"
+                android:focusable="true"
+                android:padding="@dimen/vs_10"
+                android:text="超分"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_19" />
+
+            <TextView
+                android:id="@+id/play_car_interp"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/vs_5"
+                android:layout_marginRight="@dimen/vs_5"
+                android:background="@drawable/button_dialog_main"
+                android:focusable="true"
+                android:padding="@dimen/vs_10"
+                android:text="补帧"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_19" />
+
+            <TextView
+                android:id="@+id/play_car_audio"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/vs_5"
+                android:layout_marginRight="@dimen/vs_5"
+                android:background="@drawable/button_dialog_main"
+                android:focusable="true"
+                android:padding="@dimen/vs_10"
+                android:text="音效"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/ts_19" />
 
             <TextView

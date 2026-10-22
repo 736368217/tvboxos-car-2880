@@ -9,9 +9,12 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -34,6 +37,11 @@ import java.util.Map;
 import xyz.doikki.videoplayer.controller.BaseVideoController;
 import xyz.doikki.videoplayer.controller.MediaPlayerControl;
 import xyz.doikki.videoplayer.render.IRenderView;
+import xyz.doikki.videoplayer.render.GlEnhanceRenderView;
+import xyz.doikki.videoplayer.render.GlEnhanceRenderViewFactory;
+import xyz.doikki.videoplayer.render.TextureRenderView;
+import xyz.doikki.videoplayer.render.TextureRenderViewFactory;
+import xyz.doikki.videoplayer.render.VideoEnhanceConfig;
 import xyz.doikki.videoplayer.render.RenderViewFactory;
 import xyz.doikki.videoplayer.util.L;
 import xyz.doikki.videoplayer.util.PlayerUtils;
@@ -58,6 +66,24 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
 
     protected IRenderView mRenderView;
     protected RenderViewFactory mRenderViewFactory;
+    private final Handler mRenderHandler = new Handler(Looper.getMainLooper());
+    private VideoEnhanceConfig mVideoEnhancementConfig = new VideoEnhanceConfig(0, false, false);
+    private RenderHandoff mPendingRenderHandoff;
+
+    private static final class RenderHandoff {
+        final IRenderView previous, replacement;
+        final AbstractPlayer player;
+        final VideoEnhanceConfig configuration;
+        boolean rollingBack;
+
+        RenderHandoff(IRenderView previous, IRenderView replacement, AbstractPlayer player,
+                      VideoEnhanceConfig configuration) {
+            this.previous = previous;
+            this.replacement = replacement;
+            this.player = player;
+            this.configuration = configuration;
+        }
+    }
 
     public static final int SCREEN_SCALE_DEFAULT = 0;
     public static final int SCREEN_SCALE_16_9 = 1;
@@ -147,7 +173,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
         mProgressManager = config.mProgressManager;
         mPlayerFactory = config.mPlayerFactory;
         mCurrentScreenScaleType = config.mScreenScaleType;
-        mRenderViewFactory = config.mRenderViewFactory;
+        setRenderViewFactory(config.mRenderViewFactory);
 
         //读取xml中的配置，并综合全局配置
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.VideoView);
@@ -273,6 +299,9 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     protected void addDisplay() {
         if (mRenderView != null) {
+            if (mRenderView instanceof GlEnhanceRenderView) {
+                ((GlEnhanceRenderView) mRenderView).detachFromPlayer();
+            }
             mPlayerContainer.removeView(mRenderView.getView());
             mRenderView.release();
         }
@@ -283,6 +312,241 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 Gravity.CENTER);
         mPlayerContainer.addView(mRenderView.getView(), 0, params);
+    }
+
+    /** Changes only the decoder output Surface, never its source, position or play/pause state. */
+    public void setVideoEnhancements(int mode, boolean sr, boolean interp) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mRenderHandler.post(() -> setVideoEnhancements(mode, sr, interp));
+            return;
+        }
+        VideoEnhanceConfig configuration = new VideoEnhanceConfig(mode, sr, interp);
+        mVideoEnhancementConfig = configuration;
+        mRenderViewFactory = usesEnhancementSurface(configuration)
+                ? GlEnhanceRenderViewFactory.create(configuration.preset.id, sr, interp)
+                : TextureRenderViewFactory.create();
+        applyVideoEnhancements();
+    }
+
+    public VideoEnhanceConfig getVideoEnhancementConfig() {
+        return mVideoEnhancementConfig;
+    }
+
+    private boolean usesEnhancementSurface(VideoEnhanceConfig configuration) {
+        // IJK MediaCodec corrupts its first output after runtime consumer replacement on
+        // some drivers. Keep its OES producer; all-off is identity OES with no FBO/loop.
+        return configuration.usesGl() || mMediaPlayer instanceof xyz.doikki.videoplayer.ijk.IjkPlayer;
+    }
+
+    private void applyVideoEnhancements() {
+        VideoEnhanceConfig configuration = mVideoEnhancementConfig;
+        if (mPendingRenderHandoff != null) {
+            Log.i("CarVideo", "runtime_config queued during surface handoff " + configuration);
+            return;
+        }
+        if (mMediaPlayer == null || mRenderView == null) {
+            Log.i("CarVideo", "runtime_config pending " + configuration + " state=" + mCurrentPlayState);
+            return;
+        }
+        if (usesEnhancementSurface(configuration) && mRenderView instanceof GlEnhanceRenderView) {
+            GlEnhanceRenderView gl = (GlEnhanceRenderView) mRenderView;
+            gl.setVideoEnhancements(configuration.preset.id, configuration.superResolution, configuration.interpolation);
+            gl.setPlaybackActive(isRenderPlaybackActive());
+        } else if (!usesEnhancementSurface(configuration) && mRenderView instanceof TextureRenderView) {
+            Log.i("CarVideo", "runtime_config TextureRenderView " + configuration);
+        } else {
+            replaceEnhancementRenderView(configuration);
+        }
+    }
+
+    public void setVideoEnhanceMode(int mode) {
+        if (Looper.myLooper() != Looper.getMainLooper()) { mRenderHandler.post(() -> setVideoEnhanceMode(mode)); return; }
+        setVideoEnhancements(mode, mVideoEnhancementConfig.superResolution, mVideoEnhancementConfig.interpolation);
+    }
+
+    public void setVideoSrEnabled(boolean enabled) {
+        if (Looper.myLooper() != Looper.getMainLooper()) { mRenderHandler.post(() -> setVideoSrEnabled(enabled)); return; }
+        setVideoEnhancements(mVideoEnhancementConfig.preset.id, enabled, mVideoEnhancementConfig.interpolation);
+    }
+
+    public void setVideoInterpEnabled(boolean enabled) {
+        if (Looper.myLooper() != Looper.getMainLooper()) { mRenderHandler.post(() -> setVideoInterpEnabled(enabled)); return; }
+        setVideoEnhancements(mVideoEnhancementConfig.preset.id, mVideoEnhancementConfig.superResolution, enabled);
+    }
+
+    private boolean isDecoderPlaying() {
+        P player = mMediaPlayer;
+        if (player == null) return false;
+        try {
+            return player.isPlaying();
+        } catch (Throwable error) {
+            Log.w("CarVideo", "playback info ignored; decoder state unavailable", error);
+            return false;
+        }
+    }
+
+    private boolean isRenderPlaybackActive() {
+        return mCurrentPlayState == STATE_PLAYING || (mCurrentPlayState == STATE_BUFFERED && isPlaying());
+    }
+
+    private void replaceEnhancementRenderView(VideoEnhanceConfig configuration) {
+        IRenderView previous = mRenderView;
+        AbstractPlayer player = mMediaPlayer;
+        IRenderView replacement = null;
+        try {
+            replacement = mRenderViewFactory.createRenderView(getContext());
+            replacement.setScaleType(mCurrentScreenScaleType);
+            replacement.setVideoSize(mVideoSize[0], mVideoSize[1]);
+            replacement.setVideoRotation((int) previous.getView().getRotation());
+            replacement.getView().setScaleX(previous.getView().getScaleX());
+            if (replacement instanceof GlEnhanceRenderView) {
+                ((GlEnhanceRenderView) replacement).setPlaybackActive(isRenderPlaybackActive());
+            }
+        } catch (Throwable error) {
+            if (replacement != null) releaseRenderView(replacement);
+            Log.e("CarVideo", "runtime_switch creation failed; previous output retained", error);
+            return;
+        }
+        final RenderHandoff handoff = new RenderHandoff(previous, replacement, player, configuration);
+        mPendingRenderHandoff = handoff;
+        mRenderView = replacement;
+        try {
+            // Both Views and their producers stay alive until the new setSurface returns.
+            mPlayerContainer.addView(replacement.getView(), 0, new LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+            bindRenderView(replacement, player, () -> commitRenderHandoff(handoff),
+                    () -> rollbackRenderHandoff(handoff));
+        } catch (Throwable error) {
+            Log.e("CarVideo", "runtime_switch attach failed", error);
+            rollbackRenderHandoff(handoff);
+        }
+    }
+
+    private void bindRenderView(IRenderView renderView, AbstractPlayer player, Runnable onBound, Runnable onFailure) {
+        // Texture callbacks can run inside the framework's draw traversal. Retire sibling
+        // Views only after that traversal returns, never synchronously from surface creation.
+        Runnable bound = () -> mRenderHandler.post(onBound);
+        Runnable failure = () -> mRenderHandler.post(onFailure);
+        if (renderView instanceof GlEnhanceRenderView) {
+            ((GlEnhanceRenderView) renderView).attachToPlayer(player, bound, failure);
+        } else if (renderView instanceof TextureRenderView) {
+            ((TextureRenderView) renderView).attachToPlayer(player, bound, failure);
+        } else {
+            // A SurfaceView may be the old renderer on rollback; never detach its output first.
+            try {
+                View view = renderView.getView();
+                if (!(view instanceof SurfaceView)) throw new IllegalStateException("Unsupported renderer rollback");
+                SurfaceHolder holder = ((SurfaceView) view).getHolder();
+                if (holder.getSurface() == null || !holder.getSurface().isValid()) {
+                    throw new IllegalStateException("Previous SurfaceView output unavailable");
+                }
+                player.setSurface(holder.getSurface());
+            } catch (Throwable error) {
+                Log.e("CarVideo", "previous output bind failed", error);
+                failure.run();
+                return;
+            }
+            bound.run();
+        }
+    }
+
+    private void commitRenderHandoff(RenderHandoff handoff) {
+        if (mPendingRenderHandoff != handoff || handoff.rollingBack || mMediaPlayer != handoff.player) return;
+        // Ownership transfer is not a detach: old GL release must not clear the new Surface.
+        relinquishRenderPlayer(handoff.previous);
+        releaseRenderView(handoff.previous);
+        mPendingRenderHandoff = null;
+        Log.i("CarVideo", "runtime_switch " + handoff.previous.getClass().getSimpleName() + " -> "
+                + handoff.replacement.getClass().getSimpleName() + " " + handoff.configuration
+                + " player=" + System.identityHashCode(handoff.player) + " state=" + mCurrentPlayState
+                + " playing=" + isDecoderPlaying() + " decoderRestart=false");
+        applyVideoEnhancements();
+    }
+
+    private void rollbackRenderHandoff(RenderHandoff handoff) {
+        if (mPendingRenderHandoff != handoff || handoff.rollingBack || mMediaPlayer != handoff.player) return;
+        handoff.rollingBack = true;
+        cancelRenderAttach(handoff.replacement);
+        try {
+            handoff.previous.setScaleType(mCurrentScreenScaleType);
+            handoff.previous.setVideoSize(mVideoSize[0], mVideoSize[1]);
+            handoff.previous.setVideoRotation((int) handoff.replacement.getView().getRotation());
+            handoff.previous.getView().setScaleX(handoff.replacement.getView().getScaleX());
+        } catch (Throwable error) { Log.w("CarVideo", "rollback geometry restore failed", error); }
+        // setSurface may have thrown after changing native state. Prove the old output is bound
+        // before freeing the replacement, even when it never reported a successful bind.
+        bindRenderView(handoff.previous, handoff.player, () -> {
+            if (mPendingRenderHandoff != handoff || mMediaPlayer != handoff.player) return;
+            mRenderView = handoff.previous;
+            relinquishRenderPlayer(handoff.replacement);
+            releaseRenderView(handoff.replacement);
+            mPendingRenderHandoff = null;
+            if (mRenderView instanceof GlEnhanceRenderView) {
+                ((GlEnhanceRenderView) mRenderView).setPlaybackActive(isRenderPlaybackActive());
+            }
+            Log.w("CarVideo", "runtime_switch rolled back; previous output rebound, decoderRestart=false");
+            // A failed snapshot must not cause an unbounded retry loop. Newer settings still win.
+            if (!handoff.configuration.sameAs(mVideoEnhancementConfig)) applyVideoEnhancements();
+        }, () -> {
+            if (mPendingRenderHandoff == handoff) {
+                Log.e("CarVideo", "runtime_switch rollback failed; both producers retained until release");
+            }
+        });
+    }
+
+    private void cancelRenderAttach(IRenderView renderView) {
+        if (renderView instanceof GlEnhanceRenderView) ((GlEnhanceRenderView) renderView).cancelPendingAttach();
+        else if (renderView instanceof TextureRenderView) ((TextureRenderView) renderView).cancelPendingAttach();
+    }
+
+    private void relinquishRenderPlayer(IRenderView renderView) {
+        if (renderView instanceof GlEnhanceRenderView) ((GlEnhanceRenderView) renderView).relinquishPlayer();
+        else if (renderView instanceof TextureRenderView) ((TextureRenderView) renderView).relinquishPlayer();
+    }
+
+    private boolean detachRenderPlayer(IRenderView renderView, AbstractPlayer player) {
+        if (renderView instanceof GlEnhanceRenderView) return ((GlEnhanceRenderView) renderView).tryDetachFromPlayer();
+        if (renderView instanceof TextureRenderView) return ((TextureRenderView) renderView).tryDetachFromPlayer();
+        try {
+            if (player != null) player.setSurface(null);
+            return true;
+        } catch (Throwable error) {
+            Log.e("CarVideo", "final output detach failed; retaining producer", error);
+            return false;
+        }
+    }
+
+    private void releaseRenderView(IRenderView renderView) {
+        View view = renderView.getView();
+        // Only retire native callbacks after a successful bind (or during final teardown).
+        if (view instanceof TextureView) {
+            ((TextureView) view).setSurfaceTextureListener(null);
+        } else if (!(renderView instanceof GlEnhanceRenderView) && renderView instanceof SurfaceHolder.Callback
+                && view instanceof SurfaceView) {
+            ((SurfaceView) view).getHolder().removeCallback((SurfaceHolder.Callback) renderView);
+        }
+        try {
+            try { mPlayerContainer.removeView(view); }
+            finally { renderView.release(); }
+        } catch (Throwable error) { Log.e("CarVideo", "retired renderer cleanup failed", error); }
+    }
+
+    private void releaseFinalRenderView(IRenderView renderView, AbstractPlayer player, boolean detached) {
+        if (renderView == null) return;
+        if (detached) relinquishRenderPlayer(renderView);
+        if (!detached && !detachRenderPlayer(renderView, player)) {
+            if (renderView instanceof GlEnhanceRenderView) {
+                // GL's separate OES producer survives removal of its window, and release retries.
+                releaseRenderView(renderView);
+                return;
+            }
+            if (renderView instanceof TextureRenderView) renderView.release();
+            // Keep Texture/Surface views attached: removing their listener/window too early
+            // lets the framework abandon the still-bound producer before detach can be retried.
+            mRenderHandler.postDelayed(() -> releaseFinalRenderView(renderView, player, false), 50L);
+            return;
+        }
+        releaseRenderView(renderView);
     }
 
     /**
@@ -297,7 +561,8 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
             mMediaPlayer.reset();
             //重新设置option，media player reset之后，option会失效
             setOptions();
-            if (rebindRenderView && mRenderView != null) {
+            if (rebindRenderView && mRenderView != null
+                    && (mPendingRenderHandoff == null || !mPendingRenderHandoff.rollingBack)) {
                 mRenderView.attachToPlayer(mMediaPlayer);
             }
         }
@@ -342,9 +607,9 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     @Override
     public void pause() {
-        if (isInPlaybackState()
-                && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.pause();
+        if (isInPlaybackState()) {
+            // Honor user pause even during a brief internal IJK producer handoff.
+            if (mMediaPlayer.isPlaying()) mMediaPlayer.pause();
             setPlayState(STATE_PAUSED);
             if (mAudioFocusHelper != null && !isMute()) {
                 mAudioFocusHelper.abandonFocus();
@@ -360,8 +625,17 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
         if (isInPlaybackState() && !mMediaPlayer.isPlaying()) {
             assert mRenderView != null;
             View renderView = mRenderView.getView();
-            if (renderView instanceof SurfaceView) {
+            if (renderView instanceof GlEnhanceRenderView) {
+                // GLSurfaceView owns the EGL window; the decoder must keep using its OES producer.
+                if (mPendingRenderHandoff == null || !mPendingRenderHandoff.rollingBack) {
+                    mRenderView.attachToPlayer(mMediaPlayer);
+                }
+                android.util.Log.i("GlEnhance", "resume uses SurfaceTexture producer");
+                resumePlay();
+            } else if (renderView instanceof SurfaceView) {
                 final SurfaceView surfaceView = (SurfaceView) renderView;
+                final IRenderView resumeRenderView = mRenderView;
+                final AbstractPlayer resumePlayer = mMediaPlayer;
                 final SurfaceHolder holder = surfaceView.getHolder();
                 if (holder.getSurface() != null && holder.getSurface().isValid()) {
                     mMediaPlayer.setDisplay(holder);
@@ -370,6 +644,10 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
                     holder.addCallback(new SurfaceHolder.Callback() {
                         @Override
                         public void surfaceCreated(SurfaceHolder holder) {
+                            if (mRenderView != resumeRenderView || mMediaPlayer != resumePlayer) {
+                                holder.removeCallback(this);
+                                return;
+                            }
                             if (mRenderView != null) {
                                 mRenderView.setScaleType(mCurrentScreenScaleType);
                                 mRenderView.setVideoSize(mVideoSize[0], mVideoSize[1]);
@@ -407,39 +685,55 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      * 释放播放器
      */
     public void release() {
-        if (!isInIdleState()) {
-            //释放播放器
-            if (mMediaPlayer != null) {
-                mMediaPlayer.release();
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mRenderHandler.post(this::release);
+            return;
+        }
+        boolean wasActive = !isInIdleState();
+        if (wasActive || mMediaPlayer != null || mRenderView != null || mPendingRenderHandoff != null) {
+            RenderHandoff handoff = mPendingRenderHandoff;
+            mPendingRenderHandoff = null;
+            IRenderView renderView = mRenderView;
+            IRenderView previous = handoff != null ? handoff.previous : null;
+            AbstractPlayer player = mMediaPlayer;
+            cancelRenderAttach(renderView);
+            cancelRenderAttach(previous);
+            // Before commit the old renderer still owns the decoder output, even though
+            // mRenderView already exposes the incoming View to size/rotation/resume callers.
+            boolean detached = detachRenderPlayer(previous != null ? previous : renderView, player);
+            try {
+                if (player != null) player.release();
+            } finally {
                 mMediaPlayer = null;
-            }
-            //释放renderView
-            if (mRenderView != null) {
-                mPlayerContainer.removeView(mRenderView.getView());
-                mRenderView.release();
-                mRenderView = null;
-            }
-            //释放Assets资源
-            if (mAssetFileDescriptor != null) {
-                try {
-                    mAssetFileDescriptor.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                try { releaseFinalRenderView(renderView, player, detached); }
+                finally { releaseFinalRenderView(previous, player, detached); }
+                if (!(renderView instanceof GlEnhanceRenderView) || ((GlEnhanceRenderView) renderView).isReleased()) {
+                    mRenderView = null;
                 }
             }
-            //关闭AudioFocus监听
-            if (mAudioFocusHelper != null) {
-                mAudioFocusHelper.abandonFocus();
-                mAudioFocusHelper = null;
+            if (wasActive) {
+                //释放Assets资源
+                if (mAssetFileDescriptor != null) {
+                    try {
+                        mAssetFileDescriptor.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                //关闭AudioFocus监听
+                if (mAudioFocusHelper != null) {
+                    mAudioFocusHelper.abandonFocus();
+                    mAudioFocusHelper = null;
+                }
+                //关闭屏幕常亮
+                mPlayerContainer.setKeepScreenOn(false);
+                //保存播放进度
+                saveProgress();
+                //重置播放进度
+                mCurrentPosition = 0;
+                //切换转态
+                setPlayState(STATE_IDLE);
             }
-            //关闭屏幕常亮
-            mPlayerContainer.setKeepScreenOn(false);
-            //保存播放进度
-            saveProgress();
-            //重置播放进度
-            mCurrentPosition = 0;
-            //切换转态
-            setPlayState(STATE_IDLE);
         }
         mVideoSize[0] = 0;
         mVideoSize[1] = 0;
@@ -596,12 +890,26 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
     public void onInfo(int what, int extra) {
         switch (what) {
             case AbstractPlayer.MEDIA_INFO_BUFFERING_START:
-                setPlayState(STATE_BUFFERING);
+                // A stale buffering callback must not replace an explicit user pause.
+                if (mCurrentPlayState != STATE_PAUSED) {
+                    setPlayState(STATE_BUFFERING);
+                }
                 break;
             case AbstractPlayer.MEDIA_INFO_BUFFERING_END:
+                // Buffering callbacks can arrive after pause. Only the decoder's active playback
+                // may promote the logical/UI/GL state back into buffered playback.
+                if (mCurrentPlayState == STATE_PAUSED || !isDecoderPlaying()) {
+                    Log.i("CarVideo", "buffering end ignored state=" + mCurrentPlayState);
+                    break;
+                }
                 setPlayState(STATE_BUFFERED);
                 break;
             case AbstractPlayer.MEDIA_INFO_RENDERING_START: // 视频/音频开始渲染
+                // A replacement Surface can render its retained frame while the engine is paused.
+                if (mCurrentPlayState == STATE_PAUSED || !isDecoderPlaying()) {
+                    Log.i("CarVideo", "rendering start ignored state=" + mCurrentPlayState);
+                    break;
+                }
                 setPlayState(STATE_PLAYING);
                 mPlayerContainer.setKeepScreenOn(true);
                 break;
@@ -769,6 +1077,11 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
             throw new IllegalArgumentException("RenderViewFactory can not be null!");
         }
         mRenderViewFactory = renderViewFactory;
+        if (renderViewFactory instanceof GlEnhanceRenderViewFactory) {
+            mVideoEnhancementConfig = ((GlEnhanceRenderViewFactory) renderViewFactory).getConfiguration();
+        } else {
+            mVideoEnhancementConfig = new VideoEnhanceConfig(0, false, false);
+        }
     }
 
     /**
