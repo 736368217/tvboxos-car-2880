@@ -248,3 +248,50 @@ PyProbe : homeContent={"class": [{"type_id": "1", "type_name": "PY源"}], "list"
 
 - 真车（arm64 原生）表现应优于模拟器：MuMu 是 x86_64 + ARM 转译，Python 走转译执行。
 - 本轮只验证了「py 源能加载并执行」，未逐个验证第三方 py 源的业务逻辑与站点连通性。
+
+---
+
+## 9. r3（本机 UX 修复）：小窗放大 / 返回杠可配置 / CPU 缺省不显示
+
+### 9.1 详情页小窗单击 = 放大
+
+- VodController 新增 OnPreviewTapListener：previewMode 下 onSingleTapConfirmed
+  不再 toggleShowState() 弹控制条，而是回调宿主。
+- PlayFragment.setOnPreviewTapListener() 转发；DetailActivity 在设置预览模式的两处
+  接到 enterFullPreview()。小窗里那排过小的按钮不再出现，点一下直接全屏。
+
+### 9.2 返回杠
+
+- 点按即返回：BackNavPolicy.EdgeGesture.end() 把「按下未移动即抬起」(WAITING) 视为返回，
+  与拖到 48dp 阈值等效；纵向调位、斜向/向外滑动、CANCEL 仍不返回。
+- 热区放大：默认 28x120dp → 32x140dp，并随杠尺寸自适应（宽 x3、高 +56dp）。
+- 落点修正：edge.syncBounds() 不再额外加 waveHeight/2，导引小棍回到安全区 55% 处
+  （此前被整体下移半个波形高度，视觉与点击区一起偏下）。
+- 外观可配置（设置页 4 行）：
+
+| 设置项 | 取值 |
+| :--- | :--- |
+| 返回杠大小 | 细 6x64 / 中 12x96 / 粗 18x140 dp |
+| 返回杠颜色 | 青 #38BDF8 / 白 / 琥珀 #FBBF24 / 绿 #34D399 / 粉 #F472B6 |
+| 返回杠透明度 | 40% / 60% / 80% / 100%（默认 55%） |
+| 自动隐藏 | 4 秒 / 6 秒 / 8 秒 / 常驻 |
+
+新增键 BACK_BAR_WIDTH_DP、BACK_BAR_HEIGHT_DP、BACK_BAR_COLOR、BACK_BAR_ALPHA；
+EdgePullBackView 与 FloatingBackBallView 均按这些值绘制，改完立即 refresh() 生效。
+
+### 9.3 性能徽标
+
+- SystemUsage.describeAvailable()：取不到的指标不再输出 --；CPU 缺失只显示内存，
+  两项都取不到则隐藏整个徽标（可见性跟随下载速率徽标）。
+
+### 9.4 验证状态
+
+| 项 | 结果 |
+| :--- | :--- |
+| Host 测试 | BackNavPolicyHostTest PASS 740 项（新热区/点按语义），其余 3 个测试全绿 |
+| 编译 | :app:assemblePythonRelease BUILD SUCCESSFUL |
+| 产物 | TVBox-Original-Feature-1.0.0-car.7-python-r3.apk，52,664,093 bytes，SHA-256 8E9720CFAFBE1E9F9E21CE6894D6FCB27547004B1B761DD1561D78DB0D73F82A |
+
+未完成：本轮改动未做真机点测。设备池两次 acquire 均返回
+no instance could be leased（vm0 被其他会话的 com.carweb.tvb 占用）。需要一次实机确认：
+设置页 4 个新行可循环、导引小棍点按返回、小窗单击放大、CPU 徽标按预期隐藏。
