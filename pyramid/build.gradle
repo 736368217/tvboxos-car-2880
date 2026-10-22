@@ -10,15 +10,18 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         python {
-            buildPython("D:/Programs/Python/Python38/python.exe")
+            // Override with -PbuildPython=<Python 3.8 executable> or TVBOX_BUILD_PYTHON.
+            buildPython(project.findProperty('buildPython') ?: System.getenv('TVBOX_BUILD_PYTHON') ?: 'python3.8')
             pip {
-                install "lxml"
-                install "ujson"
+                // 与已验证的 car.7 构建保持一致：lxml/ujson/pycryptodome 使用 Chaquopy 提供的
+                // Android wheel 版本；不锁定会遇到新版 sdist 的 pyproject.toml，旧 pip 无法解析。
+                install "lxml==4.6.3"
+                install "ujson==1.35"
                 install "pyquery==2.0.2"
                 install "requests"
                 install "jsonpath"
                 install "cachetools"
-                install 'pycryptodome'
+                install 'pycryptodome==3.9.4'
                 install 'beautifulsoup4'
             }
         }

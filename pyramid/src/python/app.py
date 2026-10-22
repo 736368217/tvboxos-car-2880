@@ -2,129 +2,89 @@
 #!/usr/bin/python
 import os
 import requests
-from importlib.machinery import SourceFileLoader  ### 导入这个模块
+from importlib.machinery import SourceFileLoader
 from urllib import parse
 import json
 import sys
 import crypto_protocol_dh
 sys.dont_write_bytecode = True
 
-# Keep Python requests as the default and fall back to the app's configured
-# Java HTTP client when an HTTPS endpoint rejects the embedded transport.
-_session_request = requests.sessions.Session.request
-try:
-    from com.undcover.freedom.pyramid import PythonHttp as _PythonHttp
-except Exception:
-    _PythonHttp = None
+from tvbox_http import install_fallback
+install_fallback()
 
-class _JavaResponse:
-    def __init__(self, payload):
-        self.status_code = int(payload.get("status_code", 0))
-        self.headers = payload.get("headers", {})
-        self.text = payload.get("text", "")
-        self.content = self.text.encode("utf-8")
-
-    def json(self):
-        return json.loads(self.text)
-
-def _java_request(session, method, url, kwargs):
-    params = kwargs.get("params")
-    if params:
-        query = parse.urlencode(params, doseq=True)
-        url += ("&" if "?" in url else "?") + query
-    headers = dict(session.headers)
-    headers.update(kwargs.get("headers") or {})
-    # Let OkHttp's transparent gzip interceptor decode the response.
-    headers.pop("Accept-Encoding", None)
-    cookies = getattr(session, "cookies", None)
-    if cookies:
-        cookie_header = "; ".join(str(key) + "=" + str(value) for key, value in cookies.items())
-        if cookie_header:
-            headers["Cookie"] = cookie_header
-    body = kwargs.get("json")
-    if body is not None:
-        body = json.dumps(body, ensure_ascii=False)
-        headers.setdefault("Content-Type", "application/json")
-    elif kwargs.get("data") is not None:
-        body = kwargs.get("data")
-        if not isinstance(body, str):
-            body = str(body)
-    else:
-        body = ""
-    raw = _PythonHttp.request(
-        method,
-        url,
-        json.dumps(headers, ensure_ascii=False),
-        body,
-        kwargs.get("allow_redirects", True),
-    )
-    payload = json.loads(str(raw))
-    if "error" in payload:
-        raise requests.RequestException(payload["error"])
-    response = _JavaResponse(payload)
-    set_cookie = response.headers.get("Set-Cookie") or response.headers.get("set-cookie")
-    if set_cookie and cookies is not None:
-        for item in str(set_cookie).split(","):
-            pair = item.split(";", 1)[0].strip()
-            if "=" in pair:
-                key, value = pair.split("=", 1)
-                cookies.set(key.strip(), value.strip())
-    return response
-
-_JAVA_FALLBACK_STATUS = (403, 429, 495, 496, 497, 525, 526, 527)
-
-if not getattr(_session_request, "_tvbox_java_http_fallback", False):
-    def _tvbox_session_request(self, method, url, **kwargs):
-        if _PythonHttp is None or not str(url).lower().startswith("https://") or kwargs.get("stream"):
-            return _session_request(self, method, url, **kwargs)
-        try:
-            response = _session_request(self, method, url, **kwargs)
-            if response.status_code not in _JAVA_FALLBACK_STATUS:
-                return response
-        except requests.RequestException:
-            response = None
-        fallback = _java_request(self, method, url, kwargs)
-        return fallback if response is None or fallback.status_code < response.status_code else response
-    _tvbox_session_request._tvbox_java_http_fallback = True
-    requests.sessions.Session.request = _tvbox_session_request
 
 PLUGIN_DOWNLOAD_TIMEOUT = 20
+PLUGIN_MAX_REDIRECTS = 5
+
 
 def createFile(file_path):
-    if os.path.exists(file_path) is False:
+    if not os.path.exists(file_path):
         os.makedirs(file_path)
 
-def redirectResponse(tUrl):
-  rsp = requests.get(tUrl, allow_redirects=False, verify=False, timeout=PLUGIN_DOWNLOAD_TIMEOUT)
-  if 'Location' in rsp.headers:
-    return redirectResponse(rsp.headers['Location'])
-  else:
-    return rsp
 
-def downloadFile(name,url):
+def redirectResponse(tUrl):
+    current = tUrl
+    for attempt in range(PLUGIN_MAX_REDIRECTS + 1):
+        rsp = requests.get(current, allow_redirects=False, verify=False,
+                           timeout=PLUGIN_DOWNLOAD_TIMEOUT)
+        if rsp.status_code not in (301, 302, 303, 307, 308):
+            return rsp
+        location = rsp.headers.get("Location")
+        rsp.close()
+        if not location or attempt == PLUGIN_MAX_REDIRECTS:
+            raise requests.TooManyRedirects("plugin redirect limit exceeded")
+        next_url = parse.urljoin(current, location)
+        if parse.urlsplit(next_url).scheme not in ("https", "http"):
+            raise requests.RequestException("unsupported plugin redirect")
+        current = next_url
+    raise requests.TooManyRedirects("plugin redirect limit exceeded")
+
+
+def downloadFile(name, url):
+    temp_name = name + ".tmp"
+    rsp = None
     try:
         rsp = redirectResponse(url)
-        with open(name,'wb') as f:
-            f.write(rsp.content)
-        print(url)
-    except:
-        print(name + ' =======================================> error')
-        print(url)
+        rsp.raise_for_status()
+        if not 200 <= rsp.status_code < 300:
+            raise requests.RequestException("invalid plugin status")
+        content = rsp.content
+        if not content:
+            raise requests.RequestException("empty plugin response")
+        compile(content, name, "exec")
+        with open(temp_name, "wb") as stream:
+            stream.write(content)
+        os.replace(temp_name, name)
+        print("plugin downloaded " + os.path.basename(name))
+        return True
+    except Exception as error:
+        if os.path.exists(temp_name):
+            os.remove(temp_name)
+        raise RuntimeError("plugin download failed (%s)" % type(error).__name__) from None
+    finally:
+        if rsp is not None:
+            rsp.close()
 
-def downloadPlugin(basePath,url):
+
+def downloadPlugin(basePath, url):
     createFile(basePath)
-    name = url.split('/')[-1].split('.')[0]
-    pyName = ''
-    if url.startswith('file://'):
-        pyName = url.replace('file://','')
+    parsed = parse.urlparse(url)
+    file_name = os.path.basename(parsed.path or url)
+    name = parse.unquote(file_name.rsplit(".", 1)[0] if "." in file_name else file_name)
+    if not name or os.path.basename(name) != name or "\\" in name:
+        raise RuntimeError("invalid plugin name")
+    if url.startswith("file://"):
+        pyName = parse.unquote(parsed.path)
     else:
-        pyName = basePath + name+'.py'
-        downloadFile(pyName,url)
+        pyName = os.path.join(basePath, name + ".py")
+        downloadFile(pyName, url)
+    if not os.path.isfile(pyName):
+        raise RuntimeError("plugin file missing")
     sPath = gParam['SpiderPath']
     sPath[name] = pyName
     sParam = gParam['SpiderParam']
-    paramList = parse.parse_qs(parse.urlparse(url).query).get('extend')
-    if paramList == None:
+    paramList = parse.parse_qs(parsed.query).get('extend')
+    if paramList is None:
         paramList = ['']
     sParam[name] = paramList[0]
     return pyName

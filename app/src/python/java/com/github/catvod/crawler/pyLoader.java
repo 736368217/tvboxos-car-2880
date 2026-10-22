@@ -15,6 +15,7 @@ public class pyLoader implements IPyLoader {
     private PythonLoader pythonLoader;
     private final ConcurrentHashMap<String, Spider> spiders;
     private String lastConfig = null; // 记录上次的配置
+    private String pendingConfig;
 
     public pyLoader() {
         spiders = new ConcurrentHashMap<>();
@@ -27,19 +28,24 @@ public class pyLoader implements IPyLoader {
             pythonLoader.clear();
         }
         lastConfig = null;
+        pendingConfig = null;
         recentPyKey = null;
     }
 
     @Override
-    public void setConfig(String jsonStr) {
+    public synchronized void setConfig(String jsonStr) {
         if (!isPythonSupported()) {
             Log.w("PyLoader", "python32 is disabled on Android 16+ 32-bit process.");
             return;
         }
         if (jsonStr != null && !jsonStr.equals(lastConfig)) {
             Log.i("PyLoader", "echo-setConfig 初始化json ");
-            getPythonLoader().setConfig(jsonStr);
             lastConfig = jsonStr;
+            pendingConfig = jsonStr;
+            if (pythonLoader != null) {
+                pythonLoader.setConfig(jsonStr);
+                pendingConfig = null;
+            }
         }
     }
 
@@ -61,7 +67,12 @@ public class pyLoader implements IPyLoader {
         }
         try {
             Log.i("PyLoader", "echo-getSpider url: " + cls);
-            Spider sp = getPythonLoader().getSpider(key, cls, ext);
+            PythonLoader loader = getPythonLoader();
+            if (pendingConfig != null) {
+                loader.setConfig(pendingConfig);
+                pendingConfig = null;
+            }
+            Spider sp = loader.getSpider(key, cls, ext);
             if (sp == null) return new SpiderNull();
             if (sp instanceof SpiderNull) return sp;
 //            Log.i("PyLoader", "echo-getSpider homeContent: " + sp.homeContent(true));
