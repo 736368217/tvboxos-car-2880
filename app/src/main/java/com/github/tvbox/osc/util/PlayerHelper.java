@@ -310,4 +310,19 @@ public class PlayerHelper {
             return bitSpeed > 0 ? bitSpeed + "bps" : (show ? "0bps" : "");
         }
     }
+
+    /**
+     * 真实下载速率，按字节口径：B/s、KB/s、MB/s。
+     * 车机播放页右上角使用该口径，不再换算成 bps。
+     */
+    public static String getDisplaySpeedBytes(long bytesPerSecond, boolean show) {
+        if (bytesPerSecond >= 1048576L) {
+            return new DecimalFormat("0.0").format(bytesPerSecond / 1048576d) + " MB/s";
+        } else if (bytesPerSecond >= 1024L) {
+            return new DecimalFormat("0").format(bytesPerSecond / 1024d) + " KB/s";
+        } else if (bytesPerSecond > 0L) {
+            return bytesPerSecond + " B/s";
+        }
+        return show ? "0 KB/s" : "";
+    }
 }

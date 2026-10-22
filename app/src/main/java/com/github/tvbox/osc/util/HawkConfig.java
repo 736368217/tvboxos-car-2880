@@ -67,6 +67,27 @@ public class HawkConfig {
     public static final String DANMU_RANDOM_COLOR = "danmu_random_color";
     public static final String DANMU_API = "danmu_api";
     public static final String IN_APP_BACK = "inapp_back"; // default true
+    // 应用内返回组件（双模：悬浮球 / 边缘拉出）配置键
+    public static final String BACK_MODE = "inapp_back_mode"; // 默认 edge（边缘拉出）
+    public static final String BACK_MODE_EXPLICIT = "inapp_back_mode_explicit";
+    public static final String BACK_POSITION_X = "inapp_back_x";
+    public static final String BACK_POSITION_Y = "inapp_back_y";
+    public static final String BACK_EDGE_POSITION_Y = "inapp_back_edge_y";
+    public static final String BACK_SIDE = "inapp_back_side";
+    public static final String BACK_MODE_FLOATING = "floating";
+    public static final String BACK_MODE_EDGE = "edge";
+    public static final String BACK_MODE_BOTH = "both";
+    public static final String BACK_SIDE_LEFT = "left";
+    public static final String BACK_SIDE_RIGHT = "right";
+    public static final String BACK_SIDE_BOTH = "both";
+    public static final String BACK_LARGE = "inapp_back_large";
+    public static final String BACK_HAPTIC = "inapp_back_haptic"; // 默认 true
+    public static final String BACK_HIDE_ON_ROOT = "inapp_back_hide_on_root"; // 默认 false
+    public static final String BACK_EDGE_SKIN = "inapp_back_edge_skin";
+    public static final String BACK_EDGE_SKIN_EXPLICIT = "inapp_back_skin_explicit";
+    public static final String BACK_SKIN_TEARDROP = "teardrop";
+    public static final String BACK_SKIN_CAPSULE = "capsule";
+    public static final String BACK_HIDE_SECONDS = "hide_seconds"; // 4/6/8，0 = 常驻
     public static final String HIFI_AUDIO = "hifi_audio"; // default 0
     public static final String VIDEO_ENHANCE = "video_enhance"; // 0 original, 1 vivid, 8..10 anime
     public static final String VIDEO_SR = "video_sr"; // default 1: SGSR1

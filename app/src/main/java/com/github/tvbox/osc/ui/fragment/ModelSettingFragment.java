@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 
 import com.github.tvbox.osc.R;
-import com.github.tvbox.osc.backbar.BackBarController;
+import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.api.DanmakuApi;
 import com.github.tvbox.osc.base.BaseActivity;
@@ -76,6 +76,7 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 public class ModelSettingFragment extends BaseLazyFragment {
     private static final int REQUEST_LOCAL_CONFIG = 1001;
     private TextView tvBackBarOpen;
+    private TextView tvBackMode;
     private TextView tvDebugOpen;
     private TextView tvMediaCodec;
     private TextView tvParseWebView;
@@ -136,7 +137,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? "开启" : "关闭");
         tvDebugOpen = findViewById(R.id.tvDebugOpen);
         tvBackBarOpen = findViewById(R.id.tvBackBarOpen);
-        tvBackBarOpen.setText(Hawk.get(HawkConfig.IN_APP_BACK, true) ? "开启" : "关闭");
+        tvBackBarOpen.setText(InAppBackButton.isEnabled() ? "开启" : "关闭");
+        tvBackMode = findViewById(R.id.tvBackMode);
+        refreshBackModeText();
         tvParseWebView = findViewById(R.id.tvParseWebView);
         tvMediaCodec = findViewById(R.id.tvMediaCodec);
         tvPlay = findViewById(R.id.tvPlay);
@@ -184,10 +187,16 @@ public class ModelSettingFragment extends BaseLazyFragment {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                boolean enabled = !Hawk.get(HawkConfig.IN_APP_BACK, true);
-                Hawk.put(HawkConfig.IN_APP_BACK, enabled);
-                BackBarController.setEnabled(enabled);
+                boolean enabled = !InAppBackButton.isEnabled();
+                InAppBackButton.setEnabled(getActivity(), enabled);
                 tvBackBarOpen.setText(enabled ? "开启" : "关闭");
+            }
+        });
+        findViewById(R.id.llBackMode).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                cycleBackMode();
             }
         });
         findViewById(R.id.llParseWebVew).setOnClickListener(new View.OnClickListener() {
@@ -1121,5 +1130,25 @@ public class ModelSettingFragment extends BaseLazyFragment {
         } else {
             return "缩略图";
         }
+    }
+
+    /** 应用内返回组件的当前模式文案（悬浮球 / 边缘拉出 / 双模共存）。 */
+    private void refreshBackModeText() {
+        if (tvBackMode == null) return;
+        String mode = InAppBackButton.getMode();
+        if (HawkConfig.BACK_MODE_FLOATING.equals(mode)) tvBackMode.setText("悬浮球");
+        else if (HawkConfig.BACK_MODE_BOTH.equals(mode)) tvBackMode.setText("双模共存");
+        else tvBackMode.setText("边缘拉出");
+    }
+
+    /** 依次切换：边缘拉出 → 悬浮球 → 双模共存。 */
+    private void cycleBackMode() {
+        String mode = InAppBackButton.getMode();
+        String next;
+        if (HawkConfig.BACK_MODE_EDGE.equals(mode)) next = HawkConfig.BACK_MODE_FLOATING;
+        else if (HawkConfig.BACK_MODE_FLOATING.equals(mode)) next = HawkConfig.BACK_MODE_BOTH;
+        else next = HawkConfig.BACK_MODE_EDGE;
+        InAppBackButton.setMode(getActivity(), next);
+        refreshBackModeText();
     }
 }

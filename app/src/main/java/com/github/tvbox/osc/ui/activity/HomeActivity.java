@@ -996,4 +996,29 @@ public class HomeActivity extends BaseActivity {
         blinkAnimation.setRepeatCount(Animation.INFINITE);
         tvName.startAnimation(blinkAnimation);
     }
+
+    /**
+     * 车机：一次返回先把分类页回到首页分类，复用应用自身的排序切换路径，
+     * 保证排序列表、ViewPager 与顶部区域同步。
+     */
+    @Override
+    public boolean onBackButtonStepUp() {
+        if (mViewPager == null || sortAdapter == null) return false;
+        if (mViewPager.getCurrentItem() <= 0 && currentSelected <= 0) return false;
+        try {
+            mGridView.setSelectedPosition(0);
+        } catch (Throwable ignored) {
+        }
+        sortFocused = 0;
+        sortChange = true;
+        mHandler.removeCallbacks(mDataRunnable);
+        mHandler.postDelayed(mDataRunnable, 100);
+        return true;
+    }
+
+    /** 首页即应用根页面：返回组件此处只提示，不主动退出应用。 */
+    @Override
+    public boolean onBackButtonAtRoot() {
+        return true;
+    }
 }

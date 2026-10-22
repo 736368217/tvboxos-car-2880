@@ -17,7 +17,6 @@ import com.github.tvbox.osc.util.OkGoHelper;
 import com.github.tvbox.osc.util.PlayerHelper;
 import com.kingja.loadsir.core.LoadSir;
 import com.orhanobut.hawk.Hawk;
-import com.github.tvbox.osc.backbar.BackBarController;
 import com.whl.quickjs.android.QuickJSLoader;
 import com.github.catvod.crawler.JsLoader;
 import com.p2p.P2PClass;
@@ -42,9 +41,6 @@ public class App extends MultiDexApplication {
         super.onCreate();
         instance = this;
         initParams();
-        BackBarController.install(this);
-        BackBarController.setEnabled(Hawk.get(HawkConfig.IN_APP_BACK, true));
-        BackBarController.setAutoHideMillis(4_000L);
         // OKGo
         OkGoHelper.init(); //台标获取
         EpgUtil.init();

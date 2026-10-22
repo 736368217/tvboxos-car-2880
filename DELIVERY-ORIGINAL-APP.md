@@ -138,3 +138,53 @@ $env:GRADLE_USER_HOME = 'D:\gradle-cache'
 2. **未做真车验收**：验证环境是 MuMu（API 35），非零跑 B01 实车（SA8295P / Android 12L / API 32）；未验证 OEM 安装器过滤、真实 HDR 输出与物理音质。
 3. **远端源可用性未纳入本轮范围**：点播/直播源与聚合搜索依赖外部服务，本轮未做站点连通性验证，不能表述为「各站点均已通过」。
 4. **签名是测试证书**：可安装可运行，但不构成可发布产物的签名合规结论。
+
+---
+
+## 7. r2 修订（按用户反馈重做）
+
+### 7.1 返回组件改为移植 car-ux-redesign-3k-fps 的方案
+
+上一版自写的 backbar（单条竖向杠）已删除，改为逐字移植该分支的实现：
+
+| 文件 | 作用 |
+| :--- | :--- |
+| car/InAppBackButton.java | 入口：DecorView 挂载、生命周期、返回分发、配置读写 |
+| car/InAppBackHostLayout.java | 全屏宿主，安全边距、token 缩放、显隐与置顶 |
+| car/EdgePullBackView.java | 边缘导引小棍 + 贝塞尔拉出抽屉（默认模式） |
+| car/FloatingBackBallView.java | 磁吸悬浮球（拖拽/弹簧贴边/闲置半隐藏） |
+| car/BackNavPolicy.java | 纯逻辑：命中、阈值、阻尼、磁吸、几何 |
+
+配套：HawkConfig.BACK_* 全量配置键、dimens.xml 的 car_top/bottom/side_padding、
+BaseActivity 的 attach/wake/release 与 onBackButtonStepUp()/onBackButtonAtRoot() 钩子、
+HomeActivity 的两处覆写。设置页新增「应用内返回」开关与「返回模式」循环项。
+
+### 7.2 播放页遥测
+
+- 左上角分辨率：宽 X 高；超分运行时追加 → 超分 <渲染视口宽> X <高>（视口尺寸来自 GL 渲染视图，未生效时不追加）。
+- 移除帧率行里的 SR 生效 / 平滑 生效 提示，只保留 片源 … fps · 输出 … fps。
+- 右上角下载速率改为字节口径：B/s、KB/s、MB/s（新增 PlayerHelper.getDisplaySpeedBytes），不再用 Mbps。
+- 右上角新增系统负载徽标：CPU 37% · 内存 62%；CPU 取 /proc/stat 相邻采样差值（整机口径），
+  内存取 ActivityManager.MemoryInfo；任一项 ≥90% 时文字转红。
+
+### 7.3 本轮验证
+
+| 项 | 结果 |
+| :--- | :--- |
+| Host 测试 | BackNavPolicyHostTest PASS: 738 项返回导航策略检查；另 3 个既有测试仍全绿 |
+| 编译 | :app:assembleJavaRelease BUILD SUCCESSFUL |
+| 显示门禁 | CAR_DISPLAY_PASS（2880×1620 / d160 / rotation lock / input 几何） |
+| 挂载 | 运行日志确认 InAppBackHostLayout 已创建，宿主 2880×1620，tokenScale 3.375，球体 243px，位置 (78,695) |
+| 渲染 | 唤醒后截屏在 (160–280, 720–880) 检出青色描边像素，确认球体实际绘制 |
+| 命中/返回 | 点击球体触发 performBack()：首页根状态弹出「已在首页」Toast（Window{… Toast}，owner uid 为本应用） |
+| 设置 | tvBackBarOpen=开启，tvBackMode 可在 边缘拉出 / 悬浮球 间切换并即时生效 |
+
+### 7.4 本轮未完成 / 需下一轮确认
+
+1. release APK 上未复现点击球体的 Toast：debug 构建（同源代码、未混淆）已复现；release 上两次点击未触发，
+   尚不能断定是 R8 影响还是球体处于闲置半隐藏位置导致未命中，需下一轮用 release 复测。
+2. 边缘拉出手势未在横屏下实测成功：本轮早期设备被重置为竖屏（1620×2880, ROTATION_0）导致几何错位，
+   纠正横屏后仅完成悬浮球路径验证；边缘拉出手势需补测。
+3. 播放页四项 UI 未做真机视觉验收：依赖真实播放（需要可用点播源或把播放探针接入 VodController），
+   本轮只完成代码与设备端格式前提核对（/proc/stat 字段结构、ActivityManager 可用）。
+4. 交付 APK（r2）SHA-256：F2DACE98971A5B00566B6FE97B54023D4133836E8383046A28F1A3E11E231460，33,334,877 bytes。

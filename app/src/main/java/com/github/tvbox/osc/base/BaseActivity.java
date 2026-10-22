@@ -19,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.PermissionChecker;
 
 import com.github.tvbox.osc.R;
-import com.github.tvbox.osc.backbar.BackBarController;
+import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.callback.EmptyCallback;
 import com.github.tvbox.osc.callback.LoadingCallback;
 import com.github.tvbox.osc.util.AppManager;
@@ -91,14 +91,14 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
             refreshAutoSize();
             scheduleRefreshAutoSize();
         }
-        BackBarController.attach(this);
+        InAppBackButton.attach(this);
     }
 
-    /** 返回杠跟随每个页面显示；用户触摸或按键时重新唤醒。 */
+    /** 应用内返回组件跟随每个页面显示；任何页面触摸或按键都会重新唤醒。 */
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event != null && event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            BackBarController.wake(this);
+            InAppBackButton.wake(this);
         }
         return super.dispatchTouchEvent(event);
     }
@@ -106,9 +106,25 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event != null && event.getAction() == KeyEvent.ACTION_DOWN) {
-            BackBarController.wake(this);
+            InAppBackButton.wake(this);
         }
         return super.dispatchKeyEvent(event);
+    }
+
+    /**
+     * 页面可以自行消费“返回上一级”（例如分类页回到首页分类）。
+     * 返回 true 表示本 Activity 已处理，不再继续向上分发。
+     */
+    public boolean onBackButtonStepUp() {
+        return false;
+    }
+
+    /**
+     * 返回 true 表示本 Activity 即为应用根页面：返回组件此时只做提示，
+     * 不允许由它直接退出应用。
+     */
+    public boolean onBackButtonAtRoot() {
+        return false;
     }
 
     public void hideSysBar() {
@@ -254,6 +270,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
 
     @Override
     protected void onDestroy() {
+        InAppBackButton.release(this);
         super.onDestroy();
         AppManager.getInstance().finishActivity(this);
     }

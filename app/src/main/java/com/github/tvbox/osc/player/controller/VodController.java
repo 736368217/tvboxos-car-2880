@@ -51,6 +51,7 @@ import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.LOG;
 import com.github.tvbox.osc.util.M3u8;
 import com.github.tvbox.osc.util.PlayerHelper;
+import com.github.tvbox.osc.util.SystemUsage;
 import com.github.tvbox.osc.util.ScreenUtils;
 import com.github.tvbox.osc.util.SubtitleHelper;
 import com.github.tvbox.osc.util.VideoParseRuler;
@@ -124,6 +125,7 @@ public class VodController extends BaseController {
                         mTopRoot1.setVisibility(VISIBLE);
                         mTopRoot2.setVisibility(VISIBLE);
                         mPlayLoadNetSpeedRightTop.setVisibility(VISIBLE);
+                        if (mSysUsageRightTop != null) mSysUsageRightTop.setVisibility(VISIBLE);
                         if(Hawk.get(HawkConfig.SCREEN_DISPLAY,GONE)==GONE){
                             mPlayPauseTime.setVisibility(VISIBLE);
                         }else {
@@ -138,6 +140,7 @@ public class VodController extends BaseController {
                         mBottomRoot.setVisibility(GONE);
                         mTopRoot1.setVisibility(GONE);
                         mPlayLoadNetSpeedRightTop.setVisibility(GONE);
+                        if (mSysUsageRightTop != null) mSysUsageRightTop.setVisibility(GONE);
                         if (videoPlayState == VideoView.STATE_PAUSED) {
                             showPauseRoot();
                             mPlayTitle.setVisibility(VISIBLE);
@@ -232,6 +235,7 @@ public class VodController extends BaseController {
     TextView mPlayTitle1;
     TextView mPlayLabel;
     TextView mPlayLoadNetSpeedRightTop;
+    TextView mSysUsageRightTop;
     TextView mNextBtn;
     TextView mPreBtn;
     TextView mPlayerScaleBtn;
@@ -297,15 +301,18 @@ public class VodController extends BaseController {
             @SuppressLint("SimpleDateFormat") SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
             mPlayPauseTime.setText(timeFormat.format(date));
             long mSpeed = mControlWrapper.getTcpSpeed();
-            String speed = PlayerHelper.getDisplaySpeed(mSpeed,false);
-            String speedBps = PlayerHelper.getDisplaySpeedBps(mSpeed,true);
-            mPlayLoadNetSpeedRightTop.setText(speedBps);
-            mPlayLoadNetSpeed.setText(speed);
-            net_play_speed.setText(speedBps);
-            int[] mVideoSizes = mControlWrapper.getVideoSize();
-            String width = Integer.toString(mVideoSizes[0]);
-            String height = Integer.toString(mVideoSizes[1]);
-            mVideoSize.setText(width + " X " + height);
+            // 右上角显示真实字节速率（KB/s、MB/s），不再换算成 bps。
+            String speedText = PlayerHelper.getDisplaySpeedBytes(mSpeed, true);
+            mPlayLoadNetSpeedRightTop.setText(speedText);
+            mPlayLoadNetSpeed.setText(speedText);
+            net_play_speed.setText(speedText);
+            mVideoSize.setText(buildVideoSizeText(mControlWrapper.getVideoSize()));
+            int[] usage = SystemUsage.sample(getContext());
+            if (mSysUsageRightTop != null) {
+                mSysUsageRightTop.setText(SystemUsage.describe(usage));
+                mSysUsageRightTop.setTextColor(
+                        SystemUsage.worstPercent(usage) >= 90 ? 0xFFFF6B6B : 0xFFFFFFFF);
+            }
 
             mHandler.postDelayed(this, 1000);
         }
@@ -366,14 +373,26 @@ public class VodController extends BaseController {
             source = mCarVideoView.getSourceFrameRate();
         }
         // Output submissions are a renderer diagnostic. Never copy source FPS into it.
-        String post = "";
-        if (mCarVideoView != null && mCarVideoView.hasEnhancedRenderer()) {
-            post = " · SR " + (mCarVideoView.isSuperResolutionRuntimeActive() ? "生效" : "待帧")
-                    + " · 平滑 " + (mCarVideoView.isInterpolationRuntimeActive() ? "生效" : "待帧");
-        }
         mVideoFrameRate.setText("片源 " + formatFrameRate(source) + " fps · 输出 "
-                + formatFrameRate(output) + " fps" + post);
+                + formatFrameRate(output) + " fps");
         mVideoFrameRate.setVisibility(VISIBLE);
+    }
+
+    /**
+     * 左上角分辨率：原始分辨率；超分真正生效时追加渲染视口的当前分辨率。
+     * 只在实际渲染尺寸可用时追加，避免把片源尺寸当成超分输出。
+     */
+    private String buildVideoSizeText(int[] size) {
+        if (size == null || size.length < 2 || size[0] <= 0 || size[1] <= 0) return "--";
+        String text = size[0] + " X " + size[1];
+        if (mCarVideoView != null && mCarVideoView.hasEnhancedRenderer()
+                && mCarVideoView.isSuperResolutionRuntimeActive()) {
+            View renderView = mCarVideoView.getRenderViewForDiagnostics();
+            if (renderView != null && renderView.getWidth() > 0 && renderView.getHeight() > 0) {
+                text = text + " → 超分 " + renderView.getWidth() + " X " + renderView.getHeight();
+            }
+        }
+        return text;
     }
 
     private boolean isUsableFrameRate(float frameRate) {
@@ -464,6 +483,7 @@ public class VodController extends BaseController {
         mPlayTitle1 = findViewById(R.id.tv_info_name1);
         mPlayLabel = findViewById(R.id.play_label);
         mPlayLoadNetSpeedRightTop = findViewById(R.id.tv_play_load_net_speed_right_top);
+        mSysUsageRightTop = findViewById(R.id.tv_sys_usage_right_top);
         mSeekBar = findViewById(R.id.seekBar);
         CircleThumbDrawable seekThumb = new CircleThumbDrawable(getContext());
         mSeekBar.setThumb(seekThumb);
@@ -1703,6 +1723,7 @@ public class VodController extends BaseController {
                 mTopRoot1.setVisibility(GONE);
 //                mTopRoot2.setVisibility(GONE);
                 mPlayLoadNetSpeedRightTop.setVisibility(GONE);
+                if (mSysUsageRightTop != null) mSysUsageRightTop.setVisibility(GONE);
                 if (isBottomVisible()) {
                     hideBottom();
                 }
