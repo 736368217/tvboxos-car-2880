@@ -11,17 +11,29 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="@dimen/vs_120"
-            android:layout_height="@dimen/vs_120"
+            android:layout_width="@dimen/vs_90"
+            android:layout_height="@dimen/vs_90"
+            android:alpha="0.72"
+            android:contentDescription="暂无内容"
             android:src="@drawable/ic_tvbox_file_empty" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/vs_20"
+            android:layout_marginTop="@dimen/vs_18"
             android:gravity="center"
-            android:text="没找到数据"
-            android:textColor="@android:color/white"
+            android:text="暂时没有内容"
+            android:textColor="@color/car_text_strong"
+            android:textSize="@dimen/ts_34"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_8"
+            android:gravity="center"
+            android:text="检查网络连接，或切换源站后重试"
+            android:textColor="@color/car_text_dim"
             android:textSize="@dimen/ts_24" />
     </LinearLayout>
 

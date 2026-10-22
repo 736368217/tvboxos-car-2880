@@ -1,0 +1,67 @@
+{
+  "apk": "TVBox-1.0.0-car.7-player-redesign.apk",
+  "sha256": "1b0eb5e2dfac4af3dd1c18c6aee76ffeab388f84bdc0f14f135ba4cff580dd61",
+  "bytes": 53675084,
+  "package": "com.github.tvbox.osc.jun",
+  "versionCode": 8,
+  "versionName": "1.0.0-car.7",
+  "device": {
+    "vmIndex": 1,
+    "adb": "127.0.0.1:16416",
+    "owner": "tvbox-global-style-20261022",
+    "physicalWidth": 1620,
+    "physicalHeight": 2880,
+    "displayWidth": 2880,
+    "displayHeight": 1620,
+    "density": 160,
+    "rotation": "lock 1",
+    "carDisplayPass": true
+  },
+  "tests": {
+    "pages": {
+      "passed": 80,
+      "failed": 0
+    },
+    "ux3k": {
+      "passed": 98,
+      "failed": 0
+    },
+    "playback": {
+      "passed": 101,
+      "failed": 0
+    },
+    "gestures": {
+      "passed": 7,
+      "failed": 0
+    },
+    "states": {
+      "passed": 5,
+      "failed": 0
+    }
+  },
+  "screenshots": [
+    "home.png",
+    "category.png",
+    "search.png",
+    "search-results.png",
+    "detail.png",
+    "live.png",
+    "live-channels.png",
+    "settings.png",
+    "advanced.png",
+    "collect-empty.png",
+    "history.png",
+    "local-file.png",
+    "push.png",
+    "fast-search.png",
+    "player.png",
+    "player-paused.png",
+    "player-more.png",
+    "player-advanced.png",
+    "player-hidden.png",
+    "state-empty.png",
+    "state-error.png",
+    "state-offline.png",
+    "state-loading.png"
+  ]
+}

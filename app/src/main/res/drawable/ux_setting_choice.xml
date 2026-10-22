@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true"><shape><solid android:color="@color/car_accent_blue" /><corners android:radius="20px" /><stroke android:width="3px" android:color="@color/car_accent_cyan" /></shape></item>
-    <item android:state_selected="true"><shape><solid android:color="@color/car_accent_blue_deep" /><corners android:radius="20px" /><stroke android:width="3px" android:color="@color/car_accent_cyan" /></shape></item>
-    <item android:state_focused="true"><shape><solid android:color="@color/car_surface_card_pressed" /><corners android:radius="20px" /><stroke android:width="3px" android:color="@color/car_accent_cyan" /></shape></item>
-    <item><shape><solid android:color="@color/car_surface_card_raised" /><corners android:radius="20px" /><stroke android:width="1px" android:color="@color/car_outline_idle" /></shape></item>
+    <item android:state_pressed="true"><shape><solid android:color="@color/car_surface_control_pressed" /><corners android:radius="@dimen/car_radius_sm" /><stroke android:width="@dimen/car_stroke_mid" android:color="@color/car_outline_focused" /></shape></item>
+    <item android:state_selected="true"><shape><solid android:color="@color/car_accent_blue" /><corners android:radius="@dimen/car_radius_sm" /><stroke android:width="@dimen/car_stroke_mid" android:color="@color/car_accent_cyan" /></shape></item>
+    <item android:state_focused="true"><shape><solid android:color="@color/car_surface_card_pressed" /><corners android:radius="@dimen/car_radius_sm" /><stroke android:width="@dimen/car_stroke_focus" android:color="@color/car_outline_focused" /></shape></item>
+    <item><shape><solid android:color="@color/car_surface_row" /><corners android:radius="@dimen/car_radius_sm" /><stroke android:width="1px" android:color="@color/car_outline_idle" /></shape></item>
 </selector>

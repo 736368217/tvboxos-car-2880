@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.github.tvbox.osc.car.CarSceneLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent" android:tag="2880,1620"
-    android:background="@color/car_bg">
+    android:background="@drawable/car_surface">
     <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
         <TextView android:id="@+id/ux_setting_back" android:layout_width="180px" android:layout_height="96px"
             android:layout_marginLeft="60px" android:layout_marginTop="40px" android:text="返回"

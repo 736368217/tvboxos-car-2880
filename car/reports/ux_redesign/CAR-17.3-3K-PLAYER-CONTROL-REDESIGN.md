@@ -1,5 +1,7 @@
 # CAR-17.3-3K 全屏播放页控件重构
 
+> 当前全局视觉候选：`1b0eb5e2dfac4af3dd1c18c6aee76ffeab388f84bdc0f14f135ba4cff580dd61`。本报告记录播放器结构；最新全局样式截图与回归见 `CAR-17.3-3K-GLOBAL-STYLE-REPORT.html`。
+
 ## 结论
 
 全屏播放页已从“两排常驻按钮 + 隐藏横向高级条”改为成熟播放器结构：

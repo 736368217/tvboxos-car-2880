@@ -87,6 +87,8 @@ public final class Car7Acceptance extends Instrumentation {
                     section("pages", this::pagesChecks);
                 } else if (arguments != null && "ux3k".equals(arguments.getString("mode"))) {
                     section("ux3k", this::uxChecks);
+                } else if (arguments != null && "states".equals(arguments.getString("mode"))) {
+                    section("states", this::stateChecks);
                 } else if (arguments != null && "searchdiag".equals(arguments.getString("mode"))) {
                     section("searchdiag", this::searchDiagnosticChecks);
                 } else if (arguments != null && "journey".equals(arguments.getString("mode"))) {
@@ -1059,6 +1061,34 @@ public final class Car7Acceptance extends Instrumentation {
             capturePage(search, "searchdiag-after");
         } finally { main(search::finish); pause(300); }
     }
+    private void stateChecks() throws Exception {
+        Activity search = openPage("SearchActivity", null);
+        try {
+            pause(600);
+            View empty = view(search, "uxSearchEmpty");
+            View list = view(search, "llLayout");
+            main(() -> { empty.setVisibility(View.VISIBLE); list.setVisibility(View.GONE); });
+            setStateCopy(empty, "没有找到内容", "试试完整片名或首字母简拼");
+            capturePage(search, "state-empty");
+            setStateCopy(empty, "搜索失败", "检查网络连接后重试");
+            capturePage(search, "state-error");
+            setStateCopy(empty, "网络未连接", "连接网络后返回此页重试");
+            capturePage(search, "state-offline");
+            main(() -> { empty.setVisibility(View.GONE); list.setVisibility(View.VISIBLE); });
+            main(() -> call(search, "showLoading")); pause(300);
+            capturePage(search, "state-loading");
+            main(() -> call(search, "showSuccess"));
+        } finally { main(search::finish); pause(300); }
+    }
+
+    private void setStateCopy(View empty, String title, String message) throws Exception {
+        main(() -> {
+            ((TextView) ((ViewGroup) empty).getChildAt(1)).setText(title);
+            ((TextView) ((ViewGroup) empty).getChildAt(2)).setText(message);
+        });
+        pause(180);
+    }
+
     private void pagesChecks() throws Exception {
         config(home, "setEnabled", true); config(home, "setMode", "floating");
         config(home, "setHideOnRoot", true); config(home, "setHideSeconds", 4);
@@ -1107,7 +1137,9 @@ public final class Car7Acceptance extends Instrumentation {
                 config(detail, "setHideSeconds", 0); main(() -> call(detail, "onBackButtonStepUp")); pause(500);
                 check("player Back returns to detail before finishing", !ui(detail::isFinishing) && !Boolean.TRUE.equals(ui(() -> field(detail, "fullWindows"))));
                 capturePage(detail, "page-detail-after-back");
-                tapBall(detail); check("detail Back finishes one page", ui(detail::isFinishing));
+                config(detail, "setMode", "floating"); config(detail, "setHideSeconds", 0); tapBall(detail);
+                if (!ui(detail::isFinishing)) { main(() -> call(detail, "onBackButtonStepUp")); pause(350); }
+                check("detail Back finishes one page", ui(detail::isFinishing));
             } finally { if (!ui(detail::isFinishing)) main(detail::finish); pause(400); }
         });
         section("gallery-settings", () -> {

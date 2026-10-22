@@ -1,5 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="UxPageTitle" parent="UxSceneText">
+        <item name="android:textSize">38px</item><item name="android:textStyle">bold</item>
+    </style>
+    <style name="UxSectionTitle" parent="UxSceneText">
+        <item name="android:textSize">30px</item><item name="android:textStyle">bold</item>
+    </style>
+    <style name="UxBody" parent="UxSceneText">
+        <item name="android:textSize">26px</item><item name="android:textColor">@color/car_text_regular</item>
+    </style>
+    <style name="UxMeta" parent="UxSceneText">
+        <item name="android:textSize">22px</item><item name="android:textColor">@color/car_text_dim</item>
+    </style>
+    <style name="UxEyebrow" parent="UxSceneText">
+        <item name="android:textSize">18px</item><item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.06</item><item name="android:textColor">@color/car_text_dim</item>
+    </style>
+    <style name="UxPrimaryAction" parent="UxSceneText">
+        <item name="android:gravity">center</item><item name="android:background">@drawable/car_player_primary_selector</item>
+        <item name="android:textColor">@color/car_text_strong</item><item name="android:textSize">28px</item>
+        <item name="android:textStyle">bold</item><item name="android:focusable">true</item><item name="android:clickable">true</item>
+    </style>
+    <style name="UxSecondaryAction" parent="UxSceneText">
+        <item name="android:gravity">center</item><item name="android:background">@drawable/car_button_selector</item>
+        <item name="android:textColor">@color/car_text_strong</item><item name="android:textSize">26px</item>
+        <item name="android:textStyle">bold</item><item name="android:focusable">true</item><item name="android:clickable">true</item>
+    </style>
+
     <style name="UxSceneText">
         <item name="android:layout_width">wrap_content</item><item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/car_text_strong</item>

@@ -153,7 +153,7 @@ public final class ux_setting_Pages {
         FrameLayout card = new FrameLayout(context);
         card.setBackgroundResource(R.drawable.ux_setting_card);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, height);
-        lp.bottomMargin = 30;
+        lp.bottomMargin = 8;
         parent.addView(card, lp);
         return card;
     }
@@ -166,9 +166,12 @@ public final class ux_setting_Pages {
     }
 
     private void heading(LinearLayout page, String title, String description) {
-        FrameLayout header = card(page, 140);
-        place(header, text(title, 34, true, R.color.car_text), 40, 20, 2010, 52);
-        place(header, text(description, 26, false, R.color.car_text_muted), 40, 82, 2010, 40);
+        FrameLayout header = new FrameLayout(context);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, 104);
+        lp.bottomMargin = 4;
+        page.addView(header, lp);
+        place(header, text(title, 28, true, R.color.car_text), 32, 10, 1982, 44);
+        place(header, text(description, 22, false, R.color.car_text_muted), 32, 58, 1982, 36);
     }
 
     private void note(LinearLayout page, String title, String description) {
@@ -180,26 +183,26 @@ public final class ux_setting_Pages {
     }
 
     private View legacy(LinearLayout page, int id, String label, int valueId) {
-        FrameLayout row = card(page, 130);
+        FrameLayout row = card(page, 116);
         row.setId(id);
         row.setFocusable(true);
-        row.setBackgroundResource(R.drawable.ux_setting_choice);
-        TextView labelView = text(label, 30, true, R.color.car_text);
+        row.setBackgroundResource(R.drawable.car_row_selector);
+        TextView labelView = text(label, 28, true, R.color.car_text);
         int icon = iconForRow(id);
         if (icon != 0) {
             labelView.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0);
             labelView.setCompoundDrawablePadding(14);
         }
-        place(row, labelView, 40, 25, 640, 80);
+        place(row, labelView, 32, 18, 680, 80);
         if (valueId != 0) {
-            TextView value = text("", 28, false, R.color.car_accent_cyan);
+            TextView value = text("", 24, false, R.color.car_accent_cyan);
             value.setSingleLine(true);
             value.setEllipsize(android.text.TextUtils.TruncateAt.END);
             value.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
             value.setId(valueId);
-            place(row, value, 720, 25, 1230, 80);
+            place(row, value, 720, 18, 1230, 80);
         }
-        place(row, text("›", 40, false, R.color.car_text_muted), 2000, 25, 60, 80);
+        place(row, text("›", 32, false, R.color.car_text_muted), 2000, 18, 60, 80);
         return row;
     }
 
@@ -310,17 +313,18 @@ public final class ux_setting_Pages {
     private interface Changed { void apply(boolean value); }
     private SwitchCompat toggle(LinearLayout page, int rowId, int switchId, String title, String description,
                                 boolean initial, Changed changed) {
-        FrameLayout row = card(page, 220);
+        FrameLayout row = card(page, 190);
         row.setId(rowId);
         row.setFocusable(true);
-        TextView titleView = text(title, 32, true, R.color.car_text);
+        row.setBackgroundResource(R.drawable.car_row_selector);
+        TextView titleView = text(title, 28, true, R.color.car_text);
         int icon = iconForRow(rowId);
         if (icon != 0) {
             titleView.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0);
             titleView.setCompoundDrawablePadding(14);
         }
-        place(row, titleView, 40, 35, 1690, 60);
-        place(row, text(description, 26, false, R.color.car_text_muted), 40, 112, 1690, 75);
+        place(row, titleView, 32, 24, 1690, 56);
+        place(row, text(description, 22, false, R.color.car_text_muted), 32, 84, 1690, 72);
         SwitchCompat toggle = new SwitchCompat(context);
         toggle.setId(switchId);
         toggle.setTextSize(TypedValue.COMPLEX_UNIT_PX, 26);
@@ -335,7 +339,7 @@ public final class ux_setting_Pages {
             changed.apply(value);
             toggle.setText(value ? "已开启  " : "已关闭  ");
         });
-        place(row, toggle, 1760, 60, 290, 100);
+        place(row, toggle, 1760, 40, 290, 100);
         row.setOnClickListener(v -> toggle.toggle());
         return toggle;
     }

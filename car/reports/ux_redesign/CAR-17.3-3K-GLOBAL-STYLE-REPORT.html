@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TVBox Car 3K · 全局视觉系统验收</title>
+<style>
+  :root{--bg:#07110e;--surface:#12251d;--raised:#182f26;--line:#2a6ff2c6;--text:#f2fbf7;--muted:#9db4a8;--mint:#6ff2c6;--violet:#a78bfa;--amber:#f6c177}
+  *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#07110e,#0b1712);color:var(--text);font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1480px;margin:0 auto;padding:48px 34px 72px}
+  .eyebrow{color:var(--mint);font-size:12px;letter-spacing:.16em;font-weight:700}
+  h1{font-size:36px;line-height:1.2;letter-spacing:-.03em;margin:10px 0 10px}
+  h2{font-size:22px;margin:44px 0 12px;display:flex;align-items:center;gap:10px}
+  h2:before{content:"";width:5px;height:22px;border-radius:4px;background:var(--mint)}
+  p{color:var(--muted);margin:8px 0;max-width:960px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 0}
+  .pill{border:1px solid #2a6ff2c6;background:#12251d;color:var(--text);border-radius:999px;padding:7px 13px;font-size:12px}
+  .pill strong{color:var(--mint)}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}
+  .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  figure{margin:0;background:var(--surface);border:1px solid #269ab8ab;border-radius:16px;overflow:hidden}
+  figure img{display:block;width:100%;height:auto;background:#07110e}
+  figcaption{padding:10px 14px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:10px}
+  figcaption b{color:var(--text);font-weight:600}
+  .notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+  .note{background:var(--surface);border:1px solid #269ab8ab;border-radius:14px;padding:16px}
+  .note h3{margin:0 0 6px;font-size:15px;color:var(--mint)} .note p{font-size:13px;margin:0}
+  .test{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+  .test div{background:#0d1a15;border:1px solid #2a6ff2c6;border-radius:12px;padding:12px 14px}
+  .test strong{display:block;font-size:20px;color:var(--mint)} .test span{font-size:12px;color:var(--muted)}
+  .footer{margin-top:44px;padding-top:16px;border-top:1px solid #269ab8ab;color:#667b70;font-size:12px}
+  @media(max-width:900px){.grid,.grid.three,.test{grid-template-columns:1fr 1fr}.notes{grid-template-columns:1fr}h1{font-size:28px}}
+  @media(max-width:560px){.grid,.grid.three,.test{grid-template-columns:1fr}.wrap{padding:30px 18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">TVBOX CAR · 3K / 17.3"</div>
+  <h1>一块更安静、更有主次的车机桌面</h1>
+  <p>这次不是给旧字段换皮：把每个页面的“我现在在哪、接下来做什么”重新排清楚，统一全局颜色、字体、焦点和返回方式，同时保留播放器、搜索、选集、换源、直播与设置的完整操作链。</p>
+  <div class="meta">
+    <span class="pill">SHA-256 <strong>1b0eb5e2…d61</strong></span>
+    <span class="pill">2880 × 1620 · d160</span>
+    <span class="pill"><strong>CAR_DISPLAY_PASS</strong></span>
+    <span class="pill">APK 53,675,084 bytes</span>
+  </div>
+
+  <h2>全局规则</h2>
+  <div class="notes">
+    <div class="note"><h3>清晰的中性底色</h3><p>页面、导航、卡片和行统一到深中性偏绿层级；减少整屏荧光绿与重描边，让内容而不是容器先被看到。</p></div>
+    <div class="note"><h3>薄荷 = 焦点 / 成功</h3><p>导航选中、焦点轮廓、播放器成功状态统一用薄荷绿；紫色留给真正的主动作和已选选项。</p></div>
+    <div class="note"><h3>统一状态色</h3><p>新增琥珀提醒、玫红错误、蓝色信息状态色，后续空、错误、离线与提示不再借用品牌色。</p></div>
+  </div>
+
+  <h2>高频路径</h2>
+  <div class="grid">
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/home.png" alt="首页"><figcaption><b>首页</b><span>继续观看 → 分类 → 推荐</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/category.png" alt="分类"><figcaption><b>分类专题</b><span>当前分类、筛选、海报网格</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/search.png" alt="搜索"><figcaption><b>搜索</b><span>输入、键盘、热词与最近搜索</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/search-results.png" alt="搜索结果"><figcaption><b>多源搜索结果</b><span>结果行 + 就地打开</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/detail.png" alt="详情"><figcaption><b>影片详情</b><span>预览 / 全屏播放 / 换源 / 选集</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/live.png" alt="直播"><figcaption><b>电视直播</b><span>频道列表与播放器主从</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/live-channels.png" alt="直播频道"><figcaption><b>频道列表</b><span>当前频道、节目单、收藏</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/settings.png" alt="设置"><figcaption><b>设置中心</b><span>分区导航 + 连续设置行</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/advanced.png" alt="高级功能"><figcaption><b>高级功能</b><span>画面、音效、返回控件</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/collect-empty.png" alt="收藏空状态"><figcaption><b>收藏 · 空状态</b><span>解释下一步，不让人面对空壳</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/history.png" alt="历史"><figcaption><b>播放历史</b><span>最近观看和就地删除</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/local-file.png" alt="本地文件"><figcaption><b>本地文件</b><span>路径、目录、文件列表</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/push.png" alt="多端推送"><figcaption><b>多端推送</b><span>扫码 / 地址 / 剪贴板</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/fast-search.png" alt="聚合搜索"><figcaption><b>聚合搜索</b><span>来源列表与匹配结果</span></figcaption></figure>
+  </div>
+
+  <h2>状态壳</h2>
+  <div class="grid">
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/state-empty.png" alt="空状态"><figcaption><b>空状态</b><span>没有找到内容 + 下一步建议</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/state-loading.png" alt="加载状态"><figcaption><b>加载状态</b><span>统一进度与等待文案</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/state-error.png" alt="错误状态"><figcaption><b>错误状态</b><span>说明问题并保留可执行出口</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/state-offline.png" alt="离线状态"><figcaption><b>离线状态</b><span>网络断开时给明确恢复方向</span></figcaption></figure>
+  </div>
+
+  <h2>全屏播放器</h2>
+  <div class="grid three">
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/player.png" alt="播放中"><figcaption><b>播放中</b><span>进度 + 主控</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/player-more.png" alt="播放设置"><figcaption><b>播放设置</b><span>分组面板</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/player-advanced.png" alt="高级设置"><figcaption><b>高级设置</b><span>低频能力再收一层</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/player-paused.png" alt="暂停态"><figcaption><b>暂停态</b><span>播放文案即时同步</span></figcaption></figure>
+    <figure><img loading="lazy" src="../../qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/player-hidden.png" alt="隐藏控件"><figcaption><b>隐藏控件</b><span>返回入口仍常驻</span></figcaption></figure>
+  </div>
+
+  <h2>回归结果</h2>
+  <div class="test">
+    <div><strong>80 / 0</strong><span>pages · 页面/返回/状态</span></div>
+    <div><strong>98 / 0</strong><span>ux3k · 全场景交互</span></div>
+    <div><strong>101 / 0</strong><span>playback · 解码/播放</span></div>
+    <div><strong>7 / 0</strong><span>gestures · 亮度/音量/返回</span></div>
+  </div>
+  <p style="margin-top:14px">所有结果绑定同一 SHA；截图目录：<code>car/qa/ux-audit-car7-current/evidence-1b0eb5e2/screenshots/</code>。背景彩条为本地测试视频，不是产品界面。</p>
+
+  <h2>边界与后续</h2>
+  <p>本报告是 Android 车机原生 UI 的验收，不是 Web 前端或浏览器页面。远程订阅源、真实影片的极亮/极暗场景、长时间驾驶稳定性仍需独立验收；本次没有改包名、版号、签名或第三方源。</p>
+
+  <div class="footer">TVBox Car 3K · global visual system review · 2026-10-22</div>
+</div>
+</body>
+</html>

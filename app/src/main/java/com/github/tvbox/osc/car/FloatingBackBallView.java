@@ -30,7 +30,7 @@ final class FloatingBackBallView extends View {
     private BackNavPolicy.Bounds bounds;
     private ValueAnimator appearance, spring, scale;
     private VelocityTracker velocity;
-    private float unitScale = 1, visualSize = 56, baseX, baseY, dockX, windowWidth;
+    private float unitScale = 1, visualSize = 30, baseX, baseY, dockX, windowWidth;
     private float idleFraction, drawScale = 1, downX, downY, startX, startY;
     private long downTime;
     private int idleMillis = 4000, pointerId;
@@ -43,12 +43,12 @@ final class FloatingBackBallView extends View {
         setFocusable(true);
         setFocusableInTouchMode(false);
         setContentDescription("\u5e94\u7528\u5185\u8fd4\u56de");
-        fill.setColor(0xE60F172A);
-        stroke.setColor(0xFF38BDF8);
+        fill.setColor(0xE60B1712);
+        stroke.setColor(0xFF6FF2C6);
         stroke.setStyle(Paint.Style.STROKE);
         stroke.setStrokeCap(Paint.Cap.ROUND);
         stroke.setStrokeJoin(Paint.Join.ROUND);
-        setAlpha(.9f);
+        setAlpha(.82f);
     }
 
     private void enterIdle() {
@@ -58,10 +58,10 @@ final class FloatingBackBallView extends View {
     void configure(float unitScale, boolean large, int idleMillis) {
         stopMotion();
         this.unitScale = unitScale;
-        this.visualSize = (large ? 64 : 56) * unitScale;
+        this.visualSize = (large ? 34 : 30) * unitScale;
         dragOutline = new DashPathEffect(new float[]{3 * unitScale, 2 * unitScale}, 0);
         this.idleMillis = idleMillis;
-        int box = Math.round((large ? 80 : 72) * unitScale);
+        int box = Math.round((large ? 48 : 44) * unitScale);
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) getLayoutParams();
         if (params.width != box || params.height != box) {
             params.width = params.height = box;
@@ -136,23 +136,23 @@ final class FloatingBackBallView extends View {
         int save = canvas.save();
         canvas.scale(drawScale, drawScale, cx, cy);
         float radius = visualSize / 2f - 1.5f * unitScale;
-        int rim = dragging ? 0xFFF59E0B : blend(0xFF38BDF8, 0xFF94A3B8, idleFraction);
-        int glyph = dragging ? 0xFFFBBF24 : blend(0xFF38BDF8, 0xFFE2E8F0, idleFraction);
-        fill.setColor(isPressed() ? 0xFF26364A : 0xFF1E293B);
+        int rim = dragging ? 0xFFF6C177 : blend(0xFF6FF2C6, 0xFF91AA9E, idleFraction);
+        int glyph = dragging ? 0xFFF6C177 : blend(0xFF6FF2C6, 0xFFF2FBF7, idleFraction);
+        fill.setColor(isPressed() ? 0xFF264A3A : 0xFF12251D);
         canvas.drawCircle(cx, cy, radius, fill);
-        fill.setColor(0xFF0F172A);
+        fill.setColor(0xFF0B1712);
         canvas.drawCircle(cx, cy, radius - 3.5f * unitScale, fill);
         stroke.setPathEffect(null);
-        stroke.setColor(dragging ? 0x70FBBF24 : blend(0x7038BDF8, 0x4094A3B8, idleFraction));
+        stroke.setColor(dragging ? 0x70F6C177 : blend(0x596FF2C6, 0x3391AA9E, idleFraction));
         stroke.setStrokeWidth(unitScale);
         canvas.drawCircle(cx, cy, radius - 3.5f * unitScale, stroke);
         stroke.setColor(rim);
-        stroke.setStrokeWidth(3 * unitScale);
+        stroke.setStrokeWidth(2.6f * unitScale);
         stroke.setPathEffect(dragging ? dragOutline : null);
         canvas.drawCircle(cx, cy, radius, stroke);
         stroke.setPathEffect(null);
         stroke.setColor(glyph);
-        stroke.setStrokeWidth(3 * unitScale);
+        stroke.setStrokeWidth(2.6f * unitScale);
         float halfHeight = visualSize * 8f / 42f, halfWidth = visualSize * 5f / 42f;
         chevron.reset();
         chevron.moveTo(cx + halfWidth, cy - halfHeight);

@@ -52,11 +52,11 @@
     <color name="dialog_text_hint">#809AB8AB</color>
 
     <!-- Car edition aliases intentionally point at the selected Obsidian palette. -->
-    <color name="car_bg">#FF070A10</color>
-    <color name="car_card">#FF0E211A</color>
-    <color name="car_card_translucent">#C80E211A</color>
-    <color name="car_text">#FFE9FFF8</color>
-    <color name="car_text_muted">#FF9AB8AB</color>
+    <color name="car_bg">#FF07110E</color>
+    <color name="car_card">#FF12251D</color>
+    <color name="car_card_translucent">#CC12251D</color>
+    <color name="car_text">#FFF2FBF7</color>
+    <color name="car_text_muted">#FF9DB4A8</color>
     <color name="car_accent">#FF6FF2C6</color>
     <color name="car_accent_alt">#FFA78BFA</color>
 
@@ -64,28 +64,34 @@
          Surface ladder: page #0B0F17 -> nav #121A26 -> card #182030 -> raised #1C2636.
          Accents: tech cyan #00D2FF, gem blue #2563EB, green #10B981, amber #F59E0B.
          Existing car_* / color_* entries above are kept for legacy call sites. -->
-    <color name="car_bg_obsidian">#FF0A1813</color>
-    <color name="car_bg_obsidian_deep">#FF06100E</color>
-    <color name="car_surface_nav">#FF0A1813</color>
-    <color name="car_surface_card">#FF0E211A</color>
-    <color name="car_surface_card_raised">#EB12291F</color>
-    <color name="car_surface_card_pressed">#FF1A3529</color>
-    <color name="car_surface_control">#FF12261D</color>
-    <color name="car_surface_control_pressed">#FF6C5CE7</color>
+    <color name="car_bg_obsidian">#FF0B1712</color>
+    <color name="car_bg_obsidian_deep">#FF07110E</color>
+    <color name="car_surface_nav">#FF0D1A15</color>
+    <color name="car_surface_card">#FF12251D</color>
+    <color name="car_surface_card_raised">#F2182F26</color>
+    <color name="car_surface_card_pressed">#FF1E3A2F</color>
+    <color name="car_surface_control">#FF162B22</color>
+    <color name="car_surface_control_pressed">#FF264A3A</color>
     <color name="car_surface_selected">#FF6C5CE7</color>
-    <color name="car_text_strong">#FFE9FFF8</color>
-    <color name="car_text_regular">#FFC7DED4</color>
-    <color name="car_text_dim">#FF8FAEA1</color>
-    <color name="car_text_faint">#FF607A6F</color>
+    <color name="car_surface_row">#FF12251D</color>
+    <color name="car_surface_row_hover">#FF1B3429</color>
+    <color name="car_text_strong">#FFF2FBF7</color>
+    <color name="car_text_regular">#FFC9DED4</color>
+    <color name="car_text_dim">#FF91AA9E</color>
+    <color name="car_text_faint">#FF667B70</color>
     <color name="car_accent_cyan">#FF6FF2C6</color>
     <color name="car_accent_blue">#FF6C5CE7</color>
     <color name="car_accent_blue_deep">#FF4B3FA8</color>
     <color name="car_accent_green">#FF6FF2C6</color>
     <color name="car_accent_amber">#FFA78BFA</color>
-    <color name="car_outline_idle">#2E9AB8AB</color>
+    <color name="car_outline_idle">#269AB8AB</color>
     <color name="car_outline_soft">#596FF2C6</color>
     <color name="car_outline_focused">#FF6FF2C6</color>
     <color name="car_outline_pressed">#B3A78BFA</color>
+    <color name="car_state_success">#FF6FF2C6</color>
+    <color name="car_state_warning">#FFF6C177</color>
+    <color name="car_state_danger">#FFFF8FA8</color>
+    <color name="car_state_info">#FF8AB4FF</color>
     <color name="car_scrim_top">#0006100E</color>
     <color name="car_scrim_bottom">#E606100E</color>
     <color name="car_badge_bg">#CC06100E</color>

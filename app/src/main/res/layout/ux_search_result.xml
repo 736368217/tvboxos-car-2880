@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="195px" android:focusable="true"
-    android:background="@drawable/ux_setting_choice">
+    android:layout_width="match_parent" android:layout_height="180px" android:focusable="true"
+    android:background="@drawable/car_row_selector">
     <ImageView android:id="@+id/ivThumb" android:layout_width="130px" android:layout_height="165px"
         android:layout_marginLeft="20px" android:layout_marginTop="15px" android:scaleType="centerCrop"
         android:importantForAccessibility="no" />
-    <TextView android:id="@+id/tvName" android:layout_width="780px" android:layout_height="60px"
-        android:layout_marginLeft="175px" android:layout_marginTop="20px" android:singleLine="true"
-        android:ellipsize="end" android:textSize="34px" android:textStyle="bold" android:textColor="@color/car_text" />
-    <TextView android:id="@+id/tvNote" android:layout_width="780px" android:layout_height="48px"
-        android:layout_marginLeft="175px" android:layout_marginTop="85px" android:singleLine="true"
-        android:ellipsize="end" android:textSize="26px" android:textColor="@color/car_text_muted" />
-    <TextView android:id="@+id/tvSite" android:layout_width="780px" android:layout_height="42px"
-        android:layout_marginLeft="175px" android:layout_marginTop="138px" android:singleLine="true"
-        android:ellipsize="end" android:textSize="24px" android:textColor="@color/car_accent_cyan" />
-    <TextView android:id="@+id/ux_search_play" android:layout_width="240px" android:layout_height="105px"
-        android:layout_gravity="right" android:layout_marginRight="25px" android:layout_marginTop="45px"
-        android:text="查看播放  ›" android:gravity="center" android:textSize="28px" android:textStyle="bold"
-        android:textColor="@color/car_text" android:background="@drawable/ux_search_primary"
+    <TextView android:id="@+id/tvName" android:layout_width="900px" android:layout_height="54px"
+        android:layout_marginLeft="175px" android:layout_marginTop="18px" android:singleLine="true"
+        android:ellipsize="end" android:textSize="30px" android:textStyle="bold" android:textColor="@color/car_text" />
+    <TextView android:id="@+id/tvNote" android:layout_width="900px" android:layout_height="42px"
+        android:layout_marginLeft="175px" android:layout_marginTop="76px" android:singleLine="true"
+        android:ellipsize="end" android:textSize="24px" android:textColor="@color/car_text_muted" />
+    <TextView android:id="@+id/tvSite" android:layout_width="900px" android:layout_height="38px"
+        android:layout_marginLeft="175px" android:layout_marginTop="124px" android:singleLine="true"
+        android:ellipsize="end" android:textSize="22px" android:textColor="@color/car_accent_cyan" />
+    <TextView android:id="@+id/ux_search_play" android:layout_width="210px" android:layout_height="92px"
+        android:layout_gravity="right" android:layout_marginRight="20px" android:layout_marginTop="42px"
+        android:text="打开  ›" android:gravity="center" android:textSize="26px" android:textStyle="bold"
+        android:textColor="@color/car_accent_cyan" android:background="@drawable/car_button_selector"
         android:clickable="false" android:focusable="false" />
+    <View android:layout_width="match_parent" android:layout_height="1px" android:layout_gravity="bottom"
+        android:layout_marginLeft="20px" android:layout_marginRight="20px" android:background="#1A6FF2C6" />
 </FrameLayout>

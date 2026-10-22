@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Control/button state list: idle #1C2636, pressed deep blue, focused gem blue + cyan rim. -->
+<!-- Secondary action: neutral surface; mint focus; purple is reserved for primary actions. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
@@ -22,10 +22,7 @@
     <item android:state_focused="true">
         <shape android:shape="rectangle">
             <corners android:radius="@dimen/car_radius_sm" />
-            <gradient
-                android:angle="90"
-                android:endColor="@color/car_accent_blue_deep"
-                android:startColor="@color/car_accent_blue" />
+            <solid android:color="@color/car_surface_card_pressed" />
             <stroke
                 android:width="@dimen/car_stroke_focus"
                 android:color="@color/car_outline_focused" />

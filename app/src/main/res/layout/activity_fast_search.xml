@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/car_bg"
+    android:background="@drawable/car_surface"
     android:tag="2880,1620">
     <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
         <TextView android:id="@+id/uxFastSearchBack" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="8px" android:layout_width="180px" android:layout_height="96px"
