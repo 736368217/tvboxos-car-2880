@@ -20,8 +20,8 @@
     </item>
     <item>
         <shape android:shape="oval">
-            <solid android:color="#A612261D" />
-            <stroke android:width="@dimen/car_stroke_hair" android:color="#4D6FF2C6" />
+            <solid android:color="#E60E211A" />
+            <stroke android:width="@dimen/car_stroke_hair" android:color="#806FF2C6" />
         </shape>
     </item>
 </selector>

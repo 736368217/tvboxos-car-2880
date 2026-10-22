@@ -2279,11 +2279,11 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
             mController.setImmersiveFullscreen(fullscreen);
         }
         Activity activity = getActivity();
-        // The in-app Back affordance is part of the "always return one page" contract and must
-        // stay reachable during fullscreen playback; never hide it with the playback chrome.
+        // Fullscreen keeps the player's own always-visible Back. Hide the host floating/edge
+        // affordance so two Back controls never overlap the playback UI.
         if (activity != null) {
-            com.github.tvbox.osc.car.InAppBackButton.setPlaybackHidden(activity, false);
-            com.github.tvbox.osc.car.InAppBackButton.wake(activity);
+            com.github.tvbox.osc.car.InAppBackButton.setPlaybackHidden(activity, fullscreen);
+            if (!fullscreen) com.github.tvbox.osc.car.InAppBackButton.wake(activity);
         }
     }
     public void pauseForHidden() {

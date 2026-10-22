@@ -23,7 +23,7 @@
         <item name="android:textColor">@color/car_text_strong</item>
         <item name="android:textStyle">bold</item><item name="android:textSize">26px</item>
         <item name="android:drawablePadding">12px</item>
-        <item name="android:paddingLeft">22px</item><item name="android:paddingRight">22px</item>
+        <item name="android:paddingLeft">18px</item><item name="android:paddingRight">18px</item>
     </style>
     <style name="UxPlayerPrimaryButton" parent="UxSceneButton">
         <item name="android:background">@drawable/car_player_primary_selector</item>

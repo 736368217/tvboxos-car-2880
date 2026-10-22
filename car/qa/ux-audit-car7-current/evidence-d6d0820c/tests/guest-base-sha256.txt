@@ -1,0 +1,4 @@
+path=/data/app/~~z2euKmonF2fRXQbLJ8-cKg==/com.github.tvbox.osc.jun-Baj4BMcRHEA0ktTQdNxNkA==/base.apk
+sha256=d6d0820ccd13a05337465f8247b262feab4da9fd95c785e82b199790956c7d27
+apk_sha256=d6d0820ccd13a05337465f8247b262feab4da9fd95c785e82b199790956c7d27
+bytes=53670931

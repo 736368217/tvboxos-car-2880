@@ -382,37 +382,45 @@ public class VodController extends BaseController {
     private void updateCarEnhanceButtons() {
         if (mCarVideoBtn != null) {
             mCarVideoBtn.setText("画面 · " + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
-            setStartIcon(mCarVideoBtn, R.drawable.ic_tvbox_player_picture, 30);
+            setStartIcon(mCarVideoBtn, R.drawable.ic_tvbox_player_picture, 32);
         }
         if (mCarSrBtn != null) {
             boolean enabled = CarEnhance.videoSrEnabled();
             mCarSrBtn.setText("超分 · " + (enabled ? "开" : "关"));
-            setStartIcon(mCarSrBtn, enabled ? R.drawable.ic_tvbox_player_sr_active : R.drawable.ic_tvbox_player_sr, 30);
+            setStartIcon(mCarSrBtn, enabled ? R.drawable.ic_tvbox_player_sr_active : R.drawable.ic_tvbox_player_sr, 32);
         }
         if (mCarInterpBtn != null) {
             boolean enabled = CarEnhance.videoInterpEnabled();
             mCarInterpBtn.setText("补帧 · " + (enabled ? "开" : "关"));
-            setStartIcon(mCarInterpBtn, enabled ? R.drawable.ic_tvbox_player_interp_active : R.drawable.ic_tvbox_player_interp, 30);
+            setStartIcon(mCarInterpBtn, enabled ? R.drawable.ic_tvbox_player_interp_active : R.drawable.ic_tvbox_player_interp, 32);
         }
         if (mCarAudioBtn != null) {
             mCarAudioBtn.setText("音效 · " + AudioEffectController.name(CarEnhance.audioMode()));
-            setStartIcon(mCarAudioBtn, R.drawable.ic_tvbox_player_audio, 30);
+            setStartIcon(mCarAudioBtn, R.drawable.ic_tvbox_player_audio, 32);
         }
         TextView background = findViewById(R.id.uxBackgroundPlayback);
         if (background != null) {
             setStartIcon(background, CarPlaybackPreferences.backgroundAudio()
-                    ? R.drawable.ic_tvbox_player_bg_audio_active : R.drawable.ic_tvbox_player_bg_audio, 30);
+                    ? R.drawable.ic_tvbox_player_bg_audio_active : R.drawable.ic_tvbox_player_bg_audio, 32);
         }
         updateFrameRateDisplay();
     }
 
     private void updateCarPlayPauseIcon(TextView button, boolean playing) {
         if (button == null) return;
-        setStartIcon(button, playing ? R.drawable.ic_tvbox_content_pause : R.drawable.ic_tvbox_content_play, 42);
+        setStartIcon(button, playing ? R.drawable.ic_tvbox_content_pause : R.drawable.ic_tvbox_content_play, 44);
+    }
+
+    private void syncPlayPauseButton() {
+        TextView button = findViewById(R.id.uxPlayPause);
+        if (button == null || mControlWrapper == null) return;
+        boolean playing = mControlWrapper.isPlaying();
+        button.setText(playing ? "暂停" : "播放");
+        updateCarPlayPauseIcon(button, playing);
     }
 
     private void setStartIcon(TextView view, int resId) {
-        setStartIcon(view, resId, 30);
+        setStartIcon(view, resId, 32);
     }
 
     private void setStartIcon(TextView view, int resId, int sizeDp) {
@@ -441,7 +449,7 @@ public class VodController extends BaseController {
         String source = isUsableFrameRate(sourceFrameRate) ? formatFrameRate(sourceFrameRate) : "--";
         String output = isUsableFrameRate(outputFrameRate) ? formatFrameRate(outputFrameRate) : "--";
         String text = "片源 " + source + " fps · 输出 " + output + " fps";
-        int visibility = CarEnhance.videoInterpEnabled() ? VISIBLE : GONE;
+        int visibility = CarEnhance.videoInterpEnabled() && isScreenDisplayEnabled() ? VISIBLE : GONE;
         if (mVideoFrameRate != null) {
             mVideoFrameRate.setText(text);
             mVideoFrameRate.setVisibility(visibility);
@@ -1722,6 +1730,7 @@ public class VodController extends BaseController {
     protected void onPlayStateChanged(int playState) {
         super.onPlayStateChanged(playState);
         videoPlayState = playState;
+        syncPlayPauseButton();
         switch (playState) {
             case VideoView.STATE_IDLE:
                 break;
@@ -1898,7 +1907,11 @@ public class VodController extends BaseController {
     }
 
     private void bindCarPlaybackControls() {
-        findViewById(R.id.uxPlayPause).setOnClickListener(v -> { togglePlay(); keepSeekBarActive(); });
+        findViewById(R.id.uxPlayPause).setOnClickListener(v -> {
+            togglePlay();
+            syncPlayPauseButton();
+            keepSeekBarActive();
+        });
         findViewById(R.id.uxRewind).setOnClickListener(v -> seekCarOffset(-15000));
         findViewById(R.id.uxForward).setOnClickListener(v -> seekCarOffset(15000));
         findViewById(R.id.uxEpisodes).setOnClickListener(v -> { if (listener != null) listener.showEpisodeDialog(); });
@@ -1920,7 +1933,7 @@ public class VodController extends BaseController {
             CarPlaybackPreferences.setBackgroundAudio(!CarPlaybackPreferences.backgroundAudio());
             background.setText("后台播放 · " + (CarPlaybackPreferences.backgroundAudio() ? "开" : "关"));
             setStartIcon(background, CarPlaybackPreferences.backgroundAudio()
-                    ? R.drawable.ic_tvbox_player_bg_audio_active : R.drawable.ic_tvbox_player_bg_audio, 30);
+                    ? R.drawable.ic_tvbox_player_bg_audio_active : R.drawable.ic_tvbox_player_bg_audio, 32);
         });
         if (mMoreBtn != null) mMoreBtn.setOnClickListener(v -> {
             if (isMorePanelVisible()) hideMorePanel();
@@ -1929,13 +1942,13 @@ public class VodController extends BaseController {
     }
 
     private void normalizePlayerIcons() {
-        resizeStartIcon(mPreBtn, 34);
-        resizeStartIcon(mNextBtn, 34);
-        resizeStartIcon((TextView) findViewById(R.id.uxRewind), 36);
-        resizeStartIcon((TextView) findViewById(R.id.uxForward), 36);
-        resizeStartIcon(mEpisodesBtn, 30);
-        resizeStartIcon(mMoreBtn, 30);
-        int optionIcon = 28;
+        resizeStartIcon(mPreBtn, 38);
+        resizeStartIcon(mNextBtn, 38);
+        resizeStartIcon((TextView) findViewById(R.id.uxRewind), 40);
+        resizeStartIcon((TextView) findViewById(R.id.uxForward), 40);
+        resizeStartIcon(mEpisodesBtn, 32);
+        resizeStartIcon(mMoreBtn, 32);
+        int optionIcon = 32;
         for (int id : new int[]{
                 R.id.play_car_video, R.id.play_car_audio, R.id.play_car_sr, R.id.play_car_interp,
                 R.id.play_scale, R.id.play_speed, R.id.uxChangeSource, R.id.zimu_select,
@@ -1946,7 +1959,7 @@ public class VodController extends BaseController {
         }) {
             resizeStartIcon(findViewById(id), optionIcon);
         }
-        if (mExpertToggle != null) resizeStartIcon(mExpertToggle, 26);
+        if (mExpertToggle != null) resizeStartIcon(mExpertToggle, 30);
     }
 
     private boolean isScreenDisplayEnabled() {
@@ -1955,14 +1968,16 @@ public class VodController extends BaseController {
 
     private void applyScreenDisplayVisibility(boolean visible) {
         int visibility = visible ? VISIBLE : GONE;
+        if (mVideoSize != null) mVideoSize.setVisibility(visibility);
+        if (mVideoFrameRate != null) mVideoFrameRate.setVisibility(visibility);
         if (seekTime != null) seekTime.setVisibility(visibility);
         if (net_play_speed != null) net_play_speed.setVisibility(visibility);
         if (mPlayPauseTime != null) mPlayPauseTime.setVisibility(visibility);
         if (mPlayLoadNetSpeedRightTop != null) mPlayLoadNetSpeedRightTop.setVisibility(GONE);
         if (mScreenDisplay != null) {
-            mScreenDisplay.setText(visible ? "屏显 · 开" : "屏显 · 关");
+            mScreenDisplay.setText(visible ? "播放信息 · 开" : "播放信息 · 关");
             setStartIcon(mScreenDisplay, visible
-                    ? R.drawable.ic_tvbox_settings_display_active : R.drawable.ic_tvbox_settings_display, 30);
+                    ? R.drawable.ic_tvbox_settings_display_active : R.drawable.ic_tvbox_settings_display, 32);
         }
     }
 

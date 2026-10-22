@@ -30,9 +30,9 @@
         <!-- Title block. The back affordance is a separate always-reachable layer below. -->
         <LinearLayout
             android:id="@+id/tv_top_l_container"
-            android:layout_width="1980px"
+            android:layout_width="1932px"
             android:layout_height="132px"
-            android:layout_marginLeft="176px"
+            android:layout_marginLeft="220px"
             android:layout_marginTop="50px"
             android:gravity="center_vertical"
             android:orientation="vertical"
@@ -263,7 +263,7 @@
                     <TextView
                         android:id="@+id/play_pre"
                         style="@style/UxPlayerButton"
-                        android:layout_width="150px"
+                        android:layout_width="180px"
                         android:layout_height="108px"
                         android:contentDescription="上一集"
                         android:drawableLeft="@drawable/ic_tvbox_player_prev"
@@ -302,7 +302,7 @@
                     <TextView
                         android:id="@+id/play_next"
                         style="@style/UxPlayerButton"
-                        android:layout_width="150px"
+                        android:layout_width="180px"
                         android:layout_height="108px"
                         android:layout_marginLeft="14px"
                         android:contentDescription="下一集"
@@ -382,15 +382,6 @@
                         android:textSize="34px"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/uxExpertToggle"
-                        style="@style/UxPlayerOptionButton"
-                        android:layout_width="190px"
-                        android:layout_height="90px"
-                        android:layout_marginRight="14px"
-                        android:drawableLeft="@drawable/ic_tvbox_nav_settings"
-                        android:text="高级"
-                        android:textSize="22px" />
 
                     <ImageView
                         android:id="@+id/uxMoreClose"
@@ -514,7 +505,7 @@
                     <TextView
                         style="@style/UxPlayerSectionLabel"
                         android:layout_marginTop="16px"
-                        android:text="弹幕与工具" />
+                        android:text="互动与工具" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -551,7 +542,15 @@
                             android:layout_marginLeft="14px"
                             android:layout_weight="1"
                             android:drawableLeft="@drawable/ic_tvbox_settings_display"
-                            android:text="屏显 · 关" />
+                            android:text="播放信息 · 关" />
+
+                        <TextView
+                            android:id="@+id/uxExpertToggle"
+                            style="@style/UxPlayerOptionButton"
+                            android:layout_marginLeft="14px"
+                            android:layout_weight="1"
+                            android:drawableLeft="@drawable/ic_tvbox_nav_settings"
+                            android:text="高级" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -654,7 +653,6 @@
                                 android:layout_height="96px"
                                 android:layout_marginLeft="14px"
                                 android:layout_weight="1"
-                                android:drawableLeft="@drawable/ic_tvbox_action_refresh"
                                 android:text="重置" />
                         </LinearLayout>
 
@@ -699,29 +697,29 @@
         <!-- Back is deliberately above every playback panel and stays reachable. -->
         <ImageView
             android:id="@+id/tv_back_fullscreen"
-            android:layout_width="96px"
-            android:layout_height="96px"
+            android:layout_width="108px"
+            android:layout_height="108px"
             android:layout_marginLeft="56px"
-            android:layout_marginTop="48px"
+            android:layout_marginTop="44px"
             android:background="@drawable/car_player_round_icon_selector"
             android:clickable="true"
             android:contentDescription="退出全屏"
             android:focusable="true"
-            android:padding="24px"
+            android:padding="26px"
             android:src="@drawable/ic_tvbox_action_back"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/tv_back"
-            android:layout_width="96px"
-            android:layout_height="96px"
+            android:layout_width="108px"
+            android:layout_height="108px"
             android:layout_marginLeft="56px"
-            android:layout_marginTop="48px"
+            android:layout_marginTop="44px"
             android:background="@drawable/car_player_round_icon_selector"
             android:clickable="true"
             android:contentDescription="退出全屏"
             android:focusable="true"
-            android:padding="24px"
+            android:padding="26px"
             android:src="@drawable/ic_tvbox_action_back"
             android:visibility="gone" />
 

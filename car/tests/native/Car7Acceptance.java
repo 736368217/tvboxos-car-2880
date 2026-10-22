@@ -950,6 +950,7 @@ public final class Car7Acceptance extends Instrumentation {
                 capturePage(detail, "ux-player");
                 clickView(detail, "uxPlayPause"); pause(300);
                 check("pause primary control", !Boolean.TRUE.equals(ui(() -> call(video, "isPlaying"))));
+                capturePage(detail, "ux-player-paused");
                 long before = position(video); clickView(detail, "uxForward"); pause(400);
                 check("forward 15s primary control", position(video) >= before + 12000);
                 clickView(detail, "uxRewind"); pause(400);
@@ -958,13 +959,18 @@ public final class Car7Acceptance extends Instrumentation {
                 wakePlayerControls(detail); clickView(detail, "uxMore");
                 check("legacy advanced controls reachable", ui(() -> view(detail, "uxAdvancedControls").isShown()));
                 capturePage(detail, "ux-player-more");
-                clickView(detail, "uxMore");
+                clickView(detail, "uxExpertToggle"); pause(350);
+                capturePage(detail, "ux-player-advanced");
+                clickView(detail, "uxMoreClose"); pause(250);
                 main(() -> call(type("com.orhanobut.hawk.Hawk"), "put", "car_ux_long_press", true));
                 long down = SystemClock.uptimeMillis();
                 main(() -> { MotionEvent press = MotionEvent.obtain(down, down, MotionEvent.ACTION_DOWN, 1440, 600, 0); call(controller, "onLongPress", press); press.recycle(); });
                 check("long press speed 2x", Math.abs(((Number) ui(() -> call(video, "getSpeed"))).floatValue() - 2f) < .05f);
                 main(() -> { MotionEvent cancel = MotionEvent.obtain(down, SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL, 1440, 600, 0); call(controller, "onTouchEvent", cancel); cancel.recycle(); });
                 check("cancel restores speed", Math.abs(((Number) ui(() -> call(video, "getSpeed"))).floatValue() - 1f) < .05f);
+                tap(detail, 1440, 600); pause(400);
+                capturePage(detail, "ux-player-hidden");
+                wakePlayerControls(detail);
                 main(() -> call(detail, "onBackButtonStepUp")); pause(500);
                 check("Back leaves fullscreen before detail", !Boolean.TRUE.equals(ui(() -> field(detail, "fullWindows"))) && !ui(detail::isFinishing));
                 main(() -> call(detail, "onBackButtonStepUp")); pause(500);

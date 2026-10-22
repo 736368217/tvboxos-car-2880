@@ -1,0 +1,42 @@
+{
+  "apk": "TVBox-1.0.0-car.7-player-redesign.apk",
+  "sha256": "d6d0820ccd13a05337465f8247b262feab4da9fd95c785e82b199790956c7d27",
+  "bytes": 53670931,
+  "package": "com.github.tvbox.osc.jun",
+  "versionCode": 8,
+  "versionName": "1.0.0-car.7",
+  "signature": {
+    "v1": true,
+    "v2": true,
+    "v3": true
+  },
+  "device": {
+    "vmIndex": 1,
+    "adb": "127.0.0.1:16416",
+    "owner": "tvbox-player-visual-20261022",
+    "physicalWidth": 1620,
+    "physicalHeight": 2880,
+    "displayWidth": 2880,
+    "displayHeight": 1620,
+    "density": 160,
+    "rotation": "lock 1",
+    "carDisplayPass": true
+  },
+  "evidence": {
+    "ux3kIdentity": "tests/ux3k-identity.json",
+    "ux3kResult": "tests/ux3k.json",
+    "playbackIdentity": "tests/playback-identity.json",
+    "playbackResult": "tests/playback.json",
+    "pagesIdentity": "tests/pages-identity.json",
+    "pagesResult": "tests/pages.json",
+    "gesturesIdentity": "tests/gestures-identity.json",
+    "gesturesResult": "tests/gestures.json",
+    "playerGeometry": "player/geometry.json"
+  },
+  "tests": {
+    "ux3k": { "passed": 103, "failed": 0 },
+    "playback": { "passed": 101, "failed": 0 },
+    "pages": { "passed": 80, "failed": 0 },
+    "gestures": { "passed": 7, "failed": 0 }
+  }
+}

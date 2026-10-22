@@ -24,8 +24,8 @@
     <item android:state_selected="true">
         <shape android:shape="rectangle">
             <corners android:radius="@dimen/car_radius_pill" />
-            <solid android:color="@color/car_accent_blue" />
-            <stroke android:width="@dimen/car_stroke_mid" android:color="@color/car_outline_focused" />
+            <solid android:color="#CC17332A" />
+            <stroke android:width="@dimen/car_stroke_focus" android:color="@color/car_outline_focused" />
         </shape>
     </item>
     <item>
