@@ -10,6 +10,7 @@ This file is a durable status pointer. It does not replace fresh evidence or cla
 - Evidence: `car/qa/ux-audit-car7-current/evidence-05da3b3c/`.
 - Report: `car/reports/ux_redesign/CAR-17.3-3K-R5-R4-VERIFICATION.md`.
 - Open: live-source injection (`LIVE_API_URL` → `ApiConfig.loadLiveConfig`) does not take effect in the sandbox; API/source dialog screenshots were not re-captured this batch.
+- Host checks: `run_host_checks.py --core-only` 9/9 pass (including `python_http` after installing requests 2.31.0 for Python 3.8); `test_handover` 11/11.
 
 ## Current: R4 audit completion
 
