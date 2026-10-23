@@ -146,7 +146,13 @@ public class JsSpider extends Spider {
 //        return executor.submit((FunCall.call(jsObject, func, args))).get();
         if (destroyed.get() || jsObject == null) return null;
         try {
-            return submit(() -> Async.run(jsObject, func, args).get()).get();  // 等待 executor 线程完成 JS 调用
+            Object result = submit(() -> Async.run(jsObject, func, args).get()).get();
+            // ESM 蜘蛛的方法返回值已在 JS 包装层序列化成 JSON 字符串；
+            // 这里不再对 JSObject 调 stringify（QuickJS 包装层会死锁）。
+            if (result != null && !(result instanceof String)) {
+                LOG.i("echo-call-nonstring " + func + " " + result.getClass().getSimpleName());
+            }
+            return result;
         } catch (InterruptedException | ExecutionException e) {
             LOG.i("Executor 提交或等待失败"+ e);
             return null;
@@ -304,7 +310,34 @@ public class JsSpider extends Spider {
             "    } else if (spider.default) {\n" +
             "        globalThis.__JS_SPIDER__ = typeof spider.default === 'function' ? spider.default() : spider.default\n" +
             "    }\n" +
+            "}\n" +
+            "if (globalThis.__JS_SPIDER__ && !globalThis.__JS_SPIDER__.__wrapped) {\n" +
+            "    const raw = globalThis.__JS_SPIDER__;\n" +
+            "    const wrapped = {};\n" +
+            "    for (const k of Object.keys(raw)) {\n" +
+            "        if (typeof raw[k] === 'function') {\n" +
+            "            wrapped[k] = (...args) => {\n" +
+            "                const r = raw[k].apply(raw, args);\n" +
+            "                if (r && typeof r.then === 'function') return r.then(v => (typeof v === 'string' ? v : JSON.stringify(v)));\n" +
+            "                return (typeof r === 'string') ? r : JSON.stringify(r);\n" +
+            "            };\n" +
+            "        } else { wrapped[k] = raw[k]; }\n" +
+            "    }\n" +
+            "    wrapped.__wrapped = true;\n" +
+            "    globalThis.__JS_SPIDER__ = wrapped;\n" +
             "}\n";
+    /**
+     * The QuickJS wrapper used here does not pump pending jobs, so any `await`
+     * inside an ESM spider would suspend forever. Our `net` helpers are
+     * synchronous, so flattening `async`/`await` keeps the same data flow.
+     */
+    private String toSyncModule(String content) {
+        if (!content.contains("export default") || !content.contains("async")) return content;
+        String out = content.replaceAll("\\basync\\s+(?=[A-Za-z_$][A-Za-z0-9_$]*\\s*\\()", "");
+        out = out.replaceAll("\\bawait\\s+", "");
+        return out;
+    }
+
     private void initializeJS() throws Exception {
         submit(() -> {
             if (ctx == null) createCtx();
@@ -335,11 +368,16 @@ public class JsSpider extends Spider {
                     cat = true;
                 }
                 try {
-                    ctx.evaluateModule(content, api);
+                    ctx.evaluateModule(toSyncModule(content), api);
                     ctx.evaluateModule(String.format(SPIDER_STRING_CODE, api) + "globalThis." + key + " = globalThis.__JS_SPIDER__;", "tv_box_root.js");
                 } catch (Throwable th) {
-                    LOG.i("echo-evaluateModule-error " + api + ", msg=" + th.getMessage());
-                    return null;
+                    try {
+                        ctx.evaluateModule(content, api);
+                        ctx.evaluateModule(String.format(SPIDER_STRING_CODE, api) + "globalThis." + key + " = globalThis.__JS_SPIDER__;", "tv_box_root.js");
+                    } catch (Throwable th2) {
+                        LOG.i("echo-evaluateModule-error " + api + ", msg=" + th2.getMessage());
+                        return null;
+                    }
                 }
                 //ctx.evaluateModule(content, api, moduleExtName);
                 //ctx.evaluate("globalThis." + key + " = __JS_SPIDER__;");                
