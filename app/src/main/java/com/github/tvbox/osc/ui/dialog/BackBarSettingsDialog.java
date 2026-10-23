@@ -122,6 +122,8 @@ public class BackBarSettingsDialog extends BaseDialog {
         close.setText("关闭");
         close.setTextColor(0xFF0F172A);
         close.setGravity(Gravity.CENTER);
+        close.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
+                context.getResources().getDisplayMetrics().heightPixels * 0.026f);
         close.setFocusable(true);
         close.setPadding(0, padding / 2, 0, padding / 2);
         GradientDrawable closeBg = new GradientDrawable();

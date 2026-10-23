@@ -112,6 +112,7 @@ public class DetailActivity extends BaseActivity {
     private TextView tvActor;
     private TextView tvDirector;
     private TextView tvPlayUrl;
+    private String playUrlFull = "";
     private TextView tvDes;
     private TextView tvPlay;
 //    private TextView tvSort;
@@ -375,7 +376,8 @@ public class DetailActivity extends BaseActivity {
                 //获取剪切板管理器
                 ClipboardManager cm = (ClipboardManager)getSystemService(mContext.CLIPBOARD_SERVICE);
                 //设置内容到剪切板
-                cm.setPrimaryClip(ClipData.newPlainText(null, tvPlayUrl.getText().toString().replace("播放地址：","")));
+                String copyText = playUrlFull.isEmpty() ? tvPlayUrl.getText().toString() : playUrlFull;
+                cm.setPrimaryClip(ClipData.newPlainText(null, copyText));
                 Toast.makeText(DetailActivity.this, "已复制", Toast.LENGTH_SHORT).show();
             }
         });
@@ -638,7 +640,7 @@ public class DetailActivity extends BaseActivity {
         if (vodInfo != null && vodInfo.seriesMap.get(vodInfo.playFlag).size() > 0) {
             preFlag = vodInfo.playFlag;
             //更新播放地址
-            setTextShow(tvPlayUrl, "播放地址：", vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex).url);
+            setTvPlayUrl(vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex).url);
             Bundle bundle = new Bundle();
             //保存历史
             insertVod(firstsourceKey, vodInfo);
@@ -958,7 +960,7 @@ public class DetailActivity extends BaseActivity {
                                 flag.selected = false;
                         }
                         //设置播放地址
-                        setTextShow(tvPlayUrl, "播放地址：", playingSeriesList.get(vodInfo.playIndex).url);
+                setTvPlayUrl(playingSeriesList.get(vodInfo.playIndex).url);
                         seriesFlagAdapter.setNewData(vodInfo.seriesFlags);
                         mGridViewFlag.scrollToPosition(flagScrollTo);
 
@@ -2130,8 +2132,16 @@ public class DetailActivity extends BaseActivity {
         return playFragment;
     }
 
-    private void setTvPlayUrl(String url)
-    {
-        setTextShow(tvPlayUrl, "播放地址：", url);
+    private void setTvPlayUrl(String url) {
+        playUrlFull = url == null ? "" : url;
+        String display = playUrlFull;
+        try {
+            android.net.Uri uri = android.net.Uri.parse(playUrlFull);
+            if (uri.getHost() != null) {
+                display = uri.getHost();
+            }
+        } catch (Throwable ignored) {
+        }
+        setTextShow(tvPlayUrl, "播放地址：", display);
     }
 }

@@ -225,12 +225,27 @@ public class ImgUtil {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
 
+        Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG);
+        bg.setColor(0xFF1F2937);
+        canvas.drawRoundRect(new RectF(0, 0, width, height), cornerRadius, cornerRadius, bg);
+
         Bitmap icon = BitmapFactory.decodeResource(App.getInstance().getResources(), com.github.tvbox.osc.R.drawable.icon_img_placeholder);
         if (icon != null) {
-            float left = (width - icon.getWidth()) / 2f;
-            float top = (height - icon.getHeight()) / 2f;
-            canvas.drawBitmap(icon, left, top, null);
+            float scale = Math.min(width * 0.36f / icon.getWidth(), height * 0.36f / icon.getHeight());
+            int iw = Math.max(1, (int) (icon.getWidth() * scale));
+            int ih = Math.max(1, (int) (icon.getHeight() * scale));
+            Bitmap scaled = Bitmap.createScaledBitmap(icon, iw, ih, true);
+            float left = (width - iw) / 2f;
+            float top = height * 0.32f - ih / 2f;
+            canvas.drawBitmap(scaled, left, top, null);
+            if (scaled != icon) scaled.recycle();
         }
+
+        Paint label = new Paint(Paint.ANTI_ALIAS_FLAG);
+        label.setColor(0xFF9CA3AF);
+        label.setTextAlign(Paint.Align.CENTER);
+        label.setTextSize(Math.max(18f, height * 0.09f));
+        canvas.drawText("TVBox", width / 2f, height * 0.72f, label);
 
         Drawable drawable = new BitmapDrawable(App.getInstance().getResources(), bitmap);
         drawableCache.put(key, drawable);

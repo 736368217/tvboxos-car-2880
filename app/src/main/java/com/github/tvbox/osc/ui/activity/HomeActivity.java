@@ -344,7 +344,7 @@ public class HomeActivity extends BaseActivity {
                 updateSortData(newSortData);
                 initViewPager(absXml);
                 updateHomeRec(absXml);
-                if (home != null && home.getName() != null && !home.getName().isEmpty()) tvName.setText(home.getName());
+        if (home != null && home.getName() != null && !home.getName().isEmpty()) tvName.setText("TVBox · " + home.getName());
                 tvName.clearAnimation();
                 homeSortLoading = false;
                 loadingSourceKey = null;
@@ -519,7 +519,7 @@ public class HomeActivity extends BaseActivity {
         homeSortLoading = keepCurrentContent;
         if (keepCurrentContent && home != null && home.getName() != null && !home.getName().isEmpty()) {
             previousHomeName = tvName.getText() == null ? null : tvName.getText().toString();
-            tvName.setText(home.getName());
+        tvName.setText("TVBox · " + home.getName());
         }
         tvNameAnimation();
         if (home == null) {
