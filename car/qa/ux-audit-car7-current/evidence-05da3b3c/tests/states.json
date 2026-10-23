@@ -1,0 +1,36 @@
+{
+  "passed": 5,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "SearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792777049096
+    },
+    {
+      "pass": true,
+      "test": "state-empty foreground belongs to target",
+      "detail": "",
+      "at": 1792777050047
+    },
+    {
+      "pass": true,
+      "test": "state-error foreground belongs to target",
+      "detail": "",
+      "at": 1792777050569
+    },
+    {
+      "pass": true,
+      "test": "state-offline foreground belongs to target",
+      "detail": "",
+      "at": 1792777051029
+    },
+    {
+      "pass": true,
+      "test": "state-loading foreground belongs to target",
+      "detail": "",
+      "at": 1792777051620
+    }
+  ]
+}

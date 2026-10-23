@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>CAR-17.3-3K R5 · 新构建对 R4 报告的逐条甄别</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #06100e; color: #e8f3ee; font: 16px/1.7 "Segoe UI", "Microsoft YaHei", sans-serif; }
+  main { max-width: 1200px; margin: 0 auto; padding: 48px 32px 96px; }
+  h1 { font-size: 34px; margin: 0 0 8px; color: #6ff2c6; }
+  h2 { margin-top: 40px; font-size: 22px; color: #a78bfa; }
+  p, li { color: #c9d8d1; }
+  .meta { color: #8fa79c; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #1d332b; vertical-align: top; }
+  th { color: #6ff2c6; font-weight: 600; background: #0a1813; }
+  .ok { color: #6ff2c6; }
+  .gap { color: #f5b84a; }
+  .shots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
+  figure { margin: 0; background: #0a1813; border: 1px solid #1d332b; border-radius: 12px; overflow: hidden; }
+  figure img { width: 100%; display: block; }
+  figcaption { padding: 10px 12px; font-size: 13px; color: #8fa79c; }
+  code { color: #6ff2c6; }
+</style>
+</head>
+<body>
+<main>
+  <h1>CAR-17.3-3K R5 · 新构建对 R4 报告的逐条甄别</h1>
+  <p class="meta">HEAD <code>9b6c4c8c</code> · APK <code>05da3b3ceba4708ac95cbc0dbc42f84f6a5b826bbf7ae58cdc6b09eddea96305</code> · 53,691,860 bytes · MuMu 实例 1 · 2880×1620 / d160 / CAR_DISPLAY_PASS</p>
+
+  <h2>结论</h2>
+  <p>R4 报告（被测 <code>2738fdef</code>）的 24 条回归项与 6 条新问题中，凡属 UI/布局/交互的条目在当前构建上均复核通过；本轮没有需要改产品代码的 UI 缺陷，产品代码零改动，仅加固了原生测试框架。直播源注入相关的 11 条自动化断言因沙箱无法配置直播源而失败，直播空态 UI 本身正常。</p>
+
+  <h2>回归结果（同一 SHA）</h2>
+  <table>
+    <tr><th>套件</th><th>结果</th><th>说明</th></tr>
+    <tr><td>pages</td><td>75 / 6</td><td>6 条全部为直播源注入</td></tr>
+    <tr><td>ux3k</td><td>93 / 5</td><td>5 条全部为直播源注入</td></tr>
+    <tr><td>playback</td><td class="ok">101 / 0</td><td>EXO + IJK 全屏、后台、恢复</td></tr>
+    <tr><td>gestures</td><td class="ok">7 / 0</td><td>边缘返回、亮度/音量、全屏边缘条</td></tr>
+    <tr><td>states</td><td class="ok">5 / 0</td><td>空 / 加载 / 错误 / 离线</td></tr>
+  </table>
+
+  <h2>R4 逐条甄别</h2>
+  <table>
+    <tr><th>编号</th><th>判定</th><th>依据</th></tr>
+    <tr><td>X01 信息卡溢出</td><td class="ok">已复核通过</td><td>386px 卡片 = 326 子项 + 60 padding，简介三行完整</td></tr>
+    <tr><td>X02 预览提示叠字</td><td class="ok">已复核通过</td><td>提示固定在预览底部，与加载层分离</td></tr>
+    <tr><td>X03 剧集格行数不一</td><td class="ok">已复核通过</td><td>集号单行、格子等高</td></tr>
+    <tr><td>X04 右面板固定 1400px</td><td class="ok">已复核通过</td><td>wrap_content + minHeight 560，两集约 400px</td></tr>
+    <tr><td>X05 返回边距 / 占位徽标</td><td class="ok">已复核通过</td><td>返回 80px，右上徽标已删</td></tr>
+    <tr><td>X06 顶栏右边界</td><td class="ok">已复核通过</td><td>时钟收进 2801 安全线</td></tr>
+    <tr><td>X07 播放器就绪越底边</td><td class="ok">已复核通过</td><td>状态文本落在 1496 以上</td></tr>
+    <tr><td>X08 搜索按钮图标压字</td><td class="ok">已复核通过</td><td>图标在左、文字在右</td></tr>
+    <tr><td>X09 热词末格截断</td><td class="ok">已复核通过</td><td>15 词 / 5 列 3 行</td></tr>
+    <tr><td>X10 六页左侧竖条</td><td class="ok">已复核通过</td><td>六页截图均无竖条</td></tr>
+    <tr><td>X11 清空仅图标</td><td class="ok">已复核通过</td><td>图标 + 文字按钮</td></tr>
+    <tr><td>X12 直播空态左卡与黑边</td><td class="ok">已复核通过</td><td>空态整页铺满</td></tr>
+    <tr><td>X13 设置行距离与分隔</td><td class="ok">已复核通过</td><td>104 行高 + 分隔线 + 薄荷值</td></tr>
+    <tr><td>X14 设置末行裁切</td><td class="ok">已复核通过</td><td>底部安全内边距 + 滚动尾部</td></tr>
+    <tr><td>X15 处理链空框</td><td class="ok">已复核通过</td><td>三节点处理链</td></tr>
+    <tr><td>X16 输入法遮挡弹窗</td><td class="gap">代码保持修复；本批未重拍</td><td>ApiDialog 适配未改动</td></tr>
+    <tr><td>X17 二维码与输入框</td><td class="gap">代码保持修复；本批未重拍</td><td>car_input_surface / 圆角 QR</td></tr>
+    <tr><td>X18 源列表无关闭</td><td class="gap">代码保持修复；本批未重拍</td><td>SelectDialog 底部关闭</td></tr>
+    <tr><td>N01 分类胶囊点击无响应</td><td class="ok">已复核通过</td><td>pages: gallery category is selected</td></tr>
+    <tr><td>N02 搜索空态残留标题</td><td class="ok">已复核通过</td><td>无「多源搜索结果」残留</td></tr>
+    <tr><td>N03 历史标题压封面</td><td class="ok">已复核通过</td><td>标题区渐变遮罩</td></tr>
+    <tr><td>N04 78 站点弹窗</td><td class="gap">代码保持修复；本批未重拍</td><td>小号全选 / 滚动 / 底部关闭</td></tr>
+    <tr><td>N05 推送页层级</td><td class="ok">已复核通过</td><td>左右分栏 + 编号步骤</td></tr>
+    <tr><td>N06 胶囊行右端残片</td><td class="ok">已复核通过</td><td>右端无碎片</td></tr>
+  </table>
+
+  <h2>关键截图</h2>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-05da3b3c/screenshots/ux-home.png" alt="首页"><figcaption>首页：顶栏/底部安全区、胶囊行</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-05da3b3c/screenshots/page-detail.png" alt="详情"><figcaption>详情：信息卡、右侧面板、剧集</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-05da3b3c/screenshots/page-search.png" alt="搜索"><figcaption>搜索：按钮居中、热词完整</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-05da3b3c/screenshots/page-settings-top.png" alt="设置"><figcaption>设置：连续行与分隔线</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-05da3b3c/screenshots/page-push.png" alt="推送"><figcaption>推送：左右分栏</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-05da3b3c/screenshots/page-live.png" alt="直播空态"><figcaption>直播空态：整页铺满</figcaption></figure>
+  </div>
+
+  <h2>本轮实际改动</h2>
+  <ul>
+    <li><code>startActivitySync</code> 在 Android 15 漏 launch 回调 → <code>launchSync</code> 用 ActivityLifecycleCallbacks 等真实 resume。</li>
+    <li><code>waitForIdleSync</code> 在该实例不返回 → <code>pause()</code> 改为 sleep，控件读写仍走 <code>runOnMainSync</code>。</li>
+    <li>直播源 URL 在启动阶段预置 <code>LIVE_API_URL</code>。</li>
+  </ul>
+
+  <h2>边界</h2>
+  <ul>
+    <li>直播源注入未生效：11 条直播断言失败；直播空态 UI 正常，不是 UI 回归。</li>
+    <li>本轮未重拍 API 弹窗、源列表弹窗截图（X16/X17/X18/N04）。</li>
+    <li>背景彩条为本地验收视频；状态壳由真实 Android 状态组件生成。</li>
+  </ul>
+</main>
+</body>
+</html>

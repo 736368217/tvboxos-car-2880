@@ -1,0 +1,492 @@
+{
+  "passed": 75,
+  "failed": 6,
+  "events": [
+    {
+      "pass": true,
+      "test": "uxNavCategories reachable",
+      "detail": "",
+      "at": 1792774314101
+    },
+    {
+      "pass": true,
+      "test": "page-category foreground belongs to target",
+      "detail": "",
+      "at": 1792774314499
+    },
+    {
+      "pass": true,
+      "test": "gallery category is selected",
+      "detail": "",
+      "at": 1792774314748
+    },
+    {
+      "pass": true,
+      "test": "DetailActivity has in-app Back host",
+      "detail": "",
+      "at": 1792774320321
+    },
+    {
+      "pass": true,
+      "test": "page-detail foreground belongs to target",
+      "detail": "",
+      "at": 1792774322972
+    },
+    {
+      "pass": true,
+      "test": "detail fixture metadata loaded",
+      "detail": "",
+      "at": 1792774323193
+    },
+    {
+      "pass": true,
+      "test": "detail preview plays fixture",
+      "detail": "",
+      "at": 1792774323194
+    },
+    {
+      "pass": true,
+      "test": "tvPlay reachable",
+      "detail": "",
+      "at": 1792774323445
+    },
+    {
+      "pass": true,
+      "test": "page-player-controls foreground belongs to target",
+      "detail": "",
+      "at": 1792774325452
+    },
+    {
+      "pass": true,
+      "test": "uxMore reachable",
+      "detail": "",
+      "at": 1792774325934
+    },
+    {
+      "pass": true,
+      "test": "play_car_sr reachable",
+      "detail": "",
+      "at": 1792774326411
+    },
+    {
+      "pass": true,
+      "test": "SR button updates saved preference",
+      "detail": "",
+      "at": 1792774326637
+    },
+    {
+      "pass": true,
+      "test": "SR button updates current renderer",
+      "detail": "",
+      "at": 1792774326638
+    },
+    {
+      "pass": true,
+      "test": "play_car_interp reachable",
+      "detail": "",
+      "at": 1792774326889
+    },
+    {
+      "pass": true,
+      "test": "interpolation button updates current renderer",
+      "detail": "",
+      "at": 1792774327115
+    },
+    {
+      "pass": true,
+      "test": "play_car_audio reachable",
+      "detail": "",
+      "at": 1792774327367
+    },
+    {
+      "pass": true,
+      "test": "audio button uses same current session",
+      "detail": "",
+      "at": 1792774328070
+    },
+    {
+      "pass": true,
+      "test": "play_car_video reachable",
+      "detail": "",
+      "at": 1792774328321
+    },
+    {
+      "pass": true,
+      "test": "video preset button updates current renderer",
+      "detail": "",
+      "at": 1792774329220
+    },
+    {
+      "pass": true,
+      "test": "four quick controls preserve decoder",
+      "detail": "",
+      "at": 1792774329220
+    },
+    {
+      "pass": true,
+      "test": "page-player-controls-enabled foreground belongs to target",
+      "detail": "",
+      "at": 1792774329372
+    },
+    {
+      "pass": true,
+      "test": "detail quick controls advancing decoder and source",
+      "detail": "",
+      "at": 1792774331410
+    },
+    {
+      "pass": true,
+      "test": "player Back returns to detail before finishing",
+      "detail": "",
+      "at": 1792774332653
+    },
+    {
+      "pass": true,
+      "test": "page-detail-after-back foreground belongs to target",
+      "detail": "",
+      "at": 1792774332804
+    },
+    {
+      "pass": true,
+      "test": "uxDetailBack reachable",
+      "detail": "",
+      "at": 1792774333575
+    },
+    {
+      "pass": true,
+      "test": "detail Back finishes one page",
+      "detail": "",
+      "at": 1792774334202
+    },
+    {
+      "pass": true,
+      "test": "SettingActivity has in-app Back host",
+      "detail": "",
+      "at": 1792774335674
+    },
+    {
+      "pass": true,
+      "test": "page-settings-top foreground belongs to target",
+      "detail": "",
+      "at": 1792774335825
+    },
+    {
+      "pass": true,
+      "test": "page-settings-car foreground belongs to target",
+      "detail": "",
+      "at": 1792774336992
+    },
+    {
+      "pass": true,
+      "test": "page-advanced-top foreground belongs to target",
+      "detail": "",
+      "at": 1792774337953
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedSr reachable",
+      "detail": "",
+      "at": 1792774338358
+    },
+    {
+      "pass": true,
+      "test": "advanced SR switch toggles saved value",
+      "detail": "",
+      "at": 1792774338585
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedInterp reachable",
+      "detail": "",
+      "at": 1792774338836
+    },
+    {
+      "pass": true,
+      "test": "advanced interpolation switch toggles saved value",
+      "detail": "",
+      "at": 1792774339062
+    },
+    {
+      "pass": true,
+      "test": "ux_setting_audio_tab reachable",
+      "detail": "",
+      "at": 1792774339314
+    },
+    {
+      "pass": true,
+      "test": "page-advanced-audio foreground belongs to target",
+      "detail": "",
+      "at": 1792774339693
+    },
+    {
+      "pass": true,
+      "test": "ux_setting_return_tab reachable",
+      "detail": "",
+      "at": 1792774340089
+    },
+    {
+      "pass": true,
+      "test": "page-advanced-return-top foreground belongs to target",
+      "detail": "",
+      "at": 1792774340467
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedBackHide reachable",
+      "detail": "",
+      "at": 1792774340896
+    },
+    {
+      "pass": true,
+      "test": "advanced hide duration stored",
+      "detail": "",
+      "at": 1792774341750
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedBackMode reachable",
+      "detail": "",
+      "at": 1792774342001
+    },
+    {
+      "pass": true,
+      "test": "advanced dual mode stored",
+      "detail": "",
+      "at": 1792774342868
+    },
+    {
+      "pass": true,
+      "test": "llAdvancedBackSkin reachable",
+      "detail": "",
+      "at": 1792774343120
+    },
+    {
+      "pass": true,
+      "test": "advanced capsule skin stored",
+      "detail": "",
+      "at": 1792774343835
+    },
+    {
+      "pass": true,
+      "test": "page-advanced-back foreground belongs to target",
+      "detail": "",
+      "at": 1792774344337
+    },
+    {
+      "pass": true,
+      "test": "advanced Back returns one page",
+      "detail": "",
+      "at": 1792774345320
+    },
+    {
+      "pass": true,
+      "test": "settings Back returns home",
+      "detail": "",
+      "at": 1792774346160
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792774347215
+    },
+    {
+      "pass": true,
+      "test": "page-search foreground belongs to target",
+      "detail": "",
+      "at": 1792774347767
+    },
+    {
+      "pass": true,
+      "test": "SearchActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792774348939
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity has in-app Back host",
+      "detail": "",
+      "at": 1792774350297
+    },
+    {
+      "pass": true,
+      "test": "page-fastsearch foreground belongs to target",
+      "detail": "",
+      "at": 1792774352948
+    },
+    {
+      "pass": true,
+      "test": "FastSearchActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792774354098
+    },
+    {
+      "pass": true,
+      "test": "HistoryActivity has in-app Back host",
+      "detail": "",
+      "at": 1792774355454
+    },
+    {
+      "pass": true,
+      "test": "page-history foreground belongs to target",
+      "detail": "",
+      "at": 1792774356006
+    },
+    {
+      "pass": true,
+      "test": "HistoryActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792774357152
+    },
+    {
+      "pass": true,
+      "test": "CollectActivity has in-app Back host",
+      "detail": "",
+      "at": 1792774358506
+    },
+    {
+      "pass": true,
+      "test": "page-collect foreground belongs to target",
+      "detail": "",
+      "at": 1792774359059
+    },
+    {
+      "pass": true,
+      "test": "CollectActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792774360184
+    },
+    {
+      "pass": true,
+      "test": "LocalFileActivity has in-app Back host",
+      "detail": "",
+      "at": 1792774361544
+    },
+    {
+      "pass": true,
+      "test": "page-localfile foreground belongs to target",
+      "detail": "",
+      "at": 1792774362095
+    },
+    {
+      "pass": true,
+      "test": "LocalFileActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792774363227
+    },
+    {
+      "pass": true,
+      "test": "PushActivity has in-app Back host",
+      "detail": "",
+      "at": 1792774364582
+    },
+    {
+      "pass": true,
+      "test": "page-push foreground belongs to target",
+      "detail": "",
+      "at": 1792774365133
+    },
+    {
+      "pass": true,
+      "test": "PushActivity in-app Back finishes one level",
+      "detail": "",
+      "at": 1792774366281
+    },
+    {
+      "pass": true,
+      "test": "LivePlayActivity has in-app Back host",
+      "detail": "",
+      "at": 1792774367638
+    },
+    {
+      "pass": false,
+      "test": "live fixture actually playing",
+      "detail": "",
+      "at": 1792774387660
+    },
+    {
+      "pass": false,
+      "test": "local live advancing decoder and source",
+      "detail": "",
+      "at": 1792774389462
+    },
+    {
+      "pass": true,
+      "test": "page-live foreground belongs to target",
+      "detail": "",
+      "at": 1792774389616
+    },
+    {
+      "pass": true,
+      "test": "page-live-channels foreground belongs to target",
+      "detail": "",
+      "at": 1792774390288
+    },
+    {
+      "pass": false,
+      "test": "ux_live_favorite reachable",
+      "detail": "",
+      "at": 1792774390715
+    },
+    {
+      "pass": false,
+      "test": "live channel favorite stores and labels",
+      "detail": "",
+      "at": 1792774390942
+    },
+    {
+      "pass": true,
+      "test": "ux_live_favorites reachable",
+      "detail": "",
+      "at": 1792774391193
+    },
+    {
+      "pass": false,
+      "test": "ux_live_favorite reachable",
+      "detail": "",
+      "at": 1792774392037
+    },
+    {
+      "pass": true,
+      "test": "live favorite removes again",
+      "detail": "",
+      "at": 1792774392266
+    },
+    {
+      "pass": true,
+      "test": "ux_live_settings reachable",
+      "detail": "",
+      "at": 1792774392516
+    },
+    {
+      "pass": true,
+      "test": "page-live-settings foreground belongs to target",
+      "detail": "",
+      "at": 1792774392896
+    },
+    {
+      "pass": true,
+      "test": "ux_live_close_settings reachable",
+      "detail": "",
+      "at": 1792774393330
+    },
+    {
+      "pass": true,
+      "test": "live settings closes",
+      "detail": "",
+      "at": 1792774393567
+    },
+    {
+      "pass": false,
+      "test": "gallery-live",
+      "detail": "java.lang.IllegalStateException: missing back host\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.host(Car7Acceptance.java:688)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.ball(Car7Acceptance.java:689)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.tapBall(Car7Acceptance.java:725)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.lambda$pagesChecks$219$com-github-tvbox-osc-car7-test-Car7Acceptance(Car7Acceptance.java:1245)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance$$ExternalSyntheticLambda14.run(Unknown Source:2)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.section(Car7Acceptance.java:627)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.pagesChecks(Car7Acceptance.java:1228)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.$r8$lambda$kKmNtfeFZhOoouI1HGwnKe3bXFw(Unknown Source:0)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance$$ExternalSyntheticLambda26.run(Unknown Source:2)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.section(Car7Acceptance.java:627)\n\tat com.github.tvbox.osc.car7.test.Car7Acceptance.onStart(Car7Acceptance.java:91)\n\tat android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2606)\n",
+      "at": 1792774394161
+    },
+    {
+      "pass": true,
+      "test": "page gallery retains home",
+      "detail": "",
+      "at": 1792774394161
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+﻿{
+    "apk":  "TVBox-1.0.0-car.7-r5.apk",
+    "sha256":  "05da3b3ceba4708ac95cbc0dbc42f84f6a5b826bbf7ae58cdc6b09eddea96305",
+    "bytes":  53691860,
+    "package":  "com.github.tvbox.osc.jun",
+    "versionCode":  8,
+    "versionName":  "1.0.0-car.7",
+    "device":  {
+                   "vmIndex":  1,
+                   "adb":  "127.0.0.1:16416",
+                   "owner":  "tvbox-r5-verify-20261024",
+                   "physicalWidth":  1620,
+                   "physicalHeight":  2880,
+                   "displayWidth":  2880,
+                   "displayHeight":  1620,
+                   "density":  160,
+                   "rotation":  "lock 1",
+                   "carDisplayPass":  true
+               },
+    "tests":  {
+                  "pages":  {
+                                "passed":  75,
+                                "failed":  6
+                            },
+                  "ux3k":  {
+                               "passed":  93,
+                               "failed":  5
+                           },
+                  "playback":  {
+                                   "passed":  101,
+                                   "failed":  0
+                               },
+                  "gestures":  {
+                                   "passed":  7,
+                                   "failed":  0
+                               },
+                  "states":  {
+                                 "passed":  5,
+                                 "failed":  0
+                             }
+              },
+    "screenshots":  [
+                        "EXO-fullscreen.png",
+                        "EXO-playing.png",
+                        "IJK-playing.png",
+                        "page-advanced-audio.png",
+                        "page-advanced-back.png",
+                        "page-advanced-return-top.png",
+                        "page-advanced-top.png",
+                        "page-back-mode-options.png",
+                        "page-category.png",
+                        "page-collect.png",
+                        "page-detail.png",
+                        "page-detail-after-back.png",
+                        "page-fastsearch.png",
+                        "page-hide-options.png",
+                        "page-history.png",
+                        "page-live.png",
+                        "page-live-channels.png",
+                        "page-live-favorites.png",
+                        "page-live-settings.png",
+                        "page-localfile.png",
+                        "page-player-controls.png",
+                        "page-player-controls-enabled.png",
+                        "page-player-presets.png",
+                        "page-push.png",
+                        "page-search.png",
+                        "page-settings-car.png",
+                        "page-settings-top.png",
+                        "ux-category.png",
+                        "ux-detail.png",
+                        "ux-home.png",
+                        "ux-live.png",
+                        "ux-live-after-back.png",
+                        "ux-live-fullscreen.png",
+                        "ux-player.png",
+                        "ux-player-advanced.png",
+                        "ux-player-hidden.png",
+                        "ux-player-more.png",
+                        "ux-player-paused.png",
+                        "ux-search-opened-detail.png",
+                        "ux-search-results.png",
+                        "ux-settings-category-0.png",
+                        "ux-settings-category-0-scroll-0.png",
+                        "ux-settings-category-1.png",
+                        "ux-settings-category-2.png",
+                        "ux-settings-category-2-scroll-0.png",
+                        "ux-settings-category-3.png",
+                        "ux-settings-category-3-scroll-0.png",
+                        "ux-settings-category-3-scroll-1.png",
+                        "ux-settings-category-4.png",
+                        "ux-settings-category-4-scroll-0.png",
+                        "ux-settings-category-5.png",
+                        "ux-settings-category-6.png",
+                        "ux-settings-picture.png",
+                        "ux-settings-touch.png"
+                    ],
+    "manualScreenshots":  [
+                              "manual/state-empty.png",
+                              "manual/state-error.png",
+                              "manual/state-loading.png",
+                              "manual/state-offline.png"
+                          ],
+    "note":  "All screenshots are native 2880x1620 Android captures from the leased MuMu instance. Background colour bars are the local acceptance video. The eleven failing assertions all belong to live-source injection, which this sandbox batch could not configure; they are not UI regressions."
+}

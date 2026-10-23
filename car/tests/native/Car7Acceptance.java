@@ -1,6 +1,7 @@
 package com.github.tvbox.osc.car7.test;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.Dialog;
 import android.app.Instrumentation;
 import android.content.Context;
@@ -71,11 +72,14 @@ public final class Car7Acceptance extends Instrumentation {
                     if (!Boolean.TRUE.equals(call(hawk, "isBuilt"))) throw new IllegalStateException("Application preferences not initialized");
                     call(hawk, "put", mapping.getJSONObject("constants").getString("API_URL"), arguments.getString("api"));
                     call(hawk, "put", mapping.getJSONObject("constants").getString("HOME_API"), arguments.getString("homeSite", "py_maple"));
+                    if (arguments.getString("liveApi") != null) {
+                        call(hawk, "put", mapping.getJSONObject("constants").getString("LIVE_API_URL"), arguments.getString("liveApi"));
+                    }
                     if ("pages".equals(arguments.getString("mode")) || "ux3k".equals(arguments.getString("mode"))) putPref("HOME_REC", 1);
                 }
                 Intent launch = getTargetContext().getPackageManager().getLaunchIntentForPackage(getTargetContext().getPackageName());
                 launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                home = startActivitySync(launch);
+                home = launchSync(launch);
                 pause(15000);
                 if (arguments != null && "subscription".equals(arguments.getString("mode"))) {
                     section("subscription", this::subscriptionChecks);
@@ -590,7 +594,7 @@ public final class Car7Acceptance extends Instrumentation {
             JSONObject target = new JSONObject(targetText);
             Intent launch = getTargetContext().getPackageManager().getLaunchIntentForPackage(getTargetContext().getPackageName());
             launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            home = startActivitySync(launch); SystemClock.sleep(15000);
+            home = launchSync(launch); SystemClock.sleep(15000);
             Object video = ui(() -> {
                 putPref("VIDEO_ENHANCE", 0); putPref("VIDEO_SR", 0); putPref("VIDEO_INTERP", 0); putPref("HIFI_AUDIO", 0);
                 Object v = type("com.github.tvbox.osc.player.MyVideoView").getConstructor(Context.class).newInstance(home);
@@ -622,7 +626,7 @@ public final class Car7Acceptance extends Instrumentation {
     private void section(String name, Job job) {
         try { job.run(); } catch (Throwable error) { record(false, name, Log.getStackTraceString(error)); }
     }
-    private void pause(long ms) { SystemClock.sleep(ms); waitForIdleSync(); }
+    private void pause(long ms) { SystemClock.sleep(ms); }
     private <T> T ui(Work<T> work) throws Exception {
         AtomicReference<T> value = new AtomicReference<>();
         AtomicReference<Throwable> error = new AtomicReference<>();
@@ -724,15 +728,39 @@ public final class Car7Acceptance extends Instrumentation {
         for (int i = 1; i <= 12; i++) { SystemClock.sleep(ms / 12); point(a, t, MotionEvent.ACTION_MOVE, x + (x2 - x) * i / 12, y + (y2 - y) * i / 12); }
         point(a, t, MotionEvent.ACTION_UP, x2, y2); pause(450);
     }
+
+    /** startActivitySync can miss its launch callback on API 35; wait on the real lifecycle instead. */
+    private Activity launchSync(Intent intent) throws Exception {
+        final String target = intent.getComponent() == null ? null : intent.getComponent().getClassName();
+        final java.util.concurrent.atomic.AtomicReference<Activity> resumed = new java.util.concurrent.atomic.AtomicReference<>();
+        main(() -> {
+            Object watcher = Proxy.newProxyInstance(Application.ActivityLifecycleCallbacks.class.getClassLoader(),
+                    new Class<?>[]{Application.ActivityLifecycleCallbacks.class}, (proxy, method, values) -> {
+                        if ("onActivityResumed".equals(method.getName()) && values != null && values.length == 1) {
+                            Activity activity = (Activity) values[0];
+                            if (target == null || target.equals(activity.getClass().getName())) resumed.set(activity);
+                        }
+                        return null;
+                    });
+            ((Application) getTargetContext().getApplicationContext())
+                    .registerActivityLifecycleCallbacks((Application.ActivityLifecycleCallbacks) watcher);
+        });
+        getTargetContext().startActivity(intent);
+        long end = SystemClock.uptimeMillis() + 25000;
+        while (resumed.get() == null && SystemClock.uptimeMillis() < end) SystemClock.sleep(150);
+        Activity activity = resumed.get();
+        if (activity == null) throw new IllegalStateException("activity did not resume: " + intent);
+        return activity;
+    }
     private Activity openAdvanced() throws Exception {
         Intent i = new Intent(); i.setClassName(getTargetContext().getPackageName(), "com.github.tvbox.osc.ui.activity.CarAdvancedActivity"); i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        Activity a = startActivitySync(i); pause(500); advanced = a; return a;
+        Activity a = launchSync(i); pause(500); advanced = a; return a;
     }
     private void assertTargetWindow(String name) throws Exception {
         String targetPackage = getTargetContext().getPackageName();
         String packageName = "null";
         for (int attempt = 0; attempt < 20; attempt++) {
-            waitForIdleSync();
+            SystemClock.sleep(150);
             android.view.accessibility.AccessibilityNodeInfo root = getUiAutomation().getRootInActiveWindow();
             packageName = root == null || root.getPackageName() == null ? "null" : root.getPackageName().toString();
             if (targetPackage.equals(packageName)) {
@@ -790,7 +818,7 @@ public final class Car7Acceptance extends Instrumentation {
         intent.setClassName(getTargetContext().getPackageName(), "com.github.tvbox.osc.ui.activity." + name);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (extras != null) intent.putExtras(extras);
-        Activity page = startActivitySync(intent); pause(900);
+        Activity page = launchSync(intent); pause(900);
         check(name + " has in-app Back host", host(page).isAttachedToWindow());
         return page;
     }
@@ -1201,6 +1229,14 @@ public final class Car7Acceptance extends Instrumentation {
             String liveApi = arguments == null ? "http://127.0.0.1:9978/file/TVBoxCar5/car7-live.m3u"
                     : arguments.getString("liveApi", "http://127.0.0.1:9978/file/TVBoxCar5/car7-live.m3u");
             main(() -> { putPref("LIVE_API_URL", liveApi); putPref("PLAY_TYPE", 2); });
+            try {
+                Object liveConfig = call(type("com.github.tvbox.osc.api.ApiConfig"), "get");
+                Class<?> callbackType = type("com.github.tvbox.osc.api.ApiConfig$LoadConfigCallback");
+                Object callback = Proxy.newProxyInstance(callbackType.getClassLoader(),
+                        new Class<?>[]{callbackType}, (proxy, method, values) -> null);
+                call(liveConfig, "loadLiveConfig", false, callback);
+            } catch (Throwable ignored) { }
+            SystemClock.sleep(6000);
             Activity live = openPage("LivePlayActivity", null);
             try {
                 Object video = ui(() -> field(live, "mVideoView"));

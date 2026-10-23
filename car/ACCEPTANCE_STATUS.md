@@ -2,6 +2,15 @@
 
 This file is a durable status pointer. It does not replace fresh evidence or claim a pass by itself.
 
+## Current: R5 rebuild + R4 re-verification
+
+- APK SHA-256: `05da3b3ceba4708ac95cbc0dbc42f84f6a5b826bbf7ae58cdc6b09eddea96305` (53,691,860 bytes), built from HEAD `9b6c4c8c`.
+- R4 report (24 regression + 6 new items, tested at `2738fdef`) re-checked on this build: all UI/layout/interaction items pass; product code unchanged, only the native test harness was hardened for Android 15.
+- MuMu instance 1: `CAR_DISPLAY_PASS`; `pages` 75/6, `ux3k` 93/5 (all eleven failures are live-source injection), `playback` 101/0, `gestures` 7/0, `states` 5/0.
+- Evidence: `car/qa/ux-audit-car7-current/evidence-05da3b3c/`.
+- Report: `car/reports/ux_redesign/CAR-17.3-3K-R5-R4-VERIFICATION.md`.
+- Open: live-source injection (`LIVE_API_URL` → `ApiConfig.loadLiveConfig`) does not take effect in the sandbox; API/source dialog screenshots were not re-captured this batch.
+
 ## Current: R4 audit completion
 
 - APK SHA-256: `97bc08267b17c0b173e6d9332c78f420fbdf6f7fb7d901483482a70a3990beb0` (53,691,860 bytes).

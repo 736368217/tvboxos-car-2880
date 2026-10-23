@@ -1,0 +1,612 @@
+{
+  "passed": 101,
+  "failed": 0,
+  "events": [
+    {
+      "pass": true,
+      "test": "EXO local video playing",
+      "detail": "",
+      "at": 1792777177637
+    },
+    {
+      "pass": true,
+      "test": "EXO actual engine",
+      "detail": "",
+      "at": 1792777177638
+    },
+    {
+      "pass": true,
+      "test": "EXO initial Texture",
+      "detail": "",
+      "at": 1792777177638
+    },
+    {
+      "pass": true,
+      "test": "EXO Texture to GL without restart",
+      "detail": "",
+      "at": 1792777178145
+    },
+    {
+      "pass": true,
+      "test": "EXO initial GL advancing decoder and source",
+      "detail": "",
+      "at": 1792777179965
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 0",
+      "detail": "",
+      "at": 1792777180679
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 1",
+      "detail": "",
+      "at": 1792777181185
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 2",
+      "detail": "",
+      "at": 1792777181690
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 3",
+      "detail": "",
+      "at": 1792777182196
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 4",
+      "detail": "",
+      "at": 1792777182705
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 5",
+      "detail": "",
+      "at": 1792777183209
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 6",
+      "detail": "",
+      "at": 1792777183715
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 7",
+      "detail": "",
+      "at": 1792777184223
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 8",
+      "detail": "",
+      "at": 1792777184728
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 9",
+      "detail": "",
+      "at": 1792777185234
+    },
+    {
+      "pass": true,
+      "test": "EXO video preset 10",
+      "detail": "",
+      "at": 1792777185741
+    },
+    {
+      "pass": true,
+      "test": "EXO audio session valid",
+      "detail": "",
+      "at": 1792777185742
+    },
+    {
+      "pass": true,
+      "test": "EXO audio preset 0",
+      "detail": "",
+      "at": 1792777186345
+    },
+    {
+      "pass": true,
+      "test": "EXO audio preset 1",
+      "detail": "",
+      "at": 1792777186966
+    },
+    {
+      "pass": true,
+      "test": "EXO audio preset 2",
+      "detail": "",
+      "at": 1792777187569
+    },
+    {
+      "pass": true,
+      "test": "EXO audio preset 3",
+      "detail": "",
+      "at": 1792777188175
+    },
+    {
+      "pass": true,
+      "test": "EXO audio preset 4",
+      "detail": "",
+      "at": 1792777188778
+    },
+    {
+      "pass": true,
+      "test": "EXO audio preset 5",
+      "detail": "",
+      "at": 1792777189382
+    },
+    {
+      "pass": true,
+      "test": "EXO audio preset 6",
+      "detail": "",
+      "at": 1792777189990
+    },
+    {
+      "pass": true,
+      "test": "EXO audio preset 7",
+      "detail": "",
+      "at": 1792777190596
+    },
+    {
+      "pass": true,
+      "test": "EXO audio preset 8",
+      "detail": "",
+      "at": 1792777191205
+    },
+    {
+      "pass": true,
+      "test": "EXO late callbacks keep explicit pause",
+      "detail": "",
+      "at": 1792777191658
+    },
+    {
+      "pass": true,
+      "test": "EXO paused GL to Texture preserves state",
+      "detail": "",
+      "at": 1792777192164
+    },
+    {
+      "pass": true,
+      "test": "EXO paused Texture to GL preserves state",
+      "detail": "",
+      "at": 1792777192669
+    },
+    {
+      "pass": true,
+      "test": "EXO paused switch resumes",
+      "detail": "",
+      "at": 1792777192683
+    },
+    {
+      "pass": true,
+      "test": "EXO after paused switch advancing decoder and source",
+      "detail": "",
+      "at": 1792777194501
+    },
+    {
+      "pass": true,
+      "test": "EXO fullscreen active",
+      "detail": "",
+      "at": 1792777196019
+    },
+    {
+      "pass": true,
+      "test": "EXO fullscreen preserves decoder producer",
+      "detail": "",
+      "at": 1792777196019
+    },
+    {
+      "pass": true,
+      "test": "EXO fullscreen advancing decoder and source",
+      "detail": "",
+      "at": 1792777197845
+    },
+    {
+      "pass": true,
+      "test": "EXO fullscreen exit preserves decoder producer",
+      "detail": "",
+      "at": 1792777199271
+    },
+    {
+      "pass": true,
+      "test": "EXO fullscreen exit advancing decoder and source",
+      "detail": "",
+      "at": 1792777201091
+    },
+    {
+      "pass": true,
+      "test": "EXO background not continuous",
+      "detail": "",
+      "at": 1792777203773
+    },
+    {
+      "pass": true,
+      "test": "EXO background resumes",
+      "detail": "",
+      "at": 1792777205800
+    },
+    {
+      "pass": true,
+      "test": "EXO foreground window1 advancing decoder and source",
+      "detail": "",
+      "at": 1792777207614
+    },
+    {
+      "pass": true,
+      "test": "EXO foreground window2 advancing decoder and source",
+      "detail": "",
+      "at": 1792777209435
+    },
+    {
+      "pass": true,
+      "test": "EXO rapid settings preserve decoder",
+      "detail": "",
+      "at": 1792777211289
+    },
+    {
+      "pass": true,
+      "test": "EXO rapid settings advancing decoder and source",
+      "detail": "",
+      "at": 1792777213117
+    },
+    {
+      "pass": true,
+      "test": "EXO playing GL to Texture no restart",
+      "detail": "",
+      "at": 1792777213633
+    },
+    {
+      "pass": true,
+      "test": "EXO final GL advancing decoder and source",
+      "detail": "",
+      "at": 1792777215969
+    },
+    {
+      "pass": true,
+      "test": "EXO release terminal producer empty",
+      "detail": "",
+      "at": 1792777216647
+    },
+    {
+      "pass": true,
+      "test": "EXO repeated release idempotent",
+      "detail": "",
+      "at": 1792777216648
+    },
+    {
+      "pass": true,
+      "test": "EXO reentry plays",
+      "detail": "",
+      "at": 1792777216972
+    },
+    {
+      "pass": true,
+      "test": "EXO reentry advancing decoder and source",
+      "detail": "",
+      "at": 1792777218797
+    },
+    {
+      "pass": true,
+      "test": "EXO release during handoff cleans old producer",
+      "detail": "",
+      "at": 1792777219786
+    },
+    {
+      "pass": true,
+      "test": "EXO pending handoff engine released",
+      "detail": "",
+      "at": 1792777219786
+    },
+    {
+      "pass": true,
+      "test": "IJK local video playing",
+      "detail": "",
+      "at": 1792777220828
+    },
+    {
+      "pass": true,
+      "test": "IJK actual engine",
+      "detail": "",
+      "at": 1792777220828
+    },
+    {
+      "pass": true,
+      "test": "IJK initial GL",
+      "detail": "",
+      "at": 1792777220829
+    },
+    {
+      "pass": true,
+      "test": "IJK Texture to GL without restart",
+      "detail": "",
+      "at": 1792777221335
+    },
+    {
+      "pass": true,
+      "test": "IJK initial GL advancing decoder and source",
+      "detail": "",
+      "at": 1792777223142
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 0",
+      "detail": "",
+      "at": 1792777223867
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 1",
+      "detail": "",
+      "at": 1792777224378
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 2",
+      "detail": "",
+      "at": 1792777224900
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 3",
+      "detail": "",
+      "at": 1792777225408
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 4",
+      "detail": "",
+      "at": 1792777225919
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 5",
+      "detail": "",
+      "at": 1792777226426
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 6",
+      "detail": "",
+      "at": 1792777226932
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 7",
+      "detail": "",
+      "at": 1792777227564
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 8",
+      "detail": "",
+      "at": 1792777228069
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 9",
+      "detail": "",
+      "at": 1792777228575
+    },
+    {
+      "pass": true,
+      "test": "IJK video preset 10",
+      "detail": "",
+      "at": 1792777229081
+    },
+    {
+      "pass": true,
+      "test": "IJK audio session valid",
+      "detail": "",
+      "at": 1792777229081
+    },
+    {
+      "pass": true,
+      "test": "IJK audio preset 0",
+      "detail": "",
+      "at": 1792777229684
+    },
+    {
+      "pass": true,
+      "test": "IJK audio preset 1",
+      "detail": "",
+      "at": 1792777230298
+    },
+    {
+      "pass": true,
+      "test": "IJK audio preset 2",
+      "detail": "",
+      "at": 1792777230903
+    },
+    {
+      "pass": true,
+      "test": "IJK audio preset 3",
+      "detail": "",
+      "at": 1792777231509
+    },
+    {
+      "pass": true,
+      "test": "IJK audio preset 4",
+      "detail": "",
+      "at": 1792777232114
+    },
+    {
+      "pass": true,
+      "test": "IJK audio preset 5",
+      "detail": "",
+      "at": 1792777232719
+    },
+    {
+      "pass": true,
+      "test": "IJK audio preset 6",
+      "detail": "",
+      "at": 1792777233327
+    },
+    {
+      "pass": true,
+      "test": "IJK audio preset 7",
+      "detail": "",
+      "at": 1792777233965
+    },
+    {
+      "pass": true,
+      "test": "IJK audio preset 8",
+      "detail": "",
+      "at": 1792777234569
+    },
+    {
+      "pass": true,
+      "test": "IJK late callbacks keep explicit pause",
+      "detail": "",
+      "at": 1792777235020
+    },
+    {
+      "pass": true,
+      "test": "IJK paused GL to Texture preserves state",
+      "detail": "",
+      "at": 1792777235526
+    },
+    {
+      "pass": true,
+      "test": "IJK all-off is identity without SR or interpolation",
+      "detail": "",
+      "at": 1792777235526
+    },
+    {
+      "pass": true,
+      "test": "IJK paused Texture to GL preserves state",
+      "detail": "",
+      "at": 1792777236031
+    },
+    {
+      "pass": true,
+      "test": "IJK paused switch resumes",
+      "detail": "",
+      "at": 1792777236033
+    },
+    {
+      "pass": true,
+      "test": "IJK after paused switch advancing decoder and source",
+      "detail": "",
+      "at": 1792777237870
+    },
+    {
+      "pass": true,
+      "test": "IJK fullscreen active",
+      "detail": "",
+      "at": 1792777239376
+    },
+    {
+      "pass": true,
+      "test": "IJK fullscreen preserves decoder producer",
+      "detail": "",
+      "at": 1792777239377
+    },
+    {
+      "pass": true,
+      "test": "IJK fullscreen advancing decoder and source",
+      "detail": "",
+      "at": 1792777241207
+    },
+    {
+      "pass": true,
+      "test": "IJK fullscreen exit preserves decoder producer",
+      "detail": "",
+      "at": 1792777242682
+    },
+    {
+      "pass": true,
+      "test": "IJK fullscreen exit advancing decoder and source",
+      "detail": "",
+      "at": 1792777244497
+    },
+    {
+      "pass": true,
+      "test": "IJK background not continuous",
+      "detail": "",
+      "at": 1792777247168
+    },
+    {
+      "pass": true,
+      "test": "IJK background resumes",
+      "detail": "",
+      "at": 1792777249183
+    },
+    {
+      "pass": true,
+      "test": "IJK foreground window1 advancing decoder and source",
+      "detail": "",
+      "at": 1792777251004
+    },
+    {
+      "pass": true,
+      "test": "IJK foreground window2 advancing decoder and source",
+      "detail": "",
+      "at": 1792777252835
+    },
+    {
+      "pass": true,
+      "test": "IJK rapid settings preserve decoder",
+      "detail": "",
+      "at": 1792777254707
+    },
+    {
+      "pass": true,
+      "test": "IJK rapid settings advancing decoder and source",
+      "detail": "",
+      "at": 1792777256529
+    },
+    {
+      "pass": true,
+      "test": "IJK playing GL to Texture no restart",
+      "detail": "",
+      "at": 1792777257035
+    },
+    {
+      "pass": true,
+      "test": "IJK final GL advancing decoder and source",
+      "detail": "",
+      "at": 1792777259356
+    },
+    {
+      "pass": true,
+      "test": "IJK release terminal producer empty",
+      "detail": "",
+      "at": 1792777260025
+    },
+    {
+      "pass": true,
+      "test": "IJK repeated release idempotent",
+      "detail": "",
+      "at": 1792777260026
+    },
+    {
+      "pass": true,
+      "test": "IJK reentry plays",
+      "detail": "",
+      "at": 1792777260339
+    },
+    {
+      "pass": true,
+      "test": "IJK reentry advancing decoder and source",
+      "detail": "",
+      "at": 1792777262168
+    },
+    {
+      "pass": true,
+      "test": "IJK release during handoff cleans old producer",
+      "detail": "",
+      "at": 1792777263157
+    },
+    {
+      "pass": true,
+      "test": "IJK pending handoff engine released",
+      "detail": "",
+      "at": 1792777263158
+    }
+  ]
+}
