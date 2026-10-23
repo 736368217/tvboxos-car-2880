@@ -97,5 +97,7 @@ public class HawkConfig {
     public static final String VIDEO_ENHANCE = "video_enhance"; // 0 original, 1 vivid, 8..10 anime
     public static final String VIDEO_SR = "video_sr"; // default 1: SGSR1
     public static final String VIDEO_INTERP = "video_interp"; // default 1: temporal smoothing
+    public static final String VOLUME_GAIN = "app_volume_gain"; // 0-200, default 100 (app-level gain, not system volume)
+    public static final String BRIGHTNESS_GESTURE = "brightness_gesture"; // default false: brightness follows system
     public static boolean hotVodDelete;
 }

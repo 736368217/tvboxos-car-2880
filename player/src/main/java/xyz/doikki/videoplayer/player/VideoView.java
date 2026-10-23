@@ -55,6 +55,9 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
         implements MediaPlayerControl, AbstractPlayer.PlayerEventListener {
 
     protected P mMediaPlayer;//播放器
+    /** 应用内音量（0..2），跨 prepare / 切集保持；不写系统音量 */
+    private float mVolumeLeft = 1.0f;
+    private float mVolumeRight = 1.0f;
     protected PlayerFactory<P> mPlayerFactory;//工厂类，用于实例化播放核心
     @Nullable
     protected BaseVideoController mVideoController;//控制器
@@ -290,8 +293,9 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     protected void setOptions() {
         mMediaPlayer.setLooping(mIsLooping);
-        float volume = mIsMute ? 0.0f : 1.0f;
-        mMediaPlayer.setVolume(volume, volume);
+        float left = mIsMute ? 0.0f : mVolumeLeft;
+        float right = mIsMute ? 0.0f : mVolumeRight;
+        mMediaPlayer.setVolume(left, right);
     }
 
     /**
@@ -855,8 +859,9 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
     public void setMute(boolean isMute) {
         this.mIsMute = isMute;
         if (mMediaPlayer != null) {
-            float volume = isMute ? 0.0f : 1.0f;
-            mMediaPlayer.setVolume(volume, volume);
+            float left = isMute ? 0.0f : mVolumeLeft;
+            float right = isMute ? 0.0f : mVolumeRight;
+            mMediaPlayer.setVolume(left, right);
         }
     }
 
@@ -1029,8 +1034,24 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      * @param v2 右声道音量
      */
     public void setVolume(float v1, float v2) {
+        mVolumeLeft = v1;
+        mVolumeRight = v2;
         if (mMediaPlayer != null) {
             mMediaPlayer.setVolume(v1, v2);
+        }
+    }
+
+    /** 临时压低音量（音频焦点丢失），不改变保存的应用音量。 */
+    public void duckVolume(float factor) {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setVolume(mVolumeLeft * factor, mVolumeRight * factor);
+        }
+    }
+
+    /** 恢复保存的应用音量。 */
+    public void restoreVolume() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setVolume(mVolumeLeft, mVolumeRight);
         }
     }
 

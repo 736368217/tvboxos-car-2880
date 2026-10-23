@@ -61,7 +61,7 @@ final class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener 
                     mPausedForLoss = false;
                 }
                 if (!videoView.isMute())//恢复音量
-                    videoView.setVolume(1.0f, 1.0f);
+                    videoView.restoreVolume();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS://焦点丢失
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT://焦点暂时丢失
@@ -72,7 +72,7 @@ final class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener 
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK://此时需降低音量
                 if (videoView.isPlaying() && !videoView.isMute()) {
-                    videoView.setVolume(0.1f, 0.1f);
+                    videoView.duckVolume(0.1f);
                 }
                 break;
         }

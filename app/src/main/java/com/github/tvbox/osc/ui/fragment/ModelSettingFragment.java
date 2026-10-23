@@ -187,6 +187,16 @@ public class ModelSettingFragment extends BaseLazyFragment {
                         ModelSettingFragment.this::refreshBackSummary).show();
             }
         });
+        final TextView tvBrightnessGesture = findViewById(R.id.tvBrightnessGesture);
+        refreshBrightnessGesture(tvBrightnessGesture);
+        findViewById(R.id.llBrightnessGesture).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                Hawk.put(HawkConfig.BRIGHTNESS_GESTURE, !Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false));
+                refreshBrightnessGesture(tvBrightnessGesture);
+            }
+        });
         findViewById(R.id.llParseWebVew).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1131,5 +1141,10 @@ public class ModelSettingFragment extends BaseLazyFragment {
         if (HawkConfig.BACK_MODE_FLOATING.equals(mode)) tvBackBarOpen.setText("悬浮球");
         else if (HawkConfig.BACK_MODE_BOTH.equals(mode)) tvBackBarOpen.setText("双模共存");
         else tvBackBarOpen.setText("边缘拉出");
+    }
+
+    private void refreshBrightnessGesture(TextView tv) {
+        if (tv == null) return;
+        tv.setText(Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false) ? "开启" : "关闭");
     }
 }

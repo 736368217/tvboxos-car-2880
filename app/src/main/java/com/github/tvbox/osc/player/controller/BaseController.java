@@ -19,6 +19,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.github.tvbox.osc.util.HawkConfig;
+import com.orhanobut.hawk.Hawk;
+
 import java.util.Map;
 
 import xyz.doikki.videoplayer.controller.BaseVideoController;
@@ -31,7 +34,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
     private GestureDetector mGestureDetector;
     private AudioManager mAudioManager;
     private boolean mIsGestureEnabled = true;
-    private int mStreamVolume;
+    private float mAppVolume = 1f;
     private float mBrightness;
     private int mSeekPosition = -1;
     private boolean mFirstTouch;
@@ -101,10 +104,35 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         mGestureDetector = new GestureDetector(getContext(), this);
         setOnTouchListener(this);
+        mAppVolume = loadAppVolume();
+        post(() -> {
+            if (mControlWrapper != null) mControlWrapper.setVolume(mAppVolume);
+        });
         mSlideInfo = findViewWithTag("vod_control_slide_info");
         mLoading = findViewWithTag("vod_control_loading");
         mPauseRoot = findViewWithTag("vod_control_pause");
         mPauseTime = findViewWithTag("vod_control_pause_t");
+    }
+
+    private static float clampVolume(float v) { return Math.max(0f, Math.min(2f, v)); }
+
+    private static float loadAppVolume() {
+        int percent = Hawk.get(HawkConfig.VOLUME_GAIN, 100);
+        return clampVolume(percent / 100f);
+    }
+
+    /** 应用内音量增益（0..2）：0=静音，1=原始，>1=增幅；不改系统音量。 */
+    public void setAppVolume(float volume) {
+        mAppVolume = clampVolume(volume);
+        if (mControlWrapper != null) mControlWrapper.setVolume(mAppVolume);
+        Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
+    }
+
+    public float getAppVolume() { return mAppVolume; }
+
+    /** 亮度手势默认关闭：亮度交给系统。 */
+    public boolean isBrightnessGestureEnabled() {
+        return Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false);
     }
 
     @Override
@@ -235,7 +263,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
                 || !mIsGestureEnabled //关闭了手势
                 || PlayerUtils.isEdge(getContext(), e)) //处于屏幕边沿
             return true;
-        mStreamVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        mAppVolume = loadAppVolume();
         Activity activity = PlayerUtils.scanForActivity(getContext());
         if (activity == null) {
             mBrightness = 0;
@@ -285,7 +313,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
                 if (e2.getX() > halfScreen) {
                     mChangeVolume = true;
                 } else {
-                    mChangeBrightness = true;
+                    mChangeBrightness = isBrightnessGestureEnabled();
                 }
             }
 
@@ -366,14 +394,15 @@ public abstract class BaseController extends BaseVideoController implements Gest
     }
 
     protected void slideToChangeVolume(float deltaY) {
-        int streamMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        int height = getMeasuredHeight();
-        float deltaV = deltaY * 2 / height * streamMaxVolume;
-        float index = mStreamVolume + deltaV;
-        if (index > streamMaxVolume) index = streamMaxVolume;
-        if (index < 0) index = 0;
-        int percent = (int) (index / streamMaxVolume * 100);
-        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int) index, 0);
+        int height = Math.max(1, getMeasuredHeight());
+        float deltaV = deltaY * 2f / height;
+        float volume = clampVolume(mAppVolume + deltaV);
+        if (Math.abs(volume - mAppVolume) < 0.005f) return;
+        mAppVolume = volume;
+        // 应用内增益：只作用于当前播放器，不改系统音量（车机往往没有音频权限）
+        mControlWrapper.setVolume(mAppVolume);
+        Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
+        int percent = Math.round(mAppVolume * 100);
         for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
             IControlComponent component = next.getKey();
             if (component instanceof IGestureComponent) {
