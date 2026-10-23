@@ -83,6 +83,7 @@
             <TextView
                 android:id="@+id/tvNote"
                 android:layout_width="wrap_content"
+                android:maxWidth="@dimen/vs_180"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_marginLeft="@dimen/vs_5"
@@ -100,6 +101,7 @@
             <TextView
                 android:id="@+id/tvName"
                 android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/vs_2"
                 android:layout_height="wrap_content"
                 android:background="@drawable/shape_thumb_bottom_name"
                 android:ellipsize="marquee"

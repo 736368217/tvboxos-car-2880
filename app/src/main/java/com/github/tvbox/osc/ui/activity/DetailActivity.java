@@ -702,19 +702,8 @@ public class DetailActivity extends BaseActivity {
 
         List<VodInfo.VodSeries> list = vodInfo.seriesMap.get(vodInfo.playFlag);
         int listSize = list.size();
-        int w = 1;
-        for(int i =0; i < listSize; ++i){
-            String name = list.get(i).name;
-            pFont.getTextBounds(name, 0, name.length(), rect);
-            if(w < rect.width()){
-                w = rect.width();
-            }
-        }
-        w += 32;
-        int screenWidth = getWindowManager().getDefaultDisplay().getWidth()/3;
-        int offset = screenWidth/w;
-        if(offset <=2) offset =2;
-        if(offset > 6) offset =6;
+        // 固定 6 列，避免剧集名称长短/集数变化导致卡片宽度跳变
+        int offset = 6;
         mGridViewLayoutMgr.setSpanCount(offset);
         seriesAdapter.setNewData(vodInfo.seriesMap.get(vodInfo.playFlag));
 
