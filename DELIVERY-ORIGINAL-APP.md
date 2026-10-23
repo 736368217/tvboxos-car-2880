@@ -412,3 +412,32 @@ MuMu 实例每次被池子分配时会把 wm user-rotation 重置成 free，应�
 
 另外清掉了别人留下的 wm size 2880x1620 强设——显示门禁明确禁止 override，
 它会让 mCurrentDisplayRect 变成带偏移的怪值。
+
+---
+
+## 13. 新版 ESM JS 源兼容（2026-10-23）
+
+问题：`type:3` 的 JS 源如果按新版写法（`export default { async home(){...} }`，并用 `net.json()`）会在本包报
+`UnhandledPromiseRejectionException: 'net' is not defined`，详情页显示“没找到数据”。
+
+修复：
+
+- `assets/js/lib/net.js` 增加 `net.get / post / json / text`（同步实现，底层走现有 `_http`）。
+- `JsSpider` 加载 ESM 模块时展平 `async/await`（当前 QuickJS 封装不驱动微任务），编译失败自动回退原文。
+- 给 `__JS_SPIDER__` 套返回值包装：对象/数组在 JS 侧 `JSON.stringify` 后交回 Java，
+  避免 Java 侧 `JSObject.stringify()` 死锁。
+
+实测（vm0，Android 15，python release r24，订阅 xiaosa/api.json）：
+
+| 项 | 结果 |
+| :--- | :--- |
+| 首页分类 | 日番 / 美番 / 剧场版 / 真人番剧 / BD副音轨 / 其他 |
+| 分类页 | 正常出列表（含“更新至 xx 集”角标） |
+| 详情 | 标题、年份、地区、语言、演员、简介、`cht` 线路、01-04 集 |
+| 播放 | `call play` 返回 m3u8，ExoPlayer 起播（连续截图帧变化） |
+
+产物：`TVBox-Original-Feature-1.0.0-car.7-python-r24.apk`，52,672,292 bytes，
+SHA-256 `3973A092D392C673A58AC64C5AAF1551F4E40B3E7543CA8E6D1C747945A86BED`。
+
+构建提示：当前网络访问不到 `chaquo.com` 时，`:pyramid:generatePythonReleasePythonRequirements`
+会回退到 PyPI 源码编译并失败；本次沿用已生成的 pip 产物并 `-x` 该任务完成打包。
