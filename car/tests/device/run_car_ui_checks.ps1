@@ -44,9 +44,14 @@ function Log($msg) {
 }
 
 function Pool([string[]]$poolArgs) {
-    $out = & python $pool @poolArgs 2>&1 | Out-String
-    return $out.Trim()
+    try {
+        $out = & python $pool @poolArgs 2>&1 | Out-String
+        return $out.Trim()
+    } catch {
+        return ("POOL_EXCEPTION: " + $_.Exception.Message)
+    }
 }
+
 
 $script:adbExe = "D:\Program Files\Netease\MuMu\nx_device\15.0\shell\adb.exe"
 if (-not (Test-Path $script:adbExe)) { $script:adbExe = "adb" }
@@ -213,6 +218,7 @@ if (-not (Test-Path $script:ffmpeg)) { Write-Host "FATAL: ffmpeg not found"; exi
 # ---------- 1. 租设备 ----------
 Log "acquire lease (owner=$Owner)"
 $acquire = Pool @("acquire", "--owner", $Owner, "--max-instances", "3", "--lease-minutes", "90", "--mute")
+Log ("acquire raw: " + $acquire)
 if ($acquire -notmatch '"index"\s*:\s*(\d+)') {
     Write-Host "FATAL: acquire failed: $acquire"
     exit 3
