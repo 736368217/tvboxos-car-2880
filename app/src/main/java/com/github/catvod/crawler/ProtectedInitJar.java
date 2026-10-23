@@ -93,6 +93,10 @@ class ProtectedInitJar {
                 }
             }
             return bound;
+        } catch (ClassNotFoundException noNative) {
+            // 部分受保护 jar（如 xiaosa/spider.jar 10.22）没有二级 dex，
+            // 不含 DexNative；此时不需要绑定 loader，视为成功。
+            return true;
         } catch (Throwable ignored) {
         }
         return false;
