@@ -179,6 +179,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 tvDebugOpen.setText(Hawk.get(HawkConfig.DEBUG_OPEN, false) ? "已打开" : "已关闭");
             }
         });
+        tvBackBarOpen = findViewById(R.id.tvBackBarOpen);
+        refreshBackSummary();
         findViewById(R.id.llBackBar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

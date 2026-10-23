@@ -202,6 +202,17 @@
             android:columnCount="1"
             android:clipChildren="false"
             android:clipToPadding="false" />
+
+        <TextView
+            android:id="@+id/tvHistoryEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_40"
+            android:gravity="center"
+            android:text="暂无搜索历史"
+            android:textColor="#99FFFFFF"
+            android:textSize="@dimen/ts_24"
+            android:visibility="gone" />
     </LinearLayout>
 
     <LinearLayout

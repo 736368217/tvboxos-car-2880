@@ -460,6 +460,8 @@ public class SearchActivity extends BaseActivity {
                 if (!aggregateSearchMode) return;
                 ArrayList<String> history = Hawk.get(HawkConfig.SEARCH_HISTORY, new ArrayList<String>());
                 historyWordGrid.removeAllViews();
+                TextView historyEmpty = findViewById(R.id.tvHistoryEmpty);
+                if (historyEmpty != null) historyEmpty.setVisibility(history.isEmpty() ? View.VISIBLE : View.GONE);
                 int itemHeight = getResources().getDimensionPixelSize(R.dimen.vs_50);
                 int itemMargin = getResources().getDimensionPixelSize(R.dimen.vs_5);
                 int paddingH = getResources().getDimensionPixelSize(R.dimen.vs_10);
