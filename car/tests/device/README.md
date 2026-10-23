@@ -59,4 +59,13 @@ powershell -ExecutionPolicy Bypass -File car/tests/device/run_car_ui_checks.ps1 
 
 - **定制验收镜像**（首页是"本地合成素材"网格）没有「设置」入口，前置归一化会告警，
   此时 case1/case2 的结论不可用，需要换普通配置的实例。
-- `uiautomator dump` 在 MuMu 上偶尔 SIGSEGV（能出文件），脚本对空结果做了容错但没有重试。
+- Android 15 镜像的 `uiautomator` 缺 `libnativeloader.so`，`uiautomator dump` 直接报
+  `CANNOT LINK EXECUTABLE`；脚本已改为 OCR 定位，不再依赖它。
+
+## 定位方式（2026-10-23 更新）
+
+- 截图 → `tools/ocr.ps1`（Windows.Media.Ocr）→ 按文字坐标点击；
+- 设置页用 `input keyevent 82`（MENU）打开，不再依赖首页「设置」按钮；
+- 租到实例后先等 `sys.boot_completed=1`，adb 掉线自动重连一次。
+
+要求 Windows 10+ 已安装中文 OCR 语言包；否则 `ocr.ps1` 返回 `NO_OCR_ENGINE`，脚本应按 exit 3 处理。

@@ -37,7 +37,11 @@ if (-not (Test-Path $Apk)) { Write-Host "FATAL: apk not found: $Apk"; exit 3 }
 $script:index = -1
 $script:failures = @()
 
-function Log($msg) { Write-Host ("[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $msg) }
+function Log($msg) {
+    $line = ("[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $msg)
+    Write-Host $line
+    Add-Content -Path (Join-Path $outDir "run.log") -Value $line -Encoding UTF8
+}
 
 function Pool([string[]]$poolArgs) {
     $out = & python $pool @poolArgs 2>&1 | Out-String
@@ -47,10 +51,30 @@ function Pool([string[]]$poolArgs) {
 $script:adbExe = "D:\Program Files\Netease\MuMu\nx_device\15.0\shell\adb.exe"
 if (-not (Test-Path $script:adbExe)) { $script:adbExe = "adb" }
 
+$script:ocrScript = Join-Path $PSScriptRoot "tools\ocr.ps1"
+if (-not (Test-Path $script:ocrScript)) { Write-Host "FATAL: tools/ocr.ps1 not found"; exit 3 }
+
 function Adb([string[]]$adbArgs) {
     $argList = @("-s", $script:serial) + $adbArgs
     $text = (& $script:adbExe @argList 2>&1 | Out-String)
+    if ($text -match "device offline|device '.*' not found|no devices|device not found") {
+        & $script:adbExe connect $script:serial 2>&1 | Out-Null
+        Start-Sleep -Milliseconds 1500
+        $text = (& $script:adbExe @argList 2>&1 | Out-String)
+    }
     return [string]$text
+}
+
+function WaitDeviceReady([int]$timeoutSeconds = 120) {
+    $deadline = (Get-Date).AddSeconds($timeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        & $script:adbExe connect $script:serial 2>&1 | Out-Null
+        $boot = (Adb @("shell", "getprop", "sys.boot_completed") | Out-String).Trim()
+        $state = (& $script:adbExe devices 2>&1 | Out-String)
+        if ($boot -eq "1" -and $state -match ([regex]::Escape($script:serial) + "\s+device")) { return $true }
+        Start-Sleep -Seconds 3
+    }
+    return $false
 }
 
 function Sh([string]$cmd) { return Adb @("shell", $cmd) }
@@ -71,25 +95,39 @@ function EnsureHome() {
     return ((TopActivity) -eq "HomeActivity")
 }
 
+# ---------- OCR 定位 ----------
+# Android 15 测试镜像的 uiautomator 缺 libnativeloader.so，dump 直接报
+# CANNOT LINK EXECUTABLE，因此统一用「截图 + Windows OCR」定位文字。
+function OcrScreen([string]$name) {
+    $png = Screenshot $name
+    $text = & powershell -NoProfile -ExecutionPolicy Bypass -File $script:ocrScript -Path $png 2>&1 | Out-String
+    $rows = @()
+    foreach ($line in ($text -split "`n")) {
+        $parts = $line -split "`t"
+        if ($parts.Count -ge 3 -and $parts[0] -match '^\d+$') {
+            $rows += [pscustomobject]@{ X = [int]$parts[0]; Y = [int]$parts[1]; Text = $parts[2] }
+        }
+    }
+    return $rows
+}
+
+function FindText([string]$text) {
+    $rows = OcrScreen ("ocr-" + [guid]::NewGuid().ToString("N").Substring(0, 6))
+    foreach ($r in $rows) { if ($r.Text -like "*$text*") { return $r } }
+    return $null
+}
+
 function TapText([string]$text) {
-    $dump = Join-Path $outDir "ui.xml"
-    if (Test-Path $dump) { Remove-Item $dump -Force }
-    Sh "uiautomator dump /sdcard/ui.xml" | Out-Null
-    Adb @("pull", "/sdcard/ui.xml", $dump) | Out-Null
-    if (-not (Test-Path $dump)) { return $false }
-    $xml = Get-Content $dump -Raw -Encoding UTF8
-    $m = [regex]::Match($xml, 'text="' + [regex]::Escape($text) + '"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"')
-    if (-not $m.Success) { return $false }
-    $x = ([int]$m.Groups[1].Value + [int]$m.Groups[3].Value) / 2
-    $y = ([int]$m.Groups[2].Value + [int]$m.Groups[4].Value) / 2
-    Sh ("input tap {0} {1}" -f [int]$x, [int]$y) | Out-Null
+    $r = FindText $text
+    if (-not $r) { return $false }
+    Sh ("input tap {0} {1}" -f ($r.X + 30), ($r.Y + 18)) | Out-Null
     return $true
 }
 
-# 打开设置页，并断言确实到了 SettingActivity
+# 打开设置页，并断言确实到了 SettingActivity（MENU 键在车机 UI 里就是设置）
 function OpenSettings() {
     if (-not (EnsureHome)) { return $false }
-    if (-not (TapText "设置")) { return $false }
+    Sh "input keyevent 82" | Out-Null
     Start-Sleep -Seconds 2
     return ((TopActivity) -eq "SettingActivity")
 }
@@ -99,62 +137,37 @@ function NormalizeBackBarState() {
     if (-not (OpenSettings)) { return $false }
     if (-not (TapText "高级")) { return $false }
     Start-Sleep -Milliseconds 1200
-    $dump = Join-Path $outDir "normalize.xml"
-    Sh "uiautomator dump /sdcard/normalize.xml" | Out-Null
-    Adb @("pull", "/sdcard/normalize.xml", $dump) | Out-Null
-    if (-not (Test-Path $dump)) { return $false }
-    $xml = Get-Content $dump -Raw -Encoding UTF8
-    if ($xml -notmatch "返回模式") { return $false }
-    for ($i = 0; $i -lt 3; $i++) {
-        if ($xml -match "边缘拉出") { break }
-        Sh "input tap 1400 578" | Out-Null   # 返回模式
-        Start-Sleep -Milliseconds 700
-        Sh "uiautomator dump /sdcard/normalize.xml" | Out-Null
-        Adb @("pull", "/sdcard/normalize.xml", $dump) | Out-Null
-        $xml = Get-Content $dump -Raw -Encoding UTF8
-    }
-    for ($i = 0; $i -lt 4; $i++) {
-        if ($xml -match "4 秒") { break }
-        Sh "input tap 1400 1202" | Out-Null  # 自动隐藏
-        Start-Sleep -Milliseconds 700
-        Sh "uiautomator dump /sdcard/normalize.xml" | Out-Null
-        Adb @("pull", "/sdcard/normalize.xml", $dump) | Out-Null
-        $xml = Get-Content $dump -Raw -Encoding UTF8
+
+    $okMode = $false
+    $okHide = $false
+    for ($i = 0; $i -lt 6; $i++) {
+        $rows = OcrScreen ("norm" + $i)
+        $joined = (($rows | ForEach-Object { $_.Text }) -join " ")
+        if ($joined -match "边缘拉出") { $okMode = $true }
+        if ($joined -match "4\s*秒") { $okHide = $true }
+        if ($okMode -and $okHide) { break }
+        if (-not $okMode) {
+            $r = $rows | Where-Object { $_.Text -like "*返回模式*" } | Select-Object -First 1
+            if ($r) { Sh ("input tap {0} {1}" -f ($r.X + 500), ($r.Y + 18)) | Out-Null }
+        }
+        if (-not $okHide) {
+            $r2 = $rows | Where-Object { $_.Text -like "*自动隐藏*" } | Select-Object -First 1
+            if ($r2) { Sh ("input tap {0} {1}" -f ($r2.X + 500), ($r2.Y + 18)) | Out-Null }
+        }
+        Start-Sleep -Milliseconds 900
     }
     Sh "input keyevent 4" | Out-Null
     Start-Sleep -Milliseconds 800
-    return (($xml -match "边缘拉出") -and ($xml -match "4 秒"))
-}
-
-
-function UiXml() {
-    $dump = Join-Path $outDir "ui.xml"
-    if (Test-Path $dump) { Remove-Item $dump -Force }
-    Sh "uiautomator dump /sdcard/ui.xml" | Out-Null
-    Adb @("pull", "/sdcard/ui.xml", $dump) | Out-Null
-    if (-not (Test-Path $dump)) { return "" }
-    return (Get-Content $dump -Raw -Encoding UTF8)
-}
-
-function TapResId([string]$id) {
-    $xml = UiXml
-    $m = [regex]::Match($xml, 'resource-id="[^"]*' + [regex]::Escape($id) + '"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"')
-    if (-not $m.Success) { return $false }
-    $x = ([int]$m.Groups[1].Value + [int]$m.Groups[3].Value) / 2
-    $y = ([int]$m.Groups[2].Value + [int]$m.Groups[4].Value) / 2
-    Sh ("input tap {0} {1}" -f [int]$x, [int]$y) | Out-Null
-    return $true
+    Log ("  normalize mode={0} hide={1}" -f $okMode, $okHide)
+    return ($okMode -and $okHide)
 }
 
 # 把实例自举成"有普通配置"的状态：写入订阅地址 -> 回到首页
 function BootstrapConfig([string]$url) {
-    # 干净实例首次启动会直接弹"配置地址"对话框；没有就退回设置页路径
-    if (-not (TapResId "input")) {
-        if (-not (OpenSettings)) { return $false }
-        if (-not (TapText "配置地址")) { return $false }
-        Start-Sleep -Milliseconds 1500
-        if (-not (TapResId "input")) { return $false }
-    }
+    if (-not (OpenSettings)) { return $false }
+    if (-not (TapText "配置地址")) { return $false }
+    Start-Sleep -Milliseconds 1500
+    if (-not (TapText "请输入配置地址")) { return $false }
     Start-Sleep -Milliseconds 500
     Sh "input keyevent 123" | Out-Null
     $del = ""
@@ -212,7 +225,11 @@ if ($acquire -notmatch '"adb"\s*:\s*"([^"]+)"') {
 $script:serial = $Matches[1]
 Log "lease index=$script:index adb=$script:serial"
 & $script:adbExe connect $script:serial | Out-Null
-Start-Sleep -Milliseconds 500
+Log "wait device ready"
+if (-not (WaitDeviceReady 120)) {
+    Write-Host "FATAL: device not ready after 120s"
+    exit 3
+}
 
 try {
     # ---------- 2. 安装 ----------
@@ -350,12 +367,12 @@ sys.exit(0 if ok else 1)
         $script:failures += "cannot open settings"
         Log "  FAIL: 打不开设置页"
     }
-    Sh "uiautomator dump /sdcard/adv.xml" | Out-Null
-    $advLocal = Join-Path $outDir "adv.xml"
-    Adb @("pull", "/sdcard/adv.xml", $advLocal) | Out-Null
-    $adv = if (Test-Path $advLocal) { Get-Content $advLocal -Raw -Encoding UTF8 } else { "" }
-    if ($adv -notmatch "高级") { $script:failures += "advanced entry missing" ; Log "  FAIL: 高级 button not found" }
-    else { Log "  OK: 高级 button found" }
+    if (-not (FindText "高级")) {
+        $script:failures += "advanced entry missing"
+        Log "  FAIL: 高级 button not found"
+    } else {
+        Log "  OK: 高级 button found"
+    }
 
     # ---------- 6. 结果 ----------
     if ($script:failures.Count -gt 0) {
