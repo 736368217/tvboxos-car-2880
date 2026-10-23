@@ -22,7 +22,7 @@ public class DanmuApiDialog extends BaseDialog {
     public DanmuApiDialog(@NonNull @NotNull Context context) {
         super(context);
         setContentView(R.layout.dialog_danmu_api);
-        setCanceledOnTouchOutside(false);
+        setCanceledOnTouchOutside(true);
         input = findViewById(R.id.input);
         input.setText(Hawk.get(HawkConfig.DANMU_API, ""));
         input.setHint(getDefaultApi());

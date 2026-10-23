@@ -40,7 +40,7 @@ public class SearchCheckboxDialog extends BaseDialog{
         if (context instanceof Activity) {
             setOwnerActivity((Activity) context);
         }
-        setCanceledOnTouchOutside(false);
+        setCanceledOnTouchOutside(true);
         setCancelable(true);
         mSourceList = sourceList;
         mCheckSourcees = checkedSources;
@@ -58,6 +58,13 @@ public class SearchCheckboxDialog extends BaseDialog{
         mGridView = findViewById(R.id.mGridView);
         checkAll = findViewById(R.id.checkAll);
         clearAll = findViewById(R.id.clearAll);
+        findViewById(R.id.confirm).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FastClickCheckUtil.check(view);
+                dismiss();
+            }
+        });
         checkboxSearchAdapter = new CheckboxSearchAdapter(new DiffUtil.ItemCallback<SourceBean>() {
             @Override
             public boolean areItemsTheSame(@NonNull SourceBean oldItem, @NonNull SourceBean newItem) {
