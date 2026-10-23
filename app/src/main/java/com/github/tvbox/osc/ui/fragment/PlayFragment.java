@@ -1384,8 +1384,14 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
             mVodPlayerCfg = new JSONObject();
         }
         try {
-            if (!mVodPlayerCfg.has("pl")) {
-                mVodPlayerCfg.put("pl", (sourceBean.getPlayerType() == -1) ? (int)Hawk.get(HawkConfig.PLAY_TYPE, 2) : sourceBean.getPlayerType());
+            int userPlayerType = Hawk.get(HawkConfig.PLAY_TYPE, 2);
+            if (userPlayerType == 1 && !PlayerHelper.isIjkAvailable()) userPlayerType = 2;
+            boolean playerPinnedByUser = mVodPlayerCfg.optBoolean("plUser", false);
+            if (!mVodPlayerCfg.has("pl") || !playerPinnedByUser) {
+                mVodPlayerCfg.put("pl", userPlayerType);
+            }
+            if (mVodPlayerCfg.optInt("pl", 2) == 1 && !PlayerHelper.isIjkAvailable()) {
+                mVodPlayerCfg.put("pl", 2);
             }
             if (mVodPlayerCfg.optInt("pl", 2) == 0) {
                 mVodPlayerCfg.put("pl", 2);
@@ -2019,7 +2025,11 @@ public class PlayFragment extends BaseLazyFragment implements com.github.tvbox.o
                 }
                 AbstractPlayer mediaPlayer = mVideoView.getMediaPlayer();
                 if (mediaPlayer != null) {
-                    mediaPlayer.stop();
+                    try {
+                        mediaPlayer.stop();
+                    } catch (Throwable ignored) {
+                        // Some player backends tear down their native player before stop().
+                    }
                 }
             } else {
                 mVideoView.release();

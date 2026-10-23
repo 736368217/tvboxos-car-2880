@@ -1,0 +1,47 @@
+﻿{
+  "apk": "TVBox-1.0.0-car.7-r4.apk",
+  "sha256": "97bc08267b17c0b173e6d9332c78f420fbdf6f7fb7d901483482a70a3990beb0",
+  "bytes": 53691860,
+  "package": "com.github.tvbox.osc.jun",
+  "versionCode": 8,
+  "versionName": "1.0.0-car.7",
+  "device": {
+    "vmIndex": 1,
+    "adb": "127.0.0.1:16416",
+    "owner": "tvbox-r4-verify-20261023",
+    "physicalWidth": 1620,
+    "physicalHeight": 2880,
+    "displayWidth": 2880,
+    "displayHeight": 1620,
+    "density": 160,
+    "rotation": "lock 1",
+    "carDisplayPass": true
+  },
+  "tests": {
+    "pages": { "passed": 81, "failed": 0 },
+    "ux3k": { "passed": 98, "failed": 0 },
+    "playback": { "passed": 101, "failed": 0 },
+    "gestures": { "passed": 7, "failed": 0 },
+    "states": { "passed": 5, "failed": 0 }
+  },
+  "screenshots": [
+    "home.png", "category.png", "category-ux.png", "search.png", "search-results.png",
+    "detail.png", "detail-ux.png", "live.png", "live-channels.png", "live-ux.png",
+    "settings.png", "settings-top.png", "settings-picture.png", "settings-touch.png",
+    "advanced.png", "collect.png", "history.png", "local-file.png", "push.png",
+    "fast-search.png", "player.png", "player-controls.png", "player-presets.png",
+    "player-hidden.png", "player-more.png", "player-paused.png", "player-advanced.png",
+    "state-empty.png", "state-error.png", "state-offline.png", "state-loading.png"
+  ],
+  "manualScreenshots": [
+    "manual/manual-api-dialog.png",
+    "manual/manual-api-dialog-ime.png",
+    "manual/manual-source-dialog.png",
+    "manual/manual-search-source-dialog.png",
+    "manual/manual-search-source-many.png",
+    "manual/manual-search-source-many-bottom.png",
+    "manual/manual-live-empty.png",
+    "manual/manual-home-chip-tap.png"
+  ],
+  "note": "All screenshots are native 2880x1620 Android captures from the leased MuMu instance. Background colour bars and the grey test pattern are the local acceptance video, not product UI. State shells were forced through the real Android state components, not recorded from live network failures."
+}

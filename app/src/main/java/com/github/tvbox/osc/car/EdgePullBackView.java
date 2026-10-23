@@ -29,7 +29,7 @@ final class EdgePullBackView extends View {
     private final Path arrow = new Path();
     private ValueAnimator retraction;
     private float unitScale = 1, centerY, minY, maxY, startCenterY, pullDp, progress;
-    private boolean active, capturing, ignoreStream, pullLeft, armed;
+    private boolean active, capturing, ignoreStream, pullLeft, armed, restingVisible = true;
     private String side = HawkConfig.BACK_SIDE_LEFT, skin = HawkConfig.BACK_SKIN_TEARDROP;
     private final Runnable longPress = this::beginReposition;
 
@@ -74,6 +74,13 @@ final class EdgePullBackView extends View {
         if (active == value) return;
         active = value;
         if (!value) stopMotion();
+    }
+
+    /** Pages with their own visible Back control keep the gesture but hide the resting rail. */
+    void setRestingHandleVisible(boolean value) {
+        if (restingVisible == value) return;
+        restingVisible = value;
+        invalidate();
     }
 
     /** Reference SVG token in the current car viewport, not the Android density bucket. */
@@ -167,8 +174,10 @@ final class EdgePullBackView extends View {
 
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (showsLeft()) drawPill(canvas, true);
-        if (showsRight()) drawPill(canvas, false);
+        if (restingVisible) {
+            if (showsLeft()) drawPill(canvas, true);
+            if (showsRight()) drawPill(canvas, false);
+        }
         if (pullDp <= .1f) return;
         int save = canvas.save();
         canvas.translate(pullLeft ? 0 : getWidth(), centerY);
@@ -187,13 +196,13 @@ final class EdgePullBackView extends View {
     }
 
     private void drawPill(Canvas canvas, boolean left) {
-        float x = left ? dp(3) : getWidth() - dp(9);
-        rect.set(x, centerY - dp(38), x + dp(6), centerY + dp(38));
+        float x = left ? dp(4) : getWidth() - dp(8);
+        rect.set(x, centerY - dp(30), x + dp(4), centerY + dp(30));
         boolean adjusting = capturing && left == pullLeft
                 && gesture.state() == BackNavPolicy.EdgeGesture.State.REPOSITIONING;
-        pill.setColor(adjusting ? 0xFFF6C177 : 0x8C6FF2C6);
-        // The resting handle always stays fully on-screen at 55%; ball idle never dims it.
-        canvas.drawRoundRect(rect, dp(3), dp(3), pill);
+        pill.setColor(adjusting ? 0xFFF6C177 : 0x6691AA9E);
+        // A quiet rail marks the edge gesture without competing with page content.
+        canvas.drawRoundRect(rect, dp(2), dp(2), pill);
     }
 
     private void drawTeardrop(Canvas canvas, float width) {

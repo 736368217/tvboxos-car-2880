@@ -2,6 +2,9 @@ package com.github.tvbox.osc.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+
+import com.github.tvbox.osc.base.App;
 
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.bean.IJKCode;
@@ -19,6 +22,7 @@ import com.orhanobut.hawk.Hawk;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +52,7 @@ public class PlayerHelper {
             e.printStackTrace();
         }
         if(forcePlayerType>=0)playerType = forcePlayerType;
+        if (playerType == 1 && !isIjkAvailable()) playerType = 2;
         IJKCode codec = ApiConfig.get().getIJKCodec(ijkCode);
         PlayerFactory playerFactory;
         if (playerType == 1) {
@@ -100,6 +105,7 @@ public class PlayerHelper {
 
     public static void updateCfg(VideoView videoView) {
         int playType = Hawk.get(HawkConfig.PLAY_TYPE, 2);
+        if (playType == 1 && !isIjkAvailable()) playType = 2;
         PlayerFactory playerFactory;
         if (playType == 1) {
             playerFactory = new PlayerFactory<IjkMediaPlayer>() {
@@ -165,6 +171,22 @@ public class PlayerHelper {
         }
     }
 
+    private static Boolean ijkAvailable;
+
+    /** IJK is optional: debug/x86 builds do not ship the native libraries. */
+    public static boolean isIjkAvailable() {
+        if (ijkAvailable != null) return ijkAvailable;
+        try {
+            ApplicationInfo info = App.getInstance().getApplicationInfo();
+            File dir = new File(info.nativeLibraryDir);
+            ijkAvailable = new File(dir, "libijkffmpeg.so").exists()
+                    && new File(dir, "libijksdl.so").exists();
+        } catch (Throwable th) {
+            ijkAvailable = false;
+        }
+        return ijkAvailable;
+    }
+
     public static String getPlayerName(int playType) {
         HashMap<Integer, String> playersInfo = getPlayersInfo();
         if (playersInfo.containsKey(playType)) {
@@ -194,7 +216,7 @@ public class PlayerHelper {
     public static HashMap<Integer, Boolean> getPlayersExistInfo() {
         if (mPlayersExistInfo == null) {
             HashMap<Integer, Boolean> playersExist = new HashMap<>();
-            playersExist.put(1, true);
+            playersExist.put(1, isIjkAvailable());
             playersExist.put(2, true);
             playersExist.put(10, MXPlayer.getPackageInfo() != null);
             playersExist.put(11, ReexPlayer.getPackageInfo() != null);

@@ -33,7 +33,7 @@
         android:textSize="34px"
         android:textStyle="bold" />
 
-    <TextView
+    <com.github.tvbox.osc.car.CarIconTextView
         android:id="@+id/ux_live_channel_epg" android:drawableLeft="@drawable/ic_tvbox_content_epg" android:drawablePadding="8px"
         android:layout_width="790px"
         android:layout_height="50px"

@@ -2,6 +2,7 @@ package com.github.tvbox.osc.ui.dialog;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,18 +23,25 @@ public class SelectDialog<T> extends BaseDialog {
     public SelectDialog(@NonNull @NotNull Context context) {
         super(context);
         setContentView(R.layout.dialog_select);
+        bindClose();
         enableSelectionDismissal(R.id.cl_root);
     }
 
     public SelectDialog(@NonNull @NotNull Context context, int resId) {
         super(context);
         setContentView(resId);
+        bindClose();
         enableSelectionDismissal(R.id.cl_root);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    private void bindClose() {
+        View close = findViewById(R.id.select_close);
+        if (close != null) close.setOnClickListener(v -> dismiss());
     }
 
     public void setTip(String tip) {

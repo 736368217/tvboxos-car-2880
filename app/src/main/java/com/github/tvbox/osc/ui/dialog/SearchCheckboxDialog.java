@@ -59,6 +59,8 @@ public class SearchCheckboxDialog extends BaseDialog{
         mGridView = findViewById(R.id.mGridView);
         checkAll = findViewById(R.id.checkAll);
         clearAll = findViewById(R.id.clearAll);
+        View close = findViewById(R.id.uxSearchSourceClose);
+        if (close != null) close.setOnClickListener(v -> dismiss());
         checkboxSearchAdapter = new CheckboxSearchAdapter(new DiffUtil.ItemCallback<SourceBean>() {
             @Override
             public boolean areItemsTheSame(@NonNull SourceBean oldItem, @NonNull SourceBean newItem) {
@@ -136,11 +138,14 @@ public class SearchCheckboxDialog extends BaseDialog{
         if (mGridView == null || getWindow() == null) return;
         int windowHeight = getWindow().getDecorView().getHeight();
         if (windowHeight <= 0) windowHeight = getContext().getResources().getDisplayMetrics().heightPixels;
-        View header = checkAll == null ? null : (View) checkAll.getParent();
+        // The dialog lives inside the 1496 px car safe area; keep the last row above that line.
+        int maxRootHeight = Math.min(windowHeight - AutoSizeUtils.mm2px(getContext(), 100), 1336);
+        View header = findViewById(R.id.uxSearchSourceHeader);
+        View footer = findViewById(R.id.uxSearchSourceFooter);
         int reserved = header == null ? 0 : header.getMeasuredHeight();
-        reserved += getContext().getResources().getDimensionPixelSize(R.dimen.vs_50);
-        reserved += getContext().getResources().getDimensionPixelSize(R.dimen.vs_30);
-        int available = Math.max(getContext().getResources().getDimensionPixelSize(R.dimen.vs_160), windowHeight - reserved);
+        reserved += footer == null ? 0 : footer.getMeasuredHeight();
+        reserved += 24;
+        int available = Math.max(AutoSizeUtils.mm2px(getContext(), 180), maxRootHeight - reserved);
         int desired = mGridView.getMeasuredHeight();
         if (desired <= 0) desired = available;
         desired = Math.min(desired, available);

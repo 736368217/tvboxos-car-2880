@@ -15,9 +15,12 @@
 
         <ImageView
             android:id="@+id/ivQRCode"
-            android:layout_width="@dimen/vs_300"
-            android:layout_height="@dimen/vs_300"
+            android:layout_width="@dimen/vs_260"
+            android:layout_height="@dimen/vs_260"
             android:layout_gravity="center_vertical"
+            android:background="@drawable/car_qr_surface"
+            android:clipToOutline="true"
+            android:padding="14px"
             android:focusable="false" />
 
         <LinearLayout
@@ -101,7 +104,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/input_dialog_api_input"
+                    android:background="@drawable/car_input_surface"
                     android:hint="请输入配置地址"
                     android:imeOptions="actionNext|flagNoExtractUi"
                     android:inputType="text"
@@ -159,7 +162,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@drawable/input_dialog_api_input"
+                    android:background="@drawable/car_input_surface"
                     android:hint="请输入直播地址"
                     android:imeOptions="actionDone|flagNoExtractUi"
                     android:inputType="text"

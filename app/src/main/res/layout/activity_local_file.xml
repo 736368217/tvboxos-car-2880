@@ -7,13 +7,13 @@
     android:paddingRight="@dimen/vs_40"
     android:paddingBottom="@dimen/car_bottom_padding" android:background="@drawable/car_surface">
 
-    <TextView android:id="@+id/uxPageBack" style="@style/UxSceneButton" android:layout_width="180px" android:layout_height="96px" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="10px" android:text="返回" android:textColor="@color/aether_cyan_focus" android:textSize="28px" android:contentDescription="返回上一页" />
+    <com.github.tvbox.osc.car.CarIconTextView android:id="@+id/uxPageBack" style="@style/UxSceneButton" android:layout_width="180px" android:layout_height="96px" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="10px" android:text="返回" android:textColor="@color/aether_cyan_focus" android:textSize="28px" android:contentDescription="返回上一页" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
+        <com.github.tvbox.osc.car.CarIconTextView
             android:id="@+id/tvTitle" android:drawableLeft="@drawable/ic_tvbox_file_folder" android:drawablePadding="12px"
             android:layout_width="match_parent"
             android:layout_height="88px"
@@ -45,7 +45,7 @@
             android:paddingBottom="@dimen/vs_10"
             android:scrollbars="none" />
 
-        <TextView
+        <com.github.tvbox.osc.car.CarIconTextView
             android:id="@+id/tvEmpty" android:drawableLeft="@drawable/ic_tvbox_file_empty" android:drawablePadding="12px"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -530,6 +530,7 @@ public class LivePlayActivity extends BaseActivity {
         TextView emptyMessage = findViewById(R.id.ux_live_empty_message);
         View emptyState = findViewById(R.id.ux_live_empty_state);
         View emptyAction = findViewById(R.id.ux_live_empty_action);
+        View previewCard = findViewById(R.id.ux_live_preview_card);
         View fullscreenButton = findViewById(R.id.ux_live_fullscreen);
         View previewHint = findViewById(R.id.ux_live_preview_hint);
         View epgButton = findViewById(R.id.divLoadEpg);
@@ -537,8 +538,28 @@ public class LivePlayActivity extends BaseActivity {
         boolean noGroups = liveChannelGroupList.isEmpty();
         if (emptyTitle != null) emptyTitle.setText(noGroups ? "当前未配置直播源" : channelCount == 0 ? "当前分组没有可用频道" : "请选择频道");
         if (emptyMessage != null) emptyMessage.setText(noGroups
-                ? "导入直播源后，频道列表会显示在左侧。"
+                ? "导入直播源后，频道列表和节目单会显示在这里。"
                 : channelCount == 0 ? "切换左侧分组，或检查直播订阅。" : "从左侧频道列表选择频道后开始播放。");
+        if (!uxLiveFullscreen) {
+            boolean fullBleedEmpty = noGroups;
+            if (tvLeftChannelListLayout != null) {
+                tvLeftChannelListLayout.setVisibility(fullBleedEmpty ? View.GONE : View.VISIBLE);
+            }
+            if (previewCard != null) {
+                previewCard.setVisibility(fullBleedEmpty ? View.GONE : View.VISIBLE);
+            }
+            if (mVideoView != null) {
+                mVideoView.setVisibility(available ? View.VISIBLE : View.INVISIBLE);
+            }
+            if (emptyState != null) {
+                FrameLayout.LayoutParams emptyParams = (FrameLayout.LayoutParams) emptyState.getLayoutParams();
+                emptyParams.width = fullBleedEmpty ? 2760 : 1560;
+                emptyParams.height = fullBleedEmpty ? 1336 : 680;
+                emptyParams.leftMargin = fullBleedEmpty ? 60 : 1200;
+                emptyParams.topMargin = fullBleedEmpty ? 160 : 360;
+                emptyState.setLayoutParams(emptyParams);
+            }
+        }
         if (emptyState != null) emptyState.setVisibility(!available && !uxLiveFullscreen ? View.VISIBLE : View.GONE);
         if (emptyAction != null) emptyAction.setVisibility(!available && noGroups && !uxLiveFullscreen ? View.VISIBLE : View.GONE);
         if (fullscreenButton != null) fullscreenButton.setVisibility(available ? View.VISIBLE : View.GONE);

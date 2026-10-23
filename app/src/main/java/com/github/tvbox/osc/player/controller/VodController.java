@@ -917,6 +917,7 @@ public class VodController extends BaseController {
                     }
                     playerType = exsitPlayerTypes.get(playerTypeIdx);
                     mPlayerConfig.put("pl", playerType);
+                    mPlayerConfig.put("plUser", true);
                     updatePlayerCfgView();
                     listener.updatePlayerCfg();
                     listener.replay(false);
@@ -955,6 +956,7 @@ public class VodController extends BaseController {
                                 int thisPlayType = players.get(pos);
                                 if (thisPlayType != playerType) {
                                     mPlayerConfig.put("pl", thisPlayType);
+                                    mPlayerConfig.put("plUser", true);
                                     updatePlayerCfgView();
                                     listener.updatePlayerCfg();
                                     listener.replay(false);

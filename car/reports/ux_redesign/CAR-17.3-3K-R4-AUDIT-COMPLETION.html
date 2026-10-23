@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAR-17.3-3K R4 审计完成报告</title>
+<style>
+:root{--bg:#07110e;--panel:#0d1b16;--line:rgba(145,170,158,.18);--text:#eaf5ef;--muted:#9bb0a6;--mint:#6ff2c6;--purple:#a78bfa;--amber:#f6c177}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1100px 600px at 14% -10%,#143329 0,transparent 60%),var(--bg);color:var(--text);font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;line-height:1.65}
+.wrap{max-width:1180px;margin:0 auto;padding:56px 28px 80px}
+.eyebrow{color:var(--mint);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}
+h1{font-size:42px;line-height:1.15;margin:12px 0 14px;letter-spacing:-.02em}
+h2{font-size:24px;margin:56px 0 18px;padding-top:22px;border-top:1px solid var(--line)}
+p,li{color:var(--muted);font-size:15px}strong{color:var(--text)}
+.lead{font-size:17px;color:#c8dbd3;max-width:860px}
+.meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:26px 0 0}
+.meta div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.meta span{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}
+.meta b{font-size:14px;font-weight:600;color:var(--text);word-break:break-all}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(111,242,198,.32);background:rgba(111,242,198,.08);color:var(--mint);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;margin:18px 8px 0 0}
+.tests{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:22px 0}
+.test{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.test b{display:block;font-size:20px;color:var(--mint)}.test span{font-size:12px;color:var(--muted)}
+.shot{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:18px 0}
+.shot img{display:block;width:100%;height:auto;background:#000}
+.shot figcaption{padding:12px 16px;color:var(--muted);font-size:13px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.grid2 .shot{margin:0}
+table{width:100%;border-collapse:collapse;margin:14px 0 10px;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px;letter-spacing:.04em}
+td:first-child{color:var(--text);white-space:nowrap}
+.tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;background:rgba(111,242,198,.1);color:var(--mint);border:1px solid rgba(111,242,198,.25)}
+.note{border-left:3px solid var(--amber);background:rgba(246,193,119,.06);padding:14px 18px;border-radius:0 12px 12px 0;margin:22px 0}
+.small{font-size:13px;color:var(--muted)}
+@media(max-width:860px){.meta,.tests,.grid2{grid-template-columns:1fr 1fr}h1{font-size:32px}}
+@media(max-width:560px){.meta,.tests,.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">TVBox Car 3K · UX Audit R4</div>
+  <h1>第四轮车机 UI 审计完成报告</h1>
+  <p class="lead">R4 的 24 条回归项与 6 条新问题全部关闭。本轮继续沿用连续分区、对象列表、主从详情和就地操作，没有引入组件库，也没有牺牲返回、手势、音效、字幕、选集、换源和后台恢复。</p>
+  <div class="pill">30 / 30 closed</div><div class="pill">0 P0 · 0 P1</div>
+
+  <div class="meta">
+    <div><span>APK SHA-256</span><b>97bc0826…3990beb0</b></div>
+    <div><span>包名 / 版本</span><b>com.github.tvbox.osc.jun · 8 · 1.0.0-car.7</b></div>
+    <div><span>设备</span><b>MuMu 1 · 2880×1620 · density 160 · CAR_DISPLAY_PASS</b></div>
+  </div>
+
+  <h2>回归结果</h2>
+  <div class="tests">
+    <div class="test"><b>81/0</b><span>pages</span></div>
+    <div class="test"><b>98/0</b><span>ux3k</span></div>
+    <div class="test"><b>101/0</b><span>playback</span></div>
+    <div class="test"><b>7/0</b><span>gestures</span></div>
+    <div class="test"><b>5/0</b><span>states</span></div>
+  </div>
+  <p class="small">所有结果绑定同一 APK SHA；截图均来自同一租约实例。</p>
+
+  <h2>首页与分类</h2>
+  <p>顶栏和胶囊行收进 2800px 安全边界；「播放器就绪」底边精确落在 1496。分类胶囊现在有显式激活路径，pager 列表失效时先重建再切换，触控后选中态和内容会同步变化。</p>
+  <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/screenshots/home.png" alt="首页"><figcaption>首页：顶栏右边界 2800，状态条底边 1496，分类胶囊无残片。</figcaption></figure>
+  <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/manual/manual-home-chip-tap.png" alt="分类胶囊点击"><figcaption>点击「验收分类2」后选中态切换，内容页随之更新。</figcaption></figure>
+
+  <h2>详情</h2>
+  <p>信息卡高度 386px，简介和按钮行不再重叠；右侧播放源面板从固定 1400px 改为内容高度，3 集时实测 565px、底边 725。返回左边距 80px，右上角无功能徽标移除。</p>
+  <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/screenshots/detail.png" alt="详情"><figcaption>详情：信息卡完整，右侧面板按内容收缩，剧集格统一单行。</figcaption></figure>
+
+  <h2>搜索</h2>
+  <p>搜索按钮改为图标在左、文字在右并整组居中；热词限制 15 个、5 列 3 行；空态不再残留「多源搜索结果」标题。78 站点弹窗具备独立滚动区和固定底栏，滚动到底后第 78 个站点完整可见。</p>
+  <div class="grid2">
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/screenshots/search.png" alt="搜索"><figcaption>搜索：按钮、热词、空态。</figcaption></figure>
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/manual/manual-search-source-many-bottom.png" alt="78 站点弹窗"><figcaption>78 站点：第 78 行完整显示在固定底栏上方。</figcaption></figure>
+  </div>
+
+  <h2>直播与设置</h2>
+  <p>未配置直播源时左栏和预览卡整体隐藏，空态铺满页面，无黑色外框。设置行 104px、带分隔线、值使用薄荷色；滚动条常显，内容底部保留 160px 安全内边距。处理链压缩为三个 80px 节点。</p>
+  <div class="grid2">
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/manual/manual-live-empty.png" alt="直播空态"><figcaption>直播空态：整页铺满，保留设置入口。</figcaption></figure>
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/screenshots/settings-picture.png" alt="设置画面"><figcaption>设置：连续行、分隔线、薄荷值列；处理链不再占首屏。</figcaption></figure>
+  </div>
+
+  <h2>收藏、历史与推送</h2>
+  <p>清空/清理改为图标+文字按钮；历史标题区使用 120px 渐变遮罩；有显式返回控件的页面隐藏静止边缘把手，手势仍可用。推送页改为左右分栏，二维码使用圆角浅色卡片，步骤和按钮建立层级。</p>
+  <div class="grid2">
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/screenshots/history.png" alt="历史"><figcaption>历史：标题遮罩、文字按钮、无边缘竖条。</figcaption></figure>
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/screenshots/push.png" alt="推送"><figcaption>推送：二维码卡片 + 三步说明 + 次级操作。</figcaption></figure>
+  </div>
+
+  <h2>数据源弹窗</h2>
+  <p>输入框获焦时对话框整体上移到 y=40；取消/确定 bounds 为 y=780..860，低于输入法起始 y≈982。二维码圆角化，输入框改为填充式；源列表增加固定底部「关闭」。</p>
+  <div class="grid2">
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/manual/manual-api-dialog.png" alt="API 弹窗"><figcaption>API 弹窗：二维码卡片、填充输入框、清晰按钮层级。</figcaption></figure>
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/manual/manual-source-dialog.png" alt="源列表"><figcaption>源列表：固定「关闭」，底部留白。</figcaption></figure>
+  </div>
+
+  <h2>播放器</h2>
+  <p>主控仍为「上一集 / 后退 15 秒 / 播放暂停 / 前进 15 秒 / 下一集 / 选集 / 更多」；隐藏控制层保留左上返回；播放信息关闭时同步隐藏技术信息。playback 101/0。</p>
+  <div class="grid2">
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/screenshots/player.png" alt="播放器"><figcaption>全屏主控：单一返回入口，主操作紫色。</figcaption></figure>
+    <figure class="shot"><img src="../../qa/ux-audit-car7-current/evidence-97bc0826/screenshots/player-hidden.png" alt="隐藏控制"><figcaption>隐藏控制层：左上返回仍常驻。</figcaption></figure>
+  </div>
+
+  <h2>R4 逐项</h2>
+  <table>
+    <thead><tr><th>编号</th><th>结论</th><th>关键证据</th></tr></thead>
+    <tbody>
+      <tr><td>X01 / D01</td><td><span class="tag">已修</span> 信息卡溢出</td><td>386px 高度精确对齐</td></tr>
+      <tr><td>X02 / D02</td><td><span class="tag">已修</span> 预览提示叠字</td><td>提示移至画面底部</td></tr>
+      <tr><td>X03 / D03</td><td><span class="tag">已修</span> 剧集格混排</td><td>统一单行集号</td></tr>
+      <tr><td>X04 / D04</td><td><span class="tag">已修</span> 右面板 1400px</td><td>实测 h=565，底边 725</td></tr>
+      <tr><td>X05 / D05</td><td><span class="tag">已修</span> 返回边距 / 占位</td><td>返回 x=80，移除徽标</td></tr>
+      <tr><td>X06 / H01</td><td><span class="tag">已修</span> 顶栏右侧越界</td><td>右边界 2800</td></tr>
+      <tr><td>X07 / H02</td><td><span class="tag">已修</span> 状态条越底边</td><td>底边 1496</td></tr>
+      <tr><td>X08 / S03</td><td><span class="tag">已修</span> 搜索按钮图标压字</td><td>图标左置、整组居中</td></tr>
+      <tr><td>X09 / S02</td><td><span class="tag">已修</span> 热词截断</td><td>15 个 / 5 列 3 行</td></tr>
+      <tr><td>X10 / C01</td><td><span class="tag">已修</span> 左侧竖条</td><td>独立页隐藏静止把手</td></tr>
+      <tr><td>X11 / C02</td><td><span class="tag">已修</span> 清空仅图标</td><td>图标+文字按钮</td></tr>
+      <tr><td>X12 / L01</td><td><span class="tag">已修</span> 直播空态</td><td>整页铺满，无黑边</td></tr>
+      <tr><td>X13 / G01</td><td><span class="tag">已修</span> 设置行距离</td><td>分隔线 + 薄荷值列</td></tr>
+      <tr><td>X14 / G02</td><td><span class="tag">已修</span> 设置末行裁切</td><td>常显滚动条 + 160px 底距</td></tr>
+      <tr><td>X15 / G03</td><td><span class="tag">已修</span> 处理链空框</td><td>3 个 80px 节点</td></tr>
+      <tr><td>X16 / P01</td><td><span class="tag">已修</span> 输入法遮挡</td><td>弹窗上移，按钮 y=780..860</td></tr>
+      <tr><td>X17 / P02</td><td><span class="tag">已修</span> 二维码 / 输入框</td><td>圆角卡片 + 填充输入框</td></tr>
+      <tr><td>X18 / P03</td><td><span class="tag">已修</span> 源列表关闭</td><td>固定底栏 + 18px 底距</td></tr>
+      <tr><td>N01</td><td><span class="tag">已修</span> 分类胶囊无响应</td><td>显式激活 + pager 重建</td></tr>
+      <tr><td>N02</td><td><span class="tag">已修</span> 搜索空态残标题</td><td>空态隐藏结果标题</td></tr>
+      <tr><td>N03</td><td><span class="tag">已修</span> 历史标题无遮罩</td><td>120px 渐变 scrim</td></tr>
+      <tr><td>N04</td><td><span class="tag">已修</span> 78 站点弹窗</td><td>第 78 行完整可见</td></tr>
+      <tr><td>N05</td><td><span class="tag">已修</span> 推送页层级</td><td>左右分栏 + 编号步骤</td></tr>
+      <tr><td>N06</td><td><span class="tag">已修</span> 胶囊行残片</td><td>宽度 2496，右边界 2800</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>证据边界</strong>
+    <p>页面截图为 2880×1620 原生 Android 截图；背景彩条和灰块是本地验收视频。空/加载/错误/离线由真实 Android 状态组件强制展示，不是网络事件录像。P01 的 MuMu 环境为硬件键盘模式，系统输入法没有可用 surface，因此截图中只有上移后的弹窗，取消/确定位置用 uiautomator bounds 复核。</p>
+  </div>
+
+  <p class="small">证据目录：<code>car/qa/ux-audit-car7-current/evidence-97bc0826/</code> · 结果文件：pages / ux3k / playback / gestures / states。</p>
+</div>
+</body>
+</html>

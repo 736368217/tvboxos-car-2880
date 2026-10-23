@@ -29,6 +29,9 @@ def main():
     java = Path(os.environ["JAVA_HOME"])
     tools = sdk / "build-tools" / a.build_tools
     android = sdk / "platforms/android-33/android.jar"
+    if not android.exists():
+        jars = sorted((sdk / "platforms").glob("android-*/android.jar"))
+        android = jars[-1] if jars else android
     mapping_path = a.mapping or repo / "app/build/outputs/mapping/pythonRelease/mapping.txt"
     mapping = {"classes": {}, "members": {}, "constants": {}}
     current = None

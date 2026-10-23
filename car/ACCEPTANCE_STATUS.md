@@ -1,18 +1,17 @@
-# Acceptance Status
+﻿# Acceptance Status
 
 This file is a durable status pointer. It does not replace fresh evidence or claim a pass by itself.
 
-## Current: External audit verification + global visual system
+## Current: R4 audit completion
 
+- APK SHA-256: `97bc08267b17c0b173e6d9332c78f420fbdf6f7fb7d901483482a70a3990beb0` (53,691,860 bytes).
+- R4 audit: 24 regression items + 6 new items, 30/30 closed. Detail info card/right panel, home safe insets and category taps, search icon/hotwords/empty state, 78-site source dialog, live empty state, settings rows/scroll, API dialog lift/QR/input, source dialog close, history title scrim, push hierarchy, and edge rail visibility are all addressed.
+- MuMu instance 1: `CAR_DISPLAY_PASS`; pages 81/0, ux3k 98/0, playback 101/0, gestures 7/0, state shells 5/0. All results bind the same APK SHA.
+- Evidence: `car/qa/ux-audit-car7-current/evidence-97bc0826/`.
+- Report: `car/reports/ux_redesign/CAR-17.3-3K-R4-AUDIT-COMPLETION.md` and `.html`.
+
+## Previous: External audit verification + global visual system
 - APK SHA-256: `f93416d784de3f463485421fc5f35c75f0e2fbc049592cf59dc90d6a1e54dba3` (53,679,236 bytes).
-- External 30-item audit: 8 shared issues fixed (zero-config feedback, dialog dim, history empty state, search-history hint, per-site JS spider locks, IME pan, explicit detail retry/back, search-source title/count), 11 already covered, 11 not applicable/environment-only.
-- Additional polish: settings title follows the selected section; player option icons group with their labels; video-preset sheet no longer overlaps hint/cancel; edge-back guide uses the mint/neutral palette.
-- MuMu instance 1: `CAR_DISPLAY_PASS`; pages 80/0, ux3k 98/0, playback 101/0, gestures 7/0, state shells 5/0. All results bind the same APK SHA.
-- Evidence: `car/qa/ux-audit-car7-current/evidence-f93416d7/`.
-- Report: `car/reports/ux_redesign/CAR-17.3-3K-EXTERNAL-AUDIT-VERIFICATION.md`.
-
-## Previous: Global visual system + fullscreen player
-- APK SHA-256: `1b0eb5e2dfac4af3dd1c18c6aee76ffeab388f84bdc0f14f135ba4cff580dd61` (53,675,084 bytes).
 
 ## Previous: Fullscreen player control redesign
 - APK SHA-256: `d6d0820ccd13a05337465f8247b262feab4da9fd95c785e82b199790956c7d27` (53,670,931 bytes).

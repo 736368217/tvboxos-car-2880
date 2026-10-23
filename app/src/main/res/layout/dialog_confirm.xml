@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <TextView
+        <com.github.tvbox.osc.car.CarIconTextView
             android:id="@+id/btnConfirm" android:drawableLeft="@drawable/ic_tvbox_action_check" android:drawablePadding="6px"
             android:layout_width="@dimen/vs_50"
             android:layout_height="@dimen/vs_50"
@@ -55,7 +55,7 @@
             android:textColorHint="@color/dialog_text_hint"
             android:textSize="@dimen/ts_20" />
 
-        <TextView
+        <com.github.tvbox.osc.car.CarIconTextView
             android:id="@+id/btnCancel" android:drawableLeft="@drawable/ic_tvbox_action_close" android:drawablePadding="6px"
             android:layout_width="@dimen/vs_50"
             android:layout_height="@dimen/vs_50"

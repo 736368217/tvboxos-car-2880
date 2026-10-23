@@ -102,6 +102,8 @@ public class SearchActivity extends BaseActivity {
     private TvRecyclerView mGridViewWord;
     private GridLayout historyWordGrid;
     private View searchEmpty;
+    private View searchIdle;
+    private View searchResultTitle;
     SourceViewModel sourceViewModel;
     private RemoteDialog remoteDialog;
     private EditText etSearch;
@@ -180,6 +182,8 @@ public class SearchActivity extends BaseActivity {
         historyWordGrid = findViewById(R.id.historyWordGrid);
         tvHistoryClear = findViewById(R.id.tvHistoryClear);
         searchEmpty = findViewById(R.id.uxSearchEmpty);
+        searchIdle = findViewById(R.id.uxSearchIdle);
+        searchResultTitle = findViewById(R.id.ux_search_result_title);
         findViewById(R.id.uxSearchEmptyClear).setOnClickListener(v -> tvClear.performClick());
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         findViewById(R.id.ux_search_back).setOnClickListener(v -> onBackPressed());
@@ -284,7 +288,7 @@ public class SearchActivity extends BaseActivity {
                 searchAdapter.setNewData(new ArrayList<>());
                 etSearch.setText("");
                 showSuccess();
-                mGridView.setVisibility(View.INVISIBLE);
+                showSearchIdle();
                 setHotWordsData(hots == null ? new ArrayList<>() : hots);
             }
         });
@@ -412,16 +416,18 @@ public class SearchActivity extends BaseActivity {
         setNormalWordTitle();
         wordsSwitch.setFocusable(true);
         wordsSwitch.setBackgroundResource(R.drawable.ux_setting_choice);
-        mGridViewWord.setLayoutManager(new V7GridLayoutManager(this.mContext, 6));
+        mGridViewWord.setLayoutManager(new V7GridLayoutManager(this.mContext, 5));
         mGridViewWord.setAdapter(aggregateSearchMode ? hotWordAdapter : wordAdapter);
         refreshSearchHistoryWords();
     }
 
     private void setHotWordsData(ArrayList<String> data) {
+        ArrayList<String> visible = data == null ? new ArrayList<>() : data;
+        if (visible.size() > 15) visible = new ArrayList<>(visible.subList(0, 15));
         if (aggregateSearchMode) {
-            hotWordAdapter.setNewData(data);
+            hotWordAdapter.setNewData(visible);
         } else {
-            wordAdapter.setNewData(data);
+            wordAdapter.setNewData(visible);
         }
     }
 
@@ -1181,19 +1187,32 @@ public class SearchActivity extends BaseActivity {
         }
         super.showSuccess();
         mGridView.setVisibility(View.INVISIBLE);
+        if (searchIdle != null) searchIdle.setVisibility(View.GONE);
+        if (searchResultTitle != null) searchResultTitle.setVisibility(View.GONE);
         searchEmpty.setVisibility(View.VISIBLE);
     }
 
     @Override
     protected void showLoading() {
         if (searchEmpty != null) searchEmpty.setVisibility(View.GONE);
+        if (searchIdle != null) searchIdle.setVisibility(View.GONE);
+        if (searchResultTitle != null) searchResultTitle.setVisibility(View.GONE);
         super.showLoading();
     }
 
     @Override
     protected void showSuccess() {
         if (searchEmpty != null) searchEmpty.setVisibility(View.GONE);
+        if (searchIdle != null) searchIdle.setVisibility(View.GONE);
+        if (searchResultTitle != null) searchResultTitle.setVisibility(View.VISIBLE);
         super.showSuccess();
+    }
+
+    private void showSearchIdle() {
+        if (searchEmpty != null) searchEmpty.setVisibility(View.GONE);
+        if (searchIdle != null) searchIdle.setVisibility(View.VISIBLE);
+        if (searchResultTitle != null) searchResultTitle.setVisibility(View.GONE);
+        if (mGridView != null) mGridView.setVisibility(View.INVISIBLE);
     }
 
     private void showSystemKeyboard() {

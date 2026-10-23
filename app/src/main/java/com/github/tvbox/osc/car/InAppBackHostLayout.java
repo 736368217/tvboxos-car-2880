@@ -145,10 +145,26 @@ final class InAppBackHostLayout extends FrameLayout {
         boolean show = resumed && !playbackHidden && InAppBackButton.alive(owner.get()) && !rootHidden;
         boolean showBall = show && !HawkConfig.BACK_MODE_EDGE.equals(mode);
         boolean showEdge = show && !HawkConfig.BACK_MODE_FLOATING.equals(mode);
+        edge.setRestingHandleVisible(!hasExplicitPageBack());
         ball.setVisibility(showBall ? VISIBLE : INVISIBLE);
         edge.setVisibility(showEdge ? VISIBLE : INVISIBLE);
         ball.setActive(showBall);
         edge.setActive(showEdge);
+    }
+
+    /** True when the page already carries a visible Back control of its own. */
+    private boolean hasExplicitPageBack() {
+        Activity activity = owner.get();
+        if (activity == null) return false;
+        String[] ids = {"uxPageBack", "uxDetailBack", "ux_setting_back", "ux_live_back",
+                "ux_search_back", "uxFastSearchBack", "uxEmptyBack", "tv_back"};
+        for (String name : ids) {
+            int id = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
+            if (id == 0) continue;
+            View view = activity.findViewById(id);
+            if (view != null && view.getVisibility() == VISIBLE) return true;
+        }
+        return false;
     }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event) {

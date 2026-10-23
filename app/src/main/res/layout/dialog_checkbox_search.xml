@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/root"
         android:layout_width="@dimen/vs_420"
@@ -12,63 +11,72 @@
         android:background="@drawable/shape_dialog_pg_search_checkbox"
         android:orientation="vertical">
 
-
-        <TextView
-            android:id="@+id/uxSearchSourceTitle"
+        <LinearLayout
+            android:id="@+id/uxSearchSourceHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/vs_24"
-            android:paddingBottom="@dimen/vs_6"
-            android:gravity="center"
-            android:text="选择搜索源"
-            android:textColor="@color/dialog_text_primary"
-            android:textSize="@dimen/ts_30"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:paddingLeft="40px"
+            android:paddingTop="28px"
+            android:paddingRight="40px"
+            android:paddingBottom="10px">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/vs_15"
-            android:gravity="center"
-            android:text="勾选参与本次搜索的站点"
-            android:textColor="@color/dialog_text_hint"
-            android:textSize="@dimen/ts_20" />
+            <TextView
+                android:id="@+id/uxSearchSourceTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:text="选择搜索源"
+                android:textColor="@color/dialog_text_primary"
+                android:textSize="32px"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6px"
+                android:gravity="center_vertical"
+                android:text="勾选参与本次搜索的站点"
+                android:textColor="@color/dialog_text_hint"
+                android:textSize="24px" />
+        </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
-            android:weightSum="2"
+            android:id="@+id/uxSearchSourceActions"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="40px"
+            android:paddingRight="40px"
+            android:paddingBottom="10px">
+
             <TextView
                 android:id="@+id/checkAll"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:background="@drawable/button_danmu_setting"
+                android:layout_width="190px"
+                android:layout_height="68px"
+                android:background="@drawable/car_button_selector"
                 android:clickable="true"
                 android:focusable="true"
-                android:padding="@dimen/vs_30"
+                android:gravity="center"
+                android:text="全选"
                 android:textColor="@color/dialog_text_primary"
-                android:textSize="@dimen/ts_26"
-                android:text="全选" />
+                android:textSize="24px" />
 
             <TextView
                 android:id="@+id/clearAll"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/vs_10"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:background="@drawable/button_danmu_setting"
+                android:layout_width="190px"
+                android:layout_height="68px"
+                android:layout_marginLeft="14px"
+                android:background="@drawable/car_button_selector"
                 android:clickable="true"
                 android:focusable="true"
-                android:padding="@dimen/vs_30"
+                android:gravity="center"
                 android:text="全不选"
                 android:textColor="@color/dialog_text_primary"
-                android:textSize="@dimen/ts_26" />
+                android:textSize="24px" />
         </LinearLayout>
 
         <com.owen.tvrecyclerview.widget.TvRecyclerView
@@ -76,9 +84,42 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipToPadding="false"
-            android:paddingBottom="@dimen/vs_20"
-            android:orientation="vertical" />
+            android:fadeScrollbars="false"
+            android:orientation="vertical"
+            android:paddingLeft="30px"
+            android:paddingTop="6px"
+            android:paddingRight="30px"
+            android:paddingBottom="16px"
+            android:scrollbarStyle="insideInset"
+            android:scrollbars="vertical" />
 
+        <LinearLayout
+            android:id="@+id/uxSearchSourceFooter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="40px"
+            android:paddingRight="40px"
+            android:paddingBottom="20px">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginBottom="16px"
+                android:background="@color/car_outline_idle" />
+
+            <TextView
+                android:id="@+id/uxSearchSourceClose"
+                android:layout_width="190px"
+                android:layout_height="76px"
+                android:layout_gravity="end"
+                android:background="@drawable/car_button_selector"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="关闭"
+                android:textColor="@color/dialog_text_primary"
+                android:textSize="26px" />
+        </LinearLayout>
     </LinearLayout>
-
 </FrameLayout>

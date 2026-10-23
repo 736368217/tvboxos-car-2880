@@ -1,62 +1,275 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/car_surface"
-    android:paddingTop="@dimen/car_top_padding"
-    android:paddingBottom="@dimen/car_bottom_padding"
-    android:paddingLeft="@dimen/car_side_padding"
-    android:paddingRight="@dimen/car_side_padding">
+    android:background="@drawable/car_surface">
 
-    <TextView android:id="@+id/uxPageBack" style="@style/UxSceneButton" android:layout_width="180px" android:layout_height="96px" android:layout_marginLeft="60px" android:layout_marginTop="40px" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="10px" android:text="返回" android:textColor="@color/aether_cyan_focus" android:textSize="28px" android:contentDescription="返回上一页" />
-    <TextView android:layout_width="1800px" android:layout_height="88px" android:layout_marginLeft="280px" android:layout_marginTop="40px" android:gravity="center_vertical" android:drawableLeft="@drawable/ic_tvbox_nav_push" android:drawablePadding="14px" android:text="多端互联 · AirPush" android:textColor="@color/aether_text_primary" android:textSize="38px" android:textStyle="bold" />
+    <com.github.tvbox.osc.car.CarIconTextView
+        android:id="@+id/uxPageBack"
+        style="@style/UxSceneButton"
+        android:layout_width="180px"
+        android:layout_height="96px"
+        android:layout_marginLeft="80px"
+        android:layout_marginTop="40px"
+        android:contentDescription="返回上一页"
+        android:drawableLeft="@drawable/ic_tvbox_action_back"
+        android:drawablePadding="10px"
+        android:text="返回"
+        android:textColor="@color/aether_cyan_focus"
+        android:textSize="28px" />
+
+    <com.github.tvbox.osc.car.CarIconTextView
+        android:layout_width="1700px"
+        android:layout_height="96px"
+        android:layout_marginLeft="290px"
+        android:layout_marginTop="40px"
+        android:drawableLeft="@drawable/ic_tvbox_nav_push"
+        android:drawablePadding="14px"
+        android:gravity="center_vertical"
+        android:text="多端互联 · 手机推送"
+        android:textColor="@color/aether_text_primary"
+        android:textSize="38px"
+        android:textStyle="bold" />
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical">
+        android:layout_width="2720px"
+        android:layout_height="1180px"
+        android:layout_marginLeft="80px"
+        android:layout_marginTop="220px"
+        android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/ivQRCode"
-            android:layout_width="@dimen/vs_300"
-            android:layout_height="@dimen/vs_300"
-            android:layout_gravity="center" />
+        <FrameLayout
+            android:layout_width="880px"
+            android:layout_height="match_parent"
+            android:background="@drawable/car_surface_card">
 
-        <TextView
-            android:id="@+id/tvAddress" android:drawableLeft="@drawable/ic_tvbox_file_qr" android:drawablePadding="10px"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/vs_20"
-            android:gravity="center"
-            android:lineSpacingMultiplier="1.5"
-            android:textAlignment="gravity"
-            android:textColor="@color/color_FFFFFF"
-            android:textSize="@dimen/ts_24"
-            tools:text="1111111111111111111111111111111111111111111111111111" />
+            <ImageView
+                android:id="@+id/ivQRCode"
+                android:layout_width="400px"
+                android:layout_height="400px"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="100px"
+                android:background="@drawable/car_qr_surface"
+                android:clipToOutline="true"
+                android:contentDescription="手机推送地址二维码"
+                android:padding="18px" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="70px"
-            android:layout_marginTop="@dimen/vs_12"
-            android:gravity="center"
-            android:text="1. 手机扫码打开投送页  2. 粘贴视频链接  3. 车机立即开播"
-            android:textColor="@color/color_FFFFFF"
-            android:textSize="@dimen/ts_24" />
-        <TextView
-            android:id="@+id/pushLocal" android:drawableLeft="@drawable/ic_tvbox_action_copy" android:drawablePadding="10px"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/vs_20"
-            android:background="@drawable/shape_user_focus"
-            android:focusable="true"
-            android:gravity="center"
-            android:padding="@dimen/vs_10"
-            android:text="推送剪贴板内容"
-            android:textColor="@color/color_FFFFFF"
-            android:textSize="@dimen/ts_24" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="56px"
+                android:layout_marginLeft="40px"
+                android:layout_marginTop="550px"
+                android:layout_marginRight="40px"
+                android:gravity="center"
+                android:text="手机扫码打开投送页"
+                android:textColor="@color/car_text_strong"
+                android:textSize="32px"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvAddress"
+                android:layout_width="800px"
+                android:layout_height="96px"
+                android:layout_marginLeft="40px"
+                android:layout_marginTop="620px"
+                android:ellipsize="middle"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.2"
+                android:maxLines="2"
+                android:textColor="@color/car_text_regular"
+                android:textSize="26px" />
+
+            <TextView
+                android:layout_width="800px"
+                android:layout_height="70px"
+                android:layout_marginLeft="40px"
+                android:layout_marginTop="740px"
+                android:gravity="center"
+                android:text="同一局域网内可直接访问，不需要安装额外应用"
+                android:textColor="@color/car_text_dim"
+                android:textSize="22px" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="90px"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingTop="40px">
+
+            <TextView
+                style="@style/UxEyebrow"
+                android:layout_width="match_parent"
+                android:layout_height="44px"
+                android:text="手机 → 车机"
+                android:textColor="@color/car_accent_cyan" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="86px"
+                android:layout_marginTop="16px"
+                android:text="把手机上的视频交给车机播放"
+                android:textColor="@color/car_text_strong"
+                android:textSize="44px"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="1500px"
+                android:layout_height="80px"
+                android:layout_marginTop="16px"
+                android:lineSpacingMultiplier="1.25"
+                android:text="扫码打开投送页，粘贴视频链接即可在车机开播。"
+                android:textColor="@color/car_text_muted"
+                android:textSize="27px" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="110px"
+                android:layout_marginTop="54px"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="48px"
+                    android:layout_height="48px"
+                    android:background="@drawable/car_badge_green"
+                    android:gravity="center"
+                    android:text="1"
+                    android:textColor="@color/car_text_strong"
+                    android:textSize="24px"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20px"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="42px"
+                        android:text="扫码打开投送页"
+                        android:textColor="@color/car_text_strong"
+                        android:textSize="30px" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="36px"
+                        android:text="用手机相机扫描左侧二维码"
+                        android:textColor="@color/car_text_dim"
+                        android:textSize="23px" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/car_outline_idle" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="110px"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="48px"
+                    android:layout_height="48px"
+                    android:background="@drawable/car_badge_green"
+                    android:gravity="center"
+                    android:text="2"
+                    android:textColor="@color/car_text_strong"
+                    android:textSize="24px"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20px"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="42px"
+                        android:text="粘贴视频链接"
+                        android:textColor="@color/car_text_strong"
+                        android:textSize="30px" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="36px"
+                        android:text="在手机网页里粘贴任意视频地址"
+                        android:textColor="@color/car_text_dim"
+                        android:textSize="23px" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/car_outline_idle" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="110px"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="48px"
+                    android:layout_height="48px"
+                    android:background="@drawable/car_badge_green"
+                    android:gravity="center"
+                    android:text="3"
+                    android:textColor="@color/car_text_strong"
+                    android:textSize="24px"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20px"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="42px"
+                        android:text="车机立即开播"
+                        android:textColor="@color/car_text_strong"
+                        android:textSize="30px" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="36px"
+                        android:text="页面会自动把视频交给 TVBox"
+                        android:textColor="@color/car_text_dim"
+                        android:textSize="23px" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <com.github.tvbox.osc.car.CarIconTextView
+                android:id="@+id/pushLocal"
+                style="@style/UxSecondaryAction"
+                android:layout_width="460px"
+                android:layout_height="96px"
+                android:layout_marginTop="48px"
+                android:drawableLeft="@drawable/ic_tvbox_action_copy"
+                android:drawablePadding="10px"
+                android:text="推送剪贴板内容"
+                android:textSize="27px" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="44px"
+                android:layout_marginTop="22px"
+                android:text="推送内容只在局域网内传输，不会上传到第三方。"
+                android:textColor="@color/car_text_dim"
+                android:textSize="22px" />
+        </LinearLayout>
     </LinearLayout>
 </FrameLayout>

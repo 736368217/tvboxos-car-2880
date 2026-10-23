@@ -712,6 +712,7 @@ public class DetailActivity extends BaseActivity {
         seriesAdapter.setNewData(vodInfo.seriesMap.get(vodInfo.playFlag));
 
         setSeriesGroupOptions();
+        updateSeriesPanelHeight(vodInfo.seriesMap.get(vodInfo.playFlag).size());
 
         mGridView.postDelayed(new Runnable() {
             @Override
@@ -720,6 +721,20 @@ public class DetailActivity extends BaseActivity {
                 if (vodInfo.playIndex >= 0) customSeriesScrollPos(vodInfo.playIndex);
             }
         }, 100);
+    }
+
+    /** Keep a short episode list compact while preserving a stable 5-row scrolling viewport. */
+    private void updateSeriesPanelHeight(int seriesCount) {
+        if (mGridView == null) return;
+        int rows = Math.max(1, (seriesCount + 7) / 8);
+        int gridHeight = Math.min(rows, 5) * 165;
+        ViewGroup.LayoutParams params = mGridView.getLayoutParams();
+        if (params != null && params.height != gridHeight) {
+            params.height = gridHeight;
+            mGridView.setLayoutParams(params);
+        }
+        View panel = findViewById(R.id.uxDetailSidePanel);
+        if (panel != null) panel.requestLayout();
     }
 
     @SuppressLint("NotifyDataSetChanged")

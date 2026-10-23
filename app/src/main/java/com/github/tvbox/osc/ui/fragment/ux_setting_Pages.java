@@ -183,7 +183,7 @@ public final class ux_setting_Pages {
     }
 
     private View legacy(LinearLayout page, int id, String label, int valueId) {
-        FrameLayout row = card(page, 116);
+        FrameLayout row = card(page, 104);
         row.setId(id);
         row.setFocusable(true);
         row.setBackgroundResource(R.drawable.car_row_selector);
@@ -193,16 +193,19 @@ public final class ux_setting_Pages {
             labelView.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0);
             labelView.setCompoundDrawablePadding(14);
         }
-        place(row, labelView, 32, 18, 680, 80);
+        place(row, labelView, 32, 12, 680, 80);
         if (valueId != 0) {
             TextView value = text("", 24, false, R.color.car_accent_cyan);
             value.setSingleLine(true);
             value.setEllipsize(android.text.TextUtils.TruncateAt.END);
-            value.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+            value.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
             value.setId(valueId);
-            place(row, value, 720, 18, 1230, 80);
+            place(row, value, 760, 12, 1150, 80);
         }
-        place(row, text("›", 32, false, R.color.car_text_muted), 2000, 18, 60, 80);
+        place(row, text("›", 32, false, R.color.car_text_muted), 2000, 12, 60, 80);
+        View divider = new View(context);
+        divider.setBackgroundColor(context.getResources().getColor(R.color.car_outline_idle));
+        place(row, divider, 32, 101, 2000, 1);
         return row;
     }
 
@@ -217,20 +220,30 @@ public final class ux_setting_Pages {
     }
 
     private void video(LinearLayout page) {
-        FrameLayout preview = card(page, 330);
-        place(preview, text("处理链示意（非实时截图）", 34, true, R.color.aether_text_primary), 40, 20, 1500, 52);
-        TextView source = text("原始输入帧 · 播放时", 30, true, R.color.aether_text_primary);
+        FrameLayout preview = card(page, 200);
+        place(preview, text("画面处理链 · 播放时生效", 30, true, R.color.aether_text_primary), 40, 14, 1500, 46);
+        TextView source = text("原始输入帧", 24, false, R.color.car_text_dim);
         source.setGravity(Gravity.CENTER);
-        source.setBackgroundResource(R.drawable.car_surface_card);
-        place(preview, source, 40, 92, 930, 150);
-        TextView output = text("GL 处理输出 · 播放时", 30, true, R.color.aether_cyan_focus);
+        source.setBackgroundResource(R.drawable.car_surface_control);
+        place(preview, source, 40, 70, 560, 80);
+        TextView arrow1 = text("→", 30, false, R.color.car_text_dim);
+        arrow1.setGravity(Gravity.CENTER);
+        place(preview, arrow1, 610, 70, 60, 80);
+        TextView output = text("GL 增强处理", 24, true, R.color.car_accent_cyan);
         output.setGravity(Gravity.CENTER);
         output.setBackgroundResource(R.drawable.car_surface_card_raised);
-        place(preview, output, 980, 92, 930, 150);
-        videoAppliedState = text("", 24, false, R.color.aether_emerald_ready);
+        place(preview, output, 680, 70, 560, 80);
+        TextView arrow2 = text("→", 30, false, R.color.car_text_dim);
+        arrow2.setGravity(Gravity.CENTER);
+        place(preview, arrow2, 1250, 70, 60, 80);
+        TextView screen = text("屏幕输出", 24, false, R.color.car_text_regular);
+        screen.setGravity(Gravity.CENTER);
+        screen.setBackgroundResource(R.drawable.car_surface_control);
+        place(preview, screen, 1320, 70, 560, 80);
+        videoAppliedState = text("", 22, false, R.color.aether_emerald_ready);
         videoAppliedState.setId(R.id.tvAdvancedVideoApplied);
         videoAppliedState.setMaxLines(2);
-        place(preview, videoAppliedState, 40, 258, 2010, 48);
+        place(preview, videoAppliedState, 40, 158, 2010, 28);
 
         FrameLayout presets = card(page, 460);
         presets.setId(R.id.llAdvancedVideo);

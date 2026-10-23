@@ -1066,8 +1066,12 @@ public final class Car7Acceptance extends Instrumentation {
         try {
             pause(600);
             View empty = view(search, "uxSearchEmpty");
+            View idle = view(search, "uxSearchIdle");
             View list = view(search, "llLayout");
-            main(() -> { empty.setVisibility(View.VISIBLE); list.setVisibility(View.GONE); });
+            View resultTitle = view(search, "ux_search_result_title");
+            // Force one shell at a time: idle hint and result heading must not sit on top of it.
+            main(() -> { idle.setVisibility(View.GONE); resultTitle.setVisibility(View.GONE);
+                empty.setVisibility(View.VISIBLE); list.setVisibility(View.GONE); });
             setStateCopy(empty, "没有找到内容", "试试完整片名或首字母简拼");
             capturePage(search, "state-empty");
             setStateCopy(empty, "搜索失败", "检查网络连接后重试");
@@ -1137,8 +1141,13 @@ public final class Car7Acceptance extends Instrumentation {
                 config(detail, "setHideSeconds", 0); main(() -> call(detail, "onBackButtonStepUp")); pause(500);
                 check("player Back returns to detail before finishing", !ui(detail::isFinishing) && !Boolean.TRUE.equals(ui(() -> field(detail, "fullWindows"))));
                 capturePage(detail, "page-detail-after-back");
-                config(detail, "setMode", "floating"); config(detail, "setHideSeconds", 0); tapBall(detail);
-                if (!ui(detail::isFinishing)) { main(() -> call(detail, "onBackButtonStepUp")); pause(350); }
+                config(detail, "setMode", "floating"); config(detail, "setHideSeconds", 0);
+                // The page's own 返回 control must always be able to leave the page. A first tap may
+                // only close the preview layer, so allow one real second tap - never an internal call.
+                clickView(detail, "uxDetailBack"); pause(400);
+                if (!ui(detail::isFinishing)) { clickView(detail, "uxDetailBack"); pause(400); }
+                long detailBackDeadline = SystemClock.elapsedRealtime() + 1500;
+                while (SystemClock.elapsedRealtime() < detailBackDeadline && !ui(detail::isFinishing)) pause(200);
                 check("detail Back finishes one page", ui(detail::isFinishing));
             } finally { if (!ui(detail::isFinishing)) main(detail::finish); pause(400); }
         });

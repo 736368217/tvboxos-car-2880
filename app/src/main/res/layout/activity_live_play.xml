@@ -17,17 +17,18 @@
             android:layout_height="match_parent">
 
             <View
+                android:id="@+id/ux_live_preview_card"
                 android:layout_width="1680px"
-                android:layout_height="1400px"
+                android:layout_height="1336px"
                 android:layout_marginLeft="1140px"
                 android:layout_marginTop="160px"
                 android:background="@drawable/car_surface_card" />
 
-            <TextView
+            <com.github.tvbox.osc.car.CarIconTextView
                 android:id="@+id/ux_live_back" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="8px"
                 android:layout_width="160px"
                 android:layout_height="90px"
-                android:layout_marginLeft="60px"
+                android:layout_marginLeft="80px"
                 android:layout_marginTop="40px"
                 android:background="@drawable/car_button_selector"
                 android:clickable="true"
@@ -52,7 +53,7 @@
                 android:textSize="38px"
                 android:textStyle="bold" />
 
-            <TextView
+            <com.github.tvbox.osc.car.CarIconTextView
                 android:id="@+id/ux_live_favorites" android:drawableLeft="@drawable/ic_tvbox_content_heart_on" android:drawablePadding="8px"
                 android:layout_width="270px"
                 android:layout_height="90px"
@@ -66,7 +67,7 @@
                 android:textColor="@color/car_accent_cyan"
                 android:textSize="26px" />
 
-            <TextView
+            <com.github.tvbox.osc.car.CarIconTextView
                 android:id="@+id/ux_live_settings" android:drawableLeft="@drawable/ic_tvbox_nav_settings" android:drawablePadding="8px"
                 android:layout_width="310px"
                 android:layout_height="90px"
@@ -127,7 +128,7 @@
                 android:layout_marginTop="1360px"
                 android:orientation="horizontal">
 
-                <TextView
+                <com.github.tvbox.osc.car.CarIconTextView
                     android:id="@+id/ux_live_fullscreen" android:drawableLeft="@drawable/ic_tvbox_player_fullscreen" android:drawablePadding="8px"
                     android:layout_width="420px"
                     android:layout_height="match_parent"
@@ -140,7 +141,7 @@
                     android:textSize="30px"
                     android:textStyle="bold" />
 
-                <TextView
+                <com.github.tvbox.osc.car.CarIconTextView
                     android:id="@+id/ux_live_source" android:drawableLeft="@drawable/ic_tvbox_content_source" android:drawablePadding="8px"
                     android:layout_width="340px"
                     android:layout_height="match_parent"
@@ -153,7 +154,7 @@
                     android:textColor="@color/car_accent"
                     android:textSize="26px" />
 
-                <TextView
+                <com.github.tvbox.osc.car.CarIconTextView
                     android:id="@+id/ux_live_favorite" android:drawableLeft="@drawable/ic_tvbox_content_heart_on" android:drawablePadding="8px"
                     android:layout_width="300px"
                     android:layout_height="match_parent"
@@ -177,7 +178,7 @@
                     android:gravity="center"
                     android:onClick="divLoadEpgRight"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/tv_arrow" android:layout_width="wrap_content" android:drawableLeft="@drawable/ic_tvbox_content_epg" android:drawablePadding="8px" android:layout_height="wrap_content" android:text="节目单 / 回看" android:textColor="@color/car_text" android:textSize="26px" />
+                    <com.github.tvbox.osc.car.CarIconTextView android:id="@+id/tv_arrow" android:layout_width="wrap_content" android:drawableLeft="@drawable/ic_tvbox_content_epg" android:drawablePadding="8px" android:layout_height="wrap_content" android:text="节目单 / 回看" android:textColor="@color/car_text" android:textSize="26px" />
                     <ImageView android:id="@+id/iv_arrow" android:layout_width="30px" android:layout_height="30px" android:layout_marginLeft="12px" android:src="@drawable/car_chevron_right" />
                     <TextView android:id="@+id/tv_arrow2" android:layout_width="0px" android:layout_height="0px" android:visibility="gone" />
                 </LinearLayout>
@@ -221,7 +222,7 @@
                 android:text="导入直播源后，频道列表会显示在左侧。"
                 android:textColor="@color/car_text_muted"
                 android:textSize="30px" />
-            <TextView
+            <com.github.tvbox.osc.car.CarIconTextView
                 android:id="@+id/ux_live_empty_action" android:drawableLeft="@drawable/ic_tvbox_settings_subscribe" android:drawablePadding="10px"
                 android:layout_width="500px"
                 android:layout_height="100px"
@@ -260,7 +261,7 @@
             android:textSize="26px"
             android:textStyle="bold" />
 
-        <TextView
+        <com.github.tvbox.osc.car.CarIconTextView
             android:id="@+id/ux_live_preview_hint" android:drawableLeft="@drawable/ic_tvbox_player_fullscreen" android:drawablePadding="10px"
             android:layout_width="700px"
             android:layout_height="96px"
@@ -277,7 +278,7 @@
         <LinearLayout
             android:id="@+id/tvLeftChannnelListLayout"
             android:layout_width="1040px"
-            android:layout_height="1400px"
+            android:layout_height="1336px"
             android:layout_marginLeft="60px"
             android:layout_marginTop="160px"
             android:background="@drawable/car_surface_card"
@@ -309,7 +310,7 @@
         <LinearLayout
             android:id="@+id/divEPG"
             android:layout_width="1680px"
-            android:layout_height="1400px"
+            android:layout_height="1336px"
             android:layout_marginLeft="1140px"
             android:layout_marginTop="160px"
             android:background="@drawable/car_surface_card_raised"
@@ -318,7 +319,7 @@
             android:padding="30px"
             android:visibility="gone">
             <LinearLayout android:id="@+id/divLoadEpgleft" android:layout_width="match_parent" android:layout_height="90px" android:background="@drawable/car_button_selector" android:clickable="true" android:focusable="true" android:gravity="center_vertical" android:onClick="divLoadEpgLeft" android:orientation="horizontal">
-                <TextView android:id="@+id/tv_arrow0" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="8px" android:layout_width="100px" android:layout_height="match_parent" android:gravity="center" android:text="" android:textColor="@color/car_accent" android:textSize="36px" />
+                <com.github.tvbox.osc.car.CarIconTextView android:id="@+id/tv_arrow0" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="8px" android:layout_width="100px" android:layout_height="match_parent" android:gravity="center" android:text="" android:textColor="@color/car_accent" android:textSize="36px" />
                 <ImageView android:id="@+id/iv_arrow2" android:layout_width="0px" android:layout_height="0px" android:visibility="gone" />
                 <TextView android:id="@+id/tv_arrow3" android:layout_width="wrap_content" android:layout_height="match_parent" android:gravity="center_vertical" android:text="节目单 / 回看 · 返回频道" android:textColor="@color/car_text" android:textSize="32px" android:textStyle="bold" />
             </LinearLayout>
@@ -335,7 +336,7 @@
         <LinearLayout
             android:id="@+id/tvRightSettingLayout"
             android:layout_width="1680px"
-            android:layout_height="1400px"
+            android:layout_height="1336px"
             android:layout_gravity="top|right"
             android:layout_marginTop="160px"
             android:layout_marginRight="60px"
@@ -346,7 +347,7 @@
             android:visibility="invisible">
             <LinearLayout android:layout_width="match_parent" android:layout_height="90px" android:orientation="horizontal">
                 <TextView android:layout_width="0px" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center_vertical" android:text="直播设置 · 线路 / 解码 / 订阅" android:textColor="@color/car_text" android:textSize="34px" android:textStyle="bold" />
-                <TextView android:id="@+id/ux_live_close_settings" android:drawableLeft="@drawable/ic_tvbox_action_close" android:drawablePadding="8px" android:layout_width="220px" android:layout_height="match_parent" android:background="@drawable/car_button_selector" android:clickable="true" android:focusable="true" android:gravity="center" android:text="关闭" android:textColor="@color/car_accent" android:textSize="30px" />
+                <com.github.tvbox.osc.car.CarIconTextView android:id="@+id/ux_live_close_settings" android:drawableLeft="@drawable/ic_tvbox_action_close" android:drawablePadding="8px" android:layout_width="220px" android:layout_height="match_parent" android:background="@drawable/car_button_selector" android:clickable="true" android:focusable="true" android:gravity="center" android:text="关闭" android:textColor="@color/car_accent" android:textSize="30px" />
             </LinearLayout>
             <LinearLayout android:layout_width="match_parent" android:layout_height="0px" android:layout_weight="1" android:layout_marginTop="20px" android:orientation="horizontal">
                 <com.owen.tvrecyclerview.widget.TvRecyclerView android:id="@+id/mSettingItemView" android:layout_width="1100px" android:layout_height="match_parent" android:padding="20px" android:scrollbars="vertical" />

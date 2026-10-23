@@ -3,29 +3,29 @@
     android:layout_width="match_parent" android:layout_height="match_parent" android:tag="2880,1620"
     android:background="@drawable/car_surface">
     <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
-        <TextView android:id="@+id/ux_setting_back" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="8px" android:layout_width="180px" android:layout_height="96px"
-            android:layout_marginLeft="60px" android:layout_marginTop="40px" android:text="返回"
+        <com.github.tvbox.osc.car.CarIconTextView android:id="@+id/ux_setting_back" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="8px" android:layout_width="180px" android:layout_height="96px"
+            android:layout_marginLeft="80px" android:layout_marginTop="40px" android:text="返回"
             android:textSize="28px" android:textColor="@color/car_text" android:gravity="center"
             android:focusable="true" android:background="@drawable/ux_setting_choice" />
         <TextView android:layout_width="2400px" android:layout_height="90px" android:layout_marginLeft="280px"
             android:layout_marginTop="40px" android:text="高级功能  /  画面 · 音效 · 应用内返回"
             android:textSize="38px" android:textStyle="bold" android:textColor="@color/car_text" android:gravity="center_vertical" />
-        <FrameLayout android:layout_width="620px" android:layout_height="1400px"
+        <FrameLayout android:layout_width="620px" android:layout_height="1336px"
             android:layout_marginLeft="60px" android:layout_marginTop="160px" android:background="@drawable/ux_setting_card">
-            <TextView android:id="@+id/ux_setting_video_tab" android:drawableLeft="@drawable/ic_tvbox_settings_display" android:drawablePadding="12px" android:layout_width="580px" android:layout_height="100px"
+            <com.github.tvbox.osc.car.CarIconTextView android:id="@+id/ux_setting_video_tab" android:drawableLeft="@drawable/ic_tvbox_settings_display" android:drawablePadding="12px" android:layout_width="580px" android:layout_height="100px"
                 android:layout_marginLeft="20px" android:layout_marginTop="30px" android:text="01  画面色彩与超分引擎"
                 android:textSize="26px" android:textStyle="bold" android:textColor="@color/car_text_regular" android:gravity="center_vertical"
                 android:paddingLeft="22px" android:focusable="true" android:background="@drawable/car_nav_selector" />
-            <TextView android:id="@+id/ux_setting_audio_tab" android:drawableLeft="@drawable/ic_tvbox_player_audio" android:drawablePadding="12px" android:layout_width="580px" android:layout_height="100px"
+            <com.github.tvbox.osc.car.CarIconTextView android:id="@+id/ux_setting_audio_tab" android:drawableLeft="@drawable/ic_tvbox_player_audio" android:drawablePadding="12px" android:layout_width="580px" android:layout_height="100px"
                 android:layout_marginLeft="20px" android:layout_marginTop="134px" android:text="02  座舱声场与音效"
                 android:textSize="26px" android:textStyle="bold" android:textColor="@color/car_text_regular" android:gravity="center_vertical"
                 android:paddingLeft="22px" android:focusable="true" android:background="@drawable/car_nav_selector" />
-            <TextView android:id="@+id/ux_setting_return_tab" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="12px" android:layout_width="580px" android:layout_height="100px"
+            <com.github.tvbox.osc.car.CarIconTextView android:id="@+id/ux_setting_return_tab" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="12px" android:layout_width="580px" android:layout_height="100px"
                 android:layout_marginLeft="20px" android:layout_marginTop="238px" android:text="03  双模应用内返回控件"
                 android:textSize="26px" android:textStyle="bold" android:textColor="@color/car_text_regular" android:gravity="center_vertical"
                 android:paddingLeft="22px" android:focusable="true" android:background="@drawable/car_nav_selector" />
         </FrameLayout>
-        <FrameLayout android:layout_width="2100px" android:layout_height="1400px"
+        <FrameLayout android:layout_width="2080px" android:layout_height="1336px"
             android:layout_marginLeft="720px" android:layout_marginTop="160px">
             <include layout="@layout/ux_setting_model" />
         </FrameLayout>

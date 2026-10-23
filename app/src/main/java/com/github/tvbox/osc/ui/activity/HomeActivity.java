@@ -182,6 +182,35 @@ public class HomeActivity extends BaseActivity {
         this.mGridView.setLayoutManager(new V7LinearLayoutManager(this.mContext, 0, false));
         this.mGridView.setSpacingWithMargins(0, AutoSizeUtils.dp2px(this.mContext, 10.0f));
         this.mGridView.setAdapter(this.sortAdapter);
+        this.sortAdapter.setOnItemActivatedListener(this::activateSortPosition);
+        this.mGridView.setOnTouchListener(new View.OnTouchListener() {
+            private float downX, downY;
+
+            @Override
+            public boolean onTouch(View view, android.view.MotionEvent event) {
+                switch (event.getActionMasked()) {
+                    case android.view.MotionEvent.ACTION_DOWN:
+                        downX = event.getX();
+                        downY = event.getY();
+                        return false;
+                    case android.view.MotionEvent.ACTION_UP:
+                        if (Math.abs(event.getX() - downX) > 20 || Math.abs(event.getY() - downY) > 20) {
+                            return false;
+                        }
+                        View child = mGridView.findChildViewUnder(event.getX(), event.getY());
+                        if (child != null) {
+                            int position = mGridView.getChildAdapterPosition(child);
+                            if (position >= 0) {
+                                activateSortPosition(position, child);
+                                return true;
+                            }
+                        }
+                        return false;
+                    default:
+                        return false;
+                }
+            }
+        });
         sortAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
@@ -221,6 +250,7 @@ public class HomeActivity extends BaseActivity {
 
             public void onItemSelected(TvRecyclerView tvRecyclerView, View view, int position) {
                 if (view != null) {
+                    if (!ensureHomePages(position)) return;
                     HomeActivity.this.currentView = view;
                     HomeActivity.this.isDownOrUp = false;
                     HomeActivity.this.sortChange = true;
@@ -242,30 +272,13 @@ public class HomeActivity extends BaseActivity {
 
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
-                if (itemView == null || position < 0 || position >= fragments.size()) return;
-                if (currentSelected != position) {
-                    sortFocused = position;
-                    sortFocusView = itemView;
-                    currentView = itemView;
-                    sortChange = true;
-                    mHandler.removeCallbacks(mDataRunnable);
-                    mDataRunnable.run();
-                    mGridView.setSelectedPosition(position);
-                    return;
-                }
-                if (itemView != null && currentSelected == position) {
-                    BaseLazyFragment baseLazyFragment = fragments.get(currentSelected);
-                    if ((baseLazyFragment instanceof GridFragment) && !sortAdapter.getItem(position).filters.isEmpty()) {// 弹出筛选
-                        ((GridFragment) baseLazyFragment).showFilter();
-                    } else if (baseLazyFragment instanceof UserFragment) {
-                        showSiteSwitch();
-                    }
-                }
+                activateSortPosition(position, itemView);
             }
         });
 
         this.mGridView.setOnInBorderKeyEventListener(new TvRecyclerView.OnInBorderKeyEventListener() {
             public boolean onInBorderKeyEvent(int direction, View view) {
+                if (sortFocused < 0 || sortFocused >= fragments.size()) return false;
                 if (direction == View.FOCUS_UP) {
                     BaseLazyFragment baseLazyFragment = fragments.get(sortFocused);
                     if (baseLazyFragment instanceof UserFragment) {
@@ -744,6 +757,7 @@ public class HomeActivity extends BaseActivity {
         public void run() {
             if (sortChange) {
                 sortChange = false;
+                if (sortFocused < 0 || sortFocused >= fragments.size()) return;
                 BaseLazyFragment baseLazyFragment = fragments.get(sortFocused);
                 if (sortFocused != currentSelected) {
                     currentSelected = sortFocused;
@@ -814,7 +828,7 @@ public class HomeActivity extends BaseActivity {
     private void bindCarNavigation() {
         findViewById(R.id.uxNavHome).setOnClickListener(v -> selectCarPage(0));
         findViewById(R.id.uxNavCategories).setOnClickListener(v -> {
-            if (fragments.size() > 1) selectCarPage(1);
+            if (sortAdapter.getData().size() > 1) selectCarPage(1);
             else Toast.makeText(this, "当前源暂无分类，请选择其他源站", Toast.LENGTH_SHORT).show();
         });
         findViewById(R.id.uxNavLive).setOnClickListener(v -> jumpActivity(LivePlayActivity.class));
@@ -836,8 +850,47 @@ public class HomeActivity extends BaseActivity {
         findViewById(R.id.uxNavCategories).setVisibility(View.VISIBLE);
         findViewById(R.id.uxNavSettings).setVisibility(View.VISIBLE);
     }
+    /**
+     * A tab can outlive the pager list after a source switch. Rebuild before using any
+     * fragment index so a tap never disappears into an old adapter position.
+     */
+    private boolean ensureHomePages(int position) {
+        if (position >= 0 && position < fragments.size()
+                && pageAdapter != null && pageAdapter.getCount() == fragments.size()) {
+            return true;
+        }
+        clearHomePages();
+        if (sortAdapter.getData().isEmpty()) return false;
+        initViewPager(null);
+        return position >= 0 && position < fragments.size();
+    }
+
+    private void activateSortPosition(int position, View itemView) {
+        if (position < 0 || !ensureHomePages(position)) return;
+        if (currentSelected != position) {
+            sortFocused = position;
+            sortFocusView = itemView;
+            currentView = itemView;
+            sortChange = true;
+            mHandler.removeCallbacks(mDataRunnable);
+            mDataRunnable.run();
+            mGridView.setSelectedPosition(position);
+            return;
+        }
+        BaseLazyFragment fragment = fragments.get(position);
+        if ((fragment instanceof GridFragment) && !sortAdapter.getItem(position).filters.isEmpty()) {
+            ((GridFragment) fragment).showFilter();
+        } else if (fragment instanceof UserFragment) {
+            showSiteSwitch();
+        }
+    }
+
     private void selectCarPage(int position) {
-        if (position < 0 || position >= fragments.size()) return;
+        if (position < 0) return;
+        if (!ensureHomePages(position)) {
+            Toast.makeText(this, "当前源暂无分类，请选择其他源站", Toast.LENGTH_SHORT).show();
+            return;
+        }
         sortFocused = position;
         sortChange = true;
         mHandler.removeCallbacks(mDataRunnable);

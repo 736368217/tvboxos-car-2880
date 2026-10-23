@@ -36,8 +36,8 @@ import java.util.List;
  * @description:
  */
 public class HistoryActivity extends BaseActivity {
-    private ImageView tvDelete;
-    private ImageView tvClear;
+    private TextView tvDelete;
+    private TextView tvClear;
     private TextView tvDelTip;
     private TvRecyclerView mGridView;
     private View emptyState;
@@ -175,11 +175,28 @@ public class HistoryActivity extends BaseActivity {
         List<VodInfo> allVodRecord = RoomDataManger.getAllVodRecord(100);
         List<VodInfo> vodInfoList = new ArrayList<>();
         for (VodInfo vodInfo : allVodRecord) {
-            if (vodInfo.playNote != null && !vodInfo.playNote.isEmpty())vodInfo.note = "上次看到" + vodInfo.playNote;
+            if (vodInfo.playNote != null && !vodInfo.playNote.isEmpty()) {
+                vodInfo.note = "上次看到 " + formatPlayNote(vodInfo.playNote);
+            }
             vodInfoList.add(vodInfo);
         }
         historyAdapter.setNewData(vodInfoList);
         updateEmptyState();
+    }
+
+    private String formatPlayNote(String raw) {
+        String value = raw == null ? "" : raw.trim();
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("^第?\\s*(\\d+)\\s*集?$").matcher(value);
+        if (matcher.matches()) {
+            try {
+                return String.format(java.util.Locale.ROOT, "第%02d集",
+                        Integer.parseInt(matcher.group(1)));
+            } catch (NumberFormatException ignored) {
+                return value;
+            }
+        }
+        return value;
     }
 
     private void updateEmptyState() {

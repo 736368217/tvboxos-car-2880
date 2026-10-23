@@ -260,7 +260,7 @@
                     android:gravity="center"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <com.github.tvbox.osc.car.CarIconTextView
                         android:id="@+id/play_pre"
                         style="@style/UxPlayerButton"
                         android:layout_width="180px"
@@ -269,7 +269,7 @@
                         android:drawableLeft="@drawable/ic_tvbox_player_prev"
                         android:text="上一集" />
 
-                    <TextView
+                    <com.github.tvbox.osc.car.CarIconTextView
                         android:id="@+id/uxRewind"
                         style="@style/UxPlayerButton"
                         android:layout_width="214px"
@@ -279,7 +279,7 @@
                         android:drawableLeft="@drawable/ic_tvbox_player_replay15"
                         android:text="后退 15 秒" />
 
-                    <TextView
+                    <com.github.tvbox.osc.car.CarIconTextView
                         android:id="@+id/uxPlayPause"
                         style="@style/UxPlayerPrimaryButton"
                         android:layout_width="224px"
@@ -289,7 +289,7 @@
                         android:drawableLeft="@drawable/ic_tvbox_content_pause"
                         android:text="暂停" />
 
-                    <TextView
+                    <com.github.tvbox.osc.car.CarIconTextView
                         android:id="@+id/uxForward"
                         style="@style/UxPlayerButton"
                         android:layout_width="214px"
@@ -299,7 +299,7 @@
                         android:drawableLeft="@drawable/ic_tvbox_player_forward15"
                         android:text="前进 15 秒" />
 
-                    <TextView
+                    <com.github.tvbox.osc.car.CarIconTextView
                         android:id="@+id/play_next"
                         style="@style/UxPlayerButton"
                         android:layout_width="180px"
@@ -317,7 +317,7 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <com.github.tvbox.osc.car.CarIconTextView
                         android:id="@+id/uxEpisodes"
                         style="@style/UxPlayerButton"
                         android:layout_width="160px"
@@ -326,7 +326,7 @@
                         android:drawableLeft="@drawable/ic_tvbox_content_episodes"
                         android:text="选集" />
 
-                    <TextView
+                    <com.github.tvbox.osc.car.CarIconTextView
                         android:id="@+id/uxMore"
                         style="@style/UxPlayerButton"
                         android:layout_width="150px"
@@ -412,14 +412,14 @@
                         android:layout_marginTop="8px"
                         android:orientation="horizontal">
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/play_car_video"
                             style="@style/UxPlayerOptionButton"
                             android:layout_weight="1"
                             android:drawableLeft="@drawable/ic_tvbox_player_picture"
                             android:text="画面 · 原画" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/play_car_audio"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -427,7 +427,7 @@
                             android:drawableLeft="@drawable/ic_tvbox_player_audio"
                             android:text="音效 · 关闭" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/play_car_sr"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -435,14 +435,14 @@
                             android:drawableLeft="@drawable/ic_tvbox_player_sr"
                             android:text="超分 · 关" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/play_car_interp"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
                             android:layout_weight="1"
                             android:drawableLeft="@drawable/ic_tvbox_player_interp"
                             android:text="补帧 · 关" />
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/play_scale"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -462,14 +462,14 @@
                         android:layout_marginTop="8px"
                         android:orientation="horizontal">
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/play_speed"
                             style="@style/UxPlayerOptionButton"
                             android:layout_weight="1"
                             android:drawableLeft="@drawable/ic_tvbox_player_speed"
                             android:text="倍速 · 1.0x" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/uxChangeSource"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -477,7 +477,7 @@
                             android:drawableLeft="@drawable/ic_tvbox_content_swap"
                             android:text="换源" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/zimu_select"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -485,7 +485,7 @@
                             android:drawableLeft="@drawable/ic_tvbox_player_subtitle"
                             android:text="字幕" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/audio_track_select"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -493,7 +493,7 @@
                             android:drawableLeft="@drawable/ic_tvbox_player_audio_track"
                             android:text="音轨" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/video_track_select"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -513,14 +513,14 @@
                         android:layout_marginTop="8px"
                         android:orientation="horizontal">
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/danmu_setting"
                             style="@style/UxPlayerOptionButton"
                             android:layout_weight="1"
                             android:drawableLeft="@drawable/ic_tvbox_player_danmaku"
                             android:text="弹幕" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/danmu_search_ui"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -528,7 +528,7 @@
                             android:drawableLeft="@drawable/ic_tvbox_content_quick_search"
                             android:text="搜弹幕" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/uxBackgroundPlayback"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -536,7 +536,7 @@
                             android:drawableLeft="@drawable/ic_tvbox_player_bg_audio"
                             android:text="后台播放 · 关" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/screen_display"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -544,7 +544,7 @@
                             android:drawableLeft="@drawable/ic_tvbox_settings_display"
                             android:text="播放信息 · 关" />
 
-                        <TextView
+                        <com.github.tvbox.osc.car.CarIconTextView
                             android:id="@+id/uxExpertToggle"
                             style="@style/UxPlayerOptionButton"
                             android:layout_marginLeft="14px"
@@ -571,7 +571,7 @@
                             android:layout_marginTop="8px"
                             android:orientation="horizontal">
 
-                            <TextView
+                            <com.github.tvbox.osc.car.CarIconTextView
                                 android:id="@+id/play_player"
                                 style="@style/UxPlayerOptionButton"
                                 android:layout_height="96px"
@@ -579,7 +579,7 @@
                                 android:drawableLeft="@drawable/ic_tvbox_player_decoder"
                                 android:text="播放器" />
 
-                            <TextView
+                            <com.github.tvbox.osc.car.CarIconTextView
                                 android:id="@+id/play_ijk"
                                 style="@style/UxPlayerOptionButton"
                                 android:layout_height="96px"
@@ -588,7 +588,7 @@
                                 android:drawableLeft="@drawable/ic_tvbox_player_decoder"
                                 android:text="解码" />
 
-                            <TextView
+                            <com.github.tvbox.osc.car.CarIconTextView
                                 android:id="@+id/play_retry"
                                 style="@style/UxPlayerOptionButton"
                                 android:layout_height="96px"
@@ -597,7 +597,7 @@
                                 android:drawableLeft="@drawable/ic_tvbox_action_refresh"
                                 android:text="重播" />
 
-                            <TextView
+                            <com.github.tvbox.osc.car.CarIconTextView
                                 android:id="@+id/play_refresh"
                                 style="@style/UxPlayerOptionButton"
                                 android:layout_height="96px"
@@ -606,7 +606,7 @@
                                 android:drawableLeft="@drawable/ic_tvbox_action_refresh"
                                 android:text="刷新" />
 
-                            <TextView
+                            <com.github.tvbox.osc.car.CarIconTextView
                                 android:id="@+id/play_cast"
                                 style="@style/UxPlayerOptionButton"
                                 android:layout_height="96px"
@@ -622,7 +622,7 @@
                             android:layout_marginTop="12px"
                             android:orientation="horizontal">
 
-                            <TextView
+                            <com.github.tvbox.osc.car.CarIconTextView
                                 android:id="@+id/landscape_portrait"
                                 style="@style/UxPlayerOptionButton"
                                 android:layout_height="96px"

@@ -75,6 +75,7 @@
                 style="@style/CarGridItemTitle"
                 android:background="@drawable/car_badge_scrim"
                 android:ellipsize="end"
+                android:paddingBottom="@dimen/vs_12"
                 android:text="Title" />
 
             <TextView

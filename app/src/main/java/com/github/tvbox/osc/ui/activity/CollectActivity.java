@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CollectActivity extends BaseActivity {
-    private ImageView tvDelete;
-    private ImageView tvClear;
+    private TextView tvDelete;
+    private TextView tvClear;
     private TextView tvDelTip;
     private TvRecyclerView mGridView;
     private View emptyState;

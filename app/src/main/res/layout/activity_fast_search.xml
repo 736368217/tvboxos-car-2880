@@ -6,11 +6,11 @@
     android:background="@drawable/car_surface"
     android:tag="2880,1620">
     <FrameLayout android:layout_width="2880px" android:layout_height="1620px">
-        <TextView android:id="@+id/uxFastSearchBack" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="8px" android:layout_width="180px" android:layout_height="96px"
+        <com.github.tvbox.osc.car.CarIconTextView android:id="@+id/uxFastSearchBack" android:drawableLeft="@drawable/ic_tvbox_action_back" android:drawablePadding="8px" android:layout_width="180px" android:layout_height="96px"
             android:layout_marginLeft="60px" android:layout_marginTop="40px" android:background="@drawable/ux_setting_choice"
             android:clickable="true" android:contentDescription="返回上一页" android:focusable="true" android:gravity="center"
             android:text="返回" android:textColor="@color/aether_cyan_focus" android:textSize="28px" />
-        <TextView android:layout_width="1100px" android:layout_height="90px" android:layout_marginLeft="280px"
+        <com.github.tvbox.osc.car.CarIconTextView android:layout_width="1100px" android:layout_height="90px" android:layout_marginLeft="280px"
             android:layout_marginTop="40px" android:gravity="center_vertical" android:drawableLeft="@drawable/ic_tvbox_content_quick_search" android:drawablePadding="12px" android:text="全屏聚合搜索"
             android:textColor="@color/aether_text_primary" android:textSize="38px" android:textStyle="bold" />
         <TextView android:id="@+id/uxFastSearchQuery" android:layout_width="980px" android:layout_height="90px"

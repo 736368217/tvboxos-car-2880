@@ -14,12 +14,14 @@
 
         <TextView
             android:id="@+id/title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:lineSpacingExtra="@dimen/ts_40"
-            android:lineSpacingMultiplier="0"
-            android:padding="@dimen/vs_20"
+            android:paddingLeft="@dimen/vs_24"
+            android:paddingTop="@dimen/vs_18"
+            android:paddingRight="@dimen/vs_24"
+            android:paddingBottom="@dimen/vs_8"
             android:singleLine="true"
+            android:ellipsize="end"
             android:text="11111111"
             android:textColor="@color/dialog_text_primary"
             android:textStyle="bold"
@@ -31,13 +33,15 @@
 
         <com.owen.tvrecyclerview.widget.TvRecyclerView
             android:id="@+id/list"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingLeft="@dimen/vs_30"
             android:paddingRight="@dimen/vs_30"
+            android:scrollbars="vertical"
             app:layout_constrainedHeight="true"
             app:layout_constraintHeight_max="@dimen/vs_410"
+            app:layout_constraintBottom_toTopOf="@+id/select_footer_divider"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/title"
@@ -47,10 +51,32 @@
             app:tv_verticalSpacingWithMargins="@dimen/vs_10" />
 
         <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/vs_30"
+            android:id="@+id/select_footer_divider"
+            android:layout_width="0dp"
+            android:layout_height="1px"
+            android:layout_marginLeft="@dimen/vs_24"
+            android:layout_marginRight="@dimen/vs_24"
+            android:background="@color/car_outline_idle"
+            app:layout_constraintBottom_toTopOf="@+id/select_close"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/list" />
+
+        <TextView
+            android:id="@+id/select_close"
+            android:layout_width="180px"
+            android:layout_height="86px"
+            android:layout_marginRight="@dimen/vs_30"
+            android:layout_marginBottom="@dimen/vs_18"
+            android:background="@drawable/car_button_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="关闭"
+            android:textColor="@color/dialog_text_primary"
+            android:textSize="@dimen/ts_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/select_footer_divider" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

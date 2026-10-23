@@ -34,7 +34,7 @@ public class SeriesAdapter extends BaseQuickAdapter<VodInfo.VodSeries, BaseViewH
         } else {
             tvSeries.setTextColor(Color.WHITE);
         }
-        helper.setText(R.id.tvSeries, item.selected ? item.name + "\n正在播放" : item.name);
+        helper.setText(R.id.tvSeries, item.name);
 
         if (getData().size() == 1 && helper.getLayoutPosition() == 0) {
             helper.itemView.setNextFocusUpId(R.id.mGridViewFlag);

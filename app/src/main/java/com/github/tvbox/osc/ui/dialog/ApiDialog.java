@@ -3,6 +3,7 @@ package com.github.tvbox.osc.ui.dialog;
 import android.app.Activity;
 import android.content.Context;
 import android.view.KeyEvent;
+import android.view.Gravity;
 import android.view.WindowManager;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -72,6 +73,14 @@ public class ApiDialog extends BaseDialog {
         inputApi = findViewById(R.id.input);
         inputApiLive = findViewById(R.id.inputLive);
         inputConfirm = findViewById(R.id.inputConfirm);
+        View.OnFocusChangeListener liftForIme = (view, hasFocus) -> {
+            if (hasFocus) liftDialogAboveIme();
+        };
+        inputApi.setOnFocusChangeListener(liftForIme);
+        inputApiLive.setOnFocusChangeListener(liftForIme);
+        inputConfirm.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) centerDialog();
+        });
         findViewById(R.id.inputCancel).setOnClickListener(v -> dismiss());
         //内置网络接口在此处添加
         inputApi.setText(Hawk.get(HawkConfig.API_URL, ""));
@@ -191,10 +200,27 @@ public class ApiDialog extends BaseDialog {
         inputConfirm.requestFocus();
     }
 
+    private void liftDialogAboveIme() {
+        if (getWindow() == null) return;
+        WindowManager.LayoutParams params = getWindow().getAttributes();
+        params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+        params.y = 40;
+        getWindow().setAttributes(params);
+    }
+
+    private void centerDialog() {
+        if (getWindow() == null) return;
+        WindowManager.LayoutParams params = getWindow().getAttributes();
+        params.gravity = Gravity.CENTER;
+        params.y = 0;
+        getWindow().setAttributes(params);
+    }
+
     private void refreshQRCode() {
         String address = ControlManager.get().getAddress(false);
         tvAddress.setText(String.format("扫描左侧二维码，或在同一局域网浏览器中访问地址\n%s", address));
-        ivQRCode.setImageBitmap(QRCodeGen.generateBitmap(address+"api.html", AutoSizeUtils.mm2px(getContext(), 300), AutoSizeUtils.mm2px(getContext(), 300)));
+        int size = AutoSizeUtils.mm2px(getContext(), 260);
+        ivQRCode.setImageBitmap(QRCodeGen.generateBitmap(address + "api.html", size, size, 2));
     }
 
     private void saveAndDismiss() {
