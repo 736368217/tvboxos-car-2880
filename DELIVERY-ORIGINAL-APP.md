@@ -441,3 +441,41 @@ SHA-256 `3973A092D392C673A58AC64C5AAF1551F4E40B3E7543CA8E6D1C747945A86BED`。
 
 构建提示：当前网络访问不到 `chaquo.com` 时，`:pyramid:generatePythonReleasePythonRequirements`
 会回退到 PyPI 源码编译并失败；本次沿用已生成的 pip 产物并 `-x` 该任务完成打包。
+
+## 14. 音量/亮度与首页留白（2026-10-23 晚）
+
+### 14.1 根因
+
+真正接管播放器手势的是 `com.github.tvbox.osc.player.controller.BaseController`，
+不是 player 模块里的 `GestureVideoController`。它仍在使用：
+
+- 音量：`AudioManager.setStreamVolume(STREAM_MUSIC, ...)` —— 车机无音频权限时静默失败，
+  且每次 `onDown` 重新读系统音量，所以再次拖动总是从 100% 开始；
+- 亮度：窗口级 `screenBrightness` —— 被系统自动亮度接管，表现为无效。
+
+### 14.2 修复
+
+- 音量改为**应用内增益** 0–200%：`ControlWrapper` / `VideoView` 保存左右声道音量，
+  `prepare`、切集、音频焦点恢复后重新应用；`HawkConfig.VOLUME_GAIN` 持久化；
+  手势结束显示「音量 xxx%」，重进播放器沿用上次值。
+- `AudioFocusHelper` 改用 `duckVolume/restoreVolume`，不再把增益重置成 1.0。
+- 亮度手势**默认关闭**（亮度交给系统）；设置页新增「亮度手势」开关，开启后才写
+  窗口 `screenBrightness`。
+
+### 14.3 首页留白
+
+- `mViewPager` 由 `match_parent` 改为 `0dp + weight=1`，填满 topLayout 以下空间；
+- 首页推荐卡片 `item_user_hot_vod` 高度 280→300mm，减少底部空白。
+
+### 14.4 实测（vm0，Android 15，r28）
+
+| 项 | 结果 |
+| :--- | :--- |
+| 音量手势 | 右侧上下滑显示「音量 200%」，范围 0–200 |
+| 音量持久化 | 退出重进播放器后再次滑动仍从 200% 起算（不再回 100%） |
+| 亮度手势 | 默认关闭，左侧上下滑无「亮度」覆盖层 |
+| 设置开关 | 设置页首行「亮度手势」，点按切换开/关 |
+| 首页留白 | 卡片整体下移、放大，底部空白由约 620px 降到约 370px |
+
+产物：`TVBox-Original-Feature-1.0.0-car.7-python-r28.apk`，52,672,292 bytes，
+SHA-256 `9957DDBBCE70774504B7551908C07654E8936630A26FB66DCDCA5E85950A5168`。
