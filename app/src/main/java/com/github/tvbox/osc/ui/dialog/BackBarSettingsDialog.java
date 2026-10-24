@@ -18,6 +18,8 @@ import com.github.tvbox.osc.util.HawkConfig;
 /**
  * 返回组件的二级设置：设置页只留一个入口，具体开关/模式/外观都在这里调。
  * 每一行点击即循环取值，改完立即生效（InAppBackButton 内部会 refresh 当前页面）。
+ *
+ * <p>三种返回方式：边缘拉出（可调杠） / 悬浮球 / 贴边滑动（复刻 SNG 的拉伸手柄）。</p>
  */
 public class BackBarSettingsDialog extends BaseDialog {
 
@@ -25,9 +27,12 @@ public class BackBarSettingsDialog extends BaseDialog {
             0xFF38BDF8, 0xFFFFFFFF, 0xFFFBBF24, 0xFF34D399, 0xFFF472B6
     };
     private static final String[] BAR_COLOR_NAMES = {"青", "白", "琥珀", "绿", "粉"};
+    private static final int[] SWIPE_STEPS = {60, 84, 110};
+    private static final String[] SWIPE_NAMES = {"近", "中", "远"};
 
     private final Runnable onChanged;
-    private TextView tvEnabled, tvMode, tvSize, tvColor, tvAlpha, tvHide;
+    private TextView tvEnabled, tvMode, tvSize, tvColor, tvAlpha, tvHide, tvSwipe;
+    private View rowSize, rowColor, rowAlpha, rowHide, rowSwipe;
 
     public BackBarSettingsDialog(@NonNull Context context, Runnable onChanged) {
         super(context);
@@ -72,20 +77,24 @@ public class BackBarSettingsDialog extends BaseDialog {
         root.addView(title, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        tvEnabled = addRow(root, "开关", v -> {
+        Row enabled = addRow(root, "开关", v -> {
             InAppBackButton.setEnabled(ownerActivity(), !InAppBackButton.isEnabled());
             refresh();
         });
-        tvMode = addRow(root, "返回模式", v -> {
-            String mode = InAppBackButton.getMode();
+        tvEnabled = enabled.value;
+
+        Row mode = addRow(root, "返回模式", v -> {
+            String current = InAppBackButton.getMode();
             String next;
-            if (HawkConfig.BACK_MODE_EDGE.equals(mode)) next = HawkConfig.BACK_MODE_FLOATING;
-            else if (HawkConfig.BACK_MODE_FLOATING.equals(mode)) next = HawkConfig.BACK_MODE_BOTH;
+            if (HawkConfig.BACK_MODE_EDGE.equals(current)) next = HawkConfig.BACK_MODE_FLOATING;
+            else if (HawkConfig.BACK_MODE_FLOATING.equals(current)) next = HawkConfig.BACK_MODE_SWIPE;
             else next = HawkConfig.BACK_MODE_EDGE;
             InAppBackButton.setMode(ownerActivity(), next);
             refresh();
         });
-        tvSize = addRow(root, "返回杠大小", v -> {
+        tvMode = mode.value;
+
+        Row size = addRow(root, "返回杠大小", v -> {
             int width = InAppBackButton.getBarWidthDp();
             int nextWidth = width <= 8 ? 12 : width <= 14 ? 18 : 6;
             int nextHeight = nextWidth <= 8 ? 64 : nextWidth <= 14 ? 96 : 140;
@@ -93,11 +102,14 @@ public class BackBarSettingsDialog extends BaseDialog {
             InAppBackButton.setBarHeightDp(ownerActivity(), nextHeight);
             refresh();
         });
-        tvColor = addRow(root, "返回杠颜色", v -> {
-            int color = InAppBackButton.getBarColor();
+        tvSize = size.value;
+        rowSize = size.container;
+
+        Row color = addRow(root, "返回杠颜色", v -> {
+            int current = InAppBackButton.getBarColor();
             int index = 0;
             for (int i = 0; i < BAR_COLORS.length; i++) {
-                if (BAR_COLORS[i] == color) {
+                if (BAR_COLORS[i] == current) {
                     index = i;
                     break;
                 }
@@ -105,18 +117,41 @@ public class BackBarSettingsDialog extends BaseDialog {
             InAppBackButton.setBarColor(ownerActivity(), BAR_COLORS[(index + 1) % BAR_COLORS.length]);
             refresh();
         });
-        tvAlpha = addRow(root, "返回杠透明度", v -> {
-            int alpha = InAppBackButton.getBarAlpha();
-            int next = alpha < 50 ? 60 : alpha < 70 ? 80 : alpha < 90 ? 100 : 40;
+        tvColor = color.value;
+        rowColor = color.container;
+
+        Row alpha = addRow(root, "返回杠透明度", v -> {
+            int value = InAppBackButton.getBarAlpha();
+            int next = value < 50 ? 60 : value < 70 ? 80 : value < 90 ? 100 : 40;
             InAppBackButton.setBarAlpha(ownerActivity(), next);
             refresh();
         });
-        tvHide = addRow(root, "自动隐藏", v -> {
+        tvAlpha = alpha.value;
+        rowAlpha = alpha.container;
+
+        Row hide = addRow(root, "自动隐藏", v -> {
             int seconds = InAppBackButton.getHideSeconds();
             int next = seconds == 4 ? 6 : seconds == 6 ? 8 : seconds == 8 ? 0 : 4;
             InAppBackButton.setHideSeconds(ownerActivity(), next);
             refresh();
         });
+        tvHide = hide.value;
+        rowHide = hide.container;
+
+        Row swipe = addRow(root, "滑动距离", v -> {
+            int current = InAppBackButton.getSwipeTriggerDp();
+            int next = SWIPE_STEPS[1];
+            for (int i = 0; i < SWIPE_STEPS.length; i++) {
+                if (SWIPE_STEPS[i] == current) {
+                    next = SWIPE_STEPS[(i + 1) % SWIPE_STEPS.length];
+                    break;
+                }
+            }
+            InAppBackButton.setSwipeTriggerDp(ownerActivity(), next);
+            refresh();
+        });
+        tvSwipe = swipe.value;
+        rowSwipe = swipe.container;
 
         TextView close = new TextView(context);
         close.setText("关闭");
@@ -140,7 +175,17 @@ public class BackBarSettingsDialog extends BaseDialog {
         return root;
     }
 
-    private TextView addRow(LinearLayout parent, String label, View.OnClickListener click) {
+    private static final class Row {
+        final LinearLayout container;
+        final TextView value;
+
+        Row(LinearLayout container, TextView value) {
+            this.container = container;
+            this.value = value;
+        }
+    }
+
+    private Row addRow(LinearLayout parent, String label, View.OnClickListener click) {
         Context context = getContext();
         int rowHeight = (int) context.getResources().getDimension(R.dimen.vs_60);
         int side = (int) context.getResources().getDimension(R.dimen.vs_20);
@@ -162,7 +207,7 @@ public class BackBarSettingsDialog extends BaseDialog {
                 0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         TextView value = new TextView(context);
-        value.setTextColor(0xFFFFFFFF);
+        value.setTextColor(0xFFBAE6FD);
         value.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, textSize);
         row.addView(value, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -171,7 +216,7 @@ public class BackBarSettingsDialog extends BaseDialog {
                 ViewGroup.LayoutParams.MATCH_PARENT, rowHeight);
         params.topMargin = (int) context.getResources().getDimension(R.dimen.vs_10);
         parent.addView(row, params);
-        return value;
+        return new Row(row, value);
     }
 
     private android.app.Activity ownerActivity() {
@@ -182,7 +227,9 @@ public class BackBarSettingsDialog extends BaseDialog {
     private void refresh() {
         tvEnabled.setText(InAppBackButton.isEnabled() ? "开启" : "关闭");
         String mode = InAppBackButton.getMode();
-        tvMode.setText(HawkConfig.BACK_MODE_FLOATING.equals(mode) ? "悬浮球"
+        boolean swipeMode = HawkConfig.BACK_MODE_SWIPE.equals(mode);
+        tvMode.setText(HawkConfig.BACK_MODE_SWIPE.equals(mode) ? "边缘滑动"
+                : HawkConfig.BACK_MODE_FLOATING.equals(mode) ? "悬浮球"
                 : HawkConfig.BACK_MODE_BOTH.equals(mode) ? "双模共存" : "边缘拉出");
         int width = InAppBackButton.getBarWidthDp();
         tvSize.setText(width <= 8 ? "细" : width <= 14 ? "中" : "粗");
@@ -198,6 +245,22 @@ public class BackBarSettingsDialog extends BaseDialog {
         tvAlpha.setText(InAppBackButton.getBarAlpha() + "%");
         int seconds = InAppBackButton.getHideSeconds();
         tvHide.setText(seconds == 0 ? "常驻" : seconds + " 秒");
+
+        int trigger = InAppBackButton.getSwipeTriggerDp();
+        String triggerName = "中";
+        for (int i = 0; i < SWIPE_STEPS.length; i++) {
+            if (SWIPE_STEPS[i] == trigger) triggerName = SWIPE_NAMES[i];
+        }
+        tvSwipe.setText(triggerName);
+
+        // 只显示当前模式真正会用到的行，避免设置项越堆越乱。
+        int barVisibility = swipeMode ? View.GONE : View.VISIBLE;
+        rowSize.setVisibility(barVisibility);
+        rowColor.setVisibility(barVisibility);
+        rowAlpha.setVisibility(barVisibility);
+        rowHide.setVisibility(barVisibility);
+        rowSwipe.setVisibility(swipeMode ? View.VISIBLE : View.GONE);
+
         if (onChanged != null) onChanged.run();
         // 下一帧再刷一次：弹窗刚打开时宿主可能还没完成测量，第一次 configure 会用错尺寸。
         final android.app.Activity activity = ownerActivity();

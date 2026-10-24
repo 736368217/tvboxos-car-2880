@@ -264,11 +264,14 @@ public final class InAppBackButton {
     public static int getBarColor() { return integer(HawkConfig.BACK_BAR_COLOR, 0xFF38BDF8); }
     /** 杠不透明度 10–100（百分比）。 */
     public static int getBarAlpha() { return clampInt(integer(HawkConfig.BACK_BAR_ALPHA, 55), 10, 100); }
+    /** 贴边滑动模式的触发距离 dp（40–140）。 */
+    public static int getSwipeTriggerDp() { return clampInt(integer(HawkConfig.BACK_SWIPE_TRIGGER_DP, 84), 40, 140); }
 
     public static void setBarWidthDp(Activity a, int value) { put(a, HawkConfig.BACK_BAR_WIDTH_DP, clampInt(value, 4, 28)); }
     public static void setBarHeightDp(Activity a, int value) { put(a, HawkConfig.BACK_BAR_HEIGHT_DP, clampInt(value, 48, 220)); }
     public static void setBarColor(Activity a, int value) { put(a, HawkConfig.BACK_BAR_COLOR, value); }
     public static void setBarAlpha(Activity a, int value) { put(a, HawkConfig.BACK_BAR_ALPHA, clampInt(value, 10, 100)); }
+    public static void setSwipeTriggerDp(Activity a, int value) { put(a, HawkConfig.BACK_SWIPE_TRIGGER_DP, clampInt(value, 40, 140)); }
 
     private static int clampInt(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
@@ -308,6 +311,7 @@ public final class InAppBackButton {
         String value = raw == null ? "" : raw.toLowerCase(Locale.ROOT);
         if ("1".equals(value) || "edge_pull_only".equals(value) || HawkConfig.BACK_MODE_EDGE.equals(value)) return HawkConfig.BACK_MODE_EDGE;
         if ("2".equals(value) || "dual_enabled".equals(value) || HawkConfig.BACK_MODE_BOTH.equals(value)) return HawkConfig.BACK_MODE_BOTH;
+        if ("3".equals(value) || "swipe_edge".equals(value) || HawkConfig.BACK_MODE_SWIPE.equals(value)) return HawkConfig.BACK_MODE_SWIPE;
         return HawkConfig.BACK_MODE_FLOATING;
     }
 

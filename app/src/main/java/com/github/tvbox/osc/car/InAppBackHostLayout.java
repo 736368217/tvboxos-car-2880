@@ -22,6 +22,7 @@ final class InAppBackHostLayout extends FrameLayout {
     private final WeakReference<Activity> owner;
     private final FloatingBackBallView ball;
     private final EdgePullBackView edge;
+    private final EdgeSwipeBackView swipe;
     private final Runnable rootCheck = this::applyVisibility;
     private final ViewTreeObserver.OnGlobalLayoutListener layoutObserver = this::onPageLayout;
     private ViewTreeObserver observedTree;
@@ -41,8 +42,10 @@ final class InAppBackHostLayout extends FrameLayout {
         if (Build.VERSION.SDK_INT >= 21) setTranslationZ(1000f);
         edge = new EdgePullBackView(this);
         ball = new FloatingBackBallView(this);
+        swipe = new EdgeSwipeBackView(this);
         addView(edge, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         addView(ball, new LayoutParams(1, 1));
+        addView(swipe, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         if (Build.VERSION.SDK_INT >= 20) {
             setOnApplyWindowInsetsListener((view, insets) -> {
                 readInsets(insets);
@@ -106,6 +109,8 @@ final class InAppBackHostLayout extends FrameLayout {
                 InAppBackButton.getBarWidthDp(), InAppBackButton.getBarHeightDp(),
                 InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha(),
                 InAppBackButton.getHideSeconds());
+        swipe.configure(tokenScale, side, InAppBackButton.getBarColor(),
+                InAppBackButton.getSwipeTriggerDp());
         geometryDirty = true;
         requestLayout();
         syncGeometry();
@@ -117,6 +122,7 @@ final class InAppBackHostLayout extends FrameLayout {
         if (disposed || !resumed) return;
         ball.wake();
         edge.wake();
+        swipe.wake();
         // Defer visibility changes until after the initiating DOWN has reached its original target.
         recheckRootAfterNavigation();
     }
@@ -149,12 +155,17 @@ final class InAppBackHostLayout extends FrameLayout {
         if (disposed) return;
         boolean rootHidden = hideOnRoot && InAppBackButton.atRoot(owner.get());
         boolean show = resumed && !playbackHidden && InAppBackButton.alive(owner.get()) && !rootHidden;
-        boolean showBall = show && !HawkConfig.BACK_MODE_EDGE.equals(mode);
-        boolean showEdge = show && !HawkConfig.BACK_MODE_FLOATING.equals(mode);
+        boolean swipeMode = HawkConfig.BACK_MODE_SWIPE.equals(mode);
+        boolean showBall = show && !swipeMode && !HawkConfig.BACK_MODE_EDGE.equals(mode);
+        boolean showEdge = show && !swipeMode && !HawkConfig.BACK_MODE_FLOATING.equals(mode);
+        boolean showSwipe = show && swipeMode;
+
         ball.setVisibility(showBall ? VISIBLE : INVISIBLE);
         edge.setVisibility(showEdge ? VISIBLE : INVISIBLE);
+        swipe.setVisibility(showSwipe ? VISIBLE : INVISIBLE);
         ball.setActive(showBall);
         edge.setActive(showEdge);
+        swipe.setActive(showSwipe);
     }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event) {
@@ -182,6 +193,8 @@ final class InAppBackHostLayout extends FrameLayout {
                     InAppBackButton.getBarWidthDp(), InAppBackButton.getBarHeightDp(),
                     InAppBackButton.getBarColor(), InAppBackButton.getBarAlpha(),
                     InAppBackButton.getHideSeconds());
+            swipe.configure(tokenScale, side, InAppBackButton.getBarColor(),
+                    InAppBackButton.getSwipeTriggerDp());
             geometryDirty = true;
         }
         super.onMeasure(widthSpec, heightSpec);
@@ -244,6 +257,7 @@ final class InAppBackHostLayout extends FrameLayout {
         removeCallbacks(rootCheck);
         ball.setActive(false);
         edge.setActive(false);
+        swipe.setActive(false);
     }
 
     void dispose() {

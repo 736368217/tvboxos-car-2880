@@ -77,6 +77,9 @@ public class HawkConfig {
     public static final String BACK_MODE_FLOATING = "floating";
     public static final String BACK_MODE_EDGE = "edge";
     public static final String BACK_MODE_BOTH = "both";
+    /** 第三种返回方式：贴边横滑返回（复刻 Swipe Navigation Gesture 的拉伸手柄手感）。 */
+    public static final String BACK_MODE_SWIPE = "swipe";
+    public static final String BACK_SWIPE_TRIGGER_DP = "inapp_back_swipe_trigger"; // 40-140 dp
     public static final String BACK_SIDE_LEFT = "left";
     public static final String BACK_SIDE_RIGHT = "right";
     public static final String BACK_SIDE_BOTH = "both";

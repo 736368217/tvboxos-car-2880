@@ -177,7 +177,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 tvBackBar.setText("关闭");
             } else {
                 String mode = InAppBackButton.getMode();
-                tvBackBar.setText(HawkConfig.BACK_MODE_FLOATING.equals(mode) ? "悬浮球"
+                tvBackBar.setText(HawkConfig.BACK_MODE_SWIPE.equals(mode) ? "边缘滑动"
+                        : HawkConfig.BACK_MODE_FLOATING.equals(mode) ? "悬浮球"
                         : HawkConfig.BACK_MODE_BOTH.equals(mode) ? "双模共存" : "边缘拉出");
             }
         }

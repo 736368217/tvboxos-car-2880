@@ -5,6 +5,10 @@ public final class BackNavPolicy {
     public static final int POSITION_SCALE = 10000;
     public static final float TOUCH_SLOP_DP = 8f;
     public static final float TRIGGER_DP = 48f;
+    /** 贴边横滑返回：贴边判定宽度与默认触发距离（dp）。 */
+    public static final float SWIPE_EDGE_DP = 24f;
+    public static final float SWIPE_TRIGGER_DP = 84f;
+    public static final float SWIPE_MAX_DP = 320f;
     public static final float DAMPING_RATIO = .75f;
     public static final float STIFFNESS = 400f;
     public static final long LONG_PRESS_MS = 400;

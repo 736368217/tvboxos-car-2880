@@ -1129,7 +1129,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
             back = "返回关闭";
         } else {
             String mode = InAppBackButton.getMode();
-            back = HawkConfig.BACK_MODE_FLOATING.equals(mode) ? "悬浮球"
+            back = HawkConfig.BACK_MODE_SWIPE.equals(mode) ? "边缘滑动"
+                    : HawkConfig.BACK_MODE_FLOATING.equals(mode) ? "悬浮球"
                     : HawkConfig.BACK_MODE_BOTH.equals(mode) ? "双模共存" : "边缘拉出";
         }
         String sr = com.github.tvbox.osc.car.CarEnhance.videoSrEnabled() ? "超分开" : "超分关";
