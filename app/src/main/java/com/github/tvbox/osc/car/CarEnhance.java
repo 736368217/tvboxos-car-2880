@@ -136,6 +136,14 @@ public final class CarEnhance {
         return videoEnhanceEnabled() || videoSrEnabled() || videoInterpEnabled();
     }
 
+    /** 设置页「播放增强」入口用的一行摘要；只描述当前保存值，不代表运行时已生效。 */
+    public static String summary() {
+        return VideoEnhancePreset.forMode(videoMode()).name
+                + " · 超分 " + (videoSrEnabled() ? "开" : "关")
+                + " · 平滑 " + (videoInterpEnabled() ? "开" : "关")
+                + " · 音效 " + AudioEffectController.name(audioMode());
+    }
+
     public static void toast(Context context, String text) {
         if (context != null) {
             Toast.makeText(context, text, Toast.LENGTH_SHORT).show();

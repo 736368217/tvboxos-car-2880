@@ -75,7 +75,7 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  */
 public class ModelSettingFragment extends BaseLazyFragment {
     private static final int REQUEST_LOCAL_CONFIG = 1001;
-    private TextView tvBackBarOpen;
+    private TextView tvAdvancedSummary;
     private TextView tvDebugOpen;
     private TextView tvMediaCodec;
     private TextView tvParseWebView;
@@ -135,7 +135,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvShowPreviewText = findViewById(R.id.showPreviewText);
         tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? "开启" : "关闭");
         tvDebugOpen = findViewById(R.id.tvDebugOpen);
-        refreshBackSummary();
         tvParseWebView = findViewById(R.id.tvParseWebView);
         tvMediaCodec = findViewById(R.id.tvMediaCodec);
         tvPlay = findViewById(R.id.tvPlay);
@@ -179,24 +178,14 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 tvDebugOpen.setText(Hawk.get(HawkConfig.DEBUG_OPEN, false) ? "已打开" : "已关闭");
             }
         });
-        tvBackBarOpen = findViewById(R.id.tvBackBarOpen);
-        refreshBackSummary();
-        findViewById(R.id.llBackBar).setOnClickListener(new View.OnClickListener() {
+        tvAdvancedSummary = findViewById(R.id.tvAdvancedSummary);
+        refreshAdvancedSummary();
+        findViewById(R.id.llAdvancedSettings).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                new com.github.tvbox.osc.ui.dialog.BackBarSettingsDialog(getActivity(),
-                        ModelSettingFragment.this::refreshBackSummary).show();
-            }
-        });
-        final TextView tvBrightnessGesture = findViewById(R.id.tvBrightnessGesture);
-        refreshBrightnessGesture(tvBrightnessGesture);
-        findViewById(R.id.llBrightnessGesture).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                Hawk.put(HawkConfig.BRIGHTNESS_GESTURE, !Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false));
-                refreshBrightnessGesture(tvBrightnessGesture);
+                new com.github.tvbox.osc.ui.dialog.AdvancedSettingsDialog(getActivity(),
+                        ModelSettingFragment.this::refreshAdvancedSummary).show();
             }
         });
         findViewById(R.id.llParseWebVew).setOnClickListener(new View.OnClickListener() {
@@ -1132,21 +1121,18 @@ public class ModelSettingFragment extends BaseLazyFragment {
         }
     }
 
-    /** 设置页只保留一个入口，这里显示当前是否开启与模式。 */
-    private void refreshBackSummary() {
-        if (tvBackBarOpen == null) return;
+    /** 主列表只留一个入口：显示返回组件模式与超分状态，细节进二级面板。 */
+    private void refreshAdvancedSummary() {
+        if (tvAdvancedSummary == null) return;
+        String back;
         if (!InAppBackButton.isEnabled()) {
-            tvBackBarOpen.setText("关闭");
-            return;
+            back = "返回关闭";
+        } else {
+            String mode = InAppBackButton.getMode();
+            back = HawkConfig.BACK_MODE_FLOATING.equals(mode) ? "悬浮球"
+                    : HawkConfig.BACK_MODE_BOTH.equals(mode) ? "双模共存" : "边缘拉出";
         }
-        String mode = InAppBackButton.getMode();
-        if (HawkConfig.BACK_MODE_FLOATING.equals(mode)) tvBackBarOpen.setText("悬浮球");
-        else if (HawkConfig.BACK_MODE_BOTH.equals(mode)) tvBackBarOpen.setText("双模共存");
-        else tvBackBarOpen.setText("边缘拉出");
-    }
-
-    private void refreshBrightnessGesture(TextView tv) {
-        if (tv == null) return;
-        tv.setText(Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false) ? "开启" : "关闭");
+        String sr = com.github.tvbox.osc.car.CarEnhance.videoSrEnabled() ? "超分开" : "超分关";
+        tvAdvancedSummary.setText(back + " · " + sr);
     }
 }

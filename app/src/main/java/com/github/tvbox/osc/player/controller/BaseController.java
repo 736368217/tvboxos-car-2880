@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.github.tvbox.osc.util.HawkConfig;
+import com.github.tvbox.osc.util.LOG;
 import com.orhanobut.hawk.Hawk;
 
 import java.util.Map;
@@ -35,6 +36,8 @@ public abstract class BaseController extends BaseVideoController implements Gest
     private AudioManager mAudioManager;
     private boolean mIsGestureEnabled = true;
     private float mAppVolume = 1f;
+    /** 一次音量手势起手时的增益；滑动过程中用它做基准，避免把累计位移重复叠加。 */
+    private float mVolumeStart = -1f;
     private float mBrightness;
     private int mSeekPosition = -1;
     private boolean mFirstTouch;
@@ -274,6 +277,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mChangePosition = false;
         mChangeBrightness = false;
         mChangeVolume = false;
+        mVolumeStart = mAppVolume;
         return true;
     }
 
@@ -393,16 +397,24 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mHandler.sendEmptyMessageDelayed(101, 1000);
     }
 
+    /** 全屏高度滑动对应 100% 增益变化（0..200% 区间的一半），线性、无累加。 */
+    private static final float VOLUME_SLIDE_RANGE = 1.0f;
+
     protected void slideToChangeVolume(float deltaY) {
         int height = Math.max(1, getMeasuredHeight());
-        float deltaV = deltaY * 2f / height;
-        float volume = clampVolume(mAppVolume + deltaV);
-        if (Math.abs(volume - mAppVolume) < 0.005f) return;
+        if (mVolumeStart < 0f) mVolumeStart = mAppVolume;
+        // deltaY 是「按下点 → 当前点」的累计位移，必须基于起手音量算，
+        // 不能再叠加到 mAppVolume（旧写法每个 move 事件都加一次累计值，几十像素就 0%→200%）。
+        float deltaV = deltaY / height * VOLUME_SLIDE_RANGE;
+        float volume = clampVolume(mVolumeStart + deltaV);
+        if (Math.abs(volume - mAppVolume) < 0.002f) return;
         mAppVolume = volume;
         // 应用内增益：只作用于当前播放器，不改系统音量（车机往往没有音频权限）
         mControlWrapper.setVolume(mAppVolume);
         Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
         int percent = Math.round(mAppVolume * 100);
+        LOG.i("volume_gesture start=" + Math.round(mVolumeStart * 100) + "% dy="
+                + Math.round(deltaY) + " h=" + height + " -> " + percent + "%");
         for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
             IControlComponent component = next.getKey();
             if (component instanceof IGestureComponent) {

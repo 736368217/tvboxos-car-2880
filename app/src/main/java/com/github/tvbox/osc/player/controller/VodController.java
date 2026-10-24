@@ -269,10 +269,7 @@ public class VodController extends BaseController {
     TextView mCastBtn;
     TextView net_play_speed;
     private MyVideoView mCarVideoView;
-    private TextView mCarVideoBtn;
-    private TextView mCarSrBtn;
-    private TextView mCarInterpBtn;
-    private TextView mCarAudioBtn;
+    private TextView mAdvancedSettingsBtn;
     private TextView mVideoFrameRate;
     private boolean mFpsTickerRunning;
     private boolean hasDanmu = false;
@@ -368,19 +365,8 @@ public class VodController extends BaseController {
         updateCarEnhanceButtons();
     }
 
+    /** 播放增强已收进「高级设置」面板，这里只保留与播放器状态相关的刷新。 */
     private void updateCarEnhanceButtons() {
-        if (mCarVideoBtn != null) {
-            mCarVideoBtn.setText("画面 · " + VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
-        }
-        if (mCarSrBtn != null) {
-            mCarSrBtn.setText("超分·" + (CarEnhance.videoSrEnabled() ? "开" : "关"));
-        }
-        if (mCarInterpBtn != null) {
-            mCarInterpBtn.setText("平滑·" + (CarEnhance.videoInterpEnabled() ? "开" : "关"));
-        }
-        if (mCarAudioBtn != null) {
-            mCarAudioBtn.setText("音效 · " + AudioEffectController.name(CarEnhance.audioMode()));
-        }
         updateFrameRateDisplay();
     }
 
@@ -505,62 +491,6 @@ public class VodController extends BaseController {
         mHandler.removeCallbacks(mFpsTicker);
     }
 
-    private void showCarVideoDialog() {
-        final SelectDialog<String> dialog = new SelectDialog<>(mActivity);
-        dialog.setTip("滤镜");
-        List<String> options = new ArrayList<>();
-        for (VideoEnhancePreset preset : VideoEnhancePreset.all()) {
-            options.add(preset.name + " · " + preset.description);
-        }
-        dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
-            @Override
-            public void click(String value, int pos) {
-                CarEnhance.setVideoMode(pos);
-                CarEnhance.applyVideo(mCarVideoView);
-                updateCarEnhanceButtons();
-                String state = mCarVideoView == null ? "已保存 · 下次播放生效"
-                        : mCarVideoView.isHdrVideo() && pos != 0 ? "HDR 视频 · 调色旁路"
-                        : "画面预设已应用";
-                CarEnhance.toast(getContext(), state);
-                dialog.dismiss();
-            }
-
-            @Override
-            public String getDisplay(String value) {
-                return value;
-            }
-        }, SelectDialogAdapter.stringDiff, options, CarEnhance.videoMode());
-        dialog.show();
-    }
-
-    private void showCarAudioDialog() {
-        final SelectDialog<String> dialog = new SelectDialog<>(mActivity);
-        dialog.setTip("音效");
-        List<String> options = new ArrayList<>();
-        for (int mode = 0; mode < AudioEffectController.MODE_COUNT; mode++) {
-            options.add(AudioEffectController.name(mode));
-        }
-        dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
-            @Override
-            public void click(String value, int pos) {
-                CarEnhance.setAudioMode(pos);
-                CarEnhance.applyAudio(mCarVideoView);
-                updateCarEnhanceButtons();
-                String state = pos == 0 ? "音效已关闭"
-                        : mCarVideoView == null ? "已保存 · 下次播放生效"
-                        : AudioEffectController.isActive() ? "音效已应用" : "设备未接受该音效 · 已跳过";
-                CarEnhance.toast(getContext(), state);
-                dialog.dismiss();
-            }
-
-            @Override
-            public String getDisplay(String value) {
-                return value;
-            }
-        }, SelectDialogAdapter.stringDiff, options, CarEnhance.audioMode());
-        dialog.show();
-    }
-
     protected void initView() {
         super.initView();
         mCurrentTime = findViewById(R.id.curr_time);
@@ -604,50 +534,15 @@ public class VodController extends BaseController {
         mPlayLoadNetSpeed = findViewById(R.id.tv_play_load_net_speed);
         mVideoSize = findViewById(R.id.tv_videosize);
         mVideoFrameRate = findViewById(R.id.tv_framerate);
-        mCarVideoBtn = findViewById(R.id.play_car_video);
-        mCarSrBtn = findViewById(R.id.play_car_sr);
-        mCarInterpBtn = findViewById(R.id.play_car_interp);
-        mCarAudioBtn = findViewById(R.id.play_car_audio);
-        mCarVideoBtn.setOnClickListener(new OnClickListener() {
+        mAdvancedSettingsBtn = findViewById(R.id.play_advanced);
+        mAdvancedSettingsBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                showCarVideoDialog();
-            }
-        });
-        mCarSrBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                boolean enable = !CarEnhance.videoSrEnabled();
-                CarEnhance.setVideoSrEnabled(enable);
-                CarEnhance.applyVideo(mCarVideoView);
-                updateCarEnhanceButtons();
-                boolean active = enable && mCarVideoView != null
-                        && mCarVideoView.isSuperResolutionRuntimeActive();
-                CarEnhance.toast(getContext(), !enable ? "超分已关闭"
-                        : active ? "超分已生效 · SGSR1" : "超分已请求 · 等待画面");
-            }
-        });
-        mCarInterpBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                boolean enable = !CarEnhance.videoInterpEnabled();
-                CarEnhance.setVideoInterpEnabled(enable);
-                CarEnhance.applyVideo(mCarVideoView);
-                updateCarEnhanceButtons();
-                boolean active = enable && mCarVideoView != null
-                        && mCarVideoView.isInterpolationRuntimeActive();
-                CarEnhance.toast(getContext(), !enable ? "时域平滑已关闭"
-                        : active ? "时域平滑已生效" : "时域平滑已请求 · 等待相邻帧");
-            }
-        });
-        mCarAudioBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                showCarAudioDialog();
+                myHandle.removeCallbacks(myRunnable);
+                myHandle.postDelayed(myRunnable, myHandleSeconds);
+                new com.github.tvbox.osc.ui.dialog.PlaybackAdvancedDialog(
+                        getContext(), mCarVideoView, VodController.this::updateCarEnhanceButtons).show();
             }
         });
         updateCarEnhanceButtons();
@@ -1956,7 +1851,9 @@ public class VodController extends BaseController {
     }
     @Override
     public void onLongPress(MotionEvent e) {
-        if (videoPlayState!=VideoView.STATE_PAUSED) {
+        // 长按 3 倍速默认关闭：车机上长按/误触代价高，只有在「高级设置」里显式打开才生效。
+        if (!Hawk.get(HawkConfig.LONG_PRESS_SPEED, false)) return;
+        if (videoPlayState != VideoView.STATE_PAUSED) {
             speedPlayStart();
         }
     }
