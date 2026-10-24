@@ -52,11 +52,9 @@
 
             <TextView
                 android:id="@+id/tvNote"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:layout_marginLeft="@dimen/vs_2"
-                android:layout_marginRight="@dimen/vs_2"
                 android:layout_marginBottom="@dimen/vs_5"
                 android:background="@drawable/shape_thumb_note"
                 android:ellipsize="end"

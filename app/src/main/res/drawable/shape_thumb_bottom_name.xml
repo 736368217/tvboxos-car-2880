@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 海报底部标题底衬：整条贴满卡片宽度并做直角，避免圆角/留白在卡片底部露出片源画面（遮罩漏洞）。 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <corners
-        android:bottomLeftRadius="@dimen/vs_10"
-        android:bottomRightRadius="@dimen/vs_10" />
-    <solid android:color="#CC000000" />
+    <solid android:color="#E6000000" />
 </shape>

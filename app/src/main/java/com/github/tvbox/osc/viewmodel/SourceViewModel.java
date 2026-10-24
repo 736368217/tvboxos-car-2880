@@ -1518,8 +1518,46 @@ public class SourceViewModel extends ViewModel {
         MovieSort.SortFilter filter = new MovieSort.SortFilter();
         filter.key = key;
         filter.name = name;
-        filter.values = values;
+        filter.values = sortYearFilterValues(key, name, values);
         return filter;
+    }
+
+    /**
+     * 年份筛选统一按「年份大的在前」展示：源站返回的年份经常是升序或乱序。
+     * 只重排值形如四位数字的项；「全部」等空值项保持最前，年代区间等非数字项保持原有相对顺序。
+     */
+    private static LinkedHashMap<String, String> sortYearFilterValues(String key, String name,
+                                                                     LinkedHashMap<String, String> values) {
+        boolean yearFilter = "year".equalsIgnoreCase(key)
+                || key.toLowerCase(java.util.Locale.ROOT).contains("year")
+                || (name != null && (name.contains("年份") || name.contains("年")));
+        if (!yearFilter || values.size() < 3) return values;
+        List<Map.Entry<String, String>> heads = new ArrayList<>();
+        List<Map.Entry<String, String>> years = new ArrayList<>();
+        List<Map.Entry<String, String>> tails = new ArrayList<>();
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            String label = entry.getKey() == null ? "" : entry.getKey().trim();
+            String value = entry.getValue() == null ? "" : entry.getValue().trim();
+            if (value.isEmpty()) {
+                heads.add(entry);
+            } else if (label.matches("\\d{4}")) {
+                years.add(entry);
+            } else {
+                tails.add(entry);
+            }
+        }
+        if (years.size() < 3) return values;
+        java.util.Collections.sort(years, new java.util.Comparator<Map.Entry<String, String>>() {
+            @Override
+            public int compare(Map.Entry<String, String> a, Map.Entry<String, String> b) {
+                return b.getKey().trim().compareTo(a.getKey().trim());
+            }
+        });
+        LinkedHashMap<String, String> sorted = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : heads) sorted.put(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, String> entry : years) sorted.put(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, String> entry : tails) sorted.put(entry.getKey(), entry.getValue());
+        return sorted;
     }
 
     private AbsSortXml sortJson(MutableLiveData<AbsSortXml> result, String json) {
