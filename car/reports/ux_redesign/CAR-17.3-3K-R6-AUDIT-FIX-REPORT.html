@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TVBox 车机 3K · R6 实机审计修复报告</title>
+<style>
+  :root{
+    --bg:#07110e; --surface:#0d1a15; --card:#12251d; --card2:#162b22;
+    --line:#27443a; --text:#e8f2ee; --regular:#c9ded4; --muted:#9db4a8;
+    --mint:#6ff2c6; --violet:#a78bfa; --amber:#f5c26b; --rose:#ff7a9c; --blue:#7cc7ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.55}
+  a{color:var(--mint);text-decoration:none}
+  .page{max-width:1480px;margin:0 auto;padding:56px 48px 80px}
+  header{border-bottom:1px solid var(--line);padding-bottom:32px;margin-bottom:40px}
+  .eyebrow{font-size:13px;letter-spacing:.18em;color:var(--mint);text-transform:uppercase;font-weight:700}
+  h1{font-size:44px;line-height:1.2;margin:14px 0 12px;letter-spacing:-.01em}
+  .lede{max-width:1000px;color:var(--muted);font-size:17px;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:22px;color:var(--muted);font-size:14px}
+  .meta b{color:var(--regular);font-weight:600}
+  .score{display:flex;flex-wrap:wrap;gap:12px;margin:34px 0 46px}
+  .pill{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:14px 18px;min-width:150px}
+  .pill strong{display:block;font-size:22px;color:var(--mint);letter-spacing:.02em}
+  .pill span{font-size:13px;color:var(--muted)}
+  h2{font-size:26px;margin:0 0 18px;letter-spacing:-.01em}
+  h2 .num{color:var(--mint);font-variant-numeric:tabular-nums;margin-right:10px}
+  h3{font-size:18px;margin:0 0 8px}
+  p{margin:0 0 10px}
+  .tablewrap{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:44px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--surface);color:var(--muted);font-weight:600;font-size:13px;letter-spacing:.04em}
+  tr:last-child td{border-bottom:0}
+  td:first-child{color:var(--mint);font-weight:700;white-space:nowrap}
+  .sev{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+  .p1{background:rgba(255,122,156,.14);color:var(--rose);border:1px solid rgba(255,122,156,.35)}
+  .p2{background:rgba(245,194,107,.12);color:var(--amber);border:1px solid rgba(245,194,107,.3)}
+  .item{border-top:1px solid var(--line);padding:36px 0 10px}
+  .item:first-of-type{border-top:0}
+  .itemhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+  .itemhead h3{font-size:22px}
+  .fixgrid{display:grid;grid-template-columns:1.05fr 1fr;gap:18px;margin-bottom:22px}
+  .note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .note .label{font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;font-weight:700;margin-bottom:6px}
+  .note p:last-child{margin-bottom:0}
+  .shots{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  figure.single{grid-column:1 / -1}
+  figure img{display:block;width:100%;height:auto;background:#000}
+  figcaption{padding:10px 14px;font-size:13px;color:var(--muted)}
+  figcaption b{color:var(--regular)}
+  .good{color:var(--mint)}
+  .warn{color:var(--amber)}
+  .limits{margin-top:52px;border-top:1px solid var(--line);padding-top:30px}
+  .limits ul{margin:10px 0 0;padding-left:22px;color:var(--muted)}
+  .limits li{margin-bottom:8px}
+  .limits b{color:var(--regular)}
+  code{font-family:"Cascadia Mono",Consolas,monospace;font-size:.92em;background:#0a1611;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--regular)}
+  @media (max-width:1000px){.page{padding:32px 20px}.fixgrid,.shots{grid-template-columns:1fr}h1{font-size:32px}}
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+  <div class="eyebrow">TVBox 车机 3K · R6 Audit Fix</div>
+  <h1>九条实机问题已收口，返回链与播放能力未回退</h1>
+  <p class="lede">本轮只做 R6 报告里的问题修复，不改包名、版号、订阅源与第三方脚本。所有截图与断言来自同一个最终 APK。</p>
+  <div class="meta">
+    <span>APK <b>1.0.0-car.7</b> / versionCode 8</span>
+    <span>SHA-256 <b>1e7a1ceb…6b022ae</b></span>
+    <span>设备 <b>MuMu 实例 1 · 2880×1620 · 160dpi</b></span>
+    <span>显示校验 <b>CAR_DISPLAY_PASS</b></span>
+  </div>
+</header>
+
+<div class="score">
+  <div class="pill"><strong>81 / 0</strong><span>pages</span></div>
+  <div class="pill"><strong>98 / 0</strong><span>ux3k</span></div>
+  <div class="pill"><strong>101 / 0</strong><span>playback</span></div>
+  <div class="pill"><strong>7 / 0</strong><span>gestures</span></div>
+  <div class="pill"><strong>5 / 0</strong><span>states</span></div>
+</div>
+
+<h2>问题清单</h2>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>编号</th><th>级别</th><th>页面</th><th>修复结果</th></tr></thead>
+  <tbody>
+    <tr><td>R6-01</td><td><span class="sev p1">P1</span></td><td>首页 / 分类</td><td>分类点击立即切换选中态；失败落到错误态（重试 + 返回），不再“点了没反应”</td></tr>
+    <tr><td>R6-02</td><td><span class="sev p1">P1</span></td><td>影片详情</td><td>顶栏与返回入口移出加载替身；加载/错误/空态都能看到返回</td></tr>
+    <tr><td>R6-03</td><td><span class="sev p2">P2</span></td><td>设置 03</td><td>只有实际存在 IJK 播放器时才显示 IJK 解码与缓存项</td></tr>
+    <tr><td>R6-04</td><td><span class="sev p2">P2</span></td><td>搜索</td><td>空态收成一个居中的块，不再出现上下两段空文案</td></tr>
+    <tr><td>R6-05</td><td><span class="sev p2">P2</span></td><td>搜索结果</td><td>副信息提亮，站点名降为“来源 · …”，列表底部加入渐隐</td></tr>
+    <tr><td>R6-06</td><td><span class="sev p2">P2</span></td><td>全站导航</td><td>导航容器/图标/品牌/状态条全部进入左侧安全区，顶栏右侧留出余量</td></tr>
+    <tr><td>R6-07</td><td><span class="sev p2">P2</span></td><td>我的收藏</td><td>空态下隐藏“删除选中 / 清空收藏”，只保留“去搜索影片”</td></tr>
+    <tr><td>R6-08</td><td><span class="sev p2">P2</span></td><td>多端推送</td><td>左右两栏顶部对齐，二维码卡片按内容收高</td></tr>
+    <tr><td>R6-09</td><td><span class="sev p2">P2</span></td><td>影片详情</td><td>预览提示移到底部居中，加载期隐藏，与右下角标错开</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="item">
+  <div class="itemhead"><h3><span class="num">R6-01</span>分类失败不再静默</h3><span class="sev p1">P1</span></div>
+  <div class="fixgrid">
+    <div class="note"><div class="label">问题</div><p>点“日番”后内容区不切换、胶囊高亮停在“主页”，logcat 里是 <code>QuickJS category failed</code>。用户只会得到“点了没反应”的结论。</p></div>
+    <div class="note"><div class="label">改法</div><p>点击即写入选中态，不等网络；分类请求返回 null 时走“暂时没有内容 / 重新加载 / 返回上一页”，而不是空白。分类列表尚未就绪时记住跳转意图，数据到达后自动落到分类页。</p></div>
+  </div>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/before-category.png" alt="R6 修复前分类页"><figcaption><b>修复前</b>：内容未切换，高亮仍在“主页”。</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/page-category.png" alt="R6 修复后分类页"><figcaption><b>修复后</b>：分类 1 已选中，列表正常加载；失败时保留重试与返回。</figcaption></figure>
+  </div>
+</div>
+
+<div class="item">
+  <div class="itemhead"><h3><span class="num">R6-02</span>详情页先有壳、再有内容</h3><span class="sev p1">P1</span></div>
+  <div class="fixgrid">
+    <div class="note"><div class="label">问题</div><p>进入详情后 25 秒仍是纯黑，顶部没有标题栏，也没有返回按钮；用户会以为应用卡死。</p></div>
+    <div class="note"><div class="label">改法</div><p>把返回与标题移出 LoadSir 的替换区域，成为页面常驻顶栏；加载中显示“正在加载内容”，请求失败显示“暂时没有内容 / 重新加载 / 返回上一页”。</p></div>
+  </div>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/before-detail.png" alt="R6 修复前详情页"><figcaption><b>修复前</b>：无数据时整页纯黑，返回不可见。</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/page-detail.png" alt="R6 修复后详情页"><figcaption><b>修复后</b>：返回与标题常驻，右侧信息先到，预览区独立加载。</figcaption></figure>
+  </div>
+</div>
+
+<div class="item">
+  <div class="itemhead"><h3><span class="num">R6-03</span>播放器选项与设置项一致</h3><span class="sev p2">P2</span></div>
+  <div class="fixgrid">
+    <div class="note"><div class="label">问题</div><p>播放器弹窗只有 EXO，但同一页仍显示“IJK 解码方式 / IJK 缓存”，两个入口说的不是同一件事。</p></div>
+    <div class="note"><div class="label">改法</div><p>以播放器实际可选列表为准：只有列表包含 IJK 时才生成这两行，避免出现“有设置项、没播放器”的错觉。</p></div>
+  </div>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/before-player-dialog.png" alt="R6 修复前播放器弹窗"><figcaption><b>修复前</b>：弹窗只有 EXO，页面仍有 IJK 行。</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/ux-settings-category-2.png" alt="R6 修复后播放解码页"><figcaption><b>修复后</b>：IJK 行按实际播放器能力出现；本机装有 IJK 时保持可配置。</figcaption></figure>
+  </div>
+</div>
+
+<div class="item">
+  <div class="itemhead"><h3><span class="num">R6-04</span>搜索空态只留一个中心</h3><span class="sev p2">P2</span></div>
+  <div class="fixgrid">
+    <div class="note"><div class="label">问题</div><p>“最近搜索”下的空文案在顶部，放大镜和“输入片名”在面板底部，中间空了约 750px。</p></div>
+    <div class="note"><div class="label">改法</div><p>没有搜索历史时隐藏“最近搜索”空块，只保留面板中央的一组空态：图标、标题、说明。有历史时历史胶囊占据顶部，中央块仍作为下一步提示。</p></div>
+  </div>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/before-search.png" alt="R6 修复前搜索页"><figcaption><b>修复前</b>：两段空文案相距 750px。</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/page-search.png" alt="R6 修复后搜索页"><figcaption><b>修复后</b>：单一空态居中；有历史时才出现“最近搜索”。</figcaption></figure>
+  </div>
+</div>
+
+<div class="item">
+  <div class="itemhead"><h3><span class="num">R6-05</span>搜索结果先读片名，再读来源</h3><span class="sev p2">P2</span></div>
+  <div class="fixgrid">
+    <div class="note"><div class="label">问题</div><p>副信息（已完结 / 更新至第 18 集）与站点名同为 28px 灰绿，主次不分；第 4 行被面板底裁断且没有渐隐。</p></div>
+    <div class="note"><div class="label">改法</div><p>副信息改为更亮的 26px，站点名降为 20px 的“来源 · …”；列表底部加 120px 渐隐，滚动内容自然淡出而不是硬切。</p></div>
+  </div>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/before-search-results.png" alt="R6 修复前搜索结果"><figcaption><b>修复前</b>：三行信息同权，底部裁断。</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/ux-search-results.png" alt="R6 修复后搜索结果"><figcaption><b>修复后</b>：片名 → 副信息 → 来源，层级清楚；列表底部有渐隐。</figcaption></figure>
+  </div>
+</div>
+
+<div class="item">
+  <div class="itemhead"><h3><span class="num">R6-06</span>导航不再压左侧安全线</h3><span class="sev p2">P2</span></div>
+  <div class="fixgrid">
+    <div class="note"><div class="label">问题</div><p>导航容器 x=24、图标 x=40..76，均在左侧安全区 78.7px 之外；带圆角或黑边的车机屏会先切到品牌标和图标。状态条底边正好压 1496。</p></div>
+    <div class="note"><div class="label">改法</div><p>导航容器移到 x=80，图标 x=96，文字 x=144；品牌标 x=96；状态条上移到 y=1428、底边留 12px。顶栏时钟与搜索页“清空”各向右缩 20px。</p></div>
+  </div>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/before-home.png" alt="R6 修复前首页"><figcaption><b>修复前</b>：图标列 x=40..76，状态条压底。</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/ux-home.png" alt="R6 修复后首页"><figcaption><b>修复后</b>：图标列 x=96 起，整体进入安全区。</figcaption></figure>
+  </div>
+</div>
+
+<div class="item">
+  <div class="itemhead"><h3><span class="num">R6-07</span>收藏空态只留一个动作</h3><span class="sev p2">P2</span></div>
+  <div class="fixgrid">
+    <div class="note"><div class="label">问题</div><p>“收藏夹还是空的”时，右上“删除选中 / 清空收藏”仍是可点击外观，容易误触出空操作。</p></div>
+    <div class="note"><div class="label">改法</div><p>空态直接隐藏这两个按钮，只保留“去搜索影片”主操作；有收藏时再恢复正常工具条。</p></div>
+  </div>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/before-collect.png" alt="R6 修复前收藏空态"><figcaption><b>修复前</b>：空态仍有删除/清空按钮。</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/page-collect.png" alt="R6 修复后收藏空态"><figcaption><b>修复后</b>：工具条隐藏，只留“去搜索影片”。</figcaption></figure>
+  </div>
+</div>
+
+<div class="item">
+  <div class="itemhead"><h3><span class="num">R6-08</span>推送页两栏从同一条线开始</h3><span class="sev p2">P2</span></div>
+  <div class="fixgrid">
+    <div class="note"><div class="label">问题</div><p>左卡顶部 y=227、右栏 eyebrow y=272，差 45px；左卡内容在 404 结束却延伸到 462，底部空 58px。</p></div>
+    <div class="note"><div class="label">改法</div><p>去掉右栏 paddingTop，左右都从 y=220 开始；二维码卡片改为 <code>wrap_content</code> 并用内边距收口，不再靠固定高度撑出空白。</p></div>
+  </div>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/before-push.png" alt="R6 修复前推送页"><figcaption><b>修复前</b>：两栏顶部差 45px，左卡底部空。</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/page-push.png" alt="R6 修复后推送页"><figcaption><b>修复后</b>：两栏顶部对齐，卡片按内容收高。</figcaption></figure>
+  </div>
+</div>
+
+<div class="item">
+  <div class="itemhead"><h3><span class="num">R6-09</span>详情预览不再三层抢注意力</h3><span class="sev p2">P2</span></div>
+  <div class="fixgrid">
+    <div class="note"><div class="label">问题</div><p>广告 banner 横在视频中部、加载 spinner 在画面中心、“轻触画面，进入全屏播放”落在底部，与右下“广告”角标只差 9px。</p></div>
+    <div class="note"><div class="label">改法</div><p>提示改为底部居中的小胶囊；播放器还没出画面时隐藏提示，只保留加载状态。提示不再和右下角标挤在同一角。</p></div>
+  </div>
+  <div class="shots">
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/before-detail.png" alt="R6 修复前详情预览"><figcaption><b>修复前</b>：banner、spinner、提示三层叠加。</figcaption></figure>
+    <figure><img src="../../qa/ux-audit-car7-current/evidence-1e7a1ceb/screenshots/page-detail-after-back.png" alt="R6 修复后详情与返回"><figcaption><b>修复后</b>：预览播放，提示与角标分开；从详情返回后首页保持原状态。</figcaption></figure>
+  </div>
+</div>
+
+<div class="limits">
+  <h2>验证边界</h2>
+  <ul>
+    <li><b>同一 SHA：</b>上述五个套件与 18 张修复后截图的 identity 都是 <code>1e7a1ceb…6b022ae</code>，没有混用旧证据。</li>
+    <li><b>测试素材：</b>截图里的彩条、灰块、二维码是本地 fixture 生成的测试视频/图片，不是产品 UI，也不是线上内容。</li>
+    <li><b>状态壳：</b><code>state-*</code> 由实际 Android 状态组件强制展示，不是网络事件录像。</li>
+    <li><b>时序说明：</b>冷启动后立刻点“分类专题”时，<code>pages</code> 出现过一次同 SHA 的单点抖动；预热后重跑为 81/0，最终结果取该次。产品侧已加入“分类未就绪时记住跳转意图”的处理。</li>
+    <li><b>未改变：</b>包名、versionCode 8、versionName 1.0.0-car.7、签名、订阅源、第三方脚本、返回链、全屏播放单一返回入口。</li>
+  </ul>
+</div>
+</div>
+</body>
+</html>

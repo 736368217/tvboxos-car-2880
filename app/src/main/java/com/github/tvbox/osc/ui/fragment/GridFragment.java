@@ -305,6 +305,7 @@ public class GridFragment extends BaseLazyFragment {
         });
         gridAdapter.setLoadMoreView(new LoadMoreView());
         setLoadSir2(mGridView);
+        setEmptyRetryAction(this::forceRefresh);
         initPullRefresh();
     }
 
@@ -414,7 +415,8 @@ public class GridFragment extends BaseLazyFragment {
                 } else {
                     if (page == 1) {
                         hasActionItems = false;
-                        showEmpty();
+                        // A null payload is a failed request, not an empty category: keep retry + back.
+                        if (absXml == null) showRetryEmpty(); else showEmpty();
                     } else if(page > 2){// 只有一页数据时不提示
                         Toast.makeText(getContext(), "没有更多了", Toast.LENGTH_SHORT).show();
                     }

@@ -2,6 +2,15 @@
 
 This file is a durable status pointer. It does not replace fresh evidence or claim a pass by itself.
 
+## Current: R6 audit fix
+
+- APK SHA-256: `1e7a1cebf553ab82c04208f55a13323e3e32db1515293185f331af34c6b022ae` (53,691,917 bytes), built from HEAD `55ba3ae0` + R6 working-tree changes.
+- R6 audit: 9/9 items addressed (P1 category failure state, P1 detail loading/back; P2 IJK rows, search empty state, search-result hierarchy/fade, nav safe inset, collect empty toolbar, push baseline, detail preview overlays).
+- MuMu instance 1: `CAR_DISPLAY_PASS`; `pages` 81/0, `ux3k` 98/0, `playback` 101/0, `gestures` 7/0, `states` 5/0. All identities bind the same APK SHA.
+- Evidence: `car/qa/ux-audit-car7-current/evidence-1e7a1ceb/`.
+- Report: `car/reports/ux_redesign/CAR-17.3-3K-R6-AUDIT-FIX-REPORT.html` and `.md`.
+- Note: cold-start category-nav click has a same-SHA timing flake; warm rerun is 81/0. Product now remembers the tap until the sort list arrives.
+
 ## Current: R5 rebuild + R4 re-verification
 
 - APK SHA-256: `05da3b3ceba4708ac95cbc0dbc42f84f6a5b826bbf7ae58cdc6b09eddea96305` (53,691,860 bytes), built from HEAD `9b6c4c8c`.

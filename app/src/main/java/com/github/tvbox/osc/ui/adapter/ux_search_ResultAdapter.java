@@ -20,7 +20,7 @@ public final class ux_search_ResultAdapter extends SearchAdapter {
     @Override protected void convert(BaseViewHolder holder, Movie.Video item) {
         SourceBean source = ApiConfig.get().getSource(item.sourceKey);
         holder.setText(R.id.tvName, item.name);
-        holder.setText(R.id.tvSite, source == null ? "" : source.getName());
+        holder.setText(R.id.tvSite, source == null ? "" : "来源 · " + source.getName());
         String info = TextUtils.isEmpty(item.type) ? "" : item.type;
         if (item.year > 0) info += "  " + item.year;
         if (!TextUtils.isEmpty(item.note)) info += "  " + item.note;

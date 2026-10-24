@@ -20,6 +20,7 @@ import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
 import com.github.tvbox.osc.util.HawkConfig;
+import com.github.tvbox.osc.util.PlayerHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,9 +61,13 @@ public final class ux_setting_Pages {
         heading(decoder, "播放解码与后台行为", "播放器、网络、字幕与弹幕沿用原有配置链路");
         toggle(decoder, R.id.uxBackgroundRow, R.id.uxBackgroundSwitch, "切出导航时保持后台音频", "复用前台音频服务；导航临时焦点 duck 到 20%，退出影片后释放", CarPlaybackPreferences.backgroundAudio(), CarPlaybackPreferences::setBackgroundAudio);
         legacy(decoder, R.id.llPlay, "播放器", R.id.tvPlay);
-        legacy(decoder, R.id.llMediaCodec, "IJK 解码方式", R.id.tvMediaCodec);
+        if (PlayerHelper.getExistPlayerTypes().contains(1)) {
+            legacy(decoder, R.id.llMediaCodec, "IJK 解码方式", R.id.tvMediaCodec);
+        }
         legacy(decoder, R.id.llRender, "渲染方式", R.id.tvRenderType);
-        legacy(decoder, R.id.llIjkCachePlay, "IJK 缓存", R.id.tvIjkCachePlay);
+        if (PlayerHelper.getExistPlayerTypes().contains(1)) {
+            legacy(decoder, R.id.llIjkCachePlay, "IJK 缓存", R.id.tvIjkCachePlay);
+        }
         legacy(decoder, R.id.m3u8Ad, "M3U8 去广告", R.id.m3u8AdText);
         legacy(decoder, R.id.autoSwitchLine, "自动换线", R.id.autoSwitchLineText);
         legacy(decoder, R.id.llDns, "安全 DNS", R.id.tvDns);

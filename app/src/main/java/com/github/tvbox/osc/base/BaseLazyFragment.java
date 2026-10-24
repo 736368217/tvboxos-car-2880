@@ -16,6 +16,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.github.tvbox.osc.callback.EmptyCallback;
 import com.github.tvbox.osc.callback.LoadingCallback;
+import com.github.tvbox.osc.callback.RetryEmptyCallback;
 import com.kingja.loadsir.callback.Callback;
 import com.kingja.loadsir.core.LoadService;
 import com.kingja.loadsir.core.LoadSir;
@@ -245,6 +246,11 @@ public abstract class BaseLazyFragment extends Fragment implements CustomAdapt {
      */
     protected abstract void init();
 
+    private Runnable emptyRetryAction;
+
+    protected void setEmptyRetryAction(Runnable action) {
+        emptyRetryAction = action;
+    }
     protected void setLoadSir(View view) {
         if (mLoadService == null) {
             mLoadService = LoadSir.getDefault().register(view, new Callback.OnReloadListener() {
@@ -259,6 +265,7 @@ public abstract class BaseLazyFragment extends Fragment implements CustomAdapt {
         mLoadService = LoadSir.getDefault().register(view, new Callback.OnReloadListener() {
             @Override
             public void onReload(View v) {
+                if (emptyRetryAction != null) emptyRetryAction.run();
             }
         });
     }
@@ -272,6 +279,12 @@ public abstract class BaseLazyFragment extends Fragment implements CustomAdapt {
     protected void showEmpty() {
         if (null != mLoadService) {
             mLoadService.showCallback(EmptyCallback.class);
+        }
+    }
+
+    protected void showRetryEmpty() {
+        if (null != mLoadService) {
+            mLoadService.showCallback(RetryEmptyCallback.class);
         }
     }
 

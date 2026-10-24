@@ -82,6 +82,7 @@ import java.util.regex.Pattern;
 import me.jessyan.autosize.utils.AutoSizeUtils;
 
 import android.graphics.Paint;
+import xyz.doikki.videoplayer.player.VideoView;
 
 /**
  * @author pj567
@@ -99,6 +100,8 @@ public class DetailActivity extends BaseActivity {
     private LinearLayout llLayout;
     private FragmentContainerView llPlayerFragmentContainer;
     private View llPlayerFragmentContainerBlock;
+    private TextView previewPlayerHint;
+    private boolean previewHintBound;
     private View llPlayerPlace;
     private PlayFragment playFragment = null;
     private View thumbContainer;
@@ -186,6 +189,7 @@ public class DetailActivity extends BaseActivity {
         llPlayerPlace = findViewById(R.id.previewPlayerPlace);
         llPlayerFragmentContainer = findViewById(R.id.previewPlayer);
         llPlayerFragmentContainerBlock = findViewById(R.id.previewPlayerBlock);
+        previewPlayerHint = findViewById(R.id.previewPlayerHint);
         applyPreviewRoundCorners();
         thumbContainer = findViewById(R.id.thumbContainer);
         ivThumb = findViewById(R.id.ivThumb);
@@ -2167,12 +2171,34 @@ public class DetailActivity extends BaseActivity {
         playFragment = new PlayFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.previewPlayer, playFragment).commitNowAllowingStateLoss();
         playFragment.setPreviewMode(!fullWindows);
+        bindPreviewHintState();
+    }
+
+    /** The preview hint is a control affordance: hide it while the player has no picture yet. */
+    private void bindPreviewHintState() {
+        if (previewHintBound || playFragment == null || playFragment.getPlayer() == null) return;
+        previewHintBound = true;
+        playFragment.getPlayer().addOnStateChangeListener(new VideoView.SimpleOnStateChangeListener() {
+            @Override
+            public void onPlayStateChanged(int playState) {
+                if (previewPlayerHint == null) return;
+                boolean ready = playState == VideoView.STATE_PLAYING
+                        || playState == VideoView.STATE_PAUSED
+                        || playState == VideoView.STATE_PREPARED
+                        || playState == VideoView.STATE_BUFFERED;
+                previewPlayerHint.setVisibility(ready ? View.VISIBLE : View.INVISIBLE);
+            }
+        });
+        if (previewPlayerHint != null && playFragment.getPlayer().isPlaying()) {
+            previewPlayerHint.setVisibility(View.VISIBLE);
+        }
     }
 
     void releasePlayFragment() {
         if (playFragment == null) return;
         getSupportFragmentManager().beginTransaction().remove(playFragment).commitNowAllowingStateLoss();
         playFragment = null;
+        previewHintBound = false;
     }
 
     void toggleSubtitleTextSize() {

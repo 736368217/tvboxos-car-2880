@@ -39,17 +39,21 @@
         android:layout_marginTop="220px"
         android:orientation="horizontal">
 
-        <FrameLayout
+        <LinearLayout
             android:layout_width="880px"
-            android:layout_height="match_parent"
-            android:background="@drawable/car_surface_card">
+            android:layout_height="wrap_content"
+            android:background="@drawable/car_surface_card"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="40px"
+            android:paddingBottom="40px"
+            android:paddingLeft="40px"
+            android:paddingRight="40px">
 
             <ImageView
                 android:id="@+id/ivQRCode"
                 android:layout_width="400px"
                 android:layout_height="400px"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="100px"
                 android:background="@drawable/car_qr_surface"
                 android:clipToOutline="true"
                 android:contentDescription="手机推送地址二维码"
@@ -58,9 +62,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="56px"
-                android:layout_marginLeft="40px"
-                android:layout_marginTop="550px"
-                android:layout_marginRight="40px"
+                android:layout_marginTop="44px"
                 android:gravity="center"
                 android:text="手机扫码打开投送页"
                 android:textColor="@color/car_text_strong"
@@ -69,10 +71,9 @@
 
             <TextView
                 android:id="@+id/tvAddress"
-                android:layout_width="800px"
+                android:layout_width="match_parent"
                 android:layout_height="96px"
-                android:layout_marginLeft="40px"
-                android:layout_marginTop="620px"
+                android:layout_marginTop="12px"
                 android:ellipsize="middle"
                 android:gravity="center"
                 android:lineSpacingMultiplier="1.2"
@@ -81,23 +82,21 @@
                 android:textSize="26px" />
 
             <TextView
-                android:layout_width="800px"
+                android:layout_width="match_parent"
                 android:layout_height="70px"
-                android:layout_marginLeft="40px"
-                android:layout_marginTop="740px"
+                android:layout_marginTop="6px"
                 android:gravity="center"
                 android:text="同一局域网内可直接访问，不需要安装额外应用"
                 android:textColor="@color/car_text_dim"
                 android:textSize="22px" />
-        </FrameLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="90px"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingTop="40px">
+            android:orientation="vertical">
 
             <TextView
                 style="@style/UxEyebrow"

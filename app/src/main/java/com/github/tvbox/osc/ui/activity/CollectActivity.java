@@ -174,11 +174,13 @@ public class CollectActivity extends BaseActivity {
         boolean empty = collectAdapter == null || collectAdapter.getData().isEmpty();
         if (emptyState != null) emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
         if (tvDelete != null) {
+            tvDelete.setVisibility(empty ? View.GONE : View.VISIBLE);
             tvDelete.setEnabled(!empty);
             tvDelete.setFocusable(!empty);
             tvDelete.setAlpha(empty ? 0.38f : 1f);
         }
         if (tvClear != null) {
+            tvClear.setVisibility(empty ? View.GONE : View.VISIBLE);
             tvClear.setEnabled(!empty);
             tvClear.setFocusable(!empty);
             tvClear.setAlpha(empty ? 0.38f : 1f);

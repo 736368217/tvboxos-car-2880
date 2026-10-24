@@ -96,6 +96,7 @@ public class HomeActivity extends BaseActivity {
     private boolean isDownOrUp = false;
     private boolean sortChange = false;
     private int currentSelected = 0;
+    private int pendingCarPage = -1;
     private int sortFocused = 0;
     public View sortFocusView = null;
     private String loadingSourceKey;
@@ -351,6 +352,11 @@ public class HomeActivity extends BaseActivity {
                 loadingSourceKey = null;
                 previousHomeName = null;
                 previousHomeSource = null;
+                if (pendingCarPage >= 0 && sortAdapter.getData().size() > pendingCarPage) {
+                    int pending = pendingCarPage;
+                    pendingCarPage = -1;
+                    selectCarPage(pending);
+                }
             }
         });
     }
@@ -828,8 +834,19 @@ public class HomeActivity extends BaseActivity {
     private void bindCarNavigation() {
         findViewById(R.id.uxNavHome).setOnClickListener(v -> selectCarPage(0));
         findViewById(R.id.uxNavCategories).setOnClickListener(v -> {
-            if (sortAdapter.getData().size() > 1) selectCarPage(1);
-            else Toast.makeText(this, "当前源暂无分类，请选择其他源站", Toast.LENGTH_SHORT).show();
+            if (sortAdapter.getData().size() > 1) {
+                selectCarPage(1);
+                return;
+            }
+            // The first sort response can still be in flight: remember the intent and land there.
+            pendingCarPage = 1;
+            Toast.makeText(this, "正在加载分类…", Toast.LENGTH_SHORT).show();
+            mHandler.postDelayed(() -> {
+                if (pendingCarPage == 1 && sortAdapter.getData().size() <= 1) {
+                    pendingCarPage = -1;
+                    Toast.makeText(this, "当前源暂无分类，请选择其他源站", Toast.LENGTH_SHORT).show();
+                }
+            }, 6000);
         });
         findViewById(R.id.uxNavLive).setOnClickListener(v -> jumpActivity(LivePlayActivity.class));
         findViewById(R.id.uxNavHistory).setOnClickListener(v -> jumpActivity(HistoryActivity.class));
@@ -866,15 +883,20 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void activateSortPosition(int position, View itemView) {
-        if (position < 0 || !ensureHomePages(position)) return;
+        if (position < 0) return;
+        // Selection is a local, synchronous fact: never wait for the category request to move it.
+        mGridView.setSelectedPosition(position);
+        sortFocused = position;
+        sortFocusView = itemView;
+        currentView = itemView;
+        if (!ensureHomePages(position)) {
+            Toast.makeText(this, "当前源暂无该分类，请切换源站后重试", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (currentSelected != position) {
-            sortFocused = position;
-            sortFocusView = itemView;
-            currentView = itemView;
             sortChange = true;
             mHandler.removeCallbacks(mDataRunnable);
-            mDataRunnable.run();
-            mGridView.setSelectedPosition(position);
+            if (mViewPager != null) mViewPager.post(mDataRunnable); else mDataRunnable.run();
             return;
         }
         BaseLazyFragment fragment = fragments.get(position);
@@ -894,7 +916,7 @@ public class HomeActivity extends BaseActivity {
         sortFocused = position;
         sortChange = true;
         mHandler.removeCallbacks(mDataRunnable);
-        mDataRunnable.run();
+        if (mViewPager != null) mViewPager.post(mDataRunnable); else mDataRunnable.run();
         mGridView.setSelectedPosition(position);
         changeTop(position != 0);
     }
