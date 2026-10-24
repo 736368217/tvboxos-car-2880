@@ -12,6 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- 无直播源时的空态：不再只剩一个转圈，至少告诉用户发生了什么、怎么退出 -->
+    <TextView
+        android:id="@+id/tvLiveEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.4"
+        android:text="暂无直播源\n请在设置里检查直播接口，或按返回键退出"
+        android:textColor="@color/color_CCFFFFFF"
+        android:textSize="@dimen/ts_28"
+        android:visibility="gone" />
 	<FrameLayout
 		android:id="@+id/switchChannelSnapshotOverlay"
 		android:layout_width="match_parent"

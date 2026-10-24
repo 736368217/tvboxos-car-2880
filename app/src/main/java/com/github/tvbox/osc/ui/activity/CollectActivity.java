@@ -159,6 +159,10 @@ public class CollectActivity extends BaseActivity {
             vodInfoList.add(vodInfo);
         }
         collectAdapter.setNewData(vodInfoList);
+        View empty = findViewById(R.id.tvEmpty);
+        if (empty != null) {
+            empty.setVisibility(vodInfoList.isEmpty() ? View.VISIBLE : View.GONE);
+        }
     }
 
 

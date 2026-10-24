@@ -3002,8 +3002,15 @@ public class LivePlayActivity extends BaseActivity {
     private void applyLiveChannelGroups(List<LiveChannelGroup> groups) {
         liveChannelGroupList.clear();
         liveChannelGroupList.addAll(groups);
+        setLiveEmptyVisible(false);
         showSuccess();
         initLiveState();
+    }
+
+    /** 直播源为空/加载失败时的空态提示；有频道后自动隐藏。 */
+    private void setLiveEmptyVisible(boolean visible) {
+        View empty = findViewById(R.id.tvLiveEmpty);
+        if (empty != null) empty.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     private void initLiveState() {
@@ -3618,6 +3625,7 @@ public class LivePlayActivity extends BaseActivity {
 
     private void setEmptyLiveChannelList(boolean releasePlayer) {
         clearLiveChannelList(releasePlayer);
-//        Toast.makeText(App.getInstance(), "源异常,请切换到其他源", Toast.LENGTH_SHORT).show();
+        setLiveEmptyVisible(true);
+        Toast.makeText(App.getInstance(), "源异常,请切换到其他源", Toast.LENGTH_SHORT).show();
     }
 }

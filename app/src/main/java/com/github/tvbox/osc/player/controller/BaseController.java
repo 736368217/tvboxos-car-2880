@@ -286,7 +286,9 @@ public abstract class BaseController extends BaseVideoController implements Gest
      */
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-        if (isInPlaybackState()) {
+        // 缓冲/报错时也允许唤出控制栏：否则全屏下暂停、选集、退出全都不可达
+        // （原来只在 isInPlaybackState() 为真时才切换，卡缓冲就永远出不来控制栏）。
+        if (mControlWrapper != null && !isLocked()) {
             mControlWrapper.toggleShowState();
         }
         return true;

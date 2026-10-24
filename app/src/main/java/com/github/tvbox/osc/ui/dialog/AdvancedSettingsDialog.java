@@ -153,8 +153,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
         TextView value = new TextView(context);
         value.setTextColor(0xFFBAE6FD);
         value.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, textSize);
-        row.addView(value, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        value.setSingleLine(true);
+        value.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        value.setMaxWidth((int) (context.getResources().getDisplayMetrics().widthPixels * 0.30f));
+        LinearLayout.LayoutParams valueParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        valueParams.leftMargin = (int) context.getResources().getDimension(R.dimen.vs_10);
+        row.addView(value, valueParams);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, rowHeight);
