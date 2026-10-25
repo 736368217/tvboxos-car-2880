@@ -7,8 +7,8 @@ android {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
         // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 13
-        versionName '3.1.0-car.7-r40'
+        versionCode 14
+        versionName '3.1.0-car.7-r41'
         multiDexEnabled true
         //设置room的Schema的位置
         javaCompileOptions {

@@ -124,6 +124,8 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
             }
             homeHotVodAdapter.setNewData(vodList);
         }
+        applyEntryVisibility();
+        if (tvHotList != null) tvHotList.post(this::applyHotCardSize);
     }
 
     @Override
@@ -265,6 +267,8 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         tvHotList.setAdapter(homeHotVodAdapter);
 
         initHomeHotVod(homeHotVodAdapter);
+        applyEntryVisibility();
+        tvHotList.post(this::applyHotCardSize);
         sourceViewModel.actionResult.observe(this, new Observer<JSONObject>() {
             @Override
             public void onChanged(JSONObject jsonObject) {
@@ -273,6 +277,48 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
                 if (!msg.isEmpty()) Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /** 首页中间入口按用户配置显示；「设置」始终保留，避免把自己锁在门外。 */
+    private void applyEntryVisibility() {
+        if (tvHistory == null) return;
+        tvHistory.setVisibility(entryEnabled(HawkConfig.HOME_ENTRY_HISTORY) ? View.VISIBLE : View.GONE);
+        tvLive.setVisibility(entryEnabled(HawkConfig.HOME_ENTRY_LIVE) ? View.VISIBLE : View.GONE);
+        tvSearch.setVisibility(entryEnabled(HawkConfig.HOME_ENTRY_SEARCH) ? View.VISIBLE : View.GONE);
+        tvPush.setVisibility(entryEnabled(HawkConfig.HOME_ENTRY_PUSH) ? View.VISIBLE : View.GONE);
+        tvCollect.setVisibility(entryEnabled(HawkConfig.HOME_ENTRY_FAVORITE) ? View.VISIBLE : View.GONE);
+        tvSetting.setVisibility(View.VISIBLE);
+    }
+
+    private static boolean entryEnabled(String key) {
+        Object value = Hawk.get(key, true);
+        if (value instanceof Boolean) return (Boolean) value;
+        String text = String.valueOf(value);
+        return !"false".equalsIgnoreCase(text) && !"0".equals(text);
+    }
+
+    /**
+     * 按首页剩余高度决定封面尺寸：封面越高越宽，把下面那片空白吃掉；
+     * 单卡宽度不超过屏宽 1/3，保证一屏至少能看到三张。
+     */
+    private void applyHotCardSize() {
+        View root = getView();
+        if (root == null || tvHotList == null || homeHotVodAdapter == null) return;
+        if (Hawk.get(HawkConfig.HOME_REC_STYLE, false)) return;
+        int bottomPadding = getResources().getDimensionPixelSize(R.dimen.vs_10);
+        int available = root.getHeight() - tvHotList.getTop() - bottomPadding;
+        if (available <= 0) return;
+        float ratio = homeHotVodAdapter.getCardRatio();
+        if (ratio <= 0f) ratio = .67f;
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.vs_300);
+        int cardHeight = Math.max(minHeight, available);
+        int cardWidth = Math.round(cardHeight * ratio);
+        int maxWidth = Math.round(getResources().getDisplayMetrics().widthPixels / 3.1f);
+        if (cardWidth > maxWidth) {
+            cardWidth = maxWidth;
+            cardHeight = Math.round(cardWidth / ratio);
+        }
+        homeHotVodAdapter.setCardSizePx(cardWidth, cardHeight);
     }
 
     private void initHomeHotVod(HomeHotVodAdapter adapter) {

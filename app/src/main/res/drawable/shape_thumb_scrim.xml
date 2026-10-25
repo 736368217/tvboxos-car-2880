@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 首页海报底部遮罩：从透明渐变到不透明黑，并与海报同圆角，
+     这样标题/更新信息无论多长都贴在一条连续的底衬上，不会再露出片源缝隙。 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="90"
+        android:endColor="#00000000"
+        android:startColor="#F2000000"
+        android:type="linear" />
+    <corners
+        android:bottomLeftRadius="@dimen/vs_10"
+        android:bottomRightRadius="@dimen/vs_10" />
+</shape>

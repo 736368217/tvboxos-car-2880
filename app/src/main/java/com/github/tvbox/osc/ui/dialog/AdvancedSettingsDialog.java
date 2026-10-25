@@ -33,6 +33,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private TextView tvBrightness;
     private TextView tvVolume;
     private TextView tvLongPress;
+    private TextView tvHomeEntry;
 
     public AdvancedSettingsDialog(@NonNull Context context, Runnable onChanged) {
         super(context);
@@ -101,6 +102,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
             Hawk.put(HawkConfig.LONG_PRESS_SPEED, !Hawk.get(HawkConfig.LONG_PRESS_SPEED, false));
             refresh();
         });
+        tvHomeEntry = addRow(root, "首页入口", v ->
+                new HomeEntryDialog(getContext(), this::refresh).show());
 
         TextView close = new TextView(context);
         close.setText("关闭");
@@ -127,6 +130,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private int asInt(Object value) {
         if (value instanceof Number) return ((Number) value).intValue();
         return 100;
+    }
+    private static boolean homeEntryEnabled(String key) {
+        Object value = Hawk.get(key, true);
+        if (value instanceof Boolean) return (Boolean) value;
+        String text = String.valueOf(value);
+        return !"false".equalsIgnoreCase(text) && !"0".equals(text);
     }
 
     private TextView addRow(LinearLayout parent, String label, View.OnClickListener click) {
@@ -190,6 +199,16 @@ public class AdvancedSettingsDialog extends BaseDialog {
         }
         if (tvLongPress != null) {
             tvLongPress.setText(Hawk.get(HawkConfig.LONG_PRESS_SPEED, false) ? "开启" : "关闭");
+        }
+        if (tvHomeEntry != null) {
+            int hidden = 0;
+            String[] keys = {HawkConfig.HOME_ENTRY_HISTORY, HawkConfig.HOME_ENTRY_LIVE,
+                    HawkConfig.HOME_ENTRY_SEARCH, HawkConfig.HOME_ENTRY_PUSH,
+                    HawkConfig.HOME_ENTRY_FAVORITE};
+            for (String key : keys) {
+                if (!homeEntryEnabled(key)) hidden++;
+            }
+            tvHomeEntry.setText(hidden == 0 ? "全部显示" : "已隐藏 " + hidden + " 项");
         }
         if (onChanged != null) onChanged.run();
     }
