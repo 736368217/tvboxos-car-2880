@@ -98,8 +98,10 @@ public class HawkConfig {
     public static final String BACK_BAR_ALPHA = "inapp_back_bar_alpha";      // 0-100
     public static final String HIFI_AUDIO = "hifi_audio"; // default 0
     public static final String VIDEO_ENHANCE = "video_enhance"; // 0 original, 1 vivid, 8..10 anime
-    public static final String VIDEO_SR = "video_sr"; // default 1: SGSR1
-    public static final String VIDEO_INTERP = "video_interp"; // default 1: temporal smoothing
+    public static final String VIDEO_SR = "video_sr"; // legacy 0/1, kept in sync with VIDEO_SR_TIER
+    public static final String VIDEO_INTERP = "video_interp"; // legacy 0/1, kept in sync with VIDEO_MEMC_TIER
+    public static final String VIDEO_SR_TIER = "video_sr_tier"; // 0 off, 1 SGSR, 2 FSR, 3 anime
+    public static final String VIDEO_MEMC_TIER = "video_memc_tier"; // 0 off, 1 oversample, 2 cubic, 3 safe-flow
     public static final String VOLUME_GAIN = "app_volume_gain"; // 0-200, default 100 (app-level gain, not system volume)
     public static final String BRIGHTNESS_GESTURE = "brightness_gesture"; // default false: brightness follows system
     public static final String LONG_PRESS_SPEED = "long_press_speed"; // default false: 长按 3 倍速，车机默认不使用

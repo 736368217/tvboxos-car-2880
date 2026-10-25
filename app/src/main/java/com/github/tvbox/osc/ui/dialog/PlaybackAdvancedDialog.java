@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import xyz.doikki.videoplayer.render.VideoEnhancePreset;
+import xyz.doikki.videoplayer.render.VideoEnhanceTiers;
 
 /**
  * 播放增强面板：把「滤镜 / 超分 / 时域平滑 / 音效」四项收进一个入口。
@@ -83,22 +84,24 @@ public class PlaybackAdvancedDialog extends BaseDialog {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         tvVideo = addRow(root, "画面滤镜", v -> showVideoPresetDialog());
-        tvSr = addRow(root, "画面超分", v -> {
-            boolean enable = !CarEnhance.videoSrEnabled();
-            CarEnhance.setVideoSrEnabled(enable);
+        tvSr = addRow(root, "超分档位", v -> {
+            int next = (CarEnhance.srTier() + 1) % 4;
+            CarEnhance.setSrTier(next);
             CarEnhance.applyVideo(videoView);
-            boolean active = enable && videoView != null && videoView.isSuperResolutionRuntimeActive();
-            CarEnhance.toast(context, !enable ? "超分已关闭"
-                    : active ? "超分已生效 · SGSR1" : "超分已请求 · 等待画面");
+            boolean active = next > 0 && videoView != null && videoView.isSuperResolutionRuntimeActive();
+            CarEnhance.toast(context, next == 0 ? "超分已关闭"
+                    : active ? "超分已生效 · " + VideoEnhanceTiers.srName(next)
+                    : "超分已请求 · " + VideoEnhanceTiers.srName(next));
             refresh();
         });
-        tvInterp = addRow(root, "时域平滑", v -> {
-            boolean enable = !CarEnhance.videoInterpEnabled();
-            CarEnhance.setVideoInterpEnabled(enable);
+        tvInterp = addRow(root, "补帧档位", v -> {
+            int next = (CarEnhance.memcTier() + 1) % 4;
+            CarEnhance.setMemcTier(next);
             CarEnhance.applyVideo(videoView);
-            boolean active = enable && videoView != null && videoView.isInterpolationRuntimeActive();
-            CarEnhance.toast(context, !enable ? "时域平滑已关闭"
-                    : active ? "时域平滑已生效" : "时域平滑已请求 · 等待相邻帧");
+            boolean active = next > 0 && videoView != null && videoView.isInterpolationRuntimeActive();
+            CarEnhance.toast(context, next == 0 ? "补帧已关闭"
+                    : active ? "补帧已生效 · " + VideoEnhanceTiers.memcName(next)
+                    : "补帧已请求 · " + VideoEnhanceTiers.memcName(next));
             refresh();
         });
         tvAudio = addRow(root, "音效", v -> showAudioDialog());
@@ -224,8 +227,8 @@ public class PlaybackAdvancedDialog extends BaseDialog {
 
     private void refresh() {
         if (tvVideo != null) tvVideo.setText(VideoEnhancePreset.forMode(CarEnhance.videoMode()).name);
-        if (tvSr != null) tvSr.setText(CarEnhance.videoSrEnabled() ? "开启" : "关闭");
-        if (tvInterp != null) tvInterp.setText(CarEnhance.videoInterpEnabled() ? "开启" : "关闭");
+        if (tvSr != null) tvSr.setText("Lv" + CarEnhance.srTier() + " " + VideoEnhanceTiers.srName(CarEnhance.srTier()));
+        if (tvInterp != null) tvInterp.setText("Lv" + CarEnhance.memcTier() + " " + VideoEnhanceTiers.memcName(CarEnhance.memcTier()));
         if (tvAudio != null) tvAudio.setText(AudioEffectController.name(CarEnhance.audioMode()));
         if (onChanged != null) onChanged.run();
     }

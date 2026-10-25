@@ -49,8 +49,21 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private final FloatBuffer mPositions = buffer(-1,-1, 1,-1, -1,1, 1,1);
     private final FloatBuffer mCoordinates = buffer(0,0, 1,0, 0,1, 1,1);
     private final float[] mTextureMatrix = new float[16];
-    private final int[] mFbos = new int[2];
-    private final int[] mFrameTextures = new int[2];
+    private static final int RING = 4;
+    private final int[] mFbos = new int[RING];
+    private final int[] mFrameTextures = new int[RING];
+    private int mRingHead = -1;
+    private int mValidFrames;
+    private int mSynthFbo, mSynthTexture;
+    private int mMemcProgram;
+    private int mMemcPos, mMemcTex, mMemcF0, mMemcF1, mMemcF2, mMemcF3, mMemcAlpha, mMemcTier, mMemcTexel;
+    private final int[] mSrPrograms = new int[4];
+    private final int[] mSrPos = new int[4];
+    private final int[] mSrTex = new int[4];
+    private final int[] mSrTexCoordAttr = new int[4];
+    private final int[] mSrTexel = new int[4];
+    private final int[] mSrViewport = new int[4];
+    private final int[] mSrSharpness = new int[4];
     private final VideoPostProcessPolicy mTiming = new VideoPostProcessPolicy();
     private final Object mProducerLock = new Object();
     private final ArrayList<ProducerSurface> mProducers = new ArrayList<>();
@@ -97,6 +110,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
 
     public GlEnhanceRenderView(Context context) { this(context, 0, false, false); }
     public GlEnhanceRenderView(Context context, int mode) { this(context, mode, false, false); }
+    public GlEnhanceRenderView(Context context, int mode, int srTier, int memcTier) {
+        this(context, mode, srTier > VideoEnhanceTiers.SR_OFF, memcTier > VideoEnhanceTiers.MEMC_OFF);
+        mConfiguration = new VideoEnhanceConfig(mode, srTier, memcTier);
+    }
     public GlEnhanceRenderView(Context context, int mode, boolean sr, boolean interp) {
         super(context);
         mConfiguration = new VideoEnhanceConfig(mode, sr, interp);
@@ -356,6 +373,19 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         Log.i(TAG, "runtime_config requested " + configuration);
     }
 
+    /** 档位版运行时切换：srTier / memcTier 都是 0..3。 */
+    public void setVideoEnhanceTiers(int mode, int srTier, int memcTier) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mMain.post(() -> setVideoEnhanceTiers(mode, srTier, memcTier));
+            return;
+        }
+        VideoEnhanceConfig configuration = new VideoEnhanceConfig(mode, srTier, memcTier);
+        if (mReleased || configuration.sameAs(mConfiguration)) return;
+        mConfiguration = configuration;
+        updateRenderMode();
+        requestRender();
+        Log.i(TAG, "runtime_tiers requested " + configuration);
+    }
     private boolean isRuntimePostProcessAvailable() {
         return mPostProcessSupported && mPostProcessFailure.length() == 0;
     }
@@ -519,19 +549,46 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         cRgb = GLES20.glGetUniformLocation(mColourProgram, "uRgb");
         GLES20.glUseProgram(mColourProgram);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(mColourProgram, "uTexture"), 0);
-        mOutputProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoShaders.OUTPUT_FRAGMENT);
-        mPostProcessSupported = mOutputProgram != 0;
-        if (mPostProcessSupported) {
-            oPosition = GLES20.glGetAttribLocation(mOutputProgram, "aPosition");
-            oCoordinate = GLES20.glGetAttribLocation(mOutputProgram, "aTexCoord");
-            oViewport = GLES20.glGetUniformLocation(mOutputProgram, "uViewportInfo");
-            oParams = GLES20.glGetUniformLocation(mOutputProgram, "uParams");
-            GLES20.glUseProgram(mOutputProgram);
-            GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uCurrFrameTex"), 0);
-            GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uPrevFrameTex"), 1);
-        } else {
+        mMemcProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoTierShaders.MEMC_FRAGMENT);
+        if (mMemcProgram != 0) {
+            mMemcPos = GLES20.glGetAttribLocation(mMemcProgram, "aPosition");
+            mMemcTex = GLES20.glGetAttribLocation(mMemcProgram, "aTexCoord");
+            mMemcF0 = GLES20.glGetUniformLocation(mMemcProgram, "uF0");
+            mMemcF1 = GLES20.glGetUniformLocation(mMemcProgram, "uF1");
+            mMemcF2 = GLES20.glGetUniformLocation(mMemcProgram, "uF2");
+            mMemcF3 = GLES20.glGetUniformLocation(mMemcProgram, "uF3");
+            mMemcAlpha = GLES20.glGetUniformLocation(mMemcProgram, "uAlpha");
+            mMemcTier = GLES20.glGetUniformLocation(mMemcProgram, "uTier");
+            mMemcTexel = GLES20.glGetUniformLocation(mMemcProgram, "uTexel");
+            GLES20.glUseProgram(mMemcProgram);
+            GLES20.glUniform1i(mMemcF0, 0);
+            GLES20.glUniform1i(mMemcF1, 1);
+            GLES20.glUniform1i(mMemcF2, 2);
+            GLES20.glUniform1i(mMemcF3, 3);
+        }
+        String[] srSources = {
+                VideoTierShaders.SR_PASSTHROUGH_FRAGMENT,
+                VideoTierShaders.SR_SGSR_FRAGMENT,
+                VideoTierShaders.SR_FSR_FRAGMENT,
+                VideoTierShaders.SR_ANIME_FRAGMENT
+        };
+        boolean srOk = true;
+        for (int i = 0; i < srSources.length; i++) {
+            mSrPrograms[i] = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, srSources[i]);
+            if (mSrPrograms[i] == 0) { srOk = false; continue; }
+            mSrPos[i] = GLES20.glGetAttribLocation(mSrPrograms[i], "aPosition");
+            mSrTexCoordAttr[i] = GLES20.glGetAttribLocation(mSrPrograms[i], "aTexCoord");
+            mSrTex[i] = GLES20.glGetUniformLocation(mSrPrograms[i], "uTexture");
+            mSrTexel[i] = GLES20.glGetUniformLocation(mSrPrograms[i], "uTexel");
+            mSrViewport[i] = GLES20.glGetUniformLocation(mSrPrograms[i], "uViewportInfo");
+            mSrSharpness[i] = GLES20.glGetUniformLocation(mSrPrograms[i], "uSharpness");
+            GLES20.glUseProgram(mSrPrograms[i]);
+            GLES20.glUniform1i(mSrTex[i], 0);
+        }
+        mPostProcessSupported = mMemcProgram != 0 && srOk;
+        if (!mPostProcessSupported) {
             mPostProcessFailure = "输出 shader 编译或链接失败";
-            Log.w(TAG, "POSTPROCESS_FALLBACK output shader failed; direct OES colour only");
+            Log.w(TAG, "POSTPROCESS_FALLBACK tier shader failed; direct OES colour only");
         }
         createProducerSurface();
         Log.i(TAG, "GL ready version=" + GLES20.glGetString(GLES20.GL_VERSION)
@@ -610,30 +667,45 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                 boolean resized = mFboWidth != sw || mFboHeight != sh;
                 postProcess = ensureFrameBuffers(sw, sh);
                 if (postProcess) {
-                    if (fresh || resized || changed || !mFboHasFrame) {
-                        boolean hadCurrent = mFboHasFrame && !reset && !resized && fresh;
-                        int oldIndex = mCurrentIndex;
-                        mCurrentIndex = 1 - oldIndex;
-                        mPreviousIndex = oldIndex;
-                        drawColour(mFbos[mCurrentIndex], sw, sh, configuration.preset);
+                    if (fresh || resized) {
+                        mRingHead = (mRingHead + 1) % RING;
+                        drawColour(mFbos[mRingHead], sw, sh, configuration.preset);
+                        mValidFrames = Math.min(mValidFrames + 1, RING);
                         mFboHasFrame = true;
-                        mHasPrevious = hadCurrent;
+                        mHasPrevious = mValidFrames >= 2;
+                    } else if (!mFboHasFrame) {
+                        mRingHead = (mRingHead + 1) % RING;
+                        drawColour(mFbos[mRingHead], sw, sh, configuration.preset);
+                        mValidFrames = 1;
+                        mFboHasFrame = true;
+                        mHasPrevious = false;
                     }
-                    float alpha = mHasPrevious ? mTiming.blendAlpha(System.nanoTime(), configuration.interpolation, shouldAnimate()) : 0;
+                    float alpha = mHasPrevious
+                            ? mTiming.blendAlpha(System.nanoTime(), configuration.interpolation, shouldAnimate())
+                            : 0;
+                    int memcTier = configuration.memcTier;
+                    int srcTexture;
+                    if (memcTier > VideoEnhanceTiers.MEMC_OFF && mValidFrames >= 2 && alpha > 0.002f) {
+                        srcTexture = drawMemc(sw, sh, memcTier, alpha);
+                    } else {
+                        srcTexture = mFrameTextures[mRingHead];
+                    }
                     boolean sr = VideoPostProcessPolicy.superResolutionActive(configuration.superResolution,
                             sw, sh, width, height);
-                    drawOutput(width, height, sr, alpha, configuration.preset);
-                    mRuntimeSrActive = sr;
+                    int srTier = sr ? configuration.srTier : VideoEnhanceTiers.SR_OFF;
+                    drawSr(width, height, srTier, srcTexture, sw, sh, configuration.preset);
+                    mRuntimeSrActive = sr && srTier > VideoEnhanceTiers.SR_OFF;
                     if (alpha > 0.001f) {
-                        mRuntimeInterpolationActive = configuration.interpolation;
+                        mRuntimeInterpolationActive = memcTier > VideoEnhanceTiers.MEMC_OFF;
                         mLastBlendNs = System.nanoTime();
                         mMixedOutputs++;
                     }
                     if (!mLoggedSr || mLastSrActive != sr) {
                         mLoggedSr = true;
                         mLastSrActive = sr;
-                        Log.i(TAG, "output srRequested=" + configuration.superResolution + " srActive=" + sr
-                                + " interp=" + configuration.interpolation + " viewport=" + width + "x" + height);
+                        Log.i(TAG, "output srTier=" + srTier + " memcTier=" + memcTier
+                                + " active=" + sr + " alpha=" + alpha
+                                + " viewport=" + width + "x" + height);
                     }
                 }
             }
@@ -676,32 +748,49 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             failFrameBuffers(width, height, "GL_MAX_TEXTURE_SIZE=" + max[0]);
             return false;
         }
-        GLES20.glGenTextures(2, mFrameTextures, 0);
-        GLES20.glGenFramebuffers(2, mFbos, 0);
-        for (int i=0; i<2; i++) {
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mFrameTextures[i]);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D,0,GLES20.GL_RGBA,width,height,0,GLES20.GL_RGBA,GLES20.GL_UNSIGNED_BYTE,null);
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,mFbos[i]);
-            GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER,GLES20.GL_COLOR_ATTACHMENT0,GLES20.GL_TEXTURE_2D,mFrameTextures[i],0);
-            int status=GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
-            int error=GLES20.glGetError();
-            if (status != GLES20.GL_FRAMEBUFFER_COMPLETE || error != GLES20.GL_NO_ERROR) {
-                failFrameBuffers(width,height,"status="+status+" error="+error);
+        GLES20.glGenTextures(RING, mFrameTextures, 0);
+        GLES20.glGenFramebuffers(RING, mFbos, 0);
+        for (int i = 0; i < RING; i++) {
+            if (!createTarget(mFrameTextures[i], mFbos[i], width, height)) {
+                failFrameBuffers(width, height, "ring#" + i);
                 return false;
             }
         }
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,0);
-        mFboWidth=width; mFboHeight=height;
-        mCurrentIndex=0; mPreviousIndex=1;
-        mHasPrevious=false;
+        int[] synthTex = new int[1];
+        int[] synthFbo = new int[1];
+        GLES20.glGenTextures(1, synthTex, 0);
+        GLES20.glGenFramebuffers(1, synthFbo, 0);
+        mSynthTexture = synthTex[0];
+        mSynthFbo = synthFbo[0];
+        if (!createTarget(mSynthTexture, mSynthFbo, width, height)) {
+            failFrameBuffers(width, height, "synth");
+            return false;
+        }
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        mFboWidth = width; mFboHeight = height;
+        mRingHead = -1;
+        mValidFrames = 0;
+        mHasPrevious = false;
         mTiming.reset();
-        long bytes=VideoPostProcessPolicy.frameBufferBytes(width,height);
-        Log.i(TAG,"FBO ping-pong allocated 2x "+width+"x"+height+" RGBA8 bytes="+bytes);
+        Log.i(TAG, "FBO ring allocated " + RING + "x " + width + "x" + height
+                + " + synth, bytes=" + (VideoPostProcessPolicy.frameBufferBytes(width, height) * 3));
         return true;
+    }
+
+    private boolean createTarget(int texture, int fbo, int width, int height) {
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, width, height, 0,
+                GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo);
+        GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0,
+                GLES20.GL_TEXTURE_2D, texture, 0);
+        int status = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
+        int error = GLES20.glGetError();
+        return status == GLES20.GL_FRAMEBUFFER_COMPLETE && error == GLES20.GL_NO_ERROR;
     }
     private void failFrameBuffers(int width,int height,String reason) {
         releaseFrameBuffers();
@@ -722,20 +811,58 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         drawQuad(cPosition,cCoordinate);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,0);
     }
-    private void drawOutput(int width,int height,boolean sr,float alpha,VideoEnhancePreset preset) {
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,0);
-        GLES20.glViewport(0,0,width,height);
-        GLES20.glUseProgram(mOutputProgram);
+
+    /** 4 帧时域合成到源分辨率纹理；返回给超分 Pass 采样的纹理。 */
+    private int drawMemc(int width, int height, int tier, float alpha) {
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mSynthFbo);
+        GLES20.glViewport(0, 0, width, height);
+        GLES20.glUseProgram(mMemcProgram);
+        int f2 = mRingHead;
+        int f1 = (mRingHead - 1 + RING) % RING;
+        int f0 = (mRingHead - 2 + RING) % RING;
+        int f3 = f2; // 没有前瞻帧：用当前帧顶替 t+2
+        bindFrameTexture(0, mFrameTextures[f0]);
+        bindFrameTexture(1, mFrameTextures[f1]);
+        bindFrameTexture(2, mFrameTextures[f2]);
+        bindFrameTexture(3, mFrameTextures[f3]);
+        GLES20.glUniform1f(mMemcAlpha, tier == VideoEnhanceTiers.MEMC_OVERSAMPLE
+                ? alpha : (1f - 2f * alpha));
+        GLES20.glUniform1i(mMemcTier, tier);
+        GLES20.glUniform2f(mMemcTexel, 1f / width, 1f / height);
+        drawQuad(mMemcPos, mMemcTex);
+        unbindFrameTextures(4);
+        return mSynthTexture;
+    }
+
+    /** 按档位把源纹理放大上屏（0=直通，1=SGSR，2=FSR，3=Anime）。 */
+    private void drawSr(int width, int height, int tier, int srcTexture,
+                        int srcW, int srcH, VideoEnhancePreset preset) {
+        int t = VideoEnhanceTiers.clampSr(tier);
+        int program = mSrPrograms[t] != 0 ? mSrPrograms[t] : mSrPrograms[0];
+        int idx = program == mSrPrograms[t] ? t : 0;
+        if (program == 0) return;
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        GLES20.glViewport(0, 0, width, height);
+        GLES20.glUseProgram(program);
+        bindFrameTexture(0, srcTexture);
+        GLES20.glUniform4f(mSrViewport[idx], 1f / srcW, 1f / srcH, srcW, srcH);
+        GLES20.glUniform2f(mSrTexel[idx], 1f / srcW, 1f / srcH);
+        GLES20.glUniform1f(mSrSharpness[idx], preset.sgsrSharpness);
+        drawQuad(mSrPos[idx], mSrTexCoordAttr[idx]);
+        unbindFrameTextures(1);
+    }
+
+    private void bindFrameTexture(int unit, int texture) {
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + unit);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+    }
+
+    private void unbindFrameTextures(int count) {
+        for (int i = 0; i < count; i++) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + i);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+        }
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,mFrameTextures[mCurrentIndex]);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,mFrameTextures[mHasPrevious?mPreviousIndex:mCurrentIndex]);
-        GLES20.glUniform4f(oViewport,1f/mFboWidth,1f/mFboHeight,mFboWidth,mFboHeight);
-        GLES20.glUniform3f(oParams,sr?1f:0f,preset.sgsrSharpness,alpha);
-        drawQuad(oPosition,oCoordinate);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,0);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,0);
     }
     private void drawQuad(int position,int coordinate) {
         mPositions.position(0); mCoordinates.position(0);
@@ -816,12 +943,16 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     public boolean isPostProcessSupported() { return isRuntimePostProcessAvailable(); }
     public String getPostProcessFailure() { return mPostProcessFailure; }
     private void releaseFrameBuffers() {
-        boolean allocated=mFbos[0]!=0 || mFrameTextures[0]!=0;
-        GLES20.glDeleteFramebuffers(2,mFbos,0); GLES20.glDeleteTextures(2,mFrameTextures,0);
-        mFbos[0]=mFbos[1]=mFrameTextures[0]=mFrameTextures[1]=0;
-        mFboWidth=mFboHeight=0; mHasPrevious=false; mFboHasFrame=false;
+        boolean allocated = mFbos[0] != 0 || mFrameTextures[0] != 0 || mSynthFbo != 0;
+        GLES20.glDeleteFramebuffers(RING, mFbos, 0);
+        GLES20.glDeleteTextures(RING, mFrameTextures, 0);
+        for (int i = 0; i < RING; i++) { mFbos[i] = 0; mFrameTextures[i] = 0; }
+        if (mSynthFbo != 0) { int[] f = {mSynthFbo}; GLES20.glDeleteFramebuffers(1, f, 0); mSynthFbo = 0; }
+        if (mSynthTexture != 0) { int[] t = {mSynthTexture}; GLES20.glDeleteTextures(1, t, 0); mSynthTexture = 0; }
+        mRingHead = -1; mValidFrames = 0;
+        mFboWidth = mFboHeight = 0; mHasPrevious = false; mFboHasFrame = false;
         mTiming.reset();
-        if (allocated) Log.i(TAG,"FBO ping-pong released");
+        if (allocated) Log.i(TAG, "FBO ring released");
     }
     private static final class ProducerSurface {
         final SurfaceTexture texture;
@@ -863,7 +994,11 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         if (mOesTexture!=0) GLES20.glDeleteTextures(1,new int[]{mOesTexture},0);
         if (mColourProgram!=0) GLES20.glDeleteProgram(mColourProgram);
         if (mOutputProgram!=0) GLES20.glDeleteProgram(mOutputProgram);
-        mOesTexture=mColourProgram=mOutputProgram=0;
+        if (mMemcProgram!=0) GLES20.glDeleteProgram(mMemcProgram);
+        for (int i = 0; i < mSrPrograms.length; i++) {
+            if (mSrPrograms[i] != 0) { GLES20.glDeleteProgram(mSrPrograms[i]); mSrPrograms[i] = 0; }
+        }
+        mOesTexture=mColourProgram=mOutputProgram=mMemcProgram=0;
         mHasFrame=false; mLoggedSr=false;
     }
     private static FloatBuffer buffer(float... values) {
