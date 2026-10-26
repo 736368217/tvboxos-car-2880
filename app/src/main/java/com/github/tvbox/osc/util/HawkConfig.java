@@ -102,7 +102,6 @@ public class HawkConfig {
     public static final String VIDEO_INTERP = "video_interp"; // default 1: temporal smoothing
     public static final String VOLUME_GAIN = "app_volume_gain"; // 0-200, default 100 (app-level gain, not system volume)
     public static final String BRIGHTNESS_GESTURE = "brightness_gesture"; // default false: brightness follows system
-    public static final String LONG_PRESS_SPEED = "long_press_speed"; // default false: 长按 3 倍速，车机默认不使用
     // 首页中间入口（历史/直播/搜索/推送/收藏/设置）是否显示
     public static final String HOME_ENTRY_HISTORY = "home_entry_history";
     public static final String HOME_ENTRY_LIVE = "home_entry_live";

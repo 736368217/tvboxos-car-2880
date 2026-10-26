@@ -72,6 +72,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     private List<Movie.Video> homeSourceRec;
     public static TvRecyclerView tvHotList;
     private SourceViewModel sourceViewModel;
+    private int cardSizeAttempts;
 
     public static UserFragment newInstance() {
         return new UserFragment();
@@ -168,6 +169,12 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         tvLive.setOnClickListener(this);
         tvSearch.setOnClickListener(this);
         tvSetting.setOnClickListener(this);
+        // 长按「设置」= 首页入口自定义；单击仍是进入设置页。
+        tvSetting.setOnLongClickListener(v -> {
+            new com.github.tvbox.osc.ui.dialog.HomeEntryDialog(getContext(),
+                    this::applyEntryVisibility).show();
+            return true;
+        });
         tvHistory.setOnClickListener(this);
         tvPush.setOnClickListener(this);
         tvCollect.setOnClickListener(this);
@@ -298,22 +305,41 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     }
 
     /**
-     * 按首页剩余高度决定封面尺寸：封面越高越宽，把下面那片空白吃掉；
-     * 单卡宽度不超过屏宽 1/3，保证一屏至少能看到三张。
+     * 按首页剩余空间算封面尺寸：整张卡（含底部标题）必须落在列表可视区内，
+     * 同时单卡宽度不超过屏宽 1/3，保证一屏至少三张。
+     * 之前直接用「页面高度 - 列表顶部」，布局未完成时会把整页高度当成可用高度，
+     * 结果标题被顶到屏幕外，这里补上布局就绪判断与上限。
      */
     private void applyHotCardSize() {
         View root = getView();
         if (root == null || tvHotList == null || homeHotVodAdapter == null) return;
         if (Hawk.get(HawkConfig.HOME_REC_STYLE, false)) return;
-        int bottomPadding = getResources().getDimensionPixelSize(R.dimen.vs_10);
-        int available = root.getHeight() - tvHotList.getTop() - bottomPadding;
+        int parentHeight = root.getHeight();
+        int parentWidth = root.getWidth();
+        if (parentHeight <= 0 || parentWidth <= 0) return;
+
+        int listTop = tvHotList.getTop();
+        if (listTop <= 0) {
+            if (cardSizeAttempts < 4) {
+                cardSizeAttempts++;
+                tvHotList.postDelayed(this::applyHotCardSize, 120);
+            }
+            return;
+        }
+        cardSizeAttempts = 0;
+
+        int listPadding = tvHotList.getPaddingTop() + tvHotList.getPaddingBottom();
+        int safety = getResources().getDimensionPixelSize(R.dimen.vs_12);
+        int available = parentHeight - listTop - listPadding - safety;
         if (available <= 0) return;
+
         float ratio = homeHotVodAdapter.getCardRatio();
         if (ratio <= 0f) ratio = .67f;
-        int minHeight = getResources().getDimensionPixelSize(R.dimen.vs_300);
-        int cardHeight = Math.max(minHeight, available);
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.vs_240);
+        int maxHeight = Math.round(parentHeight * .66f);
+        int cardHeight = Math.min(Math.max(minHeight, available), maxHeight);
         int cardWidth = Math.round(cardHeight * ratio);
-        int maxWidth = Math.round(getResources().getDisplayMetrics().widthPixels / 3.1f);
+        int maxWidth = Math.round(parentWidth / 3.1f);
         if (cardWidth > maxWidth) {
             cardWidth = maxWidth;
             cardHeight = Math.round(cardWidth / ratio);

@@ -1133,7 +1133,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
                     : HawkConfig.BACK_MODE_FLOATING.equals(mode) ? "悬浮球"
                     : HawkConfig.BACK_MODE_BOTH.equals(mode) ? "双模共存" : "边缘拉出";
         }
-        String sr = com.github.tvbox.osc.car.CarEnhance.videoSrEnabled() ? "超分开" : "超分关";
-        tvAdvancedSummary.setText(back + " · " + sr);
+        String brightness = Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false) ? "亮度开" : "亮度关";
+        tvAdvancedSummary.setText(back + " · " + brightness);
     }
 }
