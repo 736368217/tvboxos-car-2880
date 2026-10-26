@@ -6,11 +6,11 @@ android {
     defaultConfig {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
-        // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 14
-        versionName '3.1.0-car.7-r41-tiers'
+        // 鍛藉悕瑙勫垯锛?涓婃父鐧界洅鍩哄噯鐗堟湰>-car.7-<鎴戞柟杩唬鍙?
+        versionCode 15
+        versionName '3.1.0-car.7-r42-tiers'
         multiDexEnabled true
-        //设置room的Schema的位置
+        //璁剧疆room鐨凷chema鐨勪綅缃?
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
@@ -106,17 +106,17 @@ android {
         }
     }
 
-    // 禁用 ABI 分割
+    // 绂佺敤 ABI 鍒嗗壊
     splits {
         abi {
-            enable false // 禁用 ABI 分割
+            enable false // 绂佺敤 ABI 鍒嗗壊
         }
     }
 
     applicationVariants.configureEach { variant ->
         variant.outputs.configureEach { output ->
             def flavorNames = variant.productFlavors.collect { it.name }.join('-')
-            // 构建自定义文件名
+            // 鏋勫缓鑷畾涔夋枃浠跺悕
             def fileName = "TVBox_${variant.buildType.name}-${flavorNames}.apk"
             outputFileName = fileName
         }
@@ -197,10 +197,11 @@ dependencies {
     implementation 'com.github.hedzr:android-file-chooser:v1.2.0-final'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'
-    //支持http3
+    //鏀寔http3
     implementation ('com.google.net.cronet:cronet-okhttp:0.1.0')
 //    implementation 'com.google.android.gms:play-services-cronet:18.0.1'
     implementation ('org.chromium.net:cronet-embedded:101.4951.41')
     implementation 'org.brotli:dec:0.1.2'
 }
+
 

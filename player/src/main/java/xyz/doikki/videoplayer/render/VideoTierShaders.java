@@ -203,8 +203,8 @@ public final class VideoTierShaders {
             + "  vec3 line=(along*2.0+across+c*4.0)/9.0;\n"
             + "  vec3 detail=c*4.0-along*2.0;\n"
             + "  vec3 res=base+detail*(0.30*uSharpness+0.10)+ (c-line)*0.15;\n"
-            + "  float mn=min(min(n,s),min(e,w)); float mx=max(max(n,s),max(e,w));\n"
-            + "  res=clamp(res, vec3(mn-0.02), vec3(mx+0.02));\n"
+            + "  vec3 mn=min(min(n,s),min(e,w)); vec3 mx=max(max(n,s),max(e,w));\n"
+            + "  res=clamp(res, mn-vec3(0.02), mx+vec3(0.02));\n"
             + "  gl_FragColor=vec4(clamp(res,0.0,1.0),1.0);\n"
             + "}\n";
 
