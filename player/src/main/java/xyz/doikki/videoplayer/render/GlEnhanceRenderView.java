@@ -773,7 +773,13 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                         }
                         mRuntimeSrActive = sr && srTier > VideoEnhanceTiers.SR_OFF;
                         mRuntimeInterpolationActive = memcTier > VideoEnhanceTiers.MEMC_OFF;
-                        if (mLastPath.equals("BASELINE")) mLastPath = "SGSR_BASELINE";
+                        String srName = (mLastPath.startsWith("SR") || mLastPath.contains("FSR") || mLastPath.contains("ANIME"))
+                                ? mLastPath
+                                : (sr ? "SR1_SGSR" : "SR0_OFF");
+                        String memcName = memcTier == VideoEnhanceTiers.MEMC_OFF ? "MEMC0_OFF"
+                                : memcTier == VideoEnhanceTiers.MEMC_OVERSAMPLE ? "MEMC1_OVERSAMPLE"
+                                : memcTier == VideoEnhanceTiers.MEMC_CUBIC ? "MEMC2_CUBIC" : "MEMC3_SAFEFLOW";
+                        mLastPath = srName + "+" + memcName;
                     } else {
                         // 1 档基线（或高级管线不可用）：原 2 帧 ping-pong + 原输出 shader，行为与 r41 前一致
                         int prev = (mRingHead - 1 + RING) % RING;

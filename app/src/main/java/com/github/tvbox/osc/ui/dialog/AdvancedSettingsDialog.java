@@ -33,6 +33,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private TextView tvBrightness;
     private TextView tvVolume;
     private TextView tvLongPress;
+    private long lastRowClickMs;
 
     public AdvancedSettingsDialog(@NonNull Context context, Runnable onChanged) {
         super(context);
@@ -141,7 +142,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
         row.setFocusable(true);
         row.setPadding(side, 0, side, 0);
         row.setBackgroundResource(R.drawable.shape_setting_model_focus);
-        row.setOnClickListener(click);
+        row.setOnClickListener(v -> {
+            long now = android.os.SystemClock.uptimeMillis();
+            if (now - lastRowClickMs < 350L) return;
+            lastRowClickMs = now;
+            click.onClick(v);
+        });
 
         TextView name = new TextView(context);
         name.setText(label);

@@ -38,6 +38,7 @@ public class PlaybackAdvancedDialog extends BaseDialog {
     private TextView tvSr;
     private TextView tvInterp;
     private TextView tvAudio;
+    private long lastRowClickMs;
 
     public PlaybackAdvancedDialog(@NonNull Context context, MyVideoView videoView, Runnable onChanged) {
         super(context);
@@ -84,26 +85,9 @@ public class PlaybackAdvancedDialog extends BaseDialog {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         tvVideo = addRow(root, "画面滤镜", v -> showVideoPresetDialog());
-        tvSr = addRow(root, "超分档位", v -> {
-            int next = (CarEnhance.srTier() + 1) % 4;
-            CarEnhance.setSrTier(next);
-            CarEnhance.applyVideo(videoView);
-            boolean active = next > 0 && videoView != null && videoView.isSuperResolutionRuntimeActive();
-            CarEnhance.toast(context, next == 0 ? "超分已关闭"
-                    : active ? "超分已生效 · " + VideoEnhanceTiers.srName(next)
-                    : "超分已请求 · " + VideoEnhanceTiers.srName(next));
-            refresh();
-        });
-        tvInterp = addRow(root, "补帧档位", v -> {
-            int next = (CarEnhance.memcTier() + 1) % 4;
-            CarEnhance.setMemcTier(next);
-            CarEnhance.applyVideo(videoView);
-            boolean active = next > 0 && videoView != null && videoView.isInterpolationRuntimeActive();
-            CarEnhance.toast(context, next == 0 ? "补帧已关闭"
-                    : active ? "补帧已生效 · " + VideoEnhanceTiers.memcName(next)
-                    : "补帧已请求 · " + VideoEnhanceTiers.memcName(next));
-            refresh();
-        });
+        // 档位用列表直接选，避免「循环点击」在部分输入设备上一次点击跳两档
+        tvSr = addRow(root, "超分档位", v -> showTierDialog(true));
+        tvInterp = addRow(root, "补帧档位", v -> showTierDialog(false));
         tvAudio = addRow(root, "音效", v -> showAudioDialog());
 
         TextView close = new TextView(context);
@@ -126,6 +110,44 @@ public class PlaybackAdvancedDialog extends BaseDialog {
 
         refresh();
         return root;
+    }
+
+    /** 档位选择：0..3 直接点选，比循环点击可靠。 */
+    private void showTierDialog(final boolean superResolution) {
+        final SelectDialog<String> dialog = new SelectDialog<>(getContext());
+        dialog.setTip(superResolution ? "超分档位" : "补帧档位");
+        List<String> options = new ArrayList<>();
+        for (int tier = 0; tier <= 3; tier++) {
+            options.add("Lv" + tier + " " + (superResolution
+                    ? VideoEnhanceTiers.srName(tier) : VideoEnhanceTiers.memcName(tier)));
+        }
+        int current = superResolution ? CarEnhance.srTier() : CarEnhance.memcTier();
+        dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
+            @Override
+            public void click(String value, int pos) {
+                if (superResolution) {
+                    CarEnhance.setSrTier(pos);
+                } else {
+                    CarEnhance.setMemcTier(pos);
+                }
+                CarEnhance.applyVideo(videoView);
+                boolean active = pos > 0 && videoView != null && (superResolution
+                        ? videoView.isSuperResolutionRuntimeActive()
+                        : videoView.isInterpolationRuntimeActive());
+                String name = superResolution ? VideoEnhanceTiers.srName(pos) : VideoEnhanceTiers.memcName(pos);
+                CarEnhance.toast(getContext(), pos == 0
+                        ? (superResolution ? "超分已关闭" : "补帧已关闭")
+                        : (active ? "已生效 · " + name : "已请求 · " + name));
+                dialog.dismiss();
+                refresh();
+            }
+
+            @Override
+            public String getDisplay(String value) {
+                return value;
+            }
+        }, SelectDialogAdapter.stringDiff, options, current);
+        dialog.show();
     }
 
     private void showVideoPresetDialog() {
@@ -197,7 +219,13 @@ public class PlaybackAdvancedDialog extends BaseDialog {
         row.setFocusable(true);
         row.setPadding(side, 0, side, 0);
         row.setBackgroundResource(R.drawable.shape_setting_model_focus);
-        row.setOnClickListener(click);
+        // 防抖：部分设备/远程点击会把同一次按下派发两次，导致一次点击跳过一档（3→1）。
+        row.setOnClickListener(v -> {
+            long now = android.os.SystemClock.uptimeMillis();
+            if (now - lastRowClickMs < 350L) return;
+            lastRowClickMs = now;
+            click.onClick(v);
+        });
 
         TextView name = new TextView(context);
         name.setText(label);
