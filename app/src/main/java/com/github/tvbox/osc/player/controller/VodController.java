@@ -443,6 +443,9 @@ public class VodController extends BaseController {
             addStat(rows, "片源帧率", isUsableFrameRate(source) ? formatFrameRate(source) + " fps" : null);
             addStat(rows, "输出帧率", isUsableFrameRate(output) ? formatFrameRate(output) + " fps" : null);
             addStat(rows, "渲染器", mCarVideoView.hasEnhancedRenderer() ? "GL 增强" : "原生");
+            addStat(rows, "渲染路径", mCarVideoView.getRenderPath());
+            long gpuNs = mCarVideoView.getLastFrameGpuNanos();
+            addStat(rows, "单帧 GPU", gpuNs > 0 ? (gpuNs / 1000000f) + " ms" : null);
             addStat(rows, "超分", mCarVideoView.hasEnhancedRenderer()
                     ? (mCarVideoView.isSuperResolutionRuntimeActive() ? "生效" : "待帧/关闭") : "不支持");
             addStat(rows, "时域平滑", mCarVideoView.hasEnhancedRenderer()

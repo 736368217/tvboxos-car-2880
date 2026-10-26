@@ -116,10 +116,22 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private int mDstFbo, mDstTexture, mDstW, mDstH;
     /** 超分 3 档：ACNet 多 Pass 模型 + 亮度/色度合成程序。 */
     private MpvHookPipeline mAnimePipeline;
-    private int mAnimeCompositeProgram;
+    private int mAnimeCompositeProgram, mAnimeLumaProgram;
+    /** 喂给 ACNet 的亮度平面（源分辨率）。 */
+    private int mSrcLumaFbo, mSrcLumaTexture, mSrcLumaW, mSrcLumaH;
     private boolean mAnimeTried;
+    /** 诊断：当前帧实际走的渲染路径与 GPU 耗时。 */
+    private String mLastPath = "BASELINE";
+    private boolean mLoggedPath;
+    private String mLoggedPathName = "";
+    private int mLoggedSrTier = -1, mLoggedMemcTier = -1;
+    private int mTimedFrames;
+    private volatile long mFrameGpuNs;
 
-    public GlEnhanceRenderView(Context context) { this(context, 0, false, false); }
+    /** 供 UI 显示：最近一帧的渲染路径（BASELINE / SGSR_BASELINE / FSR_EASU_RCAS / ANIME_CNN）。 */
+    public String getRenderPath() { return mLastPath; }
+
+    public long getLastFrameGpuNanos() { return mFrameGpuNs; }
     public GlEnhanceRenderView(Context context, int mode) { this(context, mode, false, false); }
     public GlEnhanceRenderView(Context context, int mode, int srTier, int memcTier) {
         this(context, mode, srTier > VideoEnhanceTiers.SR_OFF, memcTier > VideoEnhanceTiers.MEMC_OFF);
@@ -620,6 +632,8 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                 + " ok=" + mDocPipelineOk);
         mAnimeCompositeProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX,
                 VideoDocShaders.ANIME_COMPOSITE);
+        mAnimeLumaProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX,
+                VideoDocShaders.LUMA_PREFILTER);
         mAnimeTried = false;
         if (mAnimePipeline != null) {
             mAnimePipeline.release();
@@ -669,6 +683,9 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                 mDrawConfiguration = configuration;
                 mLoggedSr = false;
                 mFboHasFrame = false;
+                mTimedFrames = 0;
+                mLoggedPath = false;
+                GLES20.glGetError(); // 清掉历史错误，避免误报
                 if (mPostProcessSupported && (mPostProcessFailure.startsWith("FBO ") || "GL 绘制错误".equals(mPostProcessFailure))) {
                     mPostProcessFailure = "";
                     mFailedWidth = mFailedHeight = 0;
@@ -731,6 +748,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                     boolean advanced = configuration.srTier > VideoEnhanceTiers.SR_SGSR
                             || configuration.memcTier > VideoEnhanceTiers.MEMC_OVERSAMPLE;
                     boolean tierPath = advanced && mTierPipelineOk;
+                    long gpuStart = 0L;
+                    boolean timing = mTimedFrames < 3;
+                    if (timing) { GLES20.glFinish(); gpuStart = System.nanoTime(); }
+                    mLastPath = "BASELINE";
                     if (tierPath) {
                         int memcTier = configuration.memcTier;
                         int srcTexture = mFrameTextures[mRingHead];
@@ -752,6 +773,7 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                         }
                         mRuntimeSrActive = sr && srTier > VideoEnhanceTiers.SR_OFF;
                         mRuntimeInterpolationActive = memcTier > VideoEnhanceTiers.MEMC_OFF;
+                        if (mLastPath.equals("BASELINE")) mLastPath = "SGSR_BASELINE";
                     } else {
                         // 1 档基线（或高级管线不可用）：原 2 帧 ping-pong + 原输出 shader，行为与 r41 前一致
                         int prev = (mRingHead - 1 + RING) % RING;
@@ -765,12 +787,25 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                         mLastBlendNs = System.nanoTime();
                         mMixedOutputs++;
                     }
-                    if (!mLoggedSr || mLastSrActive != sr) {
-                        mLoggedSr = true;
-                        mLastSrActive = sr;
-                        Log.i(TAG, "output srTier=" + configuration.srTier + " memcTier=" + configuration.memcTier
-                                + " tierPath=" + tierPath + " active=" + sr + " alpha=" + alpha
-                                + " viewport=" + width + "x" + height);
+                    if (!mLoggedPath || !mLastPath.equals(mLoggedPathName)
+                            || mLoggedSrTier != configuration.srTier
+                            || mLoggedMemcTier != configuration.memcTier) {
+                        mLoggedPath = true;
+                        mLoggedPathName = mLastPath;
+                        mLoggedSrTier = configuration.srTier;
+                        mLoggedMemcTier = configuration.memcTier;
+                        Log.i(TAG, "path=" + mLastPath + " srTier=" + configuration.srTier
+                                + " memcTier=" + configuration.memcTier + " srActive=" + sr
+                                + " src=" + sw + "x" + sh + " dst=" + (mDstFbo != 0 ? mDstW + "x" + mDstH : "-")
+                                + " flow=" + (mFlowFbo != 0) + " memcFrames=" + mValidFrames
+                                + " viewport=" + width + "x" + height + " glErr=" + GLES20.glGetError());
+                    }
+                    if (timing) {
+                        GLES20.glFinish();
+                        mFrameGpuNs = System.nanoTime() - gpuStart;
+                        mTimedFrames++;
+                        Log.i(TAG, "gpu_frame path=" + mLastPath + " cost_ms="
+                                + (mFrameGpuNs / 1000000f));
                     }
                 }
             }
@@ -963,7 +998,9 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         GLES20.glGenFramebuffers(1, f, 0);
         mFlowTexture = t[0];
         mFlowFbo = f[0];
-        return createTarget(mFlowTexture, mFlowFbo, FLOW_W, FLOW_H);
+        boolean ok = createTarget(mFlowTexture, mFlowFbo, FLOW_W, FLOW_H);
+        if (ok) Log.i(TAG, "vram_alloc flow " + FLOW_W + "x" + FLOW_H + " = " + (FLOW_W * FLOW_H * 4 / 1048576f) + " MB");
+        return ok;
     }
 
     private boolean ensureDstTarget(int w, int h) {
@@ -983,7 +1020,9 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         mDstFbo = f[0];
         mDstW = w;
         mDstH = h;
-        return createTarget(mDstTexture, mDstFbo, w, h);
+        boolean ok = createTarget(mDstTexture, mDstFbo, w, h);
+        if (ok) Log.i(TAG, "vram_alloc sr_dst " + w + "x" + h + " = " + (w * h * 4 / 1048576f) + " MB");
+        return ok;
     }
 
     private void bindUniformTexture(int program, String name, int unit, int texture) {
@@ -1045,21 +1084,33 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         return mSynthTexture;
     }
 
+    /** 超分目标分辨率：固定为片源的 2 倍（与 viewport 无关），避免窗口尺寸抖动导致每帧重建 FBO。 */
+    private int srDstWidth(int srcW) {
+        return Math.min(Math.max(srcW * 2, 2), 4096);
+    }
+
+    private int srDstHeight(int srcH) {
+        return Math.min(Math.max(srcH * 2, 2), 4096);
+    }
+
     /**
      * 超分 2/3 档的文档实现。
-     * 2 档：§3.1 EASU Pass 写中间 FBO，RCAS Pass 上屏。
+     * 2 档：§3.1 EASU Pass 写到「片源 2x」的中间 FBO，RCAS Pass 再缩放到屏幕。
      * 3 档：§3.2 加载 assets/shaders 下的 ACNet 模型（MpvHookShaderCompiler 转译），
      *       CNN 重建亮度后按亮度比例回填色度；模型不可用时回退 2 档并打日志。
      * 返回 false 表示不可用，调用方回退到基线输出。
      */
     private boolean drawSrDoc(int width, int height, int tier, int srcTexture, int srcW, int srcH) {
         if (!mDocPipelineOk) return false;
-        if (tier >= VideoEnhanceTiers.SR_ANIME && drawAnimeSr(width, height, srcTexture, srcW, srcH)) {
+        int dstW = srDstWidth(srcW);
+        int dstH = srDstHeight(srcH);
+        if (tier >= VideoEnhanceTiers.SR_ANIME && drawAnimeSr(width, height, srcTexture, srcW, srcH, dstW, dstH)) {
+            mLastPath = "ANIME_CNN";
             return true;
         }
-        if (!ensureDstTarget(width, height)) return false;
+        if (!ensureDstTarget(dstW, dstH)) return false;
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mDstFbo);
-        GLES20.glViewport(0, 0, width, height);
+        GLES20.glViewport(0, 0, dstW, dstH);
         bindUniformTexture(mEasuProgram, "uInputTex", 0, srcTexture);
         GLES20.glUniform4f(GLES20.glGetUniformLocation(mEasuProgram, "uSrcSize"),
                 1f / srcW, 1f / srcH, srcW, srcH);
@@ -1070,18 +1121,28 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         GLES20.glViewport(0, 0, width, height);
         bindUniformTexture(mRcasProgram, "uEasuTex", 0, mDstTexture);
         GLES20.glUniform2f(GLES20.glGetUniformLocation(mRcasProgram, "uInvDstSize"),
-                1f / width, 1f / height);
+                1f / dstW, 1f / dstH);
         GLES20.glUniform1f(GLES20.glGetUniformLocation(mRcasProgram, "uSharpnessStop"), 0.25f);
         drawQuad(GLES20.glGetAttribLocation(mRcasProgram, "aPosition"),
                 GLES20.glGetAttribLocation(mRcasProgram, "aTexCoord"));
         unbindFrameTextures(1);
+        mLastPath = "FSR_EASU_RCAS";
         return true;
     }
 
     /** 超分 3 档：ACNet（MIT, ACNetGLSL v3.2）亮度重建 + 色度比例回填。 */
-    private boolean drawAnimeSr(int width, int height, int srcTexture, int srcW, int srcH) {
-        if (!ensureAnimePipeline() || mAnimeCompositeProgram == 0) return false;
-        int lumaTex = mAnimePipeline.draw(srcTexture, srcW, srcH, width, height);
+    private boolean drawAnimeSr(int width, int height, int srcTexture, int srcW, int srcH,
+                                int dstW, int dstH) {
+        if (!ensureAnimePipeline() || mAnimeCompositeProgram == 0 || mAnimeLumaProgram == 0) return false;
+        if (!ensureSrcLuma(srcW, srcH)) return false;
+        // 先把 RGB 转成 Rec.709 亮度平面，网络才拿到正确的 LUMA 输入
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mSrcLumaFbo);
+        GLES20.glViewport(0, 0, srcW, srcH);
+        bindUniformTexture(mAnimeLumaProgram, "uTexture", 0, srcTexture);
+        drawQuad(GLES20.glGetAttribLocation(mAnimeLumaProgram, "aPosition"),
+                GLES20.glGetAttribLocation(mAnimeLumaProgram, "aTexCoord"));
+        unbindFrameTextures(1);
+        int lumaTex = mAnimePipeline.draw(mSrcLumaTexture, srcW, srcH, dstW, dstH);
         if (lumaTex == 0) return false;
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glViewport(0, 0, width, height);
@@ -1091,6 +1152,30 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                 GLES20.glGetAttribLocation(mAnimeCompositeProgram, "aTexCoord"));
         unbindFrameTextures(2);
         return true;
+    }
+
+    /** 源分辨率的亮度平面，供 mpv LUMA hook 模型使用。 */
+    private boolean ensureSrcLuma(int w, int h) {
+        if (mSrcLumaFbo != 0 && mSrcLumaW == w && mSrcLumaH == h) return true;
+        if (mSrcLumaFbo != 0) {
+            int[] f = {mSrcLumaFbo};
+            int[] t = {mSrcLumaTexture};
+            GLES20.glDeleteFramebuffers(1, f, 0);
+            GLES20.glDeleteTextures(1, t, 0);
+            mSrcLumaFbo = 0;
+            mSrcLumaTexture = 0;
+        }
+        int[] t = new int[1];
+        int[] f = new int[1];
+        GLES20.glGenTextures(1, t, 0);
+        GLES20.glGenFramebuffers(1, f, 0);
+        mSrcLumaTexture = t[0];
+        mSrcLumaFbo = f[0];
+        mSrcLumaW = w;
+        mSrcLumaH = h;
+        boolean ok = createTarget(mSrcLumaTexture, mSrcLumaFbo, w, h);
+        if (ok) Log.i(TAG, "vram_alloc src_luma " + w + "x" + h + " = " + (w * h * 4 / 1048576f) + " MB");
+        return ok;
     }
 
     private boolean ensureAnimePipeline() {
@@ -1244,6 +1329,10 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         if (mEasuProgram != 0) { GLES20.glDeleteProgram(mEasuProgram); mEasuProgram = 0; }
         if (mRcasProgram != 0) { GLES20.glDeleteProgram(mRcasProgram); mRcasProgram = 0; }
         if (mAnimeCompositeProgram != 0) { GLES20.glDeleteProgram(mAnimeCompositeProgram); mAnimeCompositeProgram = 0; }
+        if (mAnimeLumaProgram != 0) { GLES20.glDeleteProgram(mAnimeLumaProgram); mAnimeLumaProgram = 0; }
+        if (mSrcLumaFbo != 0) { int[] f = {mSrcLumaFbo}; GLES20.glDeleteFramebuffers(1, f, 0); mSrcLumaFbo = 0; }
+        if (mSrcLumaTexture != 0) { int[] t = {mSrcLumaTexture}; GLES20.glDeleteTextures(1, t, 0); mSrcLumaTexture = 0; }
+        mSrcLumaW = mSrcLumaH = 0;
         if (mAnimePipeline != null) { mAnimePipeline.release(); mAnimePipeline = null; }
         mAnimeTried = false;
         mDocPipelineOk = false;

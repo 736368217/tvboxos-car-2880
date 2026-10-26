@@ -190,6 +190,16 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
         return hasEnhancedRenderer()
                 && ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView)
                 .isInterpolationActive();
+
+    }
+    public String getRenderPath() {
+        return hasEnhancedRenderer()
+                ? ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).getRenderPath() : "-";
+    }
+
+    public long getLastFrameGpuNanos() {
+        return hasEnhancedRenderer()
+                ? ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).getLastFrameGpuNanos() : 0L;
     }
 
 

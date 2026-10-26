@@ -33,6 +33,7 @@ public final class MpvHookPipeline {
     private final Map<String, Target> targets = new LinkedHashMap<>();
     private int finalFbo, finalTexture, finalW, finalH;
     private boolean released;
+    private boolean loggedVram;
     private final FloatBuffer positions;
     private final FloatBuffer coordinates;
 
@@ -128,6 +129,13 @@ public final class MpvHookPipeline {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         }
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        if (!loggedVram) {
+            loggedVram = true;
+            long bytes = (long) finalW * finalH * 4L;
+            for (Target target : targets.values()) bytes += (long) target.width * target.height * 4L;
+            Log.i(TAG, "vram_alloc anime_model passes=" + passes.size() + " targets=" + targets.size()
+                    + " = " + (bytes / 1048576f) + " MB");
+        }
         return finalTexture;
     }
 

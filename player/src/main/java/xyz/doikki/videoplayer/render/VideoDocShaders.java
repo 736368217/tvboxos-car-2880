@@ -164,8 +164,19 @@ public final class VideoDocShaders {
     public static final String ANIME_COMPOSITE = HEADER
             + "uniform sampler2D uLumaTex;\nuniform sampler2D uSrcTex;\n"
             + "void main(){vec3 s=texture2D(uSrcTex,vTexCoord).rgb;"
-            + "float sy=dot(s,vec3(0.299,0.587,0.114));"
+            // Rec.709 luma，与喂给网络的 LUMA 平面一致
+            + "float sy=dot(s,vec3(0.2126,0.7152,0.0722));"
             + "float ny=texture2D(uLumaTex,vTexCoord).r;"
-            + "vec3 rgb=s*(ny/max(sy,0.004));"
-            + "gl_FragColor=vec4(clamp(rgb,0.0,1.0),1.0);}\n";
+            + "float k=ny/max(sy,0.004);"
+            + "gl_FragColor=vec4(clamp(s*clamp(k,0.25,4.0),0.0,1.0),1.0);}\n";
+
+    /**
+     * 亮度预滤波：ACNet 之类的 mpv LUMA hook 模型拿的是「亮度平面」（单通道），
+     * 而我们的输入是 OES/RGB 纹理。这里先做一次 RGB→Rec.709 luma，把网络喂对，
+     * 否则模型看到的是 R 通道（红），输出与真实亮度比例不符，画面会整体压暗。
+     */
+    public static final String LUMA_PREFILTER = HEADER
+            + "uniform sampler2D uTexture;\n"
+            + "void main(){float y=dot(texture2D(uTexture,vTexCoord).rgb,vec3(0.2126,0.7152,0.0722));"
+            + "gl_FragColor=vec4(y,y,y,1.0);}\n";
 }
