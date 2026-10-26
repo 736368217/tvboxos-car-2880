@@ -107,6 +107,8 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private long mLastOutputNs, mStatsStartNs, mStatsSource, mStatsOutput, mStatsMixed;
     private boolean mLoggedSr, mLastSrActive;
     private int mDrawErrors;
+    /** 新档位管线（4 帧 ring + 新 shader）是否可用；不可用时自动走回原 2 帧基线管线。 */
+    private boolean mTierPipelineOk;
 
     public GlEnhanceRenderView(Context context) { this(context, 0, false, false); }
     public GlEnhanceRenderView(Context context, int mode) { this(context, mode, false, false); }
@@ -585,10 +587,24 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             GLES20.glUseProgram(mSrPrograms[i]);
             GLES20.glUniform1i(mSrTex[i], 0);
         }
-        mPostProcessSupported = mMemcProgram != 0 && srOk;
+        // 原 2 帧基线管线：任何情况下都保留，1 档/回退都走它
+        mOutputProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoShaders.OUTPUT_FRAGMENT);
+        if (mOutputProgram != 0) {
+            oPosition = GLES20.glGetAttribLocation(mOutputProgram, "aPosition");
+            oCoordinate = GLES20.glGetAttribLocation(mOutputProgram, "aTexCoord");
+            oViewport = GLES20.glGetUniformLocation(mOutputProgram, "uViewportInfo");
+            oParams = GLES20.glGetUniformLocation(mOutputProgram, "uParams");
+            GLES20.glUseProgram(mOutputProgram);
+            GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uCurrFrameTex"), 0);
+            GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uPrevFrameTex"), 1);
+        }
+        mTierPipelineOk = mMemcProgram != 0 && srOk;
+        mPostProcessSupported = mOutputProgram != 0 || mTierPipelineOk;
         if (!mPostProcessSupported) {
             mPostProcessFailure = "输出 shader 编译或链接失败";
-            Log.w(TAG, "POSTPROCESS_FALLBACK tier shader failed; direct OES colour only");
+            Log.w(TAG, "POSTPROCESS_FALLBACK all shaders failed; direct OES colour only");
+        } else if (!mTierPipelineOk) {
+            Log.w(TAG, "TIER_PIPELINE_UNAVAILABLE new tier shaders failed; fallback to baseline program");
         }
         createProducerSurface();
         Log.i(TAG, "GL ready version=" + GLES20.glGetString(GLES20.GL_VERSION)
@@ -683,28 +699,41 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                     float alpha = mHasPrevious
                             ? mTiming.blendAlpha(System.nanoTime(), configuration.interpolation, shouldAnimate())
                             : 0;
-                    int memcTier = configuration.memcTier;
-                    int srcTexture;
-                    if (memcTier > VideoEnhanceTiers.MEMC_OFF && mValidFrames >= 2 && alpha > 0.002f) {
-                        srcTexture = drawMemc(sw, sh, memcTier, alpha);
-                    } else {
-                        srcTexture = mFrameTextures[mRingHead];
-                    }
                     boolean sr = VideoPostProcessPolicy.superResolutionActive(configuration.superResolution,
                             sw, sh, width, height);
-                    int srTier = sr ? configuration.srTier : VideoEnhanceTiers.SR_OFF;
-                    drawSr(width, height, srTier, srcTexture, sw, sh, configuration.preset);
-                    mRuntimeSrActive = sr && srTier > VideoEnhanceTiers.SR_OFF;
-                    if (alpha > 0.001f) {
+                    boolean advanced = configuration.srTier > VideoEnhanceTiers.SR_SGSR
+                            || configuration.memcTier > VideoEnhanceTiers.MEMC_OVERSAMPLE;
+                    boolean tierPath = advanced && mTierPipelineOk;
+                    if (tierPath) {
+                        int memcTier = configuration.memcTier;
+                        int srcTexture;
+                        if (memcTier > VideoEnhanceTiers.MEMC_OFF && mValidFrames >= 2 && alpha > 0.002f) {
+                            srcTexture = drawMemc(sw, sh, memcTier, alpha);
+                        } else {
+                            srcTexture = mFrameTextures[mRingHead];
+                        }
+                        int srTier = sr ? configuration.srTier : VideoEnhanceTiers.SR_OFF;
+                        drawSr(width, height, srTier, srcTexture, sw, sh, configuration.preset);
+                        mRuntimeSrActive = sr && srTier > VideoEnhanceTiers.SR_OFF;
                         mRuntimeInterpolationActive = memcTier > VideoEnhanceTiers.MEMC_OFF;
+                    } else {
+                        // 1 档基线（或高级管线不可用）：原 2 帧 ping-pong + 原输出 shader，行为与 r41 前一致
+                        int prev = (mRingHead - 1 + RING) % RING;
+                        drawOutputBaseline(width, height, sr, alpha, configuration.preset,
+                                mFrameTextures[mRingHead],
+                                mFrameTextures[mHasPrevious ? prev : mRingHead]);
+                        mRuntimeSrActive = sr;
+                        mRuntimeInterpolationActive = configuration.interpolation;
+                    }
+                    if (alpha > 0.001f) {
                         mLastBlendNs = System.nanoTime();
                         mMixedOutputs++;
                     }
                     if (!mLoggedSr || mLastSrActive != sr) {
                         mLoggedSr = true;
                         mLastSrActive = sr;
-                        Log.i(TAG, "output srTier=" + srTier + " memcTier=" + memcTier
-                                + " active=" + sr + " alpha=" + alpha
+                        Log.i(TAG, "output srTier=" + configuration.srTier + " memcTier=" + configuration.memcTier
+                                + " tierPath=" + tierPath + " active=" + sr + " alpha=" + alpha
                                 + " viewport=" + width + "x" + height);
                     }
                 }
@@ -832,6 +861,21 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         drawQuad(mMemcPos, mMemcTex);
         unbindFrameTextures(4);
         return mSynthTexture;
+    }
+
+    /** 原始基线输出：2 帧混合 + 原 SGSR 输出 shader（1 档与回退路径）。 */
+    private void drawOutputBaseline(int width, int height, boolean sr, float alpha,
+                                    VideoEnhancePreset preset, int currTexture, int prevTexture) {
+        if (mOutputProgram == 0) return;
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        GLES20.glViewport(0, 0, width, height);
+        GLES20.glUseProgram(mOutputProgram);
+        bindFrameTexture(0, currTexture);
+        bindFrameTexture(1, prevTexture);
+        GLES20.glUniform4f(oViewport, 1f / mFboWidth, 1f / mFboHeight, mFboWidth, mFboHeight);
+        GLES20.glUniform3f(oParams, sr ? 1f : 0f, preset.sgsrSharpness, alpha);
+        drawQuad(oPosition, oCoordinate);
+        unbindFrameTextures(2);
     }
 
     /** 按档位把源纹理放大上屏（0=直通，1=SGSR，2=FSR，3=Anime）。 */
