@@ -330,6 +330,36 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
             ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).setPlaybackActive(active);
         }
     }
+    /**
+     * 应用内音量：0..1 直接交给播放器（ExoPlayer/IJK 都只吃 0..1），
+     * >1 的部分交给 LoudnessEnhancer，否则 100% 和 200% 听感完全一样。
+     */
+    @Override
+    public void setVolume(float v1, float v2) {
+        float gain = Math.max(v1, v2);
+        float base = com.github.tvbox.osc.car.VolumeBoostMath.playerVolume(gain);
+        super.setVolume(base, base);
+        CarEnhance.setAppGain(this, gain);
+    }
+
+    @Override
+    public void setMute(boolean isMute) {
+        super.setMute(isMute);
+        CarEnhance.setVolumeFactor(this, isMute ? 0f : 1f);
+    }
+
+    @Override
+    public void duckVolume(float factor) {
+        super.duckVolume(factor);
+        CarEnhance.setVolumeFactor(this, factor);
+    }
+
+    @Override
+    public void restoreVolume() {
+        super.restoreVolume();
+        CarEnhance.setVolumeFactor(this, 1f);
+    }
+
 
     @Override
     public void updateTimer(DanmakuTimer timer) {

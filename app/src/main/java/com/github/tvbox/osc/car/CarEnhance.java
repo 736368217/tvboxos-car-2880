@@ -33,6 +33,11 @@ import xyz.doikki.videoplayer.render.VideoPostProcessPolicy;
 public final class CarEnhance {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static java.lang.ref.WeakReference<MyVideoView> activeVideo = new java.lang.ref.WeakReference<>(null);
+    /** 应用内音量增益（0..2）；>1 的部分由 LoudnessEnhancer 放大。 */
+    private static float appGain = 1f;
+    /** 增益换算（含静音/闪避与量化）统一走 VolumeBoostMath，便于宿主机验证。 */
+    /** 静音(0)/闪避(0..1) 时同步压缩增幅，避免静音了还在放大。 */
+    private static float volumeFactor = 1f;
 
     private CarEnhance() {
     }
@@ -63,10 +68,35 @@ public final class CarEnhance {
         }
         int mode = audioMode();
         int session = view.getAudioSessionId();
-        AudioEffectController.apply(mode, session);
-        Log.i("CarAudio", "runtime_apply mode=" + mode + " session=" + session
-                + " active=" + AudioEffectController.isActive() + " state=" + view.getCurrentPlayState()
+        int boost = boostMillibel();
+        AudioEffectController.apply(mode, session, boost);
+        Log.i("CarAudio", "runtime_apply mode=" + mode + " session=" + session + " gain=" + appGain
+                + " boostMb=" + boost + " enabled=" + AudioEffectController.isActive()
+                + " state=" + view.getCurrentPlayState()
                 + " player=" + System.identityHashCode(view.getMediaPlayer()));
+    }
+
+    /**
+     * 应用内音量增益（0..2）。播放器本身只吃 0..1，>1 的部分由 LoudnessEnhancer 真正放大，
+     * 否则 100% 和 200% 听感一样（ExoPlayer/IJK 的 setVolume 都会被钳到 1.0）。
+     */
+    public static void setAppGain(MyVideoView view, float gain) {
+        appGain = Math.max(0f, Math.min(2f, gain));
+        applyAudio(view);
+    }
+
+    public static float appGain() {
+        return appGain;
+    }
+
+    /** 1.0 → 0 dB；2.0 → +6 dB（电压 2 倍，对应「200%」）。静音/闪避按系数压缩。 */
+    private static int boostMillibel() {
+        return VolumeBoostMath.millibel(appGain, volumeFactor);
+    }
+    /** 静音(true)/恢复(false) 或音频焦点闪避时同步调整增幅。 */
+    public static void setVolumeFactor(MyVideoView view, float factor) {
+        volumeFactor = Math.max(0f, Math.min(1f, factor));
+        applyAudio(view);
     }
 
     public static void releaseAudio() {

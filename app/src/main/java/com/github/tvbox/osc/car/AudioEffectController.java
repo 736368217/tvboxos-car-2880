@@ -29,6 +29,8 @@ public final class AudioEffectController {
 
     private static final int FADE_STEPS = 16, MSG_FADE_STEP = 1;
     private static final long FADE_STEP_MILLIS = 32L;
+    /** LoudnessEnhancer 目标增益上限（mB）；+12 dB 已经很猛，避免破音。 */
+    private static final int MAX_BOOST_MB = 1200;
 
     /** 500 ms fade-in (16 steps x 32 ms) driven on the main looper. */
     private static final Handler FADE = new Handler(Looper.getMainLooper(), new Handler.Callback() {
@@ -55,6 +57,8 @@ public final class AudioEffectController {
     private static int[] eqStart, eqTarget;
     private static int eqMin = Short.MIN_VALUE, eqMax = Short.MAX_VALUE;
     private static int bassStart, bassTarget, virtualStart, virtualTarget, loudnessStart, loudnessTarget, fadeIndex;
+    /** 音量增益档：>100% 时额外提升的 mB（0 表示不提升）。 */
+    private static int boostMb;
 
     private AudioEffectController() {
     }
@@ -66,30 +70,34 @@ public final class AudioEffectController {
     public static String label(int mode) {
         return "音效:" + name(mode);
     }
-
-    /** Attach or retarget the chain; mode 关闭 or an invalid session id releases it. */
-    public static void apply(int mode, int audioSessionId) {
+    public static void apply(int mode, int audioSessionId, int boostMillibel) {
         if (mode < MODE_OFF || mode >= MODE_COUNT) mode = MODE_OFF;
-        if (mode == MODE_OFF || audioSessionId <= 0) {
+        int boost = Math.max(0, Math.min(MAX_BOOST_MB, boostMillibel));
+        if ((mode == MODE_OFF && boost == 0) || audioSessionId <= 0) {
             release();
             return;
         }
         boolean reuse = equalizer != null && audioSessionId == sessionId;
-        if (reuse && mode == currentMode) return;
+        if (reuse && mode == currentMode && boost == boostMb) return;
         if (!reuse) {
             release();
             sessionId = audioSessionId;
             buildChain(audioSessionId);
         }
         currentMode = mode;
+        boostMb = boost;
         computeTargets(mode);
         captureStart(reuse);
         active = true;
         enableChain();
         FADE.removeMessages(MSG_FADE_STEP); fadeIndex = 0;
         FADE.sendEmptyMessage(MSG_FADE_STEP);
+        int loudnessNow = -1;
+        try { if (loudness != null) loudnessNow = Math.round(loudness.getTargetGain()); } catch (Throwable ignored) { }
         android.util.Log.i("CarAudio", "applied mode=" + mode + " name=" + name(mode) + " session=" + audioSessionId
-                + " bass=" + bassTarget + " virtualizer=" + virtualTarget + " loudness=" + loudnessTarget);
+                + " bass=" + bassTarget + " virtualizer=" + virtualTarget
+                + " loudness=" + loudnessTarget + " boostMb=" + boost
+                + " loudnessNow=" + loudnessNow + " enabled=" + isActive());
     }
 
     /** Disable and release the four effects, stop a running fade and reset all state. */
@@ -103,14 +111,21 @@ public final class AudioEffectController {
         bassStart = bassTarget = virtualStart = virtualTarget = loudnessStart = loudnessTarget = 0;
         bassSupported = virtualSupported = false;
         sessionId = 0;
+        boostMb = 0;
         currentMode = MODE_OFF;
         active = false;
     }
 
     /** Diagnostics: true while the chain is attached on a valid session and enabled. */
     public static boolean isActive() {
-        if (!active || equalizer == null) return false;
-        try { return equalizer.getEnabled(); } catch (Throwable error) { return false; }
+        if (!active) return false;
+        try {
+            if (equalizer != null) return equalizer.getEnabled();
+            if (loudness != null) return loudness.getEnabled();
+        } catch (Throwable error) {
+            return false;
+        }
+        return false;
     }
 
     /** Tolerant bridge from the old boolean pref: true -> 影院, false/null/other -> 关闭. */
@@ -123,13 +138,17 @@ public final class AudioEffectController {
         try { bassBoost = new BassBoost(0, session); } catch (Throwable ignored) { bassBoost = null; }
         try { virtualizer = new Virtualizer(0, session); } catch (Throwable ignored) { virtualizer = null; }
         try { loudness = new LoudnessEnhancer(session); } catch (Throwable ignored) { loudness = null; }
+        if (loudness == null) {
+            android.util.Log.w("CarAudio", "loudness_unavailable session=" + session
+                    + "：设备没有 LoudnessEnhancer，>100% 音量无法放大");
+        }
     }
 
     private static void computeTargets(int mode) {
         AudioEffectPreset preset = AudioEffectPreset.forMode(mode);
         bassTarget = preset.bass;
         virtualTarget = preset.virtualizer;
-        loudnessTarget = preset.loudness;
+        loudnessTarget = preset.loudness + boostMb;
         try { bassSupported = bassBoost != null && bassTarget > 0 && bassBoost.getStrengthSupported(); } catch (Throwable ignored) { bassSupported = false; }
         try { virtualSupported = virtualizer != null && virtualTarget > 0 && virtualizer.getStrengthSupported(); } catch (Throwable ignored) { virtualSupported = false; }
         eqStart = null; eqTarget = null;
