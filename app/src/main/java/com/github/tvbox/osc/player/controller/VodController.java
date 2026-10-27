@@ -392,10 +392,16 @@ public class VodController extends BaseController {
         String text = size[0] + " X " + size[1];
         if (mCarVideoView != null && mCarVideoView.hasEnhancedRenderer()
                 && mCarVideoView.isSuperResolutionRuntimeActive()) {
-            View renderView = mCarVideoView.getRenderViewForDiagnostics();
-            if (renderView != null && renderView.getWidth() > 0 && renderView.getHeight() > 0) {
-                text = text + " → 超分 " + renderView.getWidth() + " X " + renderView.getHeight();
+            // 优先用渲染器的超分目标尺寸：窗口重排时 renderView 尺寸会短暂为 0，
+            // 直接读它会让左上角「超分 WxH」时有时无。
+            String srSize = mCarVideoView.getSrTargetSizeText();
+            if (srSize == null) {
+                View renderView = mCarVideoView.getRenderViewForDiagnostics();
+                if (renderView != null && renderView.getWidth() > 0 && renderView.getHeight() > 0) {
+                    srSize = renderView.getWidth() + " X " + renderView.getHeight();
+                }
             }
+            if (srSize != null) text = text + " → 超分 " + srSize;
         }
         return text;
     }

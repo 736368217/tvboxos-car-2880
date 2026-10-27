@@ -131,6 +131,11 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     /** 供 UI 显示：最近一帧的渲染路径（BASELINE / SGSR_BASELINE / FSR_EASU_RCAS / ANIME_CNN）。 */
     public String getRenderPath() { return mLastPath; }
 
+    /** 超分目标尺寸文本（如 3840 X 2160）；未分配时返回 null，供左上角信息展示。 */
+    public String getSrTargetSizeText() {
+        return mDstFbo != 0 && mDstW > 0 && mDstH > 0 ? (mDstW + " X " + mDstH) : null;
+    }
+
     public long getLastFrameGpuNanos() { return mFrameGpuNs; }
     public GlEnhanceRenderView(Context context, int mode) { this(context, mode, false, false); }
     public GlEnhanceRenderView(Context context, int mode, int srTier, int memcTier) {
@@ -719,11 +724,14 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             boolean postProcessRequested = configuration.superResolution || configuration.interpolation;
             boolean postProcess = isRuntimePostProcessAvailable() && postProcessRequested;
             mRuntimeColourActive = configuration.preset.id != VideoEnhancePreset.ORIGINAL;
-            mRuntimeSrActive = false;
             mRuntimeInterpolationActive = false;
+            boolean srAppliedNow = false;
+            boolean memcAppliedNow = false;
+            String srReason = postProcess ? "pending" : "postProcessOff:" + mPostProcessFailure;
+            int sw = 0, sh = 0;
             if (postProcess) {
-                int sw = mVideoWidth > 0 ? mVideoWidth : width;
-                int sh = mVideoHeight > 0 ? mVideoHeight : height;
+                sw = mVideoWidth > 0 ? mVideoWidth : width;
+                sh = mVideoHeight > 0 ? mVideoHeight : height;
                 boolean resized = mFboWidth != sw || mFboHeight != sh;
                 postProcess = ensureFrameBuffers(sw, sh);
                 if (postProcess) {
@@ -771,8 +779,9 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                             drawOutputBaseline(width, height, sr, memcApplied ? 0f : alpha,
                                     configuration.preset, srcTexture, srcTexture);
                         }
-                        mRuntimeSrActive = sr && srTier > VideoEnhanceTiers.SR_OFF;
-                        mRuntimeInterpolationActive = memcTier > VideoEnhanceTiers.MEMC_OFF;
+                        srAppliedNow = sr && srTier > VideoEnhanceTiers.SR_OFF;
+                        memcAppliedNow = memcTier > VideoEnhanceTiers.MEMC_OFF;
+                        srReason = srAppliedNow ? "active:" + mLastPath : (sr ? "srPassSkipped" : "policyInactive");
                         String srName = (mLastPath.startsWith("SR") || mLastPath.contains("FSR") || mLastPath.contains("ANIME"))
                                 ? mLastPath
                                 : (sr ? "SR1_SGSR" : "SR0_OFF");
@@ -786,9 +795,12 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                         drawOutputBaseline(width, height, sr, alpha, configuration.preset,
                                 mFrameTextures[mRingHead],
                                 mFrameTextures[mHasPrevious ? prev : mRingHead]);
-                        mRuntimeSrActive = sr;
-                        mRuntimeInterpolationActive = configuration.interpolation;
+                        srAppliedNow = sr;
+                        memcAppliedNow = configuration.interpolation;
+                        srReason = srAppliedNow ? "active:SGSR_BASELINE" : "policyInactive";
                     }
+                    applyRuntimeState(srAppliedNow, memcAppliedNow, postProcess, srReason,
+                            width, height, sw, sh, configuration);
                     if (alpha > 0.001f) {
                         mLastBlendNs = System.nanoTime();
                         mMixedOutputs++;
@@ -985,6 +997,51 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         }
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
     }
+    // 运行状态去抖：单帧抖动不该让 UI 显示「超分已关闭」
+    private int mSrOffStreak;
+    private boolean mSrReported;
+    private int mLastSrcW, mLastSrcH;
+    private int mSrHeartbeat;
+
+    /**
+     * 发布运行时状态。只有「配置关闭 / 后处理硬失败 / 连续 30 帧都没生效」才把 SR 标成关闭；
+     * 单帧的窗口尺寸抖动、丢帧、FBO 重建都不会让左上角提示闪烁。
+     */
+    private void applyRuntimeState(boolean srApplied, boolean memcApplied, boolean postProcess,
+                                   String reason, int viewportW, int viewportH,
+                                   int srcW, int srcH, VideoEnhanceConfig configuration) {
+        if (srApplied) {
+            mSrOffStreak = 0;
+            mRuntimeSrActive = true;
+        } else if (configuration.srTier <= VideoEnhanceTiers.SR_OFF || !mPostProcessSupported) {
+            mRuntimeSrActive = false;
+        } else if (++mSrOffStreak >= 30) {
+            mRuntimeSrActive = false;
+        }
+        mRuntimeInterpolationActive = memcApplied;
+        mLastSrActive = srApplied;
+        if (++mSrHeartbeat >= 600) {
+            mSrHeartbeat = 0;
+            Log.i(TAG, "sr_heartbeat srApplied=" + srApplied + " state=" + mRuntimeSrActive
+                    + " path=" + mLastPath + " cfgSr=" + configuration.srTier
+                    + " src=" + srcW + "x" + srcH + " viewport=" + viewportW + "x" + viewportH
+                    + " failure=" + mPostProcessFailure);
+        }
+        if (srApplied != mSrReported) {
+            mSrReported = srApplied;
+            Log.i(TAG, "sr_state=" + (srApplied ? "ON" : "OFF") + " reason=" + reason
+                    + " cfgSr=" + configuration.srTier + " cfgMemc=" + configuration.memcTier
+                    + " postProcess=" + postProcess + " streak=" + mSrOffStreak
+                    + " src=" + srcW + "x" + srcH + " viewport=" + viewportW + "x" + viewportH
+                    + " failure=" + mPostProcessFailure);
+        }
+        if (srcW > 0 && (srcW != mLastSrcW || srcH != mLastSrcH)) {
+            mLastSrcW = srcW;
+            mLastSrcH = srcH;
+            Log.i(TAG, "src_changed " + srcW + "x" + srcH + " viewport=" + viewportW + "x" + viewportH);
+        }
+    }
+
     private void drawQuad(int position,int coordinate) {
         mPositions.position(0); mCoordinates.position(0);
         GLES20.glEnableVertexAttribArray(position); GLES20.glEnableVertexAttribArray(coordinate);

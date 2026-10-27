@@ -202,6 +202,12 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
                 ? ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).getLastFrameGpuNanos() : 0L;
     }
 
+    public String getSrTargetSizeText() {
+        return hasEnhancedRenderer()
+                ? ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).getSrTargetSizeText()
+                : null;
+    }
+
 
     public long getPlaybackPosition() {
         return mCurrentPosition;
