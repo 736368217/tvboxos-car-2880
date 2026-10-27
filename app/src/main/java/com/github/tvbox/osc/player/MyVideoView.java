@@ -190,6 +190,22 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
         return hasEnhancedRenderer()
                 && ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView)
                 .isInterpolationActive();
+
+    }
+    public String getRenderPath() {
+        return hasEnhancedRenderer()
+                ? ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).getRenderPath() : "-";
+    }
+
+    public long getLastFrameGpuNanos() {
+        return hasEnhancedRenderer()
+                ? ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).getLastFrameGpuNanos() : 0L;
+    }
+
+    public String getSrTargetSizeText() {
+        return hasEnhancedRenderer()
+                ? ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).getSrTargetSizeText()
+                : null;
     }
 
 
@@ -290,6 +306,19 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
                 + " state=" + getCurrentPlayState() + " player=" + System.identityHashCode(mMediaPlayer));
     }
 
+    /** 档位版：直接按 srTier / memcTier 下发，HDR 仍然只旁路调色不改档位。 */
+    public void setVideoEnhanceTiers(int mode, int srTier, int memcTier) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mEnhanceMain.post(() -> setVideoEnhanceTiers(mode, srTier, memcTier));
+            return;
+        }
+        boolean hdr = isHdrVideo();
+        VideoEnhanceConfig configuration = new VideoEnhanceConfig(mode, srTier, memcTier).forHdr(hdr);
+        super.setVideoEnhanceTiers(configuration.preset.id, configuration.srTier, configuration.memcTier);
+        Log.i("CarVideo", "runtime_tiers requestedMode=" + mode + " effectiveMode=" + configuration.preset.id
+                + " hdrBypass=" + hdr + " srTier=" + configuration.srTier + " memcTier=" + configuration.memcTier
+                + " state=" + getCurrentPlayState() + " player=" + System.identityHashCode(mMediaPlayer));
+    }
     @Override
     protected void setPlayState(int state) {
         super.setPlayState(state);

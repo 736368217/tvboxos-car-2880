@@ -88,6 +88,7 @@ import com.github.tvbox.osc.player.MyVideoView;
 import xyz.doikki.videoplayer.controller.MediaPlayerControl;
 import xyz.doikki.videoplayer.player.VideoView;
 import xyz.doikki.videoplayer.render.VideoEnhancePreset;
+import xyz.doikki.videoplayer.render.VideoEnhanceTiers;
 
 import static xyz.doikki.videoplayer.util.PlayerUtils.stringForTime;
 import static xyz.doikki.videoplayer.util.PlayerUtils.safeTimeMs;
@@ -365,16 +366,18 @@ public class VodController extends BaseController {
         updateCarEnhanceButtons();
     }
 
-    /** 播放增强四按钮：两字名称 + 开关状态。 */
+    /** 播放增强四按钮：两字名称 + 档位/开关状态。 */
     private void updateCarEnhanceButtons() {
         if (mCarVideoBtn != null) {
             mCarVideoBtn.setText("滤镜" + (CarEnhance.videoEnhanceEnabled() ? "开" : "关"));
         }
         if (mCarSrBtn != null) {
-            mCarSrBtn.setText("超分" + (CarEnhance.videoSrEnabled() ? "开" : "关"));
+            int tier = CarEnhance.srTier();
+            mCarSrBtn.setText(tier == VideoEnhanceTiers.SR_OFF ? "超分关" : "超分" + tier);
         }
         if (mCarInterpBtn != null) {
-            mCarInterpBtn.setText("补帧" + (CarEnhance.videoInterpEnabled() ? "开" : "关"));
+            int tier = CarEnhance.memcTier();
+            mCarInterpBtn.setText(tier == VideoEnhanceTiers.MEMC_OFF ? "补帧关" : "补帧" + tier);
         }
         if (mCarAudioBtn != null) {
             mCarAudioBtn.setText("音效" + (CarEnhance.audioMode() != AudioEffectController.MODE_OFF ? "开" : "关"));
@@ -404,10 +407,16 @@ public class VodController extends BaseController {
         String text = size[0] + " X " + size[1];
         if (mCarVideoView != null && mCarVideoView.hasEnhancedRenderer()
                 && mCarVideoView.isSuperResolutionRuntimeActive()) {
-            View renderView = mCarVideoView.getRenderViewForDiagnostics();
-            if (renderView != null && renderView.getWidth() > 0 && renderView.getHeight() > 0) {
-                text = text + " → 超分 " + renderView.getWidth() + " X " + renderView.getHeight();
+            // 优先用渲染器的超分目标尺寸：窗口重排时 renderView 尺寸会短暂为 0，
+            // 直接读它会让左上角「超分 WxH」时有时无。
+            String srSize = mCarVideoView.getSrTargetSizeText();
+            if (srSize == null) {
+                View renderView = mCarVideoView.getRenderViewForDiagnostics();
+                if (renderView != null && renderView.getWidth() > 0 && renderView.getHeight() > 0) {
+                    srSize = renderView.getWidth() + " X " + renderView.getHeight();
+                }
             }
+            if (srSize != null) text = text + " → 超分 " + srSize;
         }
         return text;
     }
@@ -429,6 +438,44 @@ public class VodController extends BaseController {
 
     private int worstOfLast() {
         return Math.max(mLastCpu, Math.max(mLastAppCpu, mLastMem));
+    }
+
+    /** 超分 / 补帧档位：0..3 直接点选，避免循环点击一次跳两档。 */
+    private void showTierDialog(final boolean superResolution) {
+        final SelectDialog<String> dialog = new SelectDialog<>(mActivity);
+        dialog.setTip(superResolution ? "超分档位" : "补帧档位");
+        List<String> options = new ArrayList<>();
+        for (int tier = 0; tier <= VideoEnhanceTiers.SR_ANIME; tier++) {
+            options.add("Lv" + tier + " " + (superResolution
+                    ? VideoEnhanceTiers.srName(tier) : VideoEnhanceTiers.memcName(tier)));
+        }
+        int current = superResolution ? CarEnhance.srTier() : CarEnhance.memcTier();
+        dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
+            @Override
+            public void click(String value, int pos) {
+                if (superResolution) {
+                    CarEnhance.setSrTier(pos);
+                } else {
+                    CarEnhance.setMemcTier(pos);
+                }
+                CarEnhance.applyVideo(mCarVideoView);
+                updateCarEnhanceButtons();
+                boolean active = pos > 0 && mCarVideoView != null && (superResolution
+                        ? mCarVideoView.isSuperResolutionRuntimeActive()
+                        : mCarVideoView.isInterpolationRuntimeActive());
+                String name = superResolution ? VideoEnhanceTiers.srName(pos) : VideoEnhanceTiers.memcName(pos);
+                CarEnhance.toast(getContext(), pos == 0
+                        ? (superResolution ? "超分已关闭" : "补帧已关闭")
+                        : (active ? "已生效 · " + name : "已请求 · " + name));
+                dialog.dismiss();
+            }
+
+            @Override
+            public String getDisplay(String value) {
+                return value;
+            }
+        }, SelectDialogAdapter.stringDiff, options, current);
+        dialog.show();
     }
 
     /** 滤镜：预设列表（原画/臻彩/…），选中即生效。 */
@@ -513,6 +560,9 @@ public class VodController extends BaseController {
             addStat(rows, "片源帧率", isUsableFrameRate(source) ? formatFrameRate(source) + " fps" : null);
             addStat(rows, "输出帧率", isUsableFrameRate(output) ? formatFrameRate(output) + " fps" : null);
             addStat(rows, "渲染器", mCarVideoView.hasEnhancedRenderer() ? "GL 增强" : "原生");
+            addStat(rows, "渲染路径", mCarVideoView.getRenderPath());
+            long gpuNs = mCarVideoView.getLastFrameGpuNanos();
+            addStat(rows, "单帧 GPU", gpuNs > 0 ? (gpuNs / 1000000f) + " ms" : null);
             addStat(rows, "超分", mCarVideoView.hasEnhancedRenderer()
                     ? (mCarVideoView.isSuperResolutionRuntimeActive() ? "生效" : "待帧/关闭") : "不支持");
             addStat(rows, "时域平滑", mCarVideoView.hasEnhancedRenderer()
@@ -619,28 +669,14 @@ public class VodController extends BaseController {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                boolean enable = !CarEnhance.videoSrEnabled();
-                CarEnhance.setVideoSrEnabled(enable);
-                CarEnhance.applyVideo(mCarVideoView);
-                updateCarEnhanceButtons();
-                boolean active = enable && mCarVideoView != null
-                        && mCarVideoView.isSuperResolutionRuntimeActive();
-                CarEnhance.toast(getContext(), !enable ? "超分已关闭"
-                        : active ? "超分已生效 · SGSR1" : "超分已请求 · 等待画面");
+                showTierDialog(true);
             }
         });
         mCarInterpBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                boolean enable = !CarEnhance.videoInterpEnabled();
-                CarEnhance.setVideoInterpEnabled(enable);
-                CarEnhance.applyVideo(mCarVideoView);
-                updateCarEnhanceButtons();
-                boolean active = enable && mCarVideoView != null
-                        && mCarVideoView.isInterpolationRuntimeActive();
-                CarEnhance.toast(getContext(), !enable ? "补帧已关闭"
-                        : active ? "补帧已生效" : "补帧已请求 · 等待相邻帧");
+                showTierDialog(false);
             }
         });
         mCarAudioBtn.setOnClickListener(new OnClickListener() {

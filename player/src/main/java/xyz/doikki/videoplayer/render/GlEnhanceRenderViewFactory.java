@@ -10,6 +10,10 @@ public class GlEnhanceRenderViewFactory extends RenderViewFactory {
         configuration = new VideoEnhanceConfig(mode, superResolution, interpolation);
     }
 
+    private GlEnhanceRenderViewFactory(int mode, int srTier, int memcTier, boolean tiers) {
+        configuration = new VideoEnhanceConfig(mode, srTier, memcTier);
+    }
+
     public static GlEnhanceRenderViewFactory create() {
         return create(VideoEnhancePreset.VIVID_COLOR);
     }
@@ -22,6 +26,11 @@ public class GlEnhanceRenderViewFactory extends RenderViewFactory {
         return new GlEnhanceRenderViewFactory(mode, superResolution, interpolation);
     }
 
+    /** 档位版工厂：srTier / memcTier 为 0..3。 */
+    public static GlEnhanceRenderViewFactory createTiers(int mode, int srTier, int memcTier) {
+        return new GlEnhanceRenderViewFactory(mode, srTier, memcTier, true);
+    }
+
     public VideoEnhanceConfig getConfiguration() {
         return configuration;
     }
@@ -29,6 +38,6 @@ public class GlEnhanceRenderViewFactory extends RenderViewFactory {
     @Override
     public IRenderView createRenderView(Context context) {
         return new GlEnhanceRenderView(context, configuration.preset.id,
-                configuration.superResolution, configuration.interpolation);
+                configuration.srTier, configuration.memcTier);
     }
 }

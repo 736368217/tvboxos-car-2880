@@ -332,6 +332,20 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
         applyVideoEnhancements();
     }
 
+    /** 档位版：srTier / memcTier 为 0..3，1 档即原来的布尔开启基线。 */
+    public void setVideoEnhanceTiers(int mode, int srTier, int memcTier) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mRenderHandler.post(() -> setVideoEnhanceTiers(mode, srTier, memcTier));
+            return;
+        }
+        VideoEnhanceConfig configuration = new VideoEnhanceConfig(mode, srTier, memcTier);
+        mVideoEnhancementConfig = configuration;
+        mRenderViewFactory = usesEnhancementSurface(configuration)
+                ? GlEnhanceRenderViewFactory.createTiers(configuration.preset.id,
+                        configuration.srTier, configuration.memcTier)
+                : TextureRenderViewFactory.create();
+        applyVideoEnhancements();
+    }
     public VideoEnhanceConfig getVideoEnhancementConfig() {
         return mVideoEnhancementConfig;
     }
@@ -354,7 +368,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
         }
         if (usesEnhancementSurface(configuration) && mRenderView instanceof GlEnhanceRenderView) {
             GlEnhanceRenderView gl = (GlEnhanceRenderView) mRenderView;
-            gl.setVideoEnhancements(configuration.preset.id, configuration.superResolution, configuration.interpolation);
+            gl.setVideoEnhanceTiers(configuration.preset.id, configuration.srTier, configuration.memcTier);
             gl.setPlaybackActive(isRenderPlaybackActive());
         } else if (!usesEnhancementSurface(configuration) && mRenderView instanceof TextureRenderView) {
             Log.i("CarVideo", "runtime_config TextureRenderView " + configuration);

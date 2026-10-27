@@ -12,6 +12,7 @@ import com.orhanobut.hawk.Hawk;
 
 import xyz.doikki.videoplayer.player.VideoView;
 import xyz.doikki.videoplayer.render.VideoEnhancePreset;
+import xyz.doikki.videoplayer.render.VideoEnhanceTiers;
 import xyz.doikki.videoplayer.render.VideoPostProcessPolicy;
 
 /**
@@ -91,28 +92,65 @@ public final class CarEnhance {
         setVideoMode(enabled ? VideoEnhancePreset.VIVID_COLOR : VideoEnhancePreset.ORIGINAL);
     }
 
+    /** 兼容旧调用：开=1 档基线，关=0 档。 */
     public static boolean videoSrEnabled() {
-        return VideoPostProcessPolicy.enabledFromPreference(Hawk.get(HawkConfig.VIDEO_SR), false);
+        return srTier() > VideoEnhanceTiers.SR_OFF;
     }
 
+    /** 兼容旧调用：开=1 档基线，关=0 档。 */
     public static boolean videoInterpEnabled() {
-        return VideoPostProcessPolicy.enabledFromPreference(Hawk.get(HawkConfig.VIDEO_INTERP), false);
+        return memcTier() > VideoEnhanceTiers.MEMC_OFF;
+    }
+
+    public static int srTier() {
+        return VideoEnhanceTiers.clampSr(readTier(HawkConfig.VIDEO_SR_TIER, HawkConfig.VIDEO_SR));
+    }
+
+    public static int memcTier() {
+        return VideoEnhanceTiers.clampMemc(readTier(HawkConfig.VIDEO_MEMC_TIER, HawkConfig.VIDEO_INTERP));
+    }
+
+    /** 新键优先；旧布尔/0-1 值迁移成 1 档，缺省为 0 档。 */
+    private static int readTier(String key, String legacyKey) {
+        Object raw = Hawk.get(key, null);
+        if (raw == null) raw = Hawk.get(legacyKey, 0);
+        if (raw instanceof Number) {
+            int value = ((Number) raw).intValue();
+            return Math.max(value, 0);
+        }
+        if (raw instanceof Boolean) return ((Boolean) raw) ? 1 : 0;
+        if ("true".equalsIgnoreCase(String.valueOf(raw))) return 1;
+        try {
+            return Math.max(Integer.parseInt(String.valueOf(raw).trim()), 0);
+        } catch (Exception ignored) {
+            return 0;
+        }
     }
 
     public static void setVideoSrEnabled(boolean enabled) {
-        Hawk.put(HawkConfig.VIDEO_SR, enabled ? 1 : 0);
-        refreshActiveVideo();
+        setSrTier(enabled ? VideoEnhanceTiers.SR_SGSR : VideoEnhanceTiers.SR_OFF);
     }
 
     public static void setVideoInterpEnabled(boolean enabled) {
-        Hawk.put(HawkConfig.VIDEO_INTERP, enabled ? 1 : 0);
+        setMemcTier(enabled ? VideoEnhanceTiers.MEMC_OVERSAMPLE : VideoEnhanceTiers.MEMC_OFF);
+    }
+
+    public static void setSrTier(int tier) {
+        Hawk.put(HawkConfig.VIDEO_SR_TIER, VideoEnhanceTiers.clampSr(tier));
+        Hawk.put(HawkConfig.VIDEO_SR, tier > VideoEnhanceTiers.SR_OFF ? 1 : 0);
+        refreshActiveVideo();
+    }
+
+    public static void setMemcTier(int tier) {
+        Hawk.put(HawkConfig.VIDEO_MEMC_TIER, VideoEnhanceTiers.clampMemc(tier));
+        Hawk.put(HawkConfig.VIDEO_INTERP, tier > VideoEnhanceTiers.MEMC_OFF ? 1 : 0);
         refreshActiveVideo();
     }
 
     public static void applyVideo(MyVideoView view) {
         if (view == null) return;
         activeVideo = new java.lang.ref.WeakReference<>(view);
-        view.setVideoEnhancements(videoMode(), videoSrEnabled(), videoInterpEnabled());
+        view.setVideoEnhanceTiers(videoMode(), srTier(), memcTier());
     }
 
     private static void refreshActiveVideo() {
@@ -139,8 +177,8 @@ public final class CarEnhance {
     /** 设置页「播放增强」入口用的一行摘要；只描述当前保存值，不代表运行时已生效。 */
     public static String summary() {
         return VideoEnhancePreset.forMode(videoMode()).name
-                + " · 超分 " + (videoSrEnabled() ? "开" : "关")
-                + " · 平滑 " + (videoInterpEnabled() ? "开" : "关")
+                + " · 超分 " + VideoEnhanceTiers.srName(srTier())
+                + " · 补帧 " + VideoEnhanceTiers.memcName(memcTier())
                 + " · 音效 " + AudioEffectController.name(audioMode());
     }
 

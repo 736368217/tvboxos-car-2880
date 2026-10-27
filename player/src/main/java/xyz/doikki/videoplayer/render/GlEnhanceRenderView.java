@@ -49,8 +49,21 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private final FloatBuffer mPositions = buffer(-1,-1, 1,-1, -1,1, 1,1);
     private final FloatBuffer mCoordinates = buffer(0,0, 1,0, 0,1, 1,1);
     private final float[] mTextureMatrix = new float[16];
-    private final int[] mFbos = new int[2];
-    private final int[] mFrameTextures = new int[2];
+    private static final int RING = 4;
+    private final int[] mFbos = new int[RING];
+    private final int[] mFrameTextures = new int[RING];
+    private int mRingHead = -1;
+    private int mValidFrames;
+    private int mSynthFbo, mSynthTexture;
+    private int mMemcProgram;
+    private int mMemcPos, mMemcTex, mMemcF0, mMemcF1, mMemcF2, mMemcF3, mMemcAlpha, mMemcTier, mMemcTexel;
+    private final int[] mSrPrograms = new int[4];
+    private final int[] mSrPos = new int[4];
+    private final int[] mSrTex = new int[4];
+    private final int[] mSrTexCoordAttr = new int[4];
+    private final int[] mSrTexel = new int[4];
+    private final int[] mSrViewport = new int[4];
+    private final int[] mSrSharpness = new int[4];
     private final VideoPostProcessPolicy mTiming = new VideoPostProcessPolicy();
     private final Object mProducerLock = new Object();
     private final ArrayList<ProducerSurface> mProducers = new ArrayList<>();
@@ -94,9 +107,41 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     private long mLastOutputNs, mStatsStartNs, mStatsSource, mStatsOutput, mStatsMixed;
     private boolean mLoggedSr, mLastSrActive;
     private int mDrawErrors;
+    /** 新档位管线（4 帧 ring + 新 shader）是否可用；不可用时自动走回原 2 帧基线管线。 */
+    private boolean mTierPipelineOk;
+    /** 方案 v2.0 原版多 Pass 程序与中间目标。 */
+    private int mCubicProgram, mFlowEstProgram, mFlowWarpProgram, mEasuProgram, mRcasProgram;
+    private boolean mDocPipelineOk;
+    private int mFlowFbo, mFlowTexture;
+    private int mDstFbo, mDstTexture, mDstW, mDstH;
+    /** 超分 3 档：ACNet 多 Pass 模型 + 亮度/色度合成程序。 */
+    private MpvHookPipeline mAnimePipeline;
+    private int mAnimeCompositeProgram, mAnimeLumaProgram;
+    /** 喂给 ACNet 的亮度平面（源分辨率）。 */
+    private int mSrcLumaFbo, mSrcLumaTexture, mSrcLumaW, mSrcLumaH;
+    private boolean mAnimeTried;
+    /** 诊断：当前帧实际走的渲染路径与 GPU 耗时。 */
+    private String mLastPath = "BASELINE";
+    private boolean mLoggedPath;
+    private String mLoggedPathName = "";
+    private int mLoggedSrTier = -1, mLoggedMemcTier = -1;
+    private int mTimedFrames;
+    private volatile long mFrameGpuNs;
 
-    public GlEnhanceRenderView(Context context) { this(context, 0, false, false); }
+    /** 供 UI 显示：最近一帧的渲染路径（BASELINE / SGSR_BASELINE / FSR_EASU_RCAS / ANIME_CNN）。 */
+    public String getRenderPath() { return mLastPath; }
+
+    /** 超分目标尺寸文本（如 3840 X 2160）；未分配时返回 null，供左上角信息展示。 */
+    public String getSrTargetSizeText() {
+        return mDstFbo != 0 && mDstW > 0 && mDstH > 0 ? (mDstW + " X " + mDstH) : null;
+    }
+
+    public long getLastFrameGpuNanos() { return mFrameGpuNs; }
     public GlEnhanceRenderView(Context context, int mode) { this(context, mode, false, false); }
+    public GlEnhanceRenderView(Context context, int mode, int srTier, int memcTier) {
+        this(context, mode, srTier > VideoEnhanceTiers.SR_OFF, memcTier > VideoEnhanceTiers.MEMC_OFF);
+        mConfiguration = new VideoEnhanceConfig(mode, srTier, memcTier);
+    }
     public GlEnhanceRenderView(Context context, int mode, boolean sr, boolean interp) {
         super(context);
         mConfiguration = new VideoEnhanceConfig(mode, sr, interp);
@@ -356,6 +401,19 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         Log.i(TAG, "runtime_config requested " + configuration);
     }
 
+    /** 档位版运行时切换：srTier / memcTier 都是 0..3。 */
+    public void setVideoEnhanceTiers(int mode, int srTier, int memcTier) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mMain.post(() -> setVideoEnhanceTiers(mode, srTier, memcTier));
+            return;
+        }
+        VideoEnhanceConfig configuration = new VideoEnhanceConfig(mode, srTier, memcTier);
+        if (mReleased || configuration.sameAs(mConfiguration)) return;
+        mConfiguration = configuration;
+        updateRenderMode();
+        requestRender();
+        Log.i(TAG, "runtime_tiers requested " + configuration);
+    }
     private boolean isRuntimePostProcessAvailable() {
         return mPostProcessSupported && mPostProcessFailure.length() == 0;
     }
@@ -519,9 +577,45 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         cRgb = GLES20.glGetUniformLocation(mColourProgram, "uRgb");
         GLES20.glUseProgram(mColourProgram);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(mColourProgram, "uTexture"), 0);
+        mMemcProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoTierShaders.MEMC_FRAGMENT);
+        if (mMemcProgram != 0) {
+            mMemcPos = GLES20.glGetAttribLocation(mMemcProgram, "aPosition");
+            mMemcTex = GLES20.glGetAttribLocation(mMemcProgram, "aTexCoord");
+            mMemcF0 = GLES20.glGetUniformLocation(mMemcProgram, "uF0");
+            mMemcF1 = GLES20.glGetUniformLocation(mMemcProgram, "uF1");
+            mMemcF2 = GLES20.glGetUniformLocation(mMemcProgram, "uF2");
+            mMemcF3 = GLES20.glGetUniformLocation(mMemcProgram, "uF3");
+            mMemcAlpha = GLES20.glGetUniformLocation(mMemcProgram, "uAlpha");
+            mMemcTier = GLES20.glGetUniformLocation(mMemcProgram, "uTier");
+            mMemcTexel = GLES20.glGetUniformLocation(mMemcProgram, "uTexel");
+            GLES20.glUseProgram(mMemcProgram);
+            GLES20.glUniform1i(mMemcF0, 0);
+            GLES20.glUniform1i(mMemcF1, 1);
+            GLES20.glUniform1i(mMemcF2, 2);
+            GLES20.glUniform1i(mMemcF3, 3);
+        }
+        String[] srSources = {
+                VideoTierShaders.SR_PASSTHROUGH_FRAGMENT,
+                VideoTierShaders.SR_SGSR_FRAGMENT,
+                VideoTierShaders.SR_FSR_FRAGMENT,
+                VideoTierShaders.SR_ANIME_FRAGMENT
+        };
+        boolean srOk = true;
+        for (int i = 0; i < srSources.length; i++) {
+            mSrPrograms[i] = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, srSources[i]);
+            if (mSrPrograms[i] == 0) { srOk = false; continue; }
+            mSrPos[i] = GLES20.glGetAttribLocation(mSrPrograms[i], "aPosition");
+            mSrTexCoordAttr[i] = GLES20.glGetAttribLocation(mSrPrograms[i], "aTexCoord");
+            mSrTex[i] = GLES20.glGetUniformLocation(mSrPrograms[i], "uTexture");
+            mSrTexel[i] = GLES20.glGetUniformLocation(mSrPrograms[i], "uTexel");
+            mSrViewport[i] = GLES20.glGetUniformLocation(mSrPrograms[i], "uViewportInfo");
+            mSrSharpness[i] = GLES20.glGetUniformLocation(mSrPrograms[i], "uSharpness");
+            GLES20.glUseProgram(mSrPrograms[i]);
+            GLES20.glUniform1i(mSrTex[i], 0);
+        }
+        // 原 2 帧基线管线：任何情况下都保留，1 档/回退都走它
         mOutputProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoShaders.OUTPUT_FRAGMENT);
-        mPostProcessSupported = mOutputProgram != 0;
-        if (mPostProcessSupported) {
+        if (mOutputProgram != 0) {
             oPosition = GLES20.glGetAttribLocation(mOutputProgram, "aPosition");
             oCoordinate = GLES20.glGetAttribLocation(mOutputProgram, "aTexCoord");
             oViewport = GLES20.glGetUniformLocation(mOutputProgram, "uViewportInfo");
@@ -529,9 +623,34 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             GLES20.glUseProgram(mOutputProgram);
             GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uCurrFrameTex"), 0);
             GLES20.glUniform1i(GLES20.glGetUniformLocation(mOutputProgram, "uPrevFrameTex"), 1);
-        } else {
+        }
+        // 方案 v2.0 原版多 Pass 程序（FSR EASU/RCAS、4 帧 Cubic、Safe-Flow 两段）
+        mCubicProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoDocShaders.TEMPORAL_CUBIC);
+        mFlowEstProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoDocShaders.SAFE_FLOW_ESTIMATE);
+        mFlowWarpProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoDocShaders.SAFE_FLOW_WARP);
+        mEasuProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoDocShaders.FSR_EASU);
+        mRcasProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX, VideoDocShaders.FSR_RCAS);
+        mDocPipelineOk = mCubicProgram != 0 && mFlowEstProgram != 0 && mFlowWarpProgram != 0
+                && mEasuProgram != 0 && mRcasProgram != 0;
+        Log.i(TAG, "doc_pipeline cubic=" + mCubicProgram + " flowEst=" + mFlowEstProgram
+                + " flowWarp=" + mFlowWarpProgram + " easu=" + mEasuProgram + " rcas=" + mRcasProgram
+                + " ok=" + mDocPipelineOk);
+        mAnimeCompositeProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX,
+                VideoDocShaders.ANIME_COMPOSITE);
+        mAnimeLumaProgram = VideoShaders.createProgram(VideoShaders.OUTPUT_VERTEX,
+                VideoDocShaders.LUMA_PREFILTER);
+        mAnimeTried = false;
+        if (mAnimePipeline != null) {
+            mAnimePipeline.release();
+            mAnimePipeline = null;
+        }
+        mTierPipelineOk = mMemcProgram != 0 && srOk;
+        mPostProcessSupported = mOutputProgram != 0 || mTierPipelineOk;
+        if (!mPostProcessSupported) {
             mPostProcessFailure = "输出 shader 编译或链接失败";
-            Log.w(TAG, "POSTPROCESS_FALLBACK output shader failed; direct OES colour only");
+            Log.w(TAG, "POSTPROCESS_FALLBACK all shaders failed; direct OES colour only");
+        } else if (!mTierPipelineOk) {
+            Log.w(TAG, "TIER_PIPELINE_UNAVAILABLE new tier shaders failed; fallback to baseline program");
         }
         createProducerSurface();
         Log.i(TAG, "GL ready version=" + GLES20.glGetString(GLES20.GL_VERSION)
@@ -569,6 +688,9 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
                 mDrawConfiguration = configuration;
                 mLoggedSr = false;
                 mFboHasFrame = false;
+                mTimedFrames = 0;
+                mLoggedPath = false;
+                GLES20.glGetError(); // 清掉历史错误，避免误报
                 if (mPostProcessSupported && (mPostProcessFailure.startsWith("FBO ") || "GL 绘制错误".equals(mPostProcessFailure))) {
                     mPostProcessFailure = "";
                     mFailedWidth = mFailedHeight = 0;
@@ -602,38 +724,106 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             boolean postProcessRequested = configuration.superResolution || configuration.interpolation;
             boolean postProcess = isRuntimePostProcessAvailable() && postProcessRequested;
             mRuntimeColourActive = configuration.preset.id != VideoEnhancePreset.ORIGINAL;
-            mRuntimeSrActive = false;
             mRuntimeInterpolationActive = false;
+            boolean srAppliedNow = false;
+            boolean memcAppliedNow = false;
+            String srReason = postProcess ? "pending" : "postProcessOff:" + mPostProcessFailure;
+            int sw = 0, sh = 0;
             if (postProcess) {
-                int sw = mVideoWidth > 0 ? mVideoWidth : width;
-                int sh = mVideoHeight > 0 ? mVideoHeight : height;
+                sw = mVideoWidth > 0 ? mVideoWidth : width;
+                sh = mVideoHeight > 0 ? mVideoHeight : height;
                 boolean resized = mFboWidth != sw || mFboHeight != sh;
                 postProcess = ensureFrameBuffers(sw, sh);
                 if (postProcess) {
-                    if (fresh || resized || changed || !mFboHasFrame) {
-                        boolean hadCurrent = mFboHasFrame && !reset && !resized && fresh;
-                        int oldIndex = mCurrentIndex;
-                        mCurrentIndex = 1 - oldIndex;
-                        mPreviousIndex = oldIndex;
-                        drawColour(mFbos[mCurrentIndex], sw, sh, configuration.preset);
+                    if (fresh || resized) {
+                        mRingHead = (mRingHead + 1) % RING;
+                        drawColour(mFbos[mRingHead], sw, sh, configuration.preset);
+                        mValidFrames = Math.min(mValidFrames + 1, RING);
                         mFboHasFrame = true;
-                        mHasPrevious = hadCurrent;
+                        mHasPrevious = mValidFrames >= 2;
+                    } else if (!mFboHasFrame) {
+                        mRingHead = (mRingHead + 1) % RING;
+                        drawColour(mFbos[mRingHead], sw, sh, configuration.preset);
+                        mValidFrames = 1;
+                        mFboHasFrame = true;
+                        mHasPrevious = false;
                     }
-                    float alpha = mHasPrevious ? mTiming.blendAlpha(System.nanoTime(), configuration.interpolation, shouldAnimate()) : 0;
+                    float alpha = mHasPrevious
+                            ? mTiming.blendAlpha(System.nanoTime(), configuration.interpolation, shouldAnimate())
+                            : 0;
                     boolean sr = VideoPostProcessPolicy.superResolutionActive(configuration.superResolution,
                             sw, sh, width, height);
-                    drawOutput(width, height, sr, alpha, configuration.preset);
-                    mRuntimeSrActive = sr;
+                    boolean advanced = configuration.srTier > VideoEnhanceTiers.SR_SGSR
+                            || configuration.memcTier > VideoEnhanceTiers.MEMC_OVERSAMPLE;
+                    boolean tierPath = advanced && mTierPipelineOk;
+                    long gpuStart = 0L;
+                    boolean timing = mTimedFrames < 3;
+                    if (timing) { GLES20.glFinish(); gpuStart = System.nanoTime(); }
+                    mLastPath = "BASELINE";
+                    if (tierPath) {
+                        int memcTier = configuration.memcTier;
+                        int srcTexture = mFrameTextures[mRingHead];
+                        if (memcTier > VideoEnhanceTiers.MEMC_OFF && mValidFrames >= 2 && alpha > 0.002f) {
+                            int memcOut = (memcTier >= VideoEnhanceTiers.MEMC_CUBIC)
+                                    ? drawMemcDoc(sw, sh, memcTier, alpha)
+                                    : drawMemc(sw, sh, memcTier, alpha);
+                            if (memcOut != 0) srcTexture = memcOut;
+                        }
+                        int srTier = sr ? configuration.srTier : VideoEnhanceTiers.SR_OFF;
+                        boolean docSr = srTier >= VideoEnhanceTiers.SR_FSR
+                                && drawSrDoc(width, height, srTier, srcTexture, sw, sh);
+                        if (!docSr) {
+                            // SR 0/1 档一律沿用原 SGSR 输出 shader（与 r41 前同一段 GLSL）。
+                            // MEMC 已经合成过时不再重复做时间混合，直接把合成结果当同一帧上屏。
+                            boolean memcApplied = srcTexture != mFrameTextures[mRingHead];
+                            drawOutputBaseline(width, height, sr, memcApplied ? 0f : alpha,
+                                    configuration.preset, srcTexture, srcTexture);
+                        }
+                        srAppliedNow = sr && srTier > VideoEnhanceTiers.SR_OFF;
+                        memcAppliedNow = memcTier > VideoEnhanceTiers.MEMC_OFF;
+                        srReason = srAppliedNow ? "active:" + mLastPath : (sr ? "srPassSkipped" : "policyInactive");
+                        String srName = (mLastPath.startsWith("SR") || mLastPath.contains("FSR") || mLastPath.contains("ANIME"))
+                                ? mLastPath
+                                : (sr ? "SR1_SGSR" : "SR0_OFF");
+                        String memcName = memcTier == VideoEnhanceTiers.MEMC_OFF ? "MEMC0_OFF"
+                                : memcTier == VideoEnhanceTiers.MEMC_OVERSAMPLE ? "MEMC1_OVERSAMPLE"
+                                : memcTier == VideoEnhanceTiers.MEMC_CUBIC ? "MEMC2_CUBIC" : "MEMC3_SAFEFLOW";
+                        mLastPath = srName + "+" + memcName;
+                    } else {
+                        // 1 档基线（或高级管线不可用）：原 2 帧 ping-pong + 原输出 shader，行为与 r41 前一致
+                        int prev = (mRingHead - 1 + RING) % RING;
+                        drawOutputBaseline(width, height, sr, alpha, configuration.preset,
+                                mFrameTextures[mRingHead],
+                                mFrameTextures[mHasPrevious ? prev : mRingHead]);
+                        srAppliedNow = sr;
+                        memcAppliedNow = configuration.interpolation;
+                        srReason = srAppliedNow ? "active:SGSR_BASELINE" : "policyInactive";
+                    }
+                    applyRuntimeState(srAppliedNow, memcAppliedNow, postProcess, srReason,
+                            width, height, sw, sh, configuration);
                     if (alpha > 0.001f) {
-                        mRuntimeInterpolationActive = configuration.interpolation;
                         mLastBlendNs = System.nanoTime();
                         mMixedOutputs++;
                     }
-                    if (!mLoggedSr || mLastSrActive != sr) {
-                        mLoggedSr = true;
-                        mLastSrActive = sr;
-                        Log.i(TAG, "output srRequested=" + configuration.superResolution + " srActive=" + sr
-                                + " interp=" + configuration.interpolation + " viewport=" + width + "x" + height);
+                    if (!mLoggedPath || !mLastPath.equals(mLoggedPathName)
+                            || mLoggedSrTier != configuration.srTier
+                            || mLoggedMemcTier != configuration.memcTier) {
+                        mLoggedPath = true;
+                        mLoggedPathName = mLastPath;
+                        mLoggedSrTier = configuration.srTier;
+                        mLoggedMemcTier = configuration.memcTier;
+                        Log.i(TAG, "path=" + mLastPath + " srTier=" + configuration.srTier
+                                + " memcTier=" + configuration.memcTier + " srActive=" + sr
+                                + " src=" + sw + "x" + sh + " dst=" + (mDstFbo != 0 ? mDstW + "x" + mDstH : "-")
+                                + " flow=" + (mFlowFbo != 0) + " memcFrames=" + mValidFrames
+                                + " viewport=" + width + "x" + height + " glErr=" + GLES20.glGetError());
+                    }
+                    if (timing) {
+                        GLES20.glFinish();
+                        mFrameGpuNs = System.nanoTime() - gpuStart;
+                        mTimedFrames++;
+                        Log.i(TAG, "gpu_frame path=" + mLastPath + " cost_ms="
+                                + (mFrameGpuNs / 1000000f));
                     }
                 }
             }
@@ -676,32 +866,49 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
             failFrameBuffers(width, height, "GL_MAX_TEXTURE_SIZE=" + max[0]);
             return false;
         }
-        GLES20.glGenTextures(2, mFrameTextures, 0);
-        GLES20.glGenFramebuffers(2, mFbos, 0);
-        for (int i=0; i<2; i++) {
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mFrameTextures[i]);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D,0,GLES20.GL_RGBA,width,height,0,GLES20.GL_RGBA,GLES20.GL_UNSIGNED_BYTE,null);
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,mFbos[i]);
-            GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER,GLES20.GL_COLOR_ATTACHMENT0,GLES20.GL_TEXTURE_2D,mFrameTextures[i],0);
-            int status=GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
-            int error=GLES20.glGetError();
-            if (status != GLES20.GL_FRAMEBUFFER_COMPLETE || error != GLES20.GL_NO_ERROR) {
-                failFrameBuffers(width,height,"status="+status+" error="+error);
+        GLES20.glGenTextures(RING, mFrameTextures, 0);
+        GLES20.glGenFramebuffers(RING, mFbos, 0);
+        for (int i = 0; i < RING; i++) {
+            if (!createTarget(mFrameTextures[i], mFbos[i], width, height)) {
+                failFrameBuffers(width, height, "ring#" + i);
                 return false;
             }
         }
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,0);
-        mFboWidth=width; mFboHeight=height;
-        mCurrentIndex=0; mPreviousIndex=1;
-        mHasPrevious=false;
+        int[] synthTex = new int[1];
+        int[] synthFbo = new int[1];
+        GLES20.glGenTextures(1, synthTex, 0);
+        GLES20.glGenFramebuffers(1, synthFbo, 0);
+        mSynthTexture = synthTex[0];
+        mSynthFbo = synthFbo[0];
+        if (!createTarget(mSynthTexture, mSynthFbo, width, height)) {
+            failFrameBuffers(width, height, "synth");
+            return false;
+        }
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        mFboWidth = width; mFboHeight = height;
+        mRingHead = -1;
+        mValidFrames = 0;
+        mHasPrevious = false;
         mTiming.reset();
-        long bytes=VideoPostProcessPolicy.frameBufferBytes(width,height);
-        Log.i(TAG,"FBO ping-pong allocated 2x "+width+"x"+height+" RGBA8 bytes="+bytes);
+        Log.i(TAG, "FBO ring allocated " + RING + "x " + width + "x" + height
+                + " + synth, bytes=" + (VideoPostProcessPolicy.frameBufferBytes(width, height) * 3));
         return true;
+    }
+
+    private boolean createTarget(int texture, int fbo, int width, int height) {
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, width, height, 0,
+                GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo);
+        GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0,
+                GLES20.GL_TEXTURE_2D, texture, 0);
+        int status = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
+        int error = GLES20.glGetError();
+        return status == GLES20.GL_FRAMEBUFFER_COMPLETE && error == GLES20.GL_NO_ERROR;
     }
     private void failFrameBuffers(int width,int height,String reason) {
         releaseFrameBuffers();
@@ -722,21 +929,119 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         drawQuad(cPosition,cCoordinate);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,0);
     }
-    private void drawOutput(int width,int height,boolean sr,float alpha,VideoEnhancePreset preset) {
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER,0);
-        GLES20.glViewport(0,0,width,height);
-        GLES20.glUseProgram(mOutputProgram);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,mFrameTextures[mCurrentIndex]);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,mFrameTextures[mHasPrevious?mPreviousIndex:mCurrentIndex]);
-        GLES20.glUniform4f(oViewport,1f/mFboWidth,1f/mFboHeight,mFboWidth,mFboHeight);
-        GLES20.glUniform3f(oParams,sr?1f:0f,preset.sgsrSharpness,alpha);
-        drawQuad(oPosition,oCoordinate);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,0);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,0);
+
+    /** 4 帧时域合成到源分辨率纹理；返回给超分 Pass 采样的纹理。 */
+    private int drawMemc(int width, int height, int tier, float alpha) {
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mSynthFbo);
+        GLES20.glViewport(0, 0, width, height);
+        GLES20.glUseProgram(mMemcProgram);
+        int f2 = mRingHead;
+        int f1 = (mRingHead - 1 + RING) % RING;
+        int f0 = (mRingHead - 2 + RING) % RING;
+        int f3 = f2; // 没有前瞻帧：用当前帧顶替 t+2
+        bindFrameTexture(0, mFrameTextures[f0]);
+        bindFrameTexture(1, mFrameTextures[f1]);
+        bindFrameTexture(2, mFrameTextures[f2]);
+        bindFrameTexture(3, mFrameTextures[f3]);
+        GLES20.glUniform1f(mMemcAlpha, tier == VideoEnhanceTiers.MEMC_OVERSAMPLE
+                ? alpha : (1f - 2f * alpha));
+        GLES20.glUniform1i(mMemcTier, tier);
+        GLES20.glUniform2f(mMemcTexel, 1f / width, 1f / height);
+        drawQuad(mMemcPos, mMemcTex);
+        unbindFrameTextures(4);
+        return mSynthTexture;
     }
+
+    /** 原始基线输出：2 帧混合 + 原 SGSR 输出 shader（1 档与回退路径）。 */
+    private void drawOutputBaseline(int width, int height, boolean sr, float alpha,
+                                    VideoEnhancePreset preset, int currTexture, int prevTexture) {
+        if (mOutputProgram == 0) return;
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        GLES20.glViewport(0, 0, width, height);
+        GLES20.glUseProgram(mOutputProgram);
+        bindFrameTexture(0, currTexture);
+        bindFrameTexture(1, prevTexture);
+        GLES20.glUniform4f(oViewport, 1f / mFboWidth, 1f / mFboHeight, mFboWidth, mFboHeight);
+        GLES20.glUniform3f(oParams, sr ? 1f : 0f, preset.sgsrSharpness, alpha);
+        drawQuad(oPosition, oCoordinate);
+        unbindFrameTextures(2);
+    }
+
+    /** 按档位把源纹理放大上屏（0=直通，1=SGSR，2=FSR，3=Anime）。 */
+    private void drawSr(int width, int height, int tier, int srcTexture,
+                        int srcW, int srcH, VideoEnhancePreset preset) {
+        int t = VideoEnhanceTiers.clampSr(tier);
+        int program = mSrPrograms[t] != 0 ? mSrPrograms[t] : mSrPrograms[0];
+        int idx = program == mSrPrograms[t] ? t : 0;
+        if (program == 0) return;
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        GLES20.glViewport(0, 0, width, height);
+        GLES20.glUseProgram(program);
+        bindFrameTexture(0, srcTexture);
+        GLES20.glUniform4f(mSrViewport[idx], 1f / srcW, 1f / srcH, srcW, srcH);
+        GLES20.glUniform2f(mSrTexel[idx], 1f / srcW, 1f / srcH);
+        GLES20.glUniform1f(mSrSharpness[idx], preset.sgsrSharpness);
+        drawQuad(mSrPos[idx], mSrTexCoordAttr[idx]);
+        unbindFrameTextures(1);
+    }
+
+    private void bindFrameTexture(int unit, int texture) {
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + unit);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+    }
+
+    private void unbindFrameTextures(int count) {
+        for (int i = 0; i < count; i++) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + i);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+        }
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+    }
+    // 运行状态去抖：单帧抖动不该让 UI 显示「超分已关闭」
+    private int mSrOffStreak;
+    private boolean mSrReported;
+    private int mLastSrcW, mLastSrcH;
+    private int mSrHeartbeat;
+
+    /**
+     * 发布运行时状态。只有「配置关闭 / 后处理硬失败 / 连续 30 帧都没生效」才把 SR 标成关闭；
+     * 单帧的窗口尺寸抖动、丢帧、FBO 重建都不会让左上角提示闪烁。
+     */
+    private void applyRuntimeState(boolean srApplied, boolean memcApplied, boolean postProcess,
+                                   String reason, int viewportW, int viewportH,
+                                   int srcW, int srcH, VideoEnhanceConfig configuration) {
+        if (srApplied) {
+            mSrOffStreak = 0;
+            mRuntimeSrActive = true;
+        } else if (configuration.srTier <= VideoEnhanceTiers.SR_OFF || !mPostProcessSupported) {
+            mRuntimeSrActive = false;
+        } else if (++mSrOffStreak >= 30) {
+            mRuntimeSrActive = false;
+        }
+        mRuntimeInterpolationActive = memcApplied;
+        mLastSrActive = srApplied;
+        if (++mSrHeartbeat >= 600) {
+            mSrHeartbeat = 0;
+            Log.i(TAG, "sr_heartbeat srApplied=" + srApplied + " state=" + mRuntimeSrActive
+                    + " path=" + mLastPath + " cfgSr=" + configuration.srTier
+                    + " src=" + srcW + "x" + srcH + " viewport=" + viewportW + "x" + viewportH
+                    + " failure=" + mPostProcessFailure);
+        }
+        if (srApplied != mSrReported) {
+            mSrReported = srApplied;
+            Log.i(TAG, "sr_state=" + (srApplied ? "ON" : "OFF") + " reason=" + reason
+                    + " cfgSr=" + configuration.srTier + " cfgMemc=" + configuration.memcTier
+                    + " postProcess=" + postProcess + " streak=" + mSrOffStreak
+                    + " src=" + srcW + "x" + srcH + " viewport=" + viewportW + "x" + viewportH
+                    + " failure=" + mPostProcessFailure);
+        }
+        if (srcW > 0 && (srcW != mLastSrcW || srcH != mLastSrcH)) {
+            mLastSrcW = srcW;
+            mLastSrcH = srcH;
+            Log.i(TAG, "src_changed " + srcW + "x" + srcH + " viewport=" + viewportW + "x" + viewportH);
+        }
+    }
+
     private void drawQuad(int position,int coordinate) {
         mPositions.position(0); mCoordinates.position(0);
         GLES20.glEnableVertexAttribArray(position); GLES20.glEnableVertexAttribArray(coordinate);
@@ -745,6 +1050,211 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,0,4);
         GLES20.glDisableVertexAttribArray(position); GLES20.glDisableVertexAttribArray(coordinate);
     }
+    // ------------------------------------------------------------------ 方案 v2.0 原版多 Pass
+
+    private static final int FLOW_W = 480, FLOW_H = 270;
+
+    private boolean ensureFlowTarget() {
+        if (mFlowFbo != 0 && mFlowTexture != 0) return true;
+        int[] t = new int[1], f = new int[1];
+        GLES20.glGenTextures(1, t, 0);
+        GLES20.glGenFramebuffers(1, f, 0);
+        mFlowTexture = t[0];
+        mFlowFbo = f[0];
+        boolean ok = createTarget(mFlowTexture, mFlowFbo, FLOW_W, FLOW_H);
+        if (ok) Log.i(TAG, "vram_alloc flow " + FLOW_W + "x" + FLOW_H + " = " + (FLOW_W * FLOW_H * 4 / 1048576f) + " MB");
+        return ok;
+    }
+
+    private boolean ensureDstTarget(int w, int h) {
+        if (mDstFbo != 0 && mDstW == w && mDstH == h) return true;
+        if (mDstFbo != 0) {
+            int[] f = {mDstFbo};
+            int[] t = {mDstTexture};
+            GLES20.glDeleteFramebuffers(1, f, 0);
+            GLES20.glDeleteTextures(1, t, 0);
+            mDstFbo = 0;
+            mDstTexture = 0;
+        }
+        int[] t = new int[1], f = new int[1];
+        GLES20.glGenTextures(1, t, 0);
+        GLES20.glGenFramebuffers(1, f, 0);
+        mDstTexture = t[0];
+        mDstFbo = f[0];
+        mDstW = w;
+        mDstH = h;
+        boolean ok = createTarget(mDstTexture, mDstFbo, w, h);
+        if (ok) Log.i(TAG, "vram_alloc sr_dst " + w + "x" + h + " = " + (w * h * 4 / 1048576f) + " MB");
+        return ok;
+    }
+
+    private void bindUniformTexture(int program, String name, int unit, int texture) {
+        GLES20.glUseProgram(program);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(program, name), unit);
+        bindFrameTexture(unit, texture);
+    }
+
+    /**
+     * 文档 §4.1 / §4.2 的时域合成。返回 0 表示该档位不可用，调用方回退到基线纹理。
+     * MEMC 2 档 = 4 帧 Catmull-Rom；3 档 = 480p 光流估计 + 三重防锁合成（内部再回退 cubic）。
+     */
+    private int drawMemcDoc(int width, int height, int tier, float alpha) {
+        if (!mDocPipelineOk || mSynthFbo == 0) return 0;
+        int f2 = mRingHead;
+        int f1 = (mRingHead - 1 + RING) % RING;
+        int f0 = (mRingHead - 2 + RING) % RING;
+        // VideoPostProcessPolicy 的 alpha 是 0..0.5 的混合权重；文档要 0..1 的亚帧相位。
+        float phase = Math.max(0f, Math.min(1f, 1f - 2f * alpha));
+        if (tier == VideoEnhanceTiers.MEMC_CUBIC) {
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mSynthFbo);
+            GLES20.glViewport(0, 0, width, height);
+            bindUniformTexture(mCubicProgram, "uFrameMinus1", 0, mFrameTextures[f0]);
+            bindUniformTexture(mCubicProgram, "uFrame0", 1, mFrameTextures[f1]);
+            bindUniformTexture(mCubicProgram, "uFrame1", 2, mFrameTextures[f2]);
+            bindUniformTexture(mCubicProgram, "uFrame2", 3, mFrameTextures[f2]);
+            GLES20.glUniform1f(GLES20.glGetUniformLocation(mCubicProgram, "uAlpha"), phase);
+            GLES20.glUniform1f(GLES20.glGetUniformLocation(mCubicProgram, "uMitchellB"), 0f);
+            drawQuad(GLES20.glGetAttribLocation(mCubicProgram, "aPosition"),
+                    GLES20.glGetAttribLocation(mCubicProgram, "aTexCoord"));
+            unbindFrameTextures(4);
+            return mSynthTexture;
+        }
+        if (tier != VideoEnhanceTiers.MEMC_SAFE_FLOW || !ensureFlowTarget()) return 0;
+        // Pass 1: 480p 光流
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFlowFbo);
+        GLES20.glViewport(0, 0, FLOW_W, FLOW_H);
+        bindUniformTexture(mFlowEstProgram, "uPrevLuma480p", 0, mFrameTextures[f1]);
+        bindUniformTexture(mFlowEstProgram, "uCurrLuma480p", 1, mFrameTextures[f2]);
+        GLES20.glUniform2f(GLES20.glGetUniformLocation(mFlowEstProgram, "uInvSize480p"),
+                1f / FLOW_W, 1f / FLOW_H);
+        drawQuad(GLES20.glGetAttribLocation(mFlowEstProgram, "aPosition"),
+                GLES20.glGetAttribLocation(mFlowEstProgram, "aTexCoord"));
+        unbindFrameTextures(2);
+        // Pass 2: 三重防伪影锁合成
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mSynthFbo);
+        GLES20.glViewport(0, 0, width, height);
+        bindUniformTexture(mFlowWarpProgram, "uFrameMinus1", 0, mFrameTextures[f0]);
+        bindUniformTexture(mFlowWarpProgram, "uFrame0", 1, mFrameTextures[f1]);
+        bindUniformTexture(mFlowWarpProgram, "uFrame1", 2, mFrameTextures[f2]);
+        bindUniformTexture(mFlowWarpProgram, "uFrame2", 3, mFrameTextures[f2]);
+        bindUniformTexture(mFlowWarpProgram, "uFlowTex480p", 4, mFlowTexture);
+        GLES20.glUniform2f(GLES20.glGetUniformLocation(mFlowWarpProgram, "uFlowInvSize"),
+                1f / FLOW_W, 1f / FLOW_H);
+        GLES20.glUniform1f(GLES20.glGetUniformLocation(mFlowWarpProgram, "uAlpha"), phase);
+        drawQuad(GLES20.glGetAttribLocation(mFlowWarpProgram, "aPosition"),
+                GLES20.glGetAttribLocation(mFlowWarpProgram, "aTexCoord"));
+        unbindFrameTextures(5);
+        return mSynthTexture;
+    }
+
+    /** 超分目标分辨率：固定为片源的 2 倍（与 viewport 无关），避免窗口尺寸抖动导致每帧重建 FBO。 */
+    private int srDstWidth(int srcW) {
+        return Math.min(Math.max(srcW * 2, 2), 4096);
+    }
+
+    private int srDstHeight(int srcH) {
+        return Math.min(Math.max(srcH * 2, 2), 4096);
+    }
+
+    /**
+     * 超分 2/3 档的文档实现。
+     * 2 档：§3.1 EASU Pass 写到「片源 2x」的中间 FBO，RCAS Pass 再缩放到屏幕。
+     * 3 档：§3.2 加载 assets/shaders 下的 ACNet 模型（MpvHookShaderCompiler 转译），
+     *       CNN 重建亮度后按亮度比例回填色度；模型不可用时回退 2 档并打日志。
+     * 返回 false 表示不可用，调用方回退到基线输出。
+     */
+    private boolean drawSrDoc(int width, int height, int tier, int srcTexture, int srcW, int srcH) {
+        if (!mDocPipelineOk) return false;
+        int dstW = srDstWidth(srcW);
+        int dstH = srDstHeight(srcH);
+        if (tier >= VideoEnhanceTiers.SR_ANIME && drawAnimeSr(width, height, srcTexture, srcW, srcH, dstW, dstH)) {
+            mLastPath = "ANIME_CNN";
+            return true;
+        }
+        if (!ensureDstTarget(dstW, dstH)) return false;
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mDstFbo);
+        GLES20.glViewport(0, 0, dstW, dstH);
+        bindUniformTexture(mEasuProgram, "uInputTex", 0, srcTexture);
+        GLES20.glUniform4f(GLES20.glGetUniformLocation(mEasuProgram, "uSrcSize"),
+                1f / srcW, 1f / srcH, srcW, srcH);
+        drawQuad(GLES20.glGetAttribLocation(mEasuProgram, "aPosition"),
+                GLES20.glGetAttribLocation(mEasuProgram, "aTexCoord"));
+        unbindFrameTextures(1);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        GLES20.glViewport(0, 0, width, height);
+        bindUniformTexture(mRcasProgram, "uEasuTex", 0, mDstTexture);
+        GLES20.glUniform2f(GLES20.glGetUniformLocation(mRcasProgram, "uInvDstSize"),
+                1f / dstW, 1f / dstH);
+        GLES20.glUniform1f(GLES20.glGetUniformLocation(mRcasProgram, "uSharpnessStop"), 0.25f);
+        drawQuad(GLES20.glGetAttribLocation(mRcasProgram, "aPosition"),
+                GLES20.glGetAttribLocation(mRcasProgram, "aTexCoord"));
+        unbindFrameTextures(1);
+        mLastPath = "FSR_EASU_RCAS";
+        return true;
+    }
+
+    /** 超分 3 档：ACNet（MIT, ACNetGLSL v3.2）亮度重建 + 色度比例回填。 */
+    private boolean drawAnimeSr(int width, int height, int srcTexture, int srcW, int srcH,
+                                int dstW, int dstH) {
+        if (!ensureAnimePipeline() || mAnimeCompositeProgram == 0 || mAnimeLumaProgram == 0) return false;
+        if (!ensureSrcLuma(srcW, srcH)) return false;
+        // 先把 RGB 转成 Rec.709 亮度平面，网络才拿到正确的 LUMA 输入
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mSrcLumaFbo);
+        GLES20.glViewport(0, 0, srcW, srcH);
+        bindUniformTexture(mAnimeLumaProgram, "uTexture", 0, srcTexture);
+        drawQuad(GLES20.glGetAttribLocation(mAnimeLumaProgram, "aPosition"),
+                GLES20.glGetAttribLocation(mAnimeLumaProgram, "aTexCoord"));
+        unbindFrameTextures(1);
+        int lumaTex = mAnimePipeline.draw(mSrcLumaTexture, srcW, srcH, dstW, dstH);
+        if (lumaTex == 0) return false;
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        GLES20.glViewport(0, 0, width, height);
+        bindUniformTexture(mAnimeCompositeProgram, "uLumaTex", 0, lumaTex);
+        bindUniformTexture(mAnimeCompositeProgram, "uSrcTex", 1, srcTexture);
+        drawQuad(GLES20.glGetAttribLocation(mAnimeCompositeProgram, "aPosition"),
+                GLES20.glGetAttribLocation(mAnimeCompositeProgram, "aTexCoord"));
+        unbindFrameTextures(2);
+        return true;
+    }
+
+    /** 源分辨率的亮度平面，供 mpv LUMA hook 模型使用。 */
+    private boolean ensureSrcLuma(int w, int h) {
+        if (mSrcLumaFbo != 0 && mSrcLumaW == w && mSrcLumaH == h) return true;
+        if (mSrcLumaFbo != 0) {
+            int[] f = {mSrcLumaFbo};
+            int[] t = {mSrcLumaTexture};
+            GLES20.glDeleteFramebuffers(1, f, 0);
+            GLES20.glDeleteTextures(1, t, 0);
+            mSrcLumaFbo = 0;
+            mSrcLumaTexture = 0;
+        }
+        int[] t = new int[1];
+        int[] f = new int[1];
+        GLES20.glGenTextures(1, t, 0);
+        GLES20.glGenFramebuffers(1, f, 0);
+        mSrcLumaTexture = t[0];
+        mSrcLumaFbo = f[0];
+        mSrcLumaW = w;
+        mSrcLumaH = h;
+        boolean ok = createTarget(mSrcLumaTexture, mSrcLumaFbo, w, h);
+        if (ok) Log.i(TAG, "vram_alloc src_luma " + w + "x" + h + " = " + (w * h * 4 / 1048576f) + " MB");
+        return ok;
+    }
+
+    private boolean ensureAnimePipeline() {
+        if (mAnimePipeline != null) return true;
+        if (mAnimeTried) return false;
+        mAnimeTried = true;
+        if (getContext() == null) return false;
+        mAnimePipeline = MpvHookPipeline.load(getContext(), "shaders/acnet_f8b4_hdn.glsl");
+        if (mAnimePipeline == null) {
+            Log.w(TAG, "ANIME_MODEL_UNAVAILABLE shaders/acnet_f8b4_hdn.glsl; SR tier 3 falls back to FSR");
+        } else {
+            Log.i(TAG, "ANIME_MODEL_READY passes=" + mAnimePipeline.passCount());
+        }
+        return mAnimePipeline != null;
+    }
+
     private void createProducerSurface() {
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
@@ -816,12 +1326,21 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
     public boolean isPostProcessSupported() { return isRuntimePostProcessAvailable(); }
     public String getPostProcessFailure() { return mPostProcessFailure; }
     private void releaseFrameBuffers() {
-        boolean allocated=mFbos[0]!=0 || mFrameTextures[0]!=0;
-        GLES20.glDeleteFramebuffers(2,mFbos,0); GLES20.glDeleteTextures(2,mFrameTextures,0);
-        mFbos[0]=mFbos[1]=mFrameTextures[0]=mFrameTextures[1]=0;
-        mFboWidth=mFboHeight=0; mHasPrevious=false; mFboHasFrame=false;
+        boolean allocated = mFbos[0] != 0 || mFrameTextures[0] != 0 || mSynthFbo != 0;
+        GLES20.glDeleteFramebuffers(RING, mFbos, 0);
+        GLES20.glDeleteTextures(RING, mFrameTextures, 0);
+        for (int i = 0; i < RING; i++) { mFbos[i] = 0; mFrameTextures[i] = 0; }
+        if (mSynthFbo != 0) { int[] f = {mSynthFbo}; GLES20.glDeleteFramebuffers(1, f, 0); mSynthFbo = 0; }
+        if (mSynthTexture != 0) { int[] t = {mSynthTexture}; GLES20.glDeleteTextures(1, t, 0); mSynthTexture = 0; }
+        if (mFlowFbo != 0) { int[] f = {mFlowFbo}; GLES20.glDeleteFramebuffers(1, f, 0); mFlowFbo = 0; }
+        if (mFlowTexture != 0) { int[] t = {mFlowTexture}; GLES20.glDeleteTextures(1, t, 0); mFlowTexture = 0; }
+        if (mDstFbo != 0) { int[] f = {mDstFbo}; GLES20.glDeleteFramebuffers(1, f, 0); mDstFbo = 0; }
+        if (mDstTexture != 0) { int[] t = {mDstTexture}; GLES20.glDeleteTextures(1, t, 0); mDstTexture = 0; }
+        mDstW = mDstH = 0;
+        mRingHead = -1; mValidFrames = 0;
+        mFboWidth = mFboHeight = 0; mHasPrevious = false; mFboHasFrame = false;
         mTiming.reset();
-        if (allocated) Log.i(TAG,"FBO ping-pong released");
+        if (allocated) Log.i(TAG, "FBO ring released");
     }
     private static final class ProducerSurface {
         final SurfaceTexture texture;
@@ -863,7 +1382,24 @@ public class GlEnhanceRenderView extends GLSurfaceView implements IRenderView, G
         if (mOesTexture!=0) GLES20.glDeleteTextures(1,new int[]{mOesTexture},0);
         if (mColourProgram!=0) GLES20.glDeleteProgram(mColourProgram);
         if (mOutputProgram!=0) GLES20.glDeleteProgram(mOutputProgram);
-        mOesTexture=mColourProgram=mOutputProgram=0;
+        if (mMemcProgram!=0) GLES20.glDeleteProgram(mMemcProgram);
+        for (int i = 0; i < mSrPrograms.length; i++) {
+            if (mSrPrograms[i] != 0) { GLES20.glDeleteProgram(mSrPrograms[i]); mSrPrograms[i] = 0; }
+        }
+        if (mCubicProgram != 0) { GLES20.glDeleteProgram(mCubicProgram); mCubicProgram = 0; }
+        if (mFlowEstProgram != 0) { GLES20.glDeleteProgram(mFlowEstProgram); mFlowEstProgram = 0; }
+        if (mFlowWarpProgram != 0) { GLES20.glDeleteProgram(mFlowWarpProgram); mFlowWarpProgram = 0; }
+        if (mEasuProgram != 0) { GLES20.glDeleteProgram(mEasuProgram); mEasuProgram = 0; }
+        if (mRcasProgram != 0) { GLES20.glDeleteProgram(mRcasProgram); mRcasProgram = 0; }
+        if (mAnimeCompositeProgram != 0) { GLES20.glDeleteProgram(mAnimeCompositeProgram); mAnimeCompositeProgram = 0; }
+        if (mAnimeLumaProgram != 0) { GLES20.glDeleteProgram(mAnimeLumaProgram); mAnimeLumaProgram = 0; }
+        if (mSrcLumaFbo != 0) { int[] f = {mSrcLumaFbo}; GLES20.glDeleteFramebuffers(1, f, 0); mSrcLumaFbo = 0; }
+        if (mSrcLumaTexture != 0) { int[] t = {mSrcLumaTexture}; GLES20.glDeleteTextures(1, t, 0); mSrcLumaTexture = 0; }
+        mSrcLumaW = mSrcLumaH = 0;
+        if (mAnimePipeline != null) { mAnimePipeline.release(); mAnimePipeline = null; }
+        mAnimeTried = false;
+        mDocPipelineOk = false;
+        mOesTexture=mColourProgram=mOutputProgram=mMemcProgram=0;
         mHasFrame=false; mLoggedSr=false;
     }
     private static FloatBuffer buffer(float... values) {
