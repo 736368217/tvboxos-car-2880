@@ -235,6 +235,12 @@ public final class AudioEffectController {
         if (loudness != null && loudnessTarget > 0) {
             try { loudness.setTargetGain(interpolate(loudnessStart, loudnessTarget, fraction)); } catch (Throwable ignored) { }
         }
+        if (fraction >= 1f) {
+            int now = -1;
+            try { if (loudness != null) now = Math.round(loudness.getTargetGain()); } catch (Throwable ignored) { }
+            android.util.Log.i("CarAudio", "fade_done loudness=" + loudnessTarget + " now=" + now
+                    + " boostMb=" + boostMb);
+        }
     }
 
     private static int interpolate(int start, int target, float fraction) {
