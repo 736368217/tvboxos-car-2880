@@ -9,6 +9,9 @@ import com.github.tvbox.osc.util.LOG;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.audio.AudioProcessor;
+import com.google.android.exoplayer2.audio.AudioSink;
+import com.google.android.exoplayer2.audio.DefaultAudioSink;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Renderer;
@@ -505,6 +508,27 @@ public class ExoPlayer extends ExoMediaPlayer {
                         new Class<?>[]{Renderer.class},
                         new SubtitleOffsetRendererHandler(renderer, subtitleDelayProvider)));
             }
+        }
+
+        /**
+         * 在音频链路里插入 PCM 增益处理器：ExoPlayer 的 setVolume 只能 0..1，
+         * >100% 只能靠这里放大，且不依赖车机是否带系统音效。
+         *
+         * 注意：offload（直通解码）会绕过 AudioProcessor，所以这里强制关闭 offload，
+         * 否则增益在可直通格式上会被静默跳过。ExoPlayer 2.19.1 对应 API 是
+         * setOffloadMode(int)，没有 setEnableOffload(boolean)。
+         */
+        @Override
+        protected AudioSink buildAudioSink(Context context, boolean enableFloatOutput,
+                                           boolean enableAudioTrackPlaybackParams, boolean enableOffload) {
+            AudioProcessor[] processors = new AudioProcessor[]{
+                    xyz.doikki.videoplayer.exo.AudioGainProcessor.INSTANCE};
+            return new DefaultAudioSink.Builder(context)
+                    .setAudioProcessors(processors)
+                    .setEnableFloatOutput(enableFloatOutput)
+                    .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
+                    .setOffloadMode(DefaultAudioSink.OFFLOAD_MODE_DISABLED)
+                    .build();
         }
     }
 

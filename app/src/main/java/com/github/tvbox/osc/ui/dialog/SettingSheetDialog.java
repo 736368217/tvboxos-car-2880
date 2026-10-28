@@ -19,6 +19,10 @@ class SettingSheetDialog extends BaseDialog {
     private final TextView title;
     private TextView close;
     protected final LinearLayout rows;
+    /** 车机/遥控常把一次按下派发成两次点击，这里做统一防抖，避免一次点击跳两档或连开两个弹窗。 */
+    private long lastClickMs;
+    /** 本弹窗 show() 的时刻；同一次按下的第二次派发会落在刚打开的弹窗上，必须忽略。 */
+    private long shownAtMs;
 
     SettingSheetDialog(@NonNull Context context, String titleText) {
         super(context);
@@ -28,7 +32,7 @@ class SettingSheetDialog extends BaseDialog {
         title.setText(titleText);
         rows = findViewById(R.id.rows);
         close = findViewById(R.id.close);
-        close.setOnClickListener(v -> dismiss());
+        close.setOnClickListener(v -> { if (acceptClick()) dismiss(); });
     }
 
     protected void setTitleText(String text) {
@@ -45,9 +49,16 @@ class SettingSheetDialog extends BaseDialog {
                 .inflate(R.layout.item_dialog_setting_row, rows, false);
         ((TextView) row.findViewById(R.id.name)).setText(name);
         TextView valueView = row.findViewById(R.id.value);
-        valueView.setText(value);
         if (click != null) {
-            row.setOnClickListener(click);
+            row.setOnClickListener(v -> {
+                long dt = android.os.SystemClock.uptimeMillis() - shownAtMs;
+                boolean accepted = acceptClick();
+                // 车机现场的诊断入口：同一行若出现 dt 极小的两次点击，即证明「一次按下被派发两次」。
+                android.util.Log.i("CarSheet", "row " + name + " dt=" + dt
+                        + " accepted=" + accepted + " class=" + getClass().getSimpleName());
+                if (!accepted) return;
+                click.onClick(v);
+            });
         } else {
             row.setFocusable(false);
             row.setClickable(false);
@@ -56,7 +67,53 @@ class SettingSheetDialog extends BaseDialog {
         return valueView;
     }
 
+    /**
+     * 取宿主 Activity。BaseDialog 用的是 {@code Dialog(context, styleRes)} 构造，
+     * Android 会把传入的 context 包成 ContextThemeWrapper，所以 {@code getContext() instanceof Activity}
+     * 恒为 false —— 必须逐层解包，否则拿到 null、设置写进 Hawk 却从不刷新正在运行的返回组件。
+     */
+    protected android.app.Activity ownerActivity() {
+        android.content.Context context = getContext();
+        while (context instanceof android.content.ContextWrapper) {
+            if (context instanceof android.app.Activity) return (android.app.Activity) context;
+            context = ((android.content.ContextWrapper) context).getBaseContext();
+        }
+        return context instanceof android.app.Activity ? (android.app.Activity) context : null;
+    }
+
     protected void setCloseText(String text) {
         if (close != null) close.setText(text);
+    }
+
+    private static java.lang.ref.WeakReference<SettingSheetDialog> CURRENT;
+
+    /**
+     * 同一个设置类弹窗只允许存在一个同类实例，避免车机重复派发点击时叠出多层。
+     * 只替换同类：父弹窗（高级设置）打开子弹窗（返回组件）时不能被顶掉。
+     */
+    @Override
+    public void show() {
+        SettingSheetDialog previous = CURRENT == null ? null : CURRENT.get();
+        if (previous != null && previous != this
+                && previous.getClass() == getClass() && previous.isShowing()) {
+            previous.dismiss();
+        }
+        super.show();
+        shownAtMs = android.os.SystemClock.uptimeMillis();
+        CURRENT = new java.lang.ref.WeakReference<>(this);
+    }
+
+    /**
+     * 丢弃两类重复点击：
+     * 1) 弹窗刚打开就收到的点击 —— 这是触发本弹窗的那一次按下的第二次派发，落在首行会直接把开关改回原值，
+     *    表现就是「点什么都没反应 / 开关永远是关闭」；
+     * 2) 同一弹窗内 400ms 内的第二次点击。
+     */
+    private boolean acceptClick() {
+        long now = android.os.SystemClock.uptimeMillis();
+        if (now - shownAtMs < 300L) return false;
+        if (now - lastClickMs < 400L) return false;
+        lastClickMs = now;
+        return true;
     }
 }

@@ -68,10 +68,13 @@ public final class CarEnhance {
         }
         int mode = audioMode();
         int session = view.getAudioSessionId();
-        int boost = boostMillibel();
+        boolean pcm = view.usesPcmGain();
+        int boost = pcm ? 0 : boostMillibel();
+        if (pcm) view.applyPcmGain(appGain * volumeFactor);
         AudioEffectController.apply(mode, session, boost);
         Log.i("CarAudio", "runtime_apply mode=" + mode + " session=" + session + " gain=" + appGain
-                + " boostMb=" + boost + " enabled=" + AudioEffectController.isActive()
+                + " path=" + (pcm ? "pcm" : "loudness") + " boostMb=" + boost
+                + " enabled=" + AudioEffectController.isActive()
                 + " state=" + view.getCurrentPlayState()
                 + " player=" + System.identityHashCode(view.getMediaPlayer()));
     }

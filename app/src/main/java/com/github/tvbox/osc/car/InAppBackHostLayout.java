@@ -159,7 +159,9 @@ final class InAppBackHostLayout extends FrameLayout {
         boolean showBall = show && !swipeMode && !HawkConfig.BACK_MODE_EDGE.equals(mode);
         boolean showEdge = show && !swipeMode && !HawkConfig.BACK_MODE_FLOATING.equals(mode);
         boolean showSwipe = show && swipeMode;
-
+        android.util.Log.i("InAppBack", "vis mode=" + mode + " show=" + show
+                + " ball=" + showBall + " edge=" + showEdge + " swipe=" + showSwipe
+                + " resumed=" + resumed + " playbackHidden=" + playbackHidden + " rootHidden=" + rootHidden);
         ball.setVisibility(showBall ? VISIBLE : INVISIBLE);
         edge.setVisibility(showEdge ? VISIBLE : INVISIBLE);
         swipe.setVisibility(showSwipe ? VISIBLE : INVISIBLE);
@@ -232,6 +234,14 @@ final class InAppBackHostLayout extends FrameLayout {
         float edgeMin = Math.max(top, halfBar);
         float edgeMax = Math.max(edgeMin, getHeight() - bottom - halfBar);
         edge.syncBounds(edgeMin, edgeMax);
+        android.util.Log.i("InAppBack", "geom mode=" + mode
+                + " host=" + getWidth() + "x" + getHeight()
+                + " scale=" + tokenScale + " dens=" + displayDensity
+                + " safe=" + (int) safeLeft + "," + (int) safeTop + "," + (int) safeRight + "," + (int) safeBottom
+                + " ballX=" + (int) ball.getX() + " ballY=" + (int) ball.getY()
+                + " ballSize=" + ball.getWidth() + "x" + ball.getHeight()
+                + " ballVis=" + ball.getVisibility() + " ballAlpha=" + ball.getAlpha()
+                + " edgeVis=" + edge.getVisibility());
     }
 
     private void readInsets(WindowInsets insets) {

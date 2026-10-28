@@ -359,6 +359,17 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
         super.restoreVolume();
         CarEnhance.setVolumeFactor(this, 1f);
     }
+    /** ExoPlayer 走 PCM 采样增益（不依赖车机系统音效）；其它引擎返回 false。 */
+    public boolean usesPcmGain() {
+        return mMediaPlayer instanceof com.github.tvbox.osc.player.ExoPlayer;
+    }
+
+    /** 只对 PCM 增益引擎生效；IJK 等走 LoudnessEnhancer。 */
+    public void applyPcmGain(float gain) {
+        if (!usesPcmGain()) return;
+        xyz.doikki.videoplayer.exo.AudioGainProcessor.INSTANCE.setGain(gain);
+    }
+
 
 
     @Override

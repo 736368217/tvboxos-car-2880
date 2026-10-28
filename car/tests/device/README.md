@@ -65,6 +65,9 @@ powershell -ExecutionPolicy Bypass -File car/tests/device/run_car_ui_checks.ps1 
 ## 定位方式（2026-10-23 更新）
 
 - 截图 → `tools/ocr.ps1`（Windows.Media.Ocr）→ 按文字坐标点击；
+ - 需要**精确点击坐标**时用 `tools/ocr_words.ps1`：逐词输出 `x<TAB>y<TAB>w<TAB>h<TAB>中心x<TAB>中心y<TAB>文字`，中心点可直接喂 `input tap`；
+ - 需要**证明控件真的画出来了**时用 `tools/px_probe.ps1`：`-Point "x,y;x,y"` 取样颜色；不带 `-Point` 则按列统计贴边彩色像素，命中列打印 `avg=#RRGGBB`（返回杠实测 `#1F698D`）；
+ - 连续两帧截图若哈希相同 = 画面静止（视频没在播），别把它当成"控件没画"。
 - 设置页用 `input keyevent 82`（MENU）打开，不再依赖首页「设置」按钮；
 - 租到实例后先等 `sys.boot_completed=1`，adb 掉线自动重连一次。
 

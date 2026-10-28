@@ -34,12 +34,6 @@ public class BackBarSettingsDialog extends SettingSheetDialog {
         });
         refresh();
     }
-
-    private android.app.Activity ownerActivity() {
-        Context context = getContext();
-        return context instanceof android.app.Activity ? (android.app.Activity) context : null;
-    }
-
     private void refresh() {
         if (tvEnabled != null) tvEnabled.setText(InAppBackButton.isEnabled() ? "开启" : "关闭");
         if (tvMode != null) {

@@ -112,6 +112,9 @@ public final class InAppBackButton {
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         }
         host.bringToFront();
+        android.util.Log.i("InAppBack", "attach " + activity.getClass().getSimpleName()
+                + " enabled=" + isEnabled() + " mode=" + getMode()
+                + " created=" + created + " op=" + operation);
         if (operation == ATTACH || created) host.resume();
         else host.refresh();
     }
@@ -244,7 +247,12 @@ public final class InAppBackButton {
     public static String getSide() { return side(text(HawkConfig.BACK_SIDE, HawkConfig.BACK_SIDE_LEFT)); }
     public static boolean isLarge() { return bool(HawkConfig.BACK_LARGE, false); }
     public static boolean isHapticEnabled() { return bool(HawkConfig.BACK_HAPTIC, true); }
-    public static boolean isHideOnRoot() { return bool(HawkConfig.BACK_HIDE_ON_ROOT, false); }
+    /**
+     * 一律返回 false：r42 起「返回组件」只保留开关与形式，不再提供「隐藏于首页」等自定义，
+     * 而旧版本可能把该键写成 true 并长期留存。继续沿用旧值会出现「开关是开启、页面上什么也看不到」
+     * 这种无法从界面自证的失效，故直接忽略历史键（键本身保留，避免旧偏好迁移报错）。
+     */
+    public static boolean isHideOnRoot() { return false; }
     public static String getEdgeSkin() {
         String raw = text(HawkConfig.BACK_EDGE_SKIN, "");
         String normalized = skin(raw);
@@ -291,7 +299,6 @@ public final class InAppBackButton {
     }
     public static void setLarge(Activity a, boolean value) { put(a, HawkConfig.BACK_LARGE, value); }
     public static void setHapticEnabled(Activity a, boolean value) { put(a, HawkConfig.BACK_HAPTIC, value); }
-    public static void setHideOnRoot(Activity a, boolean value) { put(a, HawkConfig.BACK_HIDE_ON_ROOT, value); }
     public static void setEdgeSkin(Activity a, String value) {
         Hawk.put(HawkConfig.BACK_EDGE_SKIN_EXPLICIT, true);
         put(a, HawkConfig.BACK_EDGE_SKIN, skin(value));
