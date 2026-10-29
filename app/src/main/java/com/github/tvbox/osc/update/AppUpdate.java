@@ -98,20 +98,25 @@ public final class AppUpdate {
         public final String localVersion;
         public final String remoteVersion;
         public final String notes;
+        /** 首选下载地址（已套上查询成功那个通道的前缀）。 */
         public final String apkUrl;
+        /** 原始资产地址（不带前缀），下载失败换通道时以它为基准。 */
+        public final String apkUrlRaw;
         public final String apkName;
         public final long apkSize;
         public final String channelLabel;
         public final String releasePage;
 
         Info(String tag, boolean hasUpdate, String localVersion, String remoteVersion, String notes,
-             String apkUrl, String apkName, long apkSize, String channelLabel, String releasePage) {
+             String apkUrl, String apkUrlRaw, String apkName, long apkSize, String channelLabel,
+             String releasePage) {
             this.tag = tag;
             this.hasUpdate = hasUpdate;
             this.localVersion = localVersion;
             this.remoteVersion = remoteVersion;
             this.notes = notes;
             this.apkUrl = apkUrl;
+            this.apkUrlRaw = apkUrlRaw;
             this.apkName = apkName;
             this.apkSize = apkSize;
             this.channelLabel = channelLabel;
@@ -230,7 +235,7 @@ public final class AppUpdate {
         JSONObject json = new JSONObject(body);
         if (json.optBoolean("draft", false) || json.optBoolean("prerelease", false)) {
             // 预发布/草稿不作为更新来源，避免把测试包推给用户
-            return new Info(json.optString("tag_name"), false, local, local, "", null, null, 0,
+            return new Info(json.optString("tag_name"), false, local, local, "", null, null, null, 0,
                     channel.label, null);
         }
         // 只用 tag 判版本：Release 标题里可能顺带提到别的 rNN（例如「修 r48 的问题」），
@@ -251,14 +256,15 @@ public final class AppUpdate {
         }
         int picked = UpdateVersion.pickApk(names, sizes);
         String apkName = picked >= 0 ? names[picked] : null;
-        String apkUrl = picked >= 0 ? channel.apply(urls[picked]) : null;
+        String apkUrlRaw = picked >= 0 ? urls[picked] : null;
+        String apkUrl = apkUrlRaw == null ? null : channel.apply(apkUrlRaw);
         long apkSize = picked >= 0 ? sizes[picked] : 0L;
         boolean hasUpdate = UpdateVersion.hasUpdate(local, remoteVersion);
         String releasePage = "https://github.com/" + OWNER + "/" + REPO + "/releases/tag/" + tag;
         if (hasUpdate && apkUrl == null) {
             throw new IOException("Release " + tag + " 没有可用的 APK 资产");
         }
-        return new Info(tag, hasUpdate, local, remoteVersion, notes, apkUrl, apkName, apkSize,
+        return new Info(tag, hasUpdate, local, remoteVersion, notes, apkUrl, apkUrlRaw, apkName, apkSize,
                 channel.label, releasePage);
     }
 
@@ -267,82 +273,107 @@ public final class AppUpdate {
     public static Task download(final Context context, final Info info, final DownloadCallback callback) {
         final Task task = new Task();
         final Context appContext = context.getApplicationContext();
-        if (info == null || info.apkUrl == null) {
+        if (info == null || (info.apkUrl == null && info.apkUrlRaw == null)) {
             post(() -> callback.onError("没有可下载的安装包"));
             return task;
         }
         POOL.execute(() -> {
             File target = apkFile(appContext, info);
             File partial = new File(target.getAbsolutePath() + ".part");
-            Log.i(TAG, "download start url=" + info.apkUrl + " size=" + info.apkSize + " -> " + target);
-            try {
-                delete(partial);
-                delete(target);
-                OkHttpClient client = client(true);
-                Request request = new Request.Builder()
-                        .url(info.apkUrl)
-                        .header("User-Agent", "TVBox-Car/" + info.localVersion)
-                        .build();
-                long lastPost = 0L;
-                long total;
-                try (Response response = client.newCall(request).execute()) {
-                    ResponseBody body = response.body();
-                    if (!response.isSuccessful() || body == null) {
-                        throw new IOException("HTTP " + response.code());
-                    }
-                    total = body.contentLength() > 0 ? body.contentLength() : info.apkSize;
-                    try (InputStream in = body.byteStream();
-                         FileOutputStream out = new FileOutputStream(partial)) {
-                        byte[] buffer = new byte[64 * 1024];
-                        long done = 0L;
-                        int read;
-                        while ((read = in.read(buffer)) > 0) {
-                            if (task.isCancelled()) {
-                                out.close();
-                                delete(partial);
-                                Log.i(TAG, "download cancelled at " + done + " bytes");
-                                post(() -> callback.onError("已取消下载"));
-                                return;
-                            }
-                            out.write(buffer, 0, read);
-                            done += read;
-                            long now = System.currentTimeMillis();
-                            if (now - lastPost >= PROGRESS_INTERVAL_MS) {
-                                lastPost = now;
-                                final long posted = done;
-                                final long postedTotal = total;
-                                post(() -> callback.onProgress(posted, postedTotal));
-                            }
-                        }
-                    }
-                }
-                if (partial.length() < MIN_APK_BYTES) {
+            String raw = info.apkUrlRaw != null ? info.apkUrlRaw : info.apkUrl;
+            String preferred = prefixOf(info.apkUrl, info.apkUrlRaw);
+            String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
+            String[] candidates = UpdateVersion.downloadCandidates(raw, preferred, mirror);
+            Log.i(TAG, "download start size=" + info.apkSize + " -> " + target
+                    + " candidates=" + candidates.length + " first=" + (candidates.length > 0 ? candidates[0] : "-"));
+            delete(target);
+            List<String> failures = new ArrayList<>();
+            for (int i = 0; i < candidates.length; i++) {
+                String url = candidates[i];
+                if (task.isCancelled()) {
                     delete(partial);
-                    throw new IOException("下载内容过小（" + partial.length() + " 字节），可能是错误页");
-                }
-                if (!partial.renameTo(target)) {
-                    throw new IOException("无法重命名到 " + target.getName());
-                }
-                post(() -> callback.onProgress(target.length(), target.length()));
-                String problem = verify(appContext, target);
-                if (problem != null) {
-                    delete(target);
-                    Log.w(TAG, "verify failed: " + problem);
-                    post(() -> callback.onError(problem));
+                    post(() -> callback.onError("已取消下载"));
                     return;
                 }
-                Log.i(TAG, "download done file=" + target + " bytes=" + target.length()
-                        + " package=" + appContext.getPackageName() + " channel=" + info.channelLabel);
-                post(() -> callback.onDone(target));
-            } catch (Exception error) {
-                delete(partial);
-                String message = error.getClass().getSimpleName()
-                        + (error.getMessage() == null ? "" : (": " + error.getMessage()));
-                Log.w(TAG, "download failed: " + message);
-                post(() -> callback.onError("下载失败：" + message));
+                try {
+                    Log.i(TAG, "download try " + (i + 1) + "/" + candidates.length + " url=" + url);
+                    transfer(task, url, partial, info, target, callback);
+                    if (partial.length() < MIN_APK_BYTES) {
+                        delete(partial);
+                        throw new IOException("内容过小（" + (partial.exists() ? partial.length() : 0) + " 字节），可能是错误页");
+                    }
+                    if (!partial.renameTo(target)) {
+                        throw new IOException("无法重命名到 " + target.getName());
+                    }
+                    post(() -> callback.onProgress(target.length(), target.length()));
+                    String problem = verify(appContext, target);
+                    if (problem != null) {
+                        delete(target);
+                        Log.w(TAG, "verify failed: " + problem);
+                        post(() -> callback.onError(problem));
+                        return;
+                    }
+                    Log.i(TAG, "download done file=" + target + " bytes=" + target.length()
+                            + " package=" + appContext.getPackageName() + " url=" + url);
+                    post(() -> callback.onDone(target));
+                    return;
+                } catch (Exception error) {
+                    delete(partial);
+                    String message = error.getClass().getSimpleName()
+                            + (error.getMessage() == null ? "" : (": " + error.getMessage()));
+                    failures.add(message);
+                    Log.w(TAG, "download failed " + (i + 1) + "/" + candidates.length + " : " + message);
+                }
             }
+            String summary = failures.isEmpty() ? "没有可用地址" : failures.get(0);
+            Log.w(TAG, "download failed on every candidate (" + failures.size() + "): " + failures);
+            post(() -> callback.onError("下载失败（" + failures.size() + " 个地址都不可用）：" + summary));
         });
         return task;
+    }
+
+    /** 把资产地址前缀拆出来，供下载候选排序用。 */
+    private static String prefixOf(String urlWithPrefix, String rawUrl) {
+        if (urlWithPrefix == null || rawUrl == null) return "";
+        if (!urlWithPrefix.endsWith(rawUrl)) return "";
+        String prefix = urlWithPrefix.substring(0, urlWithPrefix.length() - rawUrl.length());
+        return prefix;
+    }
+
+    /** 单地址下载到 partial；取消/超时会抛异常，由调用方换下一个地址。 */
+    private static void transfer(Task task, String url, File partial, Info info, File target,
+                                 DownloadCallback callback) throws IOException {
+        OkHttpClient client = client(true);
+        Request request = new Request.Builder()
+                .url(url)
+                .header("User-Agent", "TVBox-Car/" + info.localVersion)
+                .build();
+        long lastPost = 0L;
+        try (Response response = client.newCall(request).execute()) {
+            ResponseBody body = response.body();
+            if (!response.isSuccessful() || body == null) {
+                throw new IOException("HTTP " + response.code());
+            }
+            long total = body.contentLength() > 0 ? body.contentLength() : info.apkSize;
+            try (InputStream in = body.byteStream();
+                 FileOutputStream out = new FileOutputStream(partial)) {
+                byte[] buffer = new byte[64 * 1024];
+                long done = 0L;
+                int read;
+                while ((read = in.read(buffer)) > 0) {
+                    if (task.isCancelled()) throw new IOException("已取消");
+                    out.write(buffer, 0, read);
+                    done += read;
+                    long now = System.currentTimeMillis();
+                    if (now - lastPost >= PROGRESS_INTERVAL_MS) {
+                        lastPost = now;
+                        final long posted = done;
+                        final long postedTotal = total;
+                        post(() -> callback.onProgress(posted, postedTotal));
+                    }
+                }
+            }
+        }
     }
 
     private static File apkFile(Context context, Info info) {
@@ -471,14 +502,24 @@ public final class AppUpdate {
      * </ul>
      */
     private static OkHttpClient client(boolean plain) {
-        if (!plain) return OkHttp.client(TIMEOUT_MS);
+        if (!plain) {
+            // App 网络栈（OkDns/DoH + 用户代理规则）。同样给 DNS 加超时，
+            // 某些网络下 netd 会卡满 20 秒才报 UnknownHostException。
+            return AppStackClient.HOLDER;
+        }
         return SystemDnsClient.HOLDER;
     }
 
-    /** 系统 DNS 客户端：懒加载，全程复用一个连接池。 */
+    /**
+     * 系统 DNS 客户端：懒加载，全程复用一个连接池。
+     *
+     * <p>{@code connectTimeout} 管不到 DNS —— OkHttp 直接调用 {@code Dns.lookup()} 阻塞等待。
+     * 实测某台车机上 netd 解析要卡满 20 秒，三个通道两轮就是 2 分钟，用户只会以为「没反应」。
+     * 所以这里包一层自带超时的 DNS。</p>
+     */
     private static final class SystemDnsClient {
         static final OkHttpClient HOLDER = new OkHttpClient.Builder()
-                .dns(okhttp3.Dns.SYSTEM)
+                .dns(new TimeoutDns(okhttp3.Dns.SYSTEM, DNS_TIMEOUT_MS))
                 .connectTimeout(8, java.util.concurrent.TimeUnit.SECONDS)
                 .readTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
                 .writeTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
@@ -486,6 +527,57 @@ public final class AppUpdate {
                 .followSslRedirects(true)
                 .build();
     }
+
+    private static final class AppStackClient {
+        static final OkHttpClient HOLDER = OkHttp.client(TIMEOUT_MS).newBuilder()
+                .dns(new TimeoutDns(OkHttp.dns(), DNS_TIMEOUT_MS))
+                .build();
+    }
+
+    /** DNS 解析硬超时：单域名最多等这么久，超时按解析失败处理。 */
+    private static final long DNS_TIMEOUT_MS = 2500L;
+
+    /** 给任意 {@link okhttp3.Dns} 加硬超时，避免解析阶段无限等待。 */
+    private static final class TimeoutDns implements okhttp3.Dns {
+        private final okhttp3.Dns delegate;
+        private final long timeoutMs;
+
+        TimeoutDns(okhttp3.Dns delegate, long timeoutMs) {
+            this.delegate = delegate == null ? okhttp3.Dns.SYSTEM : delegate;
+            this.timeoutMs = timeoutMs;
+        }
+
+        @Override
+        public java.util.List<java.net.InetAddress> lookup(final String hostname)
+                throws java.net.UnknownHostException {
+            java.util.concurrent.Future<java.util.List<java.net.InetAddress>> future =
+                    DNS_POOL.submit(() -> delegate.lookup(hostname));
+            try {
+                return future.get(timeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+            } catch (java.util.concurrent.TimeoutException timeout) {
+                future.cancel(true);
+                Log.w(TAG, "dns timeout after " + timeoutMs + "ms: " + hostname);
+                throw new java.net.UnknownHostException(hostname + "（解析超时 " + timeoutMs + "ms）");
+            } catch (InterruptedException interrupted) {
+                future.cancel(true);
+                Thread.currentThread().interrupt();
+                throw new java.net.UnknownHostException(hostname + "（解析被中断）");
+            } catch (Exception error) {
+                Throwable cause = error.getCause() == null ? error : error.getCause();
+                if (cause instanceof java.net.UnknownHostException) {
+                    throw (java.net.UnknownHostException) cause;
+                }
+                throw new java.net.UnknownHostException(hostname + "（" + cause + "）");
+            }
+        }
+    }
+
+    private static final java.util.concurrent.ExecutorService DNS_POOL =
+            java.util.concurrent.Executors.newCachedThreadPool(runnable -> {
+                Thread thread = new Thread(runnable, "update-dns");
+                thread.setDaemon(true);
+                return thread;
+            });
 
     private static void post(Runnable runnable) {
         MAIN.post(runnable);

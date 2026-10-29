@@ -125,6 +125,35 @@ public final class UpdateVersionHostTest {
             if (channel.apiUrl.contains("ghfast.top")) ghfastCount++;
         }
         eqInt(ghfastCount, 1, "duplicate mirror is not added twice");
+
+        // ---------- 下载候选（查询通 ≠ 下载通，必须能换通道重试） ----------
+        String rawAsset = "https://github.com/o/r/releases/download/v1/app.apk";
+        String[] fromDirect = UpdateVersion.downloadCandidates(rawAsset, "", "");
+        check(fromDirect.length >= 3, "direct + mirrors, got " + fromDirect.length);
+        eq(fromDirect[0], rawAsset, "direct channel tries the raw url first");
+        check(fromDirect[1].contains("ghfast.top"), "ghfast next, got " + fromDirect[1]);
+        check(fromDirect[2].contains("ghproxy.net"), "ghproxy third, got " + fromDirect[2]);
+        // 同一地址不重复出现
+        boolean dup = false;
+        for (int i = 0; i < fromDirect.length; i++) {
+            for (int j = i + 1; j < fromDirect.length; j++) {
+                if (fromDirect[i].equals(fromDirect[j])) dup = true;
+            }
+        }
+        check(!dup, "candidates must be unique");
+        // 查询走 ghfast 成功时，下载也先走 ghfast，再回直连，再另一个镜像
+        String[] fromGhfast = UpdateVersion.downloadCandidates(rawAsset, "https://ghfast.top/", "");
+        check(fromGhfast[0].startsWith("https://ghfast.top/https://github.com/"),
+                "preferred mirror first, got " + fromGhfast[0]);
+        eq(fromGhfast[1], rawAsset, "then the raw url");
+        // 用户自定义镜像参与候选
+        String[] withUser =
+                UpdateVersion.downloadCandidates(rawAsset, "", "https://my-mirror.example/");
+        check(withUser[1].startsWith("https://my-mirror.example/"),
+                "user mirror is a candidate, got " + withUser[1]);
+        // 空地址不产生候选
+        eqInt(UpdateVersion.downloadCandidates(null, "", "").length, 0, "null url -> no candidates");
+        eqInt(UpdateVersion.downloadCandidates("", "", "").length, 0, "empty url -> no candidates");
         // 镜像没有结尾斜杠也要能拼
         eq(custom[0].apply("https://github.com/x/y.apk"),
                 "https://my-mirror.example/https://github.com/x/y.apk", "asset url follows the channel");

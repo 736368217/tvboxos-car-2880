@@ -163,6 +163,34 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
     /** 内置镜像前缀，按经验顺序：用户自定义 → 直连 → ghfast → ghproxy。 */
     public static final String[] BUILT_IN_MIRRORS = {"https://ghfast.top/", "https://ghproxy.net/"};
 
+    // 下载候选地址：把同一个资产 URL 按通道前缀展开，preferredPrefix 排最前。
+    //
+    // 为什么需要：查询 API 能通不代表下载能通。实测 api.github.com 正常返回，
+    // 但 github.com/.../releases/download/... 会超时 —— 两者是被单独处理的域名。
+    // 所以下载失败要能自动换镜像重试，而不是直接报错。
+    public static String[] downloadCandidates(String rawUrl, String preferredPrefix, String userMirror) {
+        if (rawUrl == null || rawUrl.length() == 0) return new String[0];
+        List<String> ordered = new ArrayList<>();
+        String preferred = preferredPrefix == null ? "" : preferredPrefix;
+        addCandidate(ordered, applyPrefix(preferred, rawUrl));
+        if (preferred.length() > 0) addCandidate(ordered, rawUrl);
+        String mirror = userMirror == null ? "" : userMirror.trim();
+        if (mirror.length() > 0) {
+            if (!mirror.endsWith("/")) mirror = mirror + "/";
+            if (!mirror.equals(preferred)) addCandidate(ordered, applyPrefix(mirror, rawUrl));
+        }
+        for (String prefix : BUILT_IN_MIRRORS) {
+            if (prefix.equals(preferred)) continue;
+            addCandidate(ordered, applyPrefix(prefix, rawUrl));
+        }
+        return ordered.toArray(new String[0]);
+    }
+
+    private static void addCandidate(List<String> ordered, String url) {
+        if (url == null || url.length() == 0) return;
+        if (!ordered.contains(url)) ordered.add(url);
+    }
+
     public static Channel[] channels(String owner, String repo, String userMirror) {
         String api = "https://api.github.com/repos/" + owner + "/" + repo + "/releases/latest";
         List<Channel> out = new ArrayList<>();
