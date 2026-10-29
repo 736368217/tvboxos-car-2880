@@ -166,6 +166,21 @@ public class HomeActivity extends BaseActivity {
             useCacheConfig = bundle.getBoolean("useCache", false);
         }
         initData();
+        scheduleUpdateCheck();
+    }
+
+    /**
+     * 启动后延迟几秒静默检查更新：先让首页把数据拉起来，也避免刚进页面就弹窗。
+     * 节流（6 小时）与「正在播放/页面没焦点就跳过」分别在 AppUpdate、UpdateDialog 里判定。
+     */
+    private void scheduleUpdateCheck() {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isFinishing() || isDestroyed()) return;
+                com.github.tvbox.osc.update.UpdateDialog.checkSilently(HomeActivity.this);
+            }
+        }, 5000);
     }
 
     private void initView() {

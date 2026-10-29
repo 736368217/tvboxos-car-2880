@@ -76,6 +76,7 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 public class ModelSettingFragment extends BaseLazyFragment {
     private static final int REQUEST_LOCAL_CONFIG = 1001;
     private TextView tvAdvancedSummary;
+    private TextView tvCheckUpdateSummary;
     private TextView tvDebugOpen;
     private TextView tvMediaCodec;
     private TextView tvParseWebView;
@@ -186,6 +187,15 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 FastClickCheckUtil.check(v);
                 new com.github.tvbox.osc.ui.dialog.AdvancedSettingsDialog(getActivity(),
                         ModelSettingFragment.this::refreshAdvancedSummary).show();
+            }
+        });
+        tvCheckUpdateSummary = findViewById(R.id.tvCheckUpdateSummary);
+        refreshCheckUpdateSummary();
+        findViewById(R.id.llCheckUpdate).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                com.github.tvbox.osc.update.UpdateDialog.checkManually(mActivity);
             }
         });
         findViewById(R.id.llParseWebVew).setOnClickListener(new View.OnClickListener() {
@@ -1135,5 +1145,18 @@ public class ModelSettingFragment extends BaseLazyFragment {
         }
         String brightness = Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false) ? "亮度开" : "亮度关";
         tvAdvancedSummary.setText(back + " · " + brightness);
+    }
+
+    /** 「检查更新」行：显示当前版本，或上次检查到的新版本。 */
+    private void refreshCheckUpdateSummary() {
+        if (tvCheckUpdateSummary == null) return;
+        String local = com.github.tvbox.osc.update.AppUpdate.localVersion(mActivity);
+        String tag = Hawk.get(HawkConfig.UPDATE_LAST_TAG, "");
+        boolean ahead = Hawk.get(HawkConfig.UPDATE_HAS_UPDATE, false);
+        if (ahead && tag != null && tag.length() > 0) {
+            tvCheckUpdateSummary.setText("有新版本 " + tag.replace("v", ""));
+        } else {
+            tvCheckUpdateSummary.setText(local);
+        }
     }
 }

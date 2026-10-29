@@ -104,6 +104,13 @@ public class HawkConfig {
     public static final String VIDEO_MEMC_TIER = "video_memc_tier"; // 0 off, 1 oversample, 2 cubic, 3 safe-flow
     public static final String VOLUME_GAIN = "app_volume_gain"; // 0-200, default 100 (app-level gain, not system volume)
     public static final String BRIGHTNESS_GESTURE = "brightness_gesture"; // default false: brightness follows system
+    // 应用内更新：启动静默检查 + 设置页手动检查
+    public static final String UPDATE_AUTO_CHECK = "update_auto_check"; // default true
+    public static final String UPDATE_LAST_CHECK = "update_last_check_ms"; // 上次检查成功时间戳
+    public static final String UPDATE_SKIP_TAG = "update_skip_tag"; // 用户「跳过此版本」记下的 tag
+    public static final String UPDATE_MIRROR = "update_mirror"; // 自定义镜像前缀，空=自动（直连→镜像）
+    public static final String UPDATE_LAST_TAG = "update_last_tag"; // 上次检查到的最新 tag
+    public static final String UPDATE_HAS_UPDATE = "update_has_update"; // 上次检查是否有新版本（只用于设置页显示）
     // 首页中间入口（历史/直播/搜索/推送/收藏/设置）是否显示
     public static final String HOME_ENTRY_HISTORY = "home_entry_history";
     public static final String HOME_ENTRY_LIVE = "home_entry_live";
