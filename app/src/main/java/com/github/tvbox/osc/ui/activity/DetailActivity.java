@@ -902,7 +902,11 @@ public class DetailActivity extends BaseActivity {
                     setTextShow(tvDirector, "导演：", removeHtmlTag(mVideo.director));
                     setTextShow(tvDes, "内容简介：", removeHtmlTag(mVideo.des));
                     if (!TextUtils.isEmpty(mVideo.pic)) {
-                        com.github.tvbox.osc.util.ImgUtil.load(DefaultConfig.checkReplaceProxy(mVideo.pic), ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 300), AutoSizeUtils.mm2px(mContext, 400), mVideo.name);
+                        String coverUrl = DefaultConfig.checkReplaceProxy(mVideo.pic);
+                        // 详情页是"真的打开过"的地方：这里就把封面落盘，之后历史/收藏
+                        // 即使站点删图或车机没网也能显示。
+                        com.github.tvbox.osc.cache.CoverStore.remember(mContext, coverUrl, mVideo.name, sourceKey);
+                        com.github.tvbox.osc.util.ImgUtil.load(coverUrl, ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 300), AutoSizeUtils.mm2px(mContext, 400), mVideo.name);
                     } else {
                         ivThumb.setImageDrawable(com.github.tvbox.osc.util.ImgUtil.createTextDrawable(mVideo.name));
                     }
@@ -1879,6 +1883,11 @@ public class DetailActivity extends BaseActivity {
             vodInfo.playNote = "";
         }
         RoomDataManger.insertVodRecord(sourceKey, vodInfo);
+        // 写历史的同时补一次封面缓存：老记录（本次改动前产生的最多）也会被逐步补齐。
+        if (!TextUtils.isEmpty(vodInfo.pic)) {
+            com.github.tvbox.osc.cache.CoverStore.remember(mContext,
+                    DefaultConfig.checkReplaceProxy(vodInfo.pic), vodInfo.name, sourceKey);
+        }
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_HISTORY_REFRESH));
     }
 

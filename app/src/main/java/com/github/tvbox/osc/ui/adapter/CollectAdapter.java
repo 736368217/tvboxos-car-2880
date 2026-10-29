@@ -39,7 +39,18 @@ public class CollectAdapter extends BaseQuickAdapter<VodCollect, BaseViewHolder>
 
         ImageView ivThumb = helper.getView(R.id.ivThumb);
         if (!TextUtils.isEmpty(item.pic)) {
-            ImgUtil.load(item.pic, ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, ImgUtil.defaultWidth), AutoSizeUtils.mm2px(mContext, ImgUtil.defaultHeight), item.name);
+            // 与历史页同策略：先读本地缓存，命中就零网络；否则加载并顺手落盘。
+            String cover = com.github.tvbox.osc.util.DefaultConfig.checkReplaceProxy(item.pic);
+            int width = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultWidth);
+            int height = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultHeight);
+            String local = com.github.tvbox.osc.cache.CoverStore.findLocalPath(mContext, cover, item.name, item.sourceKey);
+            if (!TextUtils.isEmpty(local)) {
+                ImgUtil.load(new java.io.File(local).getAbsolutePath(), ivThumb,
+                        AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
+            } else {
+                ImgUtil.load(cover, ivThumb, AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
+                com.github.tvbox.osc.cache.CoverStore.remember(mContext, cover, item.name, item.sourceKey);
+            }
         } else {
             ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
         }

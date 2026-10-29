@@ -268,6 +268,13 @@ public class ImgUtil {
 
     private static Object getUrl(String url) {
         if (url.startsWith("data:")) return url;
+        // 本地文件（封面缓存）必须走 File 模型：直接交给 GlideUrl 会被 okhttp 当 URL 解析，
+        // 抛 "Expected URL scheme 'http' or 'https' but no colon was found"，
+        // 然后落到 error(fallback)，用户看到的就是随机色块 + 片名首字。
+        if (!url.contains("://") && !url.contains("@") && url.startsWith("/")) {
+            java.io.File file = new java.io.File(url);
+            if (file.isAbsolute()) return file;
+        }
         String header = null;
         String referer = null;
         String ua = null;
