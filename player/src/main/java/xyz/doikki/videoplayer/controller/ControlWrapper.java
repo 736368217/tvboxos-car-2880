@@ -103,6 +103,19 @@ public class ControlWrapper implements MediaPlayerControl, IVideoController {
         }
     }
 
+    /**
+     * 当前播放器是否能真正放大到 100% 以上。
+     *
+     * <p>只有走 PCM 采样增益的引擎（本项目的 ExoPlayer）能保证 &gt;100% 真的变响；
+     * IJK / 系统播放器只能依赖 LoudnessEnhancer，很多车机上并不生效。
+     * 不能放大时就应该把上限压回 100%，而不是让用户拖到 200% 却听不出变化。</p>
+     */
+    public boolean supportsVolumeBoost() {
+        return mPlayerControl instanceof xyz.doikki.videoplayer.controller.VolumeBoostCapable
+                && ((xyz.doikki.videoplayer.controller.VolumeBoostCapable) mPlayerControl)
+                .supportsVolumeBoost();
+    }
+
     @Override
     public long getTcpSpeed() {
         return mPlayerControl.getTcpSpeed();

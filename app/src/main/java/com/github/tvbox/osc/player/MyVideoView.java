@@ -24,7 +24,8 @@ import xyz.doikki.videoplayer.player.AbstractPlayer;
 import xyz.doikki.videoplayer.player.VideoView;
 import xyz.doikki.videoplayer.render.VideoEnhanceConfig;
 
-public class MyVideoView extends VideoView implements DrawHandler.Callback {
+public class MyVideoView extends VideoView implements DrawHandler.Callback,
+        xyz.doikki.videoplayer.controller.VolumeBoostCapable {
     public interface DanmuSeekListener {
         void onDanmuSeek(long position);
     }
@@ -362,6 +363,12 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback {
     /** ExoPlayer 走 PCM 采样增益（不依赖车机系统音效）；其它引擎返回 false。 */
     public boolean usesPcmGain() {
         return mMediaPlayer instanceof com.github.tvbox.osc.player.ExoPlayer;
+    }
+
+    /** {@link xyz.doikki.videoplayer.controller.VolumeBoostCapable}：只有 PCM 增益引擎才能保证 &gt;100% 真的变响。 */
+    @Override
+    public boolean supportsVolumeBoost() {
+        return usesPcmGain();
     }
 
     /** 只对 PCM 增益引擎生效；IJK 等走 LoudnessEnhancer。 */

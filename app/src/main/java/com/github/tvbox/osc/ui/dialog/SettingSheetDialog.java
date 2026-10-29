@@ -68,6 +68,51 @@ class SettingSheetDialog extends BaseDialog {
     }
 
     /**
+     * 可勾选的行：右侧显示当前选中项的「✓」。
+     *
+     * <p>用于把二级弹窗压平进一层 —— 例如「返回组件」直接列出
+     * 关闭/边缘拉出/悬浮球/边缘滑动 四项，点哪项就是哪项，不再先开弹窗再选。</p>
+     */
+    protected com.github.tvbox.osc.ui.dialog.SettingSheetDialog.OptionRow addOption(
+            String name, boolean selected, View.OnClickListener click) {
+        LinearLayout row = (LinearLayout) LayoutInflater.from(getContext())
+                .inflate(R.layout.item_dialog_setting_row, rows, false);
+        TextView nameView = row.findViewById(R.id.name);
+        nameView.setText(selected ? "✓ " + name : name);
+        TextView valueView = row.findViewById(R.id.value);
+        valueView.setVisibility(View.GONE);
+        if (click != null) {
+            row.setOnClickListener(v -> {
+                long dt = android.os.SystemClock.uptimeMillis() - shownAtMs;
+                boolean accepted = acceptClick();
+                android.util.Log.i("CarSheet", "option " + name + " dt=" + dt
+                        + " accepted=" + accepted + " class=" + getClass().getSimpleName());
+                if (!accepted) return;
+                click.onClick(v);
+            });
+        }
+        rows.addView(row);
+        return new OptionRow(row, nameView, name);
+    }
+
+    /** {@link #addOption} 返回的句柄：用于原地刷新选中态。 */
+    static final class OptionRow {
+        final LinearLayout row;
+        final TextView name;
+        final String label;
+
+        OptionRow(LinearLayout row, TextView name, String label) {
+            this.row = row;
+            this.name = name;
+            this.label = label;
+        }
+
+        void setSelected(boolean selected) {
+            name.setText(selected ? "✓ " + label : label);
+        }
+    }
+
+    /**
      * 取宿主 Activity。BaseDialog 用的是 {@code Dialog(context, styleRes)} 构造，
      * Android 会把传入的 context 包成 ContextThemeWrapper，所以 {@code getContext() instanceof Activity}
      * 恒为 false —— 必须逐层解包，否则拿到 null、设置写进 Hawk 却从不刷新正在运行的返回组件。

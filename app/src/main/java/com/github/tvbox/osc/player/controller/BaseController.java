@@ -117,9 +117,26 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mPauseTime = findViewWithTag("vod_control_pause_t");
     }
 
-    private static float clampVolume(float v) { return Math.max(0f, Math.min(2f, v)); }
+    /**
+     * 当前播放器是否真的能放大到 100% 以上。
+     *
+     * <p>只有走 PCM 采样增益的引擎（ExoPlayer）能保证 &gt;100% 真的变响；IJK 等只能依赖
+     * LoudnessEnhancer，很多车机上并不生效。这类播放器下音量上限必须压回 100%，
+     * 否则用户拖到 200% 却听不出任何变化 —— 那不是功能，是误导。</p>
+     */
+    private boolean canBoostVolume() {
+        return mControlWrapper != null && mControlWrapper.supportsVolumeBoost();
+    }
 
-    private static float loadAppVolume() {
+    private float maxVolume() {
+        return canBoostVolume() ? 2f : 1f;
+    }
+
+    private float clampVolume(float v) {
+        return Math.max(0f, Math.min(maxVolume(), v));
+    }
+
+    private float loadAppVolume() {
         int percent = Hawk.get(HawkConfig.VOLUME_GAIN, 100);
         return clampVolume(percent / 100f);
     }
@@ -232,6 +249,22 @@ public abstract class BaseController extends BaseVideoController implements Gest
     public void setPlayState(int playState) {
         super.setPlayState(playState);
         mCurPlayState = playState;
+        // 播放器就绪/切换时才拿得到真正的引擎类型：此时把音量收敛到当前播放器允许的上限。
+        // 例如从 EXO（可到 200%）切到 IJK，之前存下的 180% 必须立刻压回 100%。
+        if (playState == VideoView.STATE_PREPARED || playState == VideoView.STATE_PLAYING) {
+            applyVolumeLimit();
+        }
+    }
+
+    /** 把当前音量夹到播放器允许的范围，并同步给播放器。 */
+    private void applyVolumeLimit() {
+        float limited = clampVolume(mAppVolume);
+        if (Math.abs(limited - mAppVolume) < 0.001f) return;
+        mAppVolume = limited;
+        if (mControlWrapper != null) mControlWrapper.setVolume(mAppVolume);
+        Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
+        LOG.i("volume_limited_by_player -> " + Math.round(mAppVolume * 100)
+                + "% boost=" + canBoostVolume());
     }
 
     protected boolean isInPlaybackState() {
@@ -409,7 +442,26 @@ public abstract class BaseController extends BaseVideoController implements Gest
         // 不能再叠加到 mAppVolume（旧写法每个 move 事件都加一次累计值，几十像素就 0%→200%）。
         float deltaV = deltaY / height * VOLUME_SLIDE_RANGE;
         float volume = clampVolume(mVolumeStart + deltaV);
-        if (Math.abs(volume - mAppVolume) < 0.002f) return;
+        if (Math.abs(volume - mAppVolume) < 0.002f) {
+            // 已经在当前播放器允许的上限（非 EXO 时为 100%）：再往上滑不该静默无效，
+            // 给一次「已到上限」的提示，让用户知道是引擎不支持而不是手势失灵。
+            if (!canBoostVolume() && deltaY > 0 && mAppVolume >= 0.999f) {
+                int percent = Math.round(mAppVolume * 100);
+                for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
+                    IControlComponent component = next.getKey();
+                    if (component instanceof IGestureComponent) {
+                        ((IGestureComponent) component).onVolumeChange(percent);
+                    }
+                }
+                Message msg = Message.obtain();
+                msg.what = 100;
+                msg.obj = "音量" + percent + "%（当前播放器不支持放大）";
+                mHandler.sendMessage(msg);
+                mHandler.removeMessages(101);
+                mHandler.sendEmptyMessageDelayed(101, 1000);
+            }
+            return;
+        }
         mAppVolume = volume;
         // 应用内增益：只作用于当前播放器，不改系统音量（车机往往没有音频权限）
         mControlWrapper.setVolume(mAppVolume);
