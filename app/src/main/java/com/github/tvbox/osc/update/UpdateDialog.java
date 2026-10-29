@@ -30,7 +30,7 @@ public class UpdateDialog extends BaseDialog {
     private static final String TAG = "AppUpdate";
     private static WeakReference<UpdateDialog> CURRENT = new WeakReference<>(null);
 
-    private final boolean fromUser;
+    private boolean fromUser;
     private final TextView tvVersions, tvNotes, tvHint, tvPercent;
     private final TextView btnUpdate, btnSkip, btnManual, btnClose;
     private final LinearLayout progressBox;
@@ -107,8 +107,12 @@ public class UpdateDialog extends BaseDialog {
         dialog.startCheck(fromUser);
     }
 
-    private void startCheck(boolean showWhileChecking) {
-        if (showWhileChecking) {
+    private void startCheck(boolean userInitiated) {
+        // 复用已有弹窗实例时，本次可能是「手动检查」，而实例是自动检查建的（fromUser=false）。
+        // 不刷新这个字段，手动检查就会按静默行为走：没有新版本时不显示结果、有错误也不提示 ——
+        // 表现就是「点了检查更新没反应」。
+        fromUser = userInitiated;
+        if (userInitiated) {
             applyStateChecking();
             ensureShown();
         }
