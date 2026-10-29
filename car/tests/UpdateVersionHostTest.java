@@ -143,6 +143,23 @@ public final class UpdateVersionHostTest {
         check(longNotes.startsWith("abcd") && longNotes.endsWith("…"), "long notes truncated, got " + longNotes);
         eq(UpdateVersion.cleanNotes(null, 10), "", "null notes -> empty");
 
+        // Markdown 标记必须清掉：弹窗是纯 TextView，原样显示会出现「### 怎么用」「**自动**」这种噪声
+        String md = UpdateVersion.cleanNotes(
+                "### 怎么用\n- **自动**：进入首页约 5 秒后检查\n1. 第一项\n> 引用的一段\n"
+                        + "行内 `code` 与 [链接](https://example.com) 保留文字\n"
+                        + "| 校验 | 目的 |\n| :--- | :--- |\n| 包名 | 防装错 |", 2000);
+        check(!md.contains("#"), "heading markers removed, got:\n" + md);
+        check(!md.contains("**"), "bold markers removed, got:\n" + md);
+        check(!md.contains("`"), "inline code markers removed, got:\n" + md);
+        check(!md.contains("]("), "link syntax removed, got:\n" + md);
+        check(!md.contains("> 引用"), "blockquote marker removed, got:\n" + md);
+        check(md.contains("▪ 怎么用"), "heading keeps a bullet prefix, got:\n" + md);
+        check(md.contains("· 自动"), "list marker becomes a dot, got:\n" + md);
+        check(md.contains("包名 · 防装错"), "table row becomes dot separated, got:\n" + md);
+        check(!md.contains("---"), "table separator row dropped, got:\n" + md);
+        check(md.contains("链接"), "link text kept, got:\n" + md);
+        check(!md.contains("example.com"), "link target dropped, got:\n" + md);
+
         System.out.println("UpdateVersionHostTest PASS (" + checks + " checks)");
     }
 }

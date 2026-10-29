@@ -190,7 +190,14 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
         return url;
     }
 
-    /** 把 release 说明裁到弹窗能显示的长度，并去掉 Markdown 里最吵的噪声。 */
+    /**
+     * 把 Release 正文裁成弹窗能直接显示的样子。
+     *
+     * <p>弹窗里是纯 TextView，不解析 Markdown —— 原样贴过去用户就会看到
+     * {@code ## 标题}、{@code **粗体**}、{@code | 表格 |} 这种噪声。所以这里做轻量清洗：
+     * 去掉标题井号、粗体星号、行内代码反引号、引用/列表符与链接语法，
+     * 丢弃 HTML 注释与徽章图片；标题行加「▪」保留层次。</p>
+     */
     public static String cleanNotes(String body, int maxChars) {
         String text = body == null ? "" : body.replace("\r\n", "\n").replace('\r', '\n');
         StringBuilder out = new StringBuilder();
@@ -198,7 +205,34 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
             String trimmed = line.trim();
             if (trimmed.startsWith("<!--")) continue;
             if (trimmed.startsWith("<img") || trimmed.contains("shields.io")) continue;
-            out.append(line).append('\n');
+            if (trimmed.startsWith("|")) {
+                // Markdown 表格：分隔行（| :--- | :--- |）先按原始行判定并丢弃，
+                // 数据行逐格 trim 后用中点连接 —— 否则会出现「:--- · :---」和多余空格。
+                if (trimmed.matches("^\\|?[\\s:|-]+\\|?$")) continue;
+                String[] cells = trimmed.replaceAll("^\\|", "").replaceAll("\\|$", "").split("\\|");
+                StringBuilder row = new StringBuilder();
+                for (String cell : cells) {
+                    String value = cell.trim();
+                    if (value.length() == 0) continue;
+                    if (row.length() > 0) row.append(" · ");
+                    row.append(value);
+                }
+                if (row.length() > 0) out.append(row).append('\n');
+                continue;
+            }
+            boolean heading = trimmed.startsWith("#");
+            String cleaned = trimmed
+                    .replaceAll("^#{1,6}\\s*", "")
+                    .replaceAll("^>\\s*", "")
+                    .replaceAll("^[-*+]\\s+", "· ")
+                    .replace("**", "")
+                    .replace("__", "")
+                    .replace("`", "")
+                    .replaceAll("!?\\[([^\\]]*)]\\([^)]*\\)", "$1")
+                    .trim();
+            if (cleaned.length() == 0) continue;
+            if (heading) out.append("▪ ").append(cleaned).append('\n');
+            else out.append(cleaned).append('\n');
         }
         String cleaned = out.toString().trim();
         if (maxChars > 0 && cleaned.length() > maxChars) {

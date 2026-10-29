@@ -181,32 +181,39 @@ public final class AppUpdate {
             String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
             UpdateVersion.Channel[] channels = UpdateVersion.channels(OWNER, REPO, mirror);
             List<String> failures = new ArrayList<>();
-            for (UpdateVersion.Channel channel : channels) {
-                try {
-                    Info info = query(appContext, channel, local);
-                    remember(info);
-                    Log.i(TAG, "check ok channel=" + channel.label + " force=" + force
-                            + " local=" + local + " remote=" + info.remoteVersion
-                            + " hasUpdate=" + info.hasUpdate);
-                    post(() -> callback.onResult(info, null));
-                    return;
-                } catch (Exception error) {
-                    String reason = error.getClass().getSimpleName()
-                            + (error.getMessage() == null ? "" : (": " + error.getMessage()));
-                    failures.add(channel.label + "=" + reason);
-                    Log.w(TAG, "check failed channel=" + channel.label + " : " + reason);
+            // 两轮：先用系统 DNS 直连（最快、最常见），全挂了再用 App 自己的网络栈
+            // （带用户的 DoH / 代理规则）兜底 —— 有些网络只有后者能出去。
+            for (int round = 0; round < 2; round++) {
+                boolean plain = round == 0;
+                for (UpdateVersion.Channel channel : channels) {
+                    try {
+                        Info info = query(channel, local, plain);
+                        remember(info);
+                        Log.i(TAG, "check ok channel=" + channel.label
+                                + (plain ? "(系统DNS)" : "(应用网络)") + " force=" + force
+                                + " local=" + local + " remote=" + info.remoteVersion
+                                + " hasUpdate=" + info.hasUpdate);
+                        post(() -> callback.onResult(info, null));
+                        return;
+                    } catch (Exception error) {
+                        String reason = error.getClass().getSimpleName()
+                                + (error.getMessage() == null ? "" : (": " + error.getMessage()));
+                        failures.add(channel.label + (plain ? "" : "/app") + "=" + reason);
+                        Log.w(TAG, "check failed channel=" + channel.label
+                                + (plain ? "(系统DNS)" : "(应用网络)") + " : " + reason);
+                    }
                 }
             }
             Log.w(TAG, "check failed on every channel: " + failures);
             String message = failures.isEmpty()
                     ? "没有可用的更新通道"
-                    : "更新检查失败（" + failures.size() + " 个通道都不可达）：" + failures.get(0);
+                    : "更新检查失败（" + failures.size() + " 次尝试都不可达）：" + failures.get(0);
             post(() -> callback.onResult(null, message));
         });
     }
 
-    private static Info query(Context context, UpdateVersion.Channel channel, String local) throws Exception {
-        OkHttpClient client = OkHttp.client(TIMEOUT_MS);
+    private static Info query(UpdateVersion.Channel channel, String local, boolean plain) throws Exception {
+        OkHttpClient client = client(plain);
         Request request = new Request.Builder()
                 .url(channel.apiUrl)
                 .header("Accept", "application/vnd.github+json")
@@ -271,7 +278,7 @@ public final class AppUpdate {
             try {
                 delete(partial);
                 delete(target);
-                OkHttpClient client = OkHttp.client(TIMEOUT_MS);
+                OkHttpClient client = client(true);
                 Request request = new Request.Builder()
                         .url(info.apkUrl)
                         .header("User-Agent", "TVBox-Car/" + info.localVersion)
@@ -454,6 +461,31 @@ public final class AppUpdate {
     }
 
     // ---------------- 小工具 ----------------
+    /**
+     * 两类客户端：
+     * <ul>
+     *   <li>{@code plain=true}：<b>系统 DNS</b> + 短超时。GitHub 域名用这一条最稳 ——
+     *       App 自己的 {@link OkHttp#client} 带用户配置的 DoH/代理规则，实测会出现
+     *       「系统 ping 能解析、OkHttp 却 UnknownHostException」，而且每个域名要卡 20 秒。</li>
+     *   <li>{@code plain=false}：沿用 App 网络栈，给必须走 DoH/代理才能出网的网络兜底。</li>
+     * </ul>
+     */
+    private static OkHttpClient client(boolean plain) {
+        if (!plain) return OkHttp.client(TIMEOUT_MS);
+        return SystemDnsClient.HOLDER;
+    }
+
+    /** 系统 DNS 客户端：懒加载，全程复用一个连接池。 */
+    private static final class SystemDnsClient {
+        static final OkHttpClient HOLDER = new OkHttpClient.Builder()
+                .dns(okhttp3.Dns.SYSTEM)
+                .connectTimeout(8, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .build();
+    }
 
     private static void post(Runnable runnable) {
         MAIN.post(runnable);

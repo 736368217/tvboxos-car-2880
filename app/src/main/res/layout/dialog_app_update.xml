@@ -44,7 +44,7 @@
             android:layout_height="0dp"
             android:scrollbars="none"
             app:layout_constrainedHeight="true"
-            app:layout_constraintHeight_max="@dimen/vs_520"
+            app:layout_constraintHeight_max="@dimen/vs_300"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvVersions">
