@@ -297,7 +297,7 @@ public final class AppUpdate {
                 }
                 try {
                     Log.i(TAG, "download try " + (i + 1) + "/" + candidates.length + " url=" + url);
-                    transfer(task, url, partial, info, target, callback);
+                    transfer(task, url, partial, info, target, callback, i < candidates.length - 1);
                     if (partial.length() < MIN_APK_BYTES) {
                         delete(partial);
                         throw new IOException("内容过小（" + (partial.exists() ? partial.length() : 0) + " 字节），可能是错误页");
@@ -340,21 +340,31 @@ public final class AppUpdate {
         return prefix;
     }
 
-    /** 单地址下载到 partial；取消/超时会抛异常，由调用方换下一个地址。 */
+    // 慢速切换：GitHub 资产域名常被限速到几十 KB/s，而它「不报错」，用户只会看着进度条
+    // 十几分钟不动。所以前几个候选若在观察窗内太慢就主动放弃，把机会给镜像。
+    private static final long SLOW_WINDOW_MS = 20000L;
+    // 观察窗内至少要拿到总大小的这个比例（约 125 KB/s @50MB），否则判定为慢速。
+    private static final double SLOW_MIN_FRACTION = 0.05;
+    // 最后一个候选是兜底：允许它慢速跑完，不再放弃。
+    private static final long SLOW_MIN_BYTES = 2L * 1024 * 1024;
+
+    /** 单地址下载到 partial；取消/超时/太慢会抛异常，由调用方换下一个地址。 */
     private static void transfer(Task task, String url, File partial, Info info, File target,
-                                 DownloadCallback callback) throws IOException {
+                                 DownloadCallback callback, boolean allowSlowAbort) throws IOException {
         OkHttpClient client = client(true);
         Request request = new Request.Builder()
                 .url(url)
                 .header("User-Agent", "TVBox-Car/" + info.localVersion)
                 .build();
         long lastPost = 0L;
+        long startedAt = System.currentTimeMillis();
         try (Response response = client.newCall(request).execute()) {
             ResponseBody body = response.body();
             if (!response.isSuccessful() || body == null) {
                 throw new IOException("HTTP " + response.code());
             }
             long total = body.contentLength() > 0 ? body.contentLength() : info.apkSize;
+            long slowTarget = Math.max(SLOW_MIN_BYTES, (long) (total * SLOW_MIN_FRACTION));
             try (InputStream in = body.byteStream();
                  FileOutputStream out = new FileOutputStream(partial)) {
                 byte[] buffer = new byte[64 * 1024];
@@ -365,6 +375,12 @@ public final class AppUpdate {
                     out.write(buffer, 0, read);
                     done += read;
                     long now = System.currentTimeMillis();
+                    if (allowSlowAbort && now - startedAt >= SLOW_WINDOW_MS && done < slowTarget) {
+                        out.flush();
+                        long kbps = done * 1000L / Math.max(1L, now - startedAt) / 1024L;
+                        throw new IOException("速度过慢（" + kbps + " KB/s，"
+                                + Math.max(1, (now - startedAt) / 1000L) + " 秒仅 " + done + " 字节）");
+                    }
                     if (now - lastPost >= PROGRESS_INTERVAL_MS) {
                         lastPost = now;
                         final long posted = done;
