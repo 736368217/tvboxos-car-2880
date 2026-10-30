@@ -7,8 +7,11 @@ android {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
         // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 29
-        versionName '3.1.0-car.7-r56'
+        versionCode 31
+        versionName '3.1.0-car.7-r59'
+        // r59: 修复静默更新弹窗归属 HomeActivity 窗口、播放页覆盖时不可见的问题
+        // r59: 自动检查改为无窗口化，结果暂存后在获得焦点的前台窗口显示
+        // r59: HomeActivity 每次恢复重新排队静默检查（仍受 6h 节流约束）
         multiDexEnabled true
         //设置room的Schema的位置
         javaCompileOptions {

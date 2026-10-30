@@ -509,3 +509,15 @@ SHA-256 `9957DDBBCE70774504B7551908C07654E8936630A26FB66DCDCA5E85950A5168`。
 - **仍未验证**：车机上「200% 真的更响」尚无任何证据。下一步：抓一份车机日志，按
   `car/handover/volume-boost/06-INSTRUMENTATION.md` 的判读矩阵把
   「没走到增益（H1/H2）」与「走到了没用（H3）」分开。
+
+## r58：应用内音量 >100% 修复版（生产构建）
+
+- 每个 ExoPlayer `AudioSink` 使用独立 `AudioGainProcessor`，只通过所属播放器的 gain provider 读取增益；多个内置/扩展 renderer 不再共享 `BaseAudioProcessor` buffer/state。
+- `DefaultAudioSink` 配置 PCM-only `AudioCapabilities` 并关闭 offload，避免 compressed passthrough 绕过 PCM 增益；可解码压缩音频先转 PCM 再处理。
+- `CarEnhance.appGain` / `volumeFactor` 从进程静态值改为按 `MyVideoView` 实例保存，预览/主播放的音量、静音与焦点 duck 不再互相覆盖。
+- IJK 内部点播首次请求 >100% 时切到 EXO，保留当前解析 URL、headers 和播放位置；EXO `PREPARED` 后重施目标音量。外部播放器/无可重播 URL 不强切；若 EXO 无法播放并回退，则仍按能力封顶。
+- 版本：`3.1.0-car.7-r58`（versionCode 31）。
+- Host 验证：`AudioGainProcessorHostTest PASS`（PCM 数学、独立 sink、provider 实时增益）；`VolumeBoostMathHostTest PASS`；`VolumeLimitHostTest PASS (16 checks)`；Java compile PASS。
+- 生产构建：`:app:assemblePythonRelease -x :pyramid:generatePythonReleasePythonRequirements --rerun-tasks --console=plain --offline`，`BUILD SUCCESSFUL`。requirements 从既有 r40 donor 注入 3 个 `.imy`；APK zipalign；apksigner v1/v2/v3 验证通过；签名证书 SHA-256 `2FEB63C511CD725795CADC8FA890F9CBC754FE59C0BBFE0787AC33F94F44FA9C`。
+- APK：`TVBox-Original-Feature-3.1.0-car.7-r58-python-final.apk`，52,730,073 bytes，SHA-256 `6337B202C1AEE1DF7E224D96CB1A3DC65BB049471D66B35F405683CB66C22446`。
+- **仍需车机验收**：本轮未安装到车机、未完成听觉/RMS 对照。APK DEX 含 PCM sink、IJK→EXO 切换与增益日志代码；这不是车机扬声器真实变响的证据。详细根因修复与复测命令见 `car/handover/volume-boost/07-R58-FIX.md`。

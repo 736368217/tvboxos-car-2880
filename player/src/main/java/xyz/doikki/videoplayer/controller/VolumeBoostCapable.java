@@ -14,4 +14,12 @@ public interface VolumeBoostCapable {
 
     /** true = 支持 &gt;100% 应用内增益。 */
     boolean supportsVolumeBoost();
+
+    /**
+     * Requests a switch to a PCM-gain-capable engine when the current engine cannot boost.
+     * Implementations return true only when a switch has actually been scheduled.
+     */
+    default boolean requestVolumeBoost(float requestedGain) {
+        return false;
+    }
 }

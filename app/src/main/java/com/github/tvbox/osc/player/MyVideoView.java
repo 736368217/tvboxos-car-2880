@@ -30,13 +30,23 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
         void onDanmuSeek(long position);
     }
 
+    public interface VolumeBoostRequestListener {
+        boolean onRequestVolumeBoost(float requestedGain);
+    }
+
     private DanmakuView danmuView;
     private ImageView artworkView;
     private DanmuSeekListener danmuSeekListener;
     private final Handler mEnhanceMain = new Handler(Looper.getMainLooper());
     /** 诊断用：上一次真正生效的应用内增益，避免拖动时刷屏。 */
     private float mLastLoggedGain = -1f;
+    private volatile float mAppAudioGain = 1f;
+    private volatile float mAudioVolumeFactor = 1f;
+    private VolumeBoostRequestListener mVolumeBoostRequestListener;
 
+    public void setVolumeBoostRequestListener(VolumeBoostRequestListener listener) {
+        mVolumeBoostRequestListener = listener;
+    }
 
     public MyVideoView(@NonNull Context context) {
         super(context, null);
@@ -373,16 +383,47 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
         return mMediaPlayer instanceof com.github.tvbox.osc.player.ExoPlayer;
     }
 
-    /** {@link xyz.doikki.videoplayer.controller.VolumeBoostCapable}：只有 PCM 增益引擎才能保证 &gt;100% 真的变响。 */
+    /** {@link xyz.doikki.videoplayer.controller.VolumeBoostCapable}: PCM-backed engine capability. */
     @Override
     public boolean supportsVolumeBoost() {
         return usesPcmGain();
     }
 
+    @Override
+    public boolean requestVolumeBoost(float requestedGain) {
+        if (supportsVolumeBoost()) return true;
+        VolumeBoostRequestListener listener = mVolumeBoostRequestListener;
+        return listener != null && listener.onRequestVolumeBoost(requestedGain);
+    }
     /** 只对 PCM 增益引擎生效；IJK 等走 LoudnessEnhancer。 */
     public void applyPcmGain(float gain) {
-        if (!usesPcmGain()) return;
-        xyz.doikki.videoplayer.exo.AudioGainProcessor.INSTANCE.setGain(gain);
+        ((com.github.tvbox.osc.player.ExoPlayer) mMediaPlayer).setAudioGain(gain);
+    }
+
+    public float getAppAudioGain() {
+        return mAppAudioGain;
+    }
+
+    public void setAppAudioGain(float gain) {
+        mAppAudioGain = Math.max(0f, Math.min(2f, gain));
+    }
+
+    public float getAudioVolumeFactor() {
+        return mAudioVolumeFactor;
+    }
+
+    public void setAudioVolumeFactor(float factor) {
+        mAudioVolumeFactor = Math.max(0f, Math.min(1f, factor));
+    }
+
+    public float getPcmGain() {
+        return mMediaPlayer instanceof com.github.tvbox.osc.player.ExoPlayer
+                ? ((com.github.tvbox.osc.player.ExoPlayer) mMediaPlayer).getAudioGain() : -1f;
+    }
+
+    public long getPcmGainQueueCount() {
+        return mMediaPlayer instanceof com.github.tvbox.osc.player.ExoPlayer
+                ? ((com.github.tvbox.osc.player.ExoPlayer) mMediaPlayer).getAudioGainQueueCount() : -1L;
     }
 
 

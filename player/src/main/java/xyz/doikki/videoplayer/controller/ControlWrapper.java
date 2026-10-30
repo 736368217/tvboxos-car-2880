@@ -115,7 +115,11 @@ public class ControlWrapper implements MediaPlayerControl, IVideoController {
                 && ((xyz.doikki.videoplayer.controller.VolumeBoostCapable) mPlayerControl)
                 .supportsVolumeBoost();
     }
-
+    public boolean requestVolumeBoost(float requestedGain) {
+        return mPlayerControl instanceof xyz.doikki.videoplayer.controller.VolumeBoostCapable
+                && ((xyz.doikki.videoplayer.controller.VolumeBoostCapable) mPlayerControl)
+                .requestVolumeBoost(requestedGain);
+    }
     @Override
     public long getTcpSpeed() {
         return mPlayerControl.getTcpSpeed();

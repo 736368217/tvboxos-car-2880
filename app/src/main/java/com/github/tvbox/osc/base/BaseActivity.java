@@ -92,6 +92,9 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
             scheduleRefreshAutoSize();
         }
         InAppBackButton.attach(this);
+        if (hasWindowFocus()) {
+            getWindow().getDecorView().post(() -> com.github.tvbox.osc.update.UpdateDialog.showPendingIfReady(this));
+        }
     }
 
     /** 应用内返回组件跟随每个页面显示；任何页面触摸或按键都会重新唤醒。 */
@@ -159,6 +162,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
     @Override
     protected void onPause() {
         super.onPause();
+        com.github.tvbox.osc.update.UpdateDialog.onActivityPaused(this);
         getWindow().getDecorView().removeCallbacks(refreshAutoSizeRunnable);
         getWindow().getDecorView().removeCallbacks(hideSysBarRunnable);
     }
@@ -171,6 +175,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
             if (shouldRefreshAutoSize()) {
                 scheduleRefreshAutoSize();
             }
+            getWindow().getDecorView().post(() -> com.github.tvbox.osc.update.UpdateDialog.showPendingIfReady(this));
         }
     }
 

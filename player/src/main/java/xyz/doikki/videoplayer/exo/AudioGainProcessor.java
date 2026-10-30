@@ -11,43 +11,57 @@ import java.nio.ByteOrder;
  * App-level PCM gain for ExoPlayer.
  *
  * <p>ExoPlayer's {@code setVolume()} only accepts 0..1 (it ends up in AudioTrack volume),
- * so anything above 100 % has to be applied to the decoded samples.  This processor sits
- * in the audio sink's processor chain and simply multiplies every PCM sample by the current
- * gain, saturating to the sample range.</p>
+ * so anything above 100 % has to be applied to the decoded samples. This processor multiplies
+ * every PCM sample by the current gain, saturating to the sample range.</p>
  *
- * <p>The gain is read per buffer, so changing it while playing takes effect immediately
- * (one buffer of latency at most).</p>
+ * <p>A processor instance belongs to exactly one {@code DefaultAudioSink}. Extension renderer
+ * factories can construct more than one sink, so production callers use a per-sink instance and
+ * a shared gain provider owned by the ExoPlayer. This prevents BaseAudioProcessor buffers/state
+ * from being concurrently shared across audio renderers.</p>
  *
- * <p><b>Diagnostics (car edition)</b>: tag {@code CarAudioGain}.  A playback session must emit
- * {@code configure enc=…} and {@code queue n=…}.  If {@code configure} never appears, this
- * processor is not in the sink chain at all and no gain can ever be heard; if {@code level_in}
- * and {@code level_out} differ by the expected factor, the samples really are being scaled.
- * Logging is throttled (first few calls plus every 500th buffer) so it is safe to leave on,
- * and every log call is exception-proof because this class is also driven on a plain JVM by
- * {@code car/tests/AudioGainProcessorHostTest}.</p>
+ * <p>Diagnostics use tag {@code CarAudioGain}: {@code configure} proves the processor is in the
+ * sink chain; {@code queue} includes input/output sample magnitudes. Logs are throttled and safe
+ * on a plain JVM because {@code AudioGainProcessorHostTest} drives this class without Android.</p>
  */
 public final class AudioGainProcessor extends BaseAudioProcessor {
 
+    public interface GainProvider {
+        float getGain();
+    }
+
     private static final String TAG = "CarAudioGain";
 
-    public static final AudioGainProcessor INSTANCE = new AudioGainProcessor();
-
+    private final GainProvider gainProvider;
     private volatile float gain = 1f;
-    /** 当前输出编码，由 onConfigure 记录（BaseAudioProcessor 没有公开的输出格式访问器）。 */
     private int encoding = C.ENCODING_PCM_16BIT;
 
     // ---------------------------------------------------------------- diagnostics
     private long configureCalls;
     private long queueCalls;
-    /** 上一次 queueInput 里采样值真的被放大过没有（用于区分"在链上但不放大"）。 */
     private float lastAppliedGain = -1f;
-    /** set_gain 日志节流：只在增益变化超过 0.05 时打一行，避免拖动音量时刷屏。 */
     private float lastLoggedGain = 1f;
 
-    /** 0..2, where 1 = untouched. */
+    public AudioGainProcessor() {
+        this(null);
+    }
+
+    public AudioGainProcessor(GainProvider gainProvider) {
+        this.gainProvider = gainProvider;
+    }
+
+    /** A standalone processor for tests or a sink that owns its gain state. */
+    public static AudioGainProcessor create() {
+        return new AudioGainProcessor();
+    }
+
+    /** A sink-owned processor whose gain is read from its owning player. */
+    public static AudioGainProcessor create(GainProvider gainProvider) {
+        return new AudioGainProcessor(gainProvider);
+    }
+
     public void setGain(float gain) {
         if (Float.isNaN(gain)) return;
-        float next = Math.max(0f, Math.min(2f, gain));
+        float next = clampGain(gain);
         if (next != this.gain && Math.abs(next - lastLoggedGain) >= 0.05f) {
             lastLoggedGain = next;
             log("set_gain " + this.gain + " -> " + next + " (queue_calls=" + queueCalls + ")");
@@ -56,7 +70,13 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
     }
 
     public float getGain() {
-        return gain;
+        GainProvider provider = gainProvider;
+        return provider == null ? gain : clampGain(provider.getGain());
+    }
+
+    private static float clampGain(float value) {
+        if (Float.isNaN(value)) return 1f;
+        return Math.max(0f, Math.min(2f, value));
     }
 
     @Override
@@ -69,13 +89,12 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
                     + " enc=" + encodingName(inputAudioFormat.encoding)
                     + " sampleRate=" + inputAudioFormat.sampleRate
                     + " channels=" + inputAudioFormat.channelCount
-                    + " accepted=" + kept + " gain=" + gain);
+                    + " accepted=" + kept + " gain=" + getGain());
         }
         if (kept) {
             encoding = inputAudioFormat.encoding;
             return inputAudioFormat;
         }
-        // 不可处理的编码（例如直通 AC3/EAC3）：处理器会被整条链路跳过，增益静默失效。
         log("configure REJECTED enc=" + encodingName(inputAudioFormat.encoding)
                 + " -> gain cannot be applied");
         throw new UnhandledAudioFormatException(inputAudioFormat);
@@ -85,7 +104,7 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
     public void queueInput(ByteBuffer inputBuffer) {
         int remaining = inputBuffer.remaining();
         if (remaining <= 0) return;
-        float g = gain;
+        float currentGain = getGain();
         boolean report = queueCalls < 3 || queueCalls % 500 == 0;
         boolean isFloat = encoding == C.ENCODING_PCM_FLOAT;
         long levelIn = 0;
@@ -98,7 +117,7 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         if (isFloat) {
             while (inputBuffer.remaining() >= 4) {
                 float in = inputBuffer.getFloat();
-                float value = in * g;
+                float value = in * currentGain;
                 if (value > 1f) value = 1f;
                 else if (value < -1f) value = -1f;
                 if (report) {
@@ -110,7 +129,7 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         } else {
             while (inputBuffer.remaining() >= 2) {
                 int in = inputBuffer.getShort();
-                int value = Math.round(in * g);
+                int value = Math.round(in * currentGain);
                 if (value > Short.MAX_VALUE) value = Short.MAX_VALUE;
                 else if (value < Short.MIN_VALUE) value = Short.MIN_VALUE;
                 if (report) {
@@ -124,15 +143,14 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
 
         queueCalls++;
         if (report) {
-            lastAppliedGain = g;
-            log("queue n=" + queueCalls + " gain=" + g
+            lastAppliedGain = currentGain;
+            log("queue n=" + queueCalls + " gain=" + currentGain
                     + " enc=" + encodingName(encoding)
                     + " samples=" + (remaining / (isFloat ? 4 : 2))
                     + " level_in=" + levelIn + " level_out=" + levelOut);
         }
     }
 
-    /** 供车机侧取证：处理器最后一次真正作用到的增益（-1 = 一个 buffer 都没处理过）。 */
     public float appliedGain() {
         return lastAppliedGain;
     }
@@ -141,15 +159,11 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         return queueCalls;
     }
 
-    /**
-     * 诊断日志出口。android.util.Log 在宿主 JVM（{@code AudioGainProcessorHostTest}）上不可用，
-     * 这里吞掉一切异常，保证音频路径永远不因为日志失败。
-     */
     private static void log(String message) {
         try {
             android.util.Log.i(TAG, message);
         } catch (Throwable ignored) {
-            // host JVM / 日志系统异常：忽略
+            // The Android stub throws on a plain host JVM; diagnostics must not affect processing.
         }
     }
 

@@ -42,6 +42,8 @@ public class ExoPlayer extends ExoMediaPlayer {
 
     private static AudioTrackMemory memory;
     private volatile long internalSubtitleDelayUs;
+    private volatile float audioGain = 1f;
+    private final ArrayList<xyz.doikki.videoplayer.exo.AudioGainProcessor> audioGainProcessors = new ArrayList<>();
     private OnCuesListener onCuesListener;
     private boolean defaultSubtitleTrackSelected;
     private boolean defaultSubtitleTrackSelectionClosed;
@@ -55,9 +57,9 @@ public class ExoPlayer extends ExoMediaPlayer {
                         DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
                         DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
                 .build());
-        setRenderersFactory(buildRenderersFactory(context));
-        LOG.i("echo-exo-low-memory-load-control");
+        setRenderersFactory(buildRenderersFactory(context, this));
         memory = AudioTrackMemory.getInstance(context);
+        LOG.i("echo-exo-low-memory-load-control");
     }
 
     /**
@@ -71,6 +73,40 @@ public class ExoPlayer extends ExoMediaPlayer {
             return 0;
         }
     }
+
+    public synchronized void setAudioGain(float gain) {
+        if (Float.isNaN(gain)) return;
+        audioGain = Math.max(0f, Math.min(2f, gain));
+        for (xyz.doikki.videoplayer.exo.AudioGainProcessor processor : audioGainProcessors) {
+            processor.setGain(audioGain);
+        }
+    }
+
+    public float getAudioGain() {
+        return audioGain;
+    }
+
+    private synchronized void registerAudioGainProcessor(
+            xyz.doikki.videoplayer.exo.AudioGainProcessor processor) {
+        processor.setGain(audioGain);
+        audioGainProcessors.add(processor);
+    }
+
+    private synchronized void clearAudioGainProcessors() {
+        audioGainProcessors.clear();
+    }
+
+    public synchronized long getAudioGainQueueCount() {
+        long count = 0;
+        for (xyz.doikki.videoplayer.exo.AudioGainProcessor processor : audioGainProcessors) {
+            count += processor.queueCount();
+        }
+        return count;
+    }
+    /** A PCM-only capability set: compressed passthrough would bypass the gain processor. */
+    static final com.google.android.exoplayer2.audio.AudioCapabilities PCM_ONLY_CAPABILITIES =
+            new com.google.android.exoplayer2.audio.AudioCapabilities(
+                    new int[]{C.ENCODING_PCM_16BIT}, 8);
 
     /**
      * Car edition: true when the selected video track is HDR/HLG/Dolby Vision, in which case the
@@ -102,6 +138,7 @@ public class ExoPlayer extends ExoMediaPlayer {
 
     @Override
     public void initPlayer() {
+        clearAudioGainProcessors();
         super.initPlayer();
         mInternalPlayer.addListener(new Player.Listener() {
             @Override
@@ -134,13 +171,14 @@ public class ExoPlayer extends ExoMediaPlayer {
         super.setDataSource(path, headers);
     }
 
-    private RenderersFactory buildRenderersFactory(Context context) {
-        DefaultRenderersFactory factory = new SubtitleOffsetRenderersFactory(context, new SubtitleDelayProvider() {
+    private RenderersFactory buildRenderersFactory(Context context, ExoPlayer owner) {
+        DefaultRenderersFactory factory = new SubtitleOffsetRenderersFactory(context,
+                new SubtitleDelayProvider() {
             @Override
             public long getDelayUs() {
                 return internalSubtitleDelayUs;
             }
-        })
+        }, owner)
                 .setEnableDecoderFallback(true)
                 .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
         try {
@@ -493,10 +531,13 @@ public class ExoPlayer extends ExoMediaPlayer {
 
     private static final class SubtitleOffsetRenderersFactory extends DefaultRenderersFactory {
         private final SubtitleDelayProvider subtitleDelayProvider;
+        private final ExoPlayer owner;
 
-        SubtitleOffsetRenderersFactory(Context context, SubtitleDelayProvider subtitleDelayProvider) {
+        SubtitleOffsetRenderersFactory(Context context, SubtitleDelayProvider subtitleDelayProvider,
+                                       ExoPlayer owner) {
             super(context);
             this.subtitleDelayProvider = subtitleDelayProvider;
+            this.owner = owner;
         }
 
         @Override
@@ -523,9 +564,12 @@ public class ExoPlayer extends ExoMediaPlayer {
         @Override
         protected AudioSink buildAudioSink(Context context, boolean enableFloatOutput,
                                            boolean enableAudioTrackPlaybackParams, boolean enableOffload) {
-            AudioProcessor[] processors = new AudioProcessor[]{
-                    xyz.doikki.videoplayer.exo.AudioGainProcessor.INSTANCE};
+            xyz.doikki.videoplayer.exo.AudioGainProcessor processor =
+                    xyz.doikki.videoplayer.exo.AudioGainProcessor.create(owner::getAudioGain);
+            owner.registerAudioGainProcessor(processor);
+            AudioProcessor[] processors = new AudioProcessor[]{processor};
             DefaultAudioSink sink = new DefaultAudioSink.Builder(context)
+                    .setAudioCapabilities(PCM_ONLY_CAPABILITIES)
                     .setAudioProcessors(processors)
                     .setEnableFloatOutput(enableFloatOutput)
                     .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
@@ -534,7 +578,7 @@ public class ExoPlayer extends ExoMediaPlayer {
             android.util.Log.i("CarAudio", "sink_built floatOut=" + enableFloatOutput
                     + " atParams=" + enableAudioTrackPlaybackParams
                     + " offloadArg=" + enableOffload + " processors=" + processors.length
-                    + " gain=" + xyz.doikki.videoplayer.exo.AudioGainProcessor.INSTANCE.getGain());
+                    + " gain=" + processor.getGain());
             return sink;
         }
     }

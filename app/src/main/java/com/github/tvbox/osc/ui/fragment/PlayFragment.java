@@ -271,6 +271,7 @@ public class PlayFragment extends BaseLazyFragment {
             }
         });
         mVideoView = findViewById(R.id.mVideoView);
+        mVideoView.setVolumeBoostRequestListener(this::requestExoForVolumeBoost);
         mPlayLoadTip = findViewById(R.id.play_load_tip);
         mPlayLoading = findViewById(R.id.play_loading);
         mPlayLoadErr = findViewById(R.id.play_load_error);
@@ -306,6 +307,25 @@ public class PlayFragment extends BaseLazyFragment {
         mVideoView.addOnStateChangeListener(new VideoView.SimpleOnStateChangeListener() {
             @Override
             public void onPlayStateChanged(int playState) {
+                if (pendingVolumeBoostAfterSwitch > 1f) {
+                    if (playState == VideoView.STATE_ERROR || playState == VideoView.STATE_PLAYBACK_COMPLETED) {
+                        pendingVolumeBoostAfterSwitch = -1f;
+                        volumeBoostSwitchInProgress = false;
+                    } else if (playState == VideoView.STATE_PREPARED && mVideoView != null) {
+                        if (mVideoView.supportsVolumeBoost() && mController != null) {
+                            float targetGain = pendingVolumeBoostAfterSwitch;
+                            pendingVolumeBoostAfterSwitch = -1f;
+                            volumeBoostSwitchInProgress = false;
+                            mController.setAppVolume(targetGain);
+                            LOG.i("volume_boost_applied after=exo target="
+                                    + Math.round(targetGain * 100) + "%");
+                        } else {
+                            pendingVolumeBoostAfterSwitch = -1f;
+                            volumeBoostSwitchInProgress = false;
+                            LOG.i("volume_boost_switch fallback_without_pcm_gain");
+                        }
+                    }
+                }
                 if (webPlayUrl != null && isStartedPlayState(playState)) {
                     markPlaybackStarted();
                     hideTipOnUiThread();
@@ -1663,7 +1683,49 @@ public class PlayFragment extends BaseLazyFragment {
     private boolean playbackStarted = false;
     private long playTimeoutBasePosition = 0;
     private java.util.Set<String> triedLineFlags = new java.util.HashSet<>();  // 记录已尝试过的线路
-
+    private boolean volumeBoostSwitchInProgress;
+    private float pendingVolumeBoostAfterSwitch = -1f;
+    private boolean requestExoForVolumeBoost(float requestedGain) {
+        if (volumeBoostSwitchInProgress) return true;
+        if (mVideoView == null || mController == null || mVodPlayerCfg == null
+                || mHandler == null || TextUtils.isEmpty(webPlayUrl)
+                || !(mVideoView.getMediaPlayer() instanceof IjkMediaPlayer)) return false;
+        final String url = webPlayUrl;
+        final HashMap<String, String> headers = webHeaderMap == null ? null : new HashMap<>(webHeaderMap);
+        volumeBoostSwitchInProgress = true;
+        pendingVolumeBoostAfterSwitch = Math.max(1f, Math.min(2f, requestedGain));
+        mHandler.post(() -> switchToExoForVolumeBoost(url, headers));
+        return true;
+    }
+    private void switchToExoForVolumeBoost(String url, HashMap<String, String> headers) {
+        if (!isAdded() || mVideoView == null || mVodPlayerCfg == null) {
+            volumeBoostSwitchInProgress = false;
+            pendingVolumeBoostAfterSwitch = -1f;
+            return;
+        }
+        long position = Math.max(0L, mVideoView.getCurrentPosition());
+        if (position > 0 && !TextUtils.isEmpty(progressKey)) CacheManager.save(MD5.string2MD5(progressKey), position);
+        try {
+            mVodPlayerCfg.put("pl", 2);
+            if (mVodInfo != null) mVodInfo.playerCfg = mVodPlayerCfg.toString();
+            mController.setPlayerConfig(mVodPlayerCfg);
+            EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH, mVodPlayerCfg));
+        } catch (JSONException error) {
+            volumeBoostSwitchInProgress = false;
+            pendingVolumeBoostAfterSwitch = -1f;
+            return;
+        }
+        LOG.i("volume_boost_switch ijk->exo target=" + Math.round(pendingVolumeBoostAfterSwitch * 100)
+                + "% position=" + position);
+        hasAutoSwitchedPlayer = false;
+        autoRetryCount = 0;
+        allowSwitchPlayer = true;
+        triedLineFlags.clear();
+        stopParse();
+        initParseLoadFound();
+        mVideoView.release();
+        goPlayUrl(url, headers);
+    }
     private void restoreAutoSwitchedPlayer() {
         if (autoSwitchedPlayerType < 0) return;
         releasePlayerOnSwitch = true;

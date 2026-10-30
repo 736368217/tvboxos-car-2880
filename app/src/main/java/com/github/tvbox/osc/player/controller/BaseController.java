@@ -441,7 +441,23 @@ public abstract class BaseController extends BaseVideoController implements Gest
         // deltaY 是「按下点 → 当前点」的累计位移，必须基于起手音量算，
         // 不能再叠加到 mAppVolume（旧写法每个 move 事件都加一次累计值，几十像素就 0%→200%）。
         float deltaV = deltaY / height * VOLUME_SLIDE_RANGE;
-        float volume = clampVolume(mVolumeStart + deltaV);
+        float requestedVolume = mVolumeStart + deltaV;
+        if (!canBoostVolume() && deltaY > 0 && requestedVolume > 1.001f
+                && mControlWrapper != null && mControlWrapper.requestVolumeBoost(requestedVolume)) {
+            mAppVolume = Math.max(1f, Math.min(2f, requestedVolume));
+            mControlWrapper.setVolume(mAppVolume);
+            Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
+            int targetPercent = Math.round(mAppVolume * 100);
+            LOG.i("volume_boost_requested target=" + targetPercent + "% engine_switch=exo");
+            Message switching = Message.obtain();
+            switching.what = 100;
+            switching.obj = "正在切换 EXO，目标音量 " + targetPercent + "%";
+            mHandler.sendMessage(switching);
+            mHandler.removeMessages(101);
+            mHandler.sendEmptyMessageDelayed(101, 1200);
+            return;
+        }
+        float volume = clampVolume(requestedVolume);
         if (Math.abs(volume - mAppVolume) < 0.002f) {
             // 已经在当前播放器允许的上限（非 EXO 时为 100%）：再往上滑不该静默无效，
             // 给一次「已到上限」的提示，让用户知道是引擎不支持而不是手势失灵。

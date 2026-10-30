@@ -55,7 +55,7 @@ public final class AudioGainProcessorHostTest {
     }
 
     public static void main(String[] args) throws Exception {
-        AudioGainProcessor processor = AudioGainProcessor.INSTANCE;
+        AudioGainProcessor processor = AudioGainProcessor.create();
 
         // 处理器必须对 16bit PCM「生效」——否则 DefaultAudioSink 会直接绕过它，音量增益等于没接。
         processor.reset();
@@ -117,6 +117,26 @@ public final class AudioGainProcessorHostTest {
         }
         check(rejected, "24bit must be reported as unhandled");
 
+
+        // Separate renderer sinks get separate buffers while sharing only the owning player's gain value.
+        final float[] firstPlayerGain = {2f};
+        final float[] secondPlayerGain = {1f};
+        AudioGainProcessor firstSink = AudioGainProcessor.create(() -> firstPlayerGain[0]);
+        AudioGainProcessor secondSink = AudioGainProcessor.create(() -> secondPlayerGain[0]);
+        firstSink.configure(format(C.ENCODING_PCM_16BIT));
+        secondSink.configure(format(C.ENCODING_PCM_16BIT));
+        long firstBefore = firstSink.queueCount();
+        long secondBefore = secondSink.queueCount();
+        short[] firstPlayer = run16(firstSink, 1f, 1000);
+        short[] secondPlayer = run16(secondSink, 1f, 1000);
+        check(firstPlayer[0] == 2000, "first player's shared gain doubles samples");
+        check(secondPlayer[0] == 1000, "second player's gain stays independent");
+        firstPlayerGain[0] = 1.5f;
+        short[] firstUpdated = run16(firstSink, 1f, 1000);
+        check(firstUpdated[0] == 1500, "sink reads the owning player's live gain each buffer");
+        check(secondSink.getGain() == 1f, "first player's gain update does not affect second player");
+        check(firstSink.queueCount() == firstBefore + 2 && secondSink.queueCount() == secondBefore + 1,
+                "renderer sink buffer counters are independent");
         System.out.println("AudioGainProcessorHostTest PASS");
     }
 }

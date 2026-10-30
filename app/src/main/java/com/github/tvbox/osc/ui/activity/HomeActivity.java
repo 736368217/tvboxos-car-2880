@@ -103,6 +103,10 @@ public class HomeActivity extends BaseActivity {
     private boolean homeSortLoading = false;
     private boolean refreshHomeRec = false;
     private final Handler mHandler = new Handler();
+    private final Runnable autoUpdateCheckRunnable = () -> {
+        if (isFinishing() || isDestroyed()) return;
+        com.github.tvbox.osc.update.UpdateDialog.checkSilently(HomeActivity.this);
+    };
     private long mExitTime = 0;
     private boolean eventBusRegistered = false;
     private final Runnable mRunnable = new Runnable() {
@@ -174,13 +178,8 @@ public class HomeActivity extends BaseActivity {
      * 节流（6 小时）与「正在播放/页面没焦点就跳过」分别在 AppUpdate、UpdateDialog 里判定。
      */
     private void scheduleUpdateCheck() {
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (isFinishing() || isDestroyed()) return;
-                com.github.tvbox.osc.update.UpdateDialog.checkSilently(HomeActivity.this);
-            }
-        }, 5000);
+        mHandler.removeCallbacks(autoUpdateCheckRunnable);
+        mHandler.postDelayed(autoUpdateCheckRunnable, 5000);
     }
 
     private void initView() {
@@ -695,6 +694,7 @@ public class HomeActivity extends BaseActivity {
         mHandler.removeCallbacks(refreshTopLayoutRunnable);
         mHandler.postDelayed(refreshTopLayoutRunnable, 450);
         mHandler.post(mRunnable);
+        scheduleUpdateCheck();
     }
 
 
@@ -704,6 +704,7 @@ public class HomeActivity extends BaseActivity {
         mHandler.removeCallbacks(refreshTopInfoTextSizeRunnable);
         mHandler.removeCallbacks(refreshTopLayoutRunnable);
         mHandler.removeCallbacks(mRunnable);
+        mHandler.removeCallbacks(autoUpdateCheckRunnable);
     }
 
     private void refreshTopInfoTextSize() {

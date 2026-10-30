@@ -27,15 +27,17 @@ import java.util.Locale;
  */
 public class UpdateDialog extends BaseDialog {
 
-    private static final String TAG = "AppUpdate";
     private static WeakReference<UpdateDialog> CURRENT = new WeakReference<>(null);
+    private static final String TAG = "AppUpdate";
+    private static AppUpdate.Info pendingAutoInfo;
 
-    private boolean fromUser;
+    private final WeakReference<Activity> hostActivity;
     private final TextView tvVersions, tvNotes, tvHint, tvPercent;
     private final TextView btnUpdate, btnSkip, btnManual, btnClose;
     private final LinearLayout progressBox;
     private final ProgressBar progress;
 
+    private boolean fromUser;
     private AppUpdate.Info info;
     private AppUpdate.Task task;
     private File downloaded;
@@ -46,6 +48,7 @@ public class UpdateDialog extends BaseDialog {
 
     private UpdateDialog(@NonNull Context context, boolean fromUser) {
         super(context);
+        this.hostActivity = new WeakReference<>(context instanceof Activity ? (Activity) context : null);
         this.fromUser = fromUser;
         setContentView(R.layout.dialog_app_update);
         tvVersions = findViewById(R.id.tvVersions);
@@ -93,24 +96,79 @@ public class UpdateDialog extends BaseDialog {
                 Log.i(TAG, "auto check skipped (throttled or disabled)");
                 return;
             }
-            if (!activity.hasWindowFocus()) {
-                Log.i(TAG, "auto check skipped (page not focused)");
-                return;
-            }
+            // Silent checks never allocate a Dialog against the HomeActivity window.
+            // The result may arrive after playback has covered HomeActivity.
+            AppUpdate.check(activity, false, (result, error) -> {
+                if (error != null) {
+                    Log.w(TAG, "silent check error: " + error);
+                    return;
+                }
+                if (result == null || !result.hasUpdate || AppUpdate.isSkipped(result.tag)) return;
+                pendingAutoInfo = result;
+                Activity current = null;
+                try {
+                    current = com.github.tvbox.osc.base.App.getInstance().getCurrentActivity();
+                } catch (Throwable ignored) {
+                }
+                if (current == null || current.isFinishing() || current.isDestroyed()) current = activity;
+                showPendingIfReady(current);
+            });
+            return;
         }
         UpdateDialog existing = CURRENT.get();
         if (existing != null && existing.isShowing()) {
-            existing.startCheck(fromUser);
+            if (existing.hostActivity.get() == activity) {
+                existing.startCheck(true);
+                return;
+            }
+            existing.dismiss();
+        }
+        pendingAutoInfo = null;
+        final UpdateDialog dialog = new UpdateDialog(activity, true);
+        dialog.startCheck(true);
+    }
+
+    /** Called by BaseActivity on resume/window-focus; delayed auto results bind to the foreground window. */
+    public static void showPendingIfReady(Activity activity) {
+        if (!(activity instanceof com.github.tvbox.osc.ui.activity.HomeActivity)) return;
+        if (activity.isFinishing() || activity.isDestroyed() || !activity.hasWindowFocus()) return;
+        AppUpdate.Info info = pendingAutoInfo;
+        if (info == null) return;
+        if (AppUpdate.isSkipped(info.tag)) {
+            pendingAutoInfo = null;
             return;
         }
-        final UpdateDialog dialog = new UpdateDialog(activity, fromUser);
-        dialog.startCheck(fromUser);
+        UpdateDialog existing = CURRENT.get();
+        if (existing != null && existing.isShowing()) {
+            if (existing.hostActivity.get() == activity) {
+                pendingAutoInfo = null;
+                return;
+            }
+            existing.dismiss();
+        }
+        pendingAutoInfo = null;
+        UpdateDialog dialog = new UpdateDialog(activity, false);
+        dialog.info = info;
+        dialog.applyStateAvailable();
+        dialog.ensureShown();
+        Log.i(TAG, "auto update dialog shown on " + activity.getClass().getSimpleName());
+    }
+
+    /** 将未下载的更新提示从即将被覆盖的 Activity 窗口收回，返回 Home 后再显示。 */
+    public static void onActivityPaused(Activity activity) {
+        UpdateDialog dialog = CURRENT.get();
+        // 只有「还没下载、也没下好」的提示才收回；下载中或已下好要留在原窗口，避免打断或丢状态。
+        if (activity == null || dialog == null || !dialog.isShowing()
+                || dialog.hostActivity.get() != activity
+                || dialog.downloading || dialog.downloaded != null
+                || dialog.info == null || !dialog.info.hasUpdate) return;
+        pendingAutoInfo = dialog.info;
+        Log.i(TAG, "update dialog deferred until HomeActivity resumes");
+        dialog.dismiss();
     }
 
     private void startCheck(boolean userInitiated) {
         // 复用已有弹窗实例时，本次可能是「手动检查」，而实例是自动检查建的（fromUser=false）。
-        // 不刷新这个字段，手动检查就会按静默行为走：没有新版本时不显示结果、有错误也不提示 ——
-        // 表现就是「点了检查更新没反应」。
         fromUser = userInitiated;
         if (userInitiated) {
             applyStateChecking();
