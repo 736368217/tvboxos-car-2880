@@ -17,15 +17,22 @@ public final class CoverKey {
     /**
      * 把带内联头信息的封面地址收敛成「稳定」的样子，作为缓存键。
      *
-     * <p>站点常在地址后追加 {@code @Headers=...} / {@code @Referer=...}，
-     * 这类后缀会变（例如 token 刷新），直接用会命中不到已有缓存。</p>
+     * <p>站点常在地址后追加 {@code @Headers=...} / {@code @Referer=...}，这类后缀会变
+     * （例如 token 刷新），直接用会命中不到已有缓存。只截已知的内联键 —— 不能见 {@code @}
+     * 就砍：不少图床的地址本身就带 {@code @}（例如 {@code pic@200w.jpg}、{@code .jpg@!c750x375}），
+     * 全砍会让不同图片算出同一个键、互相覆盖显示成别人的封面。</p>
      */
     public static String normalize(String pic) {
         if (pic == null) return "";
         String value = pic.trim();
         if (value.length() == 0) return "";
-        int at = value.indexOf('@');
-        if (at > 0) value = value.substring(0, at).trim();
+        String[] inlineKeys = {"@Headers=", "@Cookie=", "@User-Agent=", "@Referer="};
+        int cut = -1;
+        for (String inlineKey : inlineKeys) {
+            int at = value.indexOf(inlineKey);
+            if (at > 0 && (cut < 0 || at < cut)) cut = at;
+        }
+        if (cut > 0) value = value.substring(0, cut).trim();
         return value;
     }
 

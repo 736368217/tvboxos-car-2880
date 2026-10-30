@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.github.catvod.net.OkHttp;
 import com.github.tvbox.osc.util.CoverKey;
+import com.github.tvbox.osc.util.PlainHttp;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,6 +59,12 @@ public final class CoverStore {
     /** 同一个地址只跑一次，避免列表滚动时重复下载同一张封面。 */
     private static final java.util.Set<String> IN_FLIGHT =
             java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+
+    /** 下载失败退避：key=缓存文件名，value=最早可重试时间。 */
+    private static final java.util.Map<String, Long> RETRY_BACKOFF =
+            java.util.Collections.synchronizedMap(new java.util.HashMap<>());
+    /** 失败后等多久才允许重试。 */
+    private static final long RETRY_BACKOFF_MS = 60_000L;
 
     private static final AtomicBoolean TRIMMING = new AtomicBoolean(false);
 
@@ -182,6 +189,9 @@ public final class CoverStore {
             } catch (Exception ignored) {
             }
         }
+        // 失败退避：60 秒内不重复发起，避免列表滚动时反复打注定失败的请求。
+        Long blockedUntil = RETRY_BACKOFF.get(name2);
+        if (blockedUntil != null && System.currentTimeMillis() < blockedUntil) return;
         if (!IN_FLIGHT.add(name2)) return;
         POOL.execute(() -> {
             try {
@@ -195,16 +205,33 @@ public final class CoverStore {
             } catch (Exception error) {
                 Log.w(TAG, "cache failed " + shortUrl(pic) + " : " + error.getClass().getSimpleName()
                         + (error.getMessage() == null ? "" : (": " + error.getMessage())));
+                RETRY_BACKOFF.put(name2, System.currentTimeMillis() + RETRY_BACKOFF_MS);
             } finally {
                 IN_FLIGHT.remove(name2);
+                RETRY_BACKOFF.remove(name2);
             }
         });
     }
 
     private static void download(android.content.Context context, String pic, File target) throws Exception {
-        OkHttpClient client = OkHttp.client(CONNECT_TIMEOUT_MS).newBuilder()
+        // 两轮：先系统 DNS 直连 —— 部分车机的 App 网络栈（DoH/代理规则）DNS 全挂，
+        // 封面落盘在那类机器上从来没成功过，历史列表永远只有色块；失败后再用 App 栈兜底
+        // （有些网络只有它能出去）。任何一轮成功，封面就永久落盘，之后零网络。
+        try {
+            downloadVia(PlainHttp.systemDns(), context, pic, target);
+            return;
+        } catch (Exception error) {
+            Log.w(TAG, "cache via system-dns failed " + shortUrl(pic) + " : "
+                    + error.getClass().getSimpleName()
+                    + (error.getMessage() == null ? "" : (": " + error.getMessage())));
+        }
+        OkHttpClient appStack = OkHttp.client(CONNECT_TIMEOUT_MS).newBuilder()
                 .readTimeout(READ_TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
                 .build();
+        downloadVia(appStack, context, pic, target);
+    }
+
+    private static void downloadVia(OkHttpClient client, android.content.Context context, String pic, File target) throws Exception {
         Request request = new Request.Builder()
                 .url(pic)
                 .header("User-Agent", "TVBox-Car/CoverCache")

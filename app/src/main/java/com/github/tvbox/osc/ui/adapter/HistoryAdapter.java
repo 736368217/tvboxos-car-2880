@@ -1,6 +1,7 @@
 package com.github.tvbox.osc.ui.adapter;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -56,6 +57,8 @@ public class HistoryAdapter extends BaseQuickAdapter<VodInfo, BaseViewHolder> {
         String pic = com.github.tvbox.osc.util.DefaultConfig.checkReplaceProxy(
                 item.pic == null ? "" : item.pic);
         if (TextUtils.isEmpty(pic)) {
+            // 色块第一类：历史记录里根本没存封面地址（老版本写入或源就没给）。
+            Log.i(CoverStore.TAG, "history cover: empty pic name=" + item.name);
             ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
             return;
         }
@@ -64,10 +67,14 @@ public class HistoryAdapter extends BaseQuickAdapter<VodInfo, BaseViewHolder> {
         String local = CoverStore.findLocalPath(mContext, pic, item.name, item.sourceKey);
         if (!TextUtils.isEmpty(local)) {
             // 命中本地缓存（URL 键或片名键）：直接显示，不再走网络。
+            Log.i(CoverStore.TAG, "history cover: local hit name=" + item.name);
             ImgUtil.load(new java.io.File(local).getAbsolutePath(), ivThumb,
                     AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
             return;
         }
+        // 色块第二类：本地没缓存、走网络 —— 网络失败时 ImgUtil 的 onLoadFailed 会接着打日志。
+        Log.i(CoverStore.TAG, "history cover: network fallback name=" + item.name
+                + " url=" + pic.substring(0, Math.min(96, pic.length())));
         ImgUtil.load(pic, ivThumb, AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
         // 这次既然能加载到，就顺手存一份（同时写 URL 键与片名键），下次站点挂了也能显示。
         CoverStore.remember(mContext, pic, item.name, item.sourceKey);

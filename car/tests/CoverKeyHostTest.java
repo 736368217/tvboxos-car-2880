@@ -35,6 +35,17 @@ public final class CoverKeyHostTest {
         eq(CoverKey.normalize(null), "", "null -> empty");
         eq(CoverKey.normalize(""), "", "empty -> empty");
 
+        // ---------- 归一化：URL 自带 @ 的图床不能被误伤 ----------
+        // 图床地址本身带 @（尺寸后缀/签名）时，旧实现见 @ 就砍会让不同图片算出同一个键、
+        // 互相覆盖成同一张封面。新行为：只截 @Headers= / @Cookie= / @User-Agent= / @Referer= 这些已知内联键。
+        String atUrl = "https://img.example.com/pic@200w.jpg";
+        eq(CoverKey.normalize(atUrl), atUrl, "decorated url with @ is kept intact");
+        eq(CoverKey.normalize(atUrl + "@Referer=https://x/"), atUrl, "@-url still strips known inline keys");
+        check(!CoverKey.key("https://h/a@1.jpg").equals(CoverKey.key("https://h/a@2.jpg")),
+                "different @-decorated urls must get different keys");
+        eq(CoverKey.key("https://h/a@200w.jpg@Headers={\"ua\":\"x\"}"), CoverKey.key("https://h/a@200w.jpg"),
+                "inline headers after an @-url do not change the key");
+
         // ---------- 缓存键：稳定、可复现、不含路径分隔符 ----------
         String key = CoverKey.key(pic);
         check(key != null, "key computed");

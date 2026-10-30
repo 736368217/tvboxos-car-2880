@@ -143,15 +143,27 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
     }
 
     /** 一个可达的更新检查通道：{@code prefix} 为空表示直连。 */
+    /** 一个可达的更新检查通道：{@code prefix} 为空表示直连。 */
     public static final class Channel {
         public final String prefix;
         public final String apiUrl;
         public final String label;
+        /**
+         * true = Web 通道：地址是 {@code github.com/{owner}/{repo}/releases/latest} 页面，
+         * 靠 302 Location 解析 tag，不查 GitHub API。很多 gh-proxy 镜像只代理
+         * github.com 域名、不支持 api.github.com 前缀 —— API 全挂时它是唯一活路。
+         */
+        public final boolean web;
 
         Channel(String prefix, String apiUrl, String label) {
+            this(prefix, apiUrl, label, false);
+        }
+
+        Channel(String prefix, String apiUrl, String label, boolean web) {
             this.prefix = prefix;
             this.apiUrl = apiUrl;
             this.label = label;
+            this.web = web;
         }
 
         /** 把同一通道的前缀套到资产下载地址上，保证下载与查询走同一条路。 */
@@ -159,9 +171,8 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
             return applyPrefix(prefix, url);
         }
     }
-
-    /** 内置镜像前缀，按经验顺序：用户自定义 → 直连 → ghfast → ghproxy。 */
-    public static final String[] BUILT_IN_MIRRORS = {"https://ghfast.top/", "https://ghproxy.net/"};
+    /** 内置镜像前缀，按经验顺序：用户自定义 → 直连 → ghfast → gh-proxy → ghproxy。 */
+    public static final String[] BUILT_IN_MIRRORS = {"https://ghfast.top/", "https://gh-proxy.com/", "https://ghproxy.net/"};
 
     // 下载候选地址：把同一个资产 URL 按通道前缀展开，preferredPrefix 排最前。
     //
@@ -208,7 +219,73 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
             }
             if (!duplicate) out.add(new Channel(prefix, url, prefix.replace("https://", "").replace("/", "")));
         }
+        // Web 通道排在 API 通道之后：API 能通时优先用（信息全：notes、资产清单、size）；
+        // API 全挂（镜像不支持 api.github.com 前缀、DNS 污染）时靠 302 兜底。
+        // 通道顺序按前缀集合对齐：自定义 → 直连 → ghfast → gh-proxy → ghproxy。
+        String web = webLatestUrl(owner, repo);
+        if (mirror.length() > 0) out.add(new Channel(mirror, mirror + web, "自定义web", true));
+        out.add(new Channel("", web, "直连web", true));
+        for (String prefix : BUILT_IN_MIRRORS) {
+            String url = prefix + web;
+            boolean duplicate = false;
+            for (Channel existing : out) {
+                if (existing.apiUrl.equals(url)) duplicate = true;
+            }
+            if (!duplicate) out.add(new Channel(prefix, url, prefix.replace("https://", "").replace("/", "") + "web", true));
+        }
         return out.toArray(new Channel[0]);
+    }
+
+    /** Web 通道地址：releases/latest 页面，服务端 302 到 /releases/tag/&lt;tag&gt;。 */
+    public static String webLatestUrl(String owner, String repo) {
+        return "https://github.com/" + owner + "/" + repo + "/releases/latest";
+    }
+
+    /**
+     * 从 302 的 Location（或最终页面 URL）提取 release tag。
+     *
+     * <p>取 {@code /releases/tag/} 之后、下一个 {@code /} 或 {@code ?} 之前的段并做 URL 解码；
+     * 解析不出返回 null。样例：
+     * {@code /736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r59 → v3.1.0-car.7-r59}。</p>
+     */
+    public static String tagFromRedirect(String location) {
+        if (location == null) return null;
+        String marker = "/releases/tag/";
+        int at = location.indexOf(marker);
+        if (at < 0) return null;
+        String tag = location.substring(at + marker.length());
+        int end = tag.length();
+        for (int i = 0; i < tag.length(); i++) {
+            char c = tag.charAt(i);
+            if (c == '/' || c == '?' || c == '#') {
+                end = i;
+                break;
+            }
+        }
+        tag = tag.substring(0, end);
+        if (tag.length() == 0) return null;
+        try {
+            tag = java.net.URLDecoder.decode(tag, "UTF-8");
+        } catch (Exception ignored) {
+            // tag 里出现非法转义就按原样用
+        }
+        return tag;
+    }
+
+    /**
+     * Web 通道拿不到资产清单，按本仓库的资产命名规范反推候选文件名。
+     *
+     * <p>命名规范：tag = {@code v&lt;版本&gt;}，资产 = {@code TVBox-Original-Feature-&lt;版本&gt;.apk}。
+     * 候选按可能性排序，下载端有「内容过小/包名校验」兜底，拼错只会 404 换下一个。</p>
+     */
+    public static String[] assetNamesForTag(String tag) {
+        if (tag == null || tag.length() == 0) return new String[0];
+        String version = tag.startsWith("v") ? tag.substring(1) : tag;
+        List<String> names = new ArrayList<>();
+        names.add("TVBox-Original-Feature-" + version + ".apk");
+        names.add("TVBox-Original-Feature-" + tag + ".apk");
+        names.add("TVBox-" + version + ".apk");
+        return names.toArray(new String[0]);
     }
 
     public static String applyPrefix(String prefix, String url) {

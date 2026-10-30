@@ -16,6 +16,7 @@ import androidx.core.content.FileProvider;
 
 import com.github.catvod.net.OkHttp;
 import com.github.tvbox.osc.util.DefaultConfig;
+import com.github.tvbox.osc.util.PlainHttp;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.orhanobut.hawk.Hawk;
 
@@ -218,6 +219,10 @@ public final class AppUpdate {
     }
 
     private static Info query(UpdateVersion.Channel channel, String local, boolean plain) throws Exception {
+        if (channel.web) {
+            // Web 通道：不查 JSON API，靠 releases/latest 的 302 解析 tag。
+            return queryWeb(channel, local);
+        }
         OkHttpClient client = client(plain);
         Request request = new Request.Builder()
                 .url(channel.apiUrl)
@@ -266,6 +271,56 @@ public final class AppUpdate {
         }
         return new Info(tag, hasUpdate, local, remoteVersion, notes, apkUrl, apkUrlRaw, apkName, apkSize,
                 channel.label, releasePage);
+    }
+
+    /**
+     * Web 通道：GET {@code releases/latest}（不跟随重定向），从 302 Location 解析最新 tag。
+     *
+     * <p>为什么绕这一道：车机网络下 api.github.com 和多数镜像的 API 前缀都不通
+     * （gh-proxy 系镜像只代理 github.com 域名），但 {@code github.com/.../releases/latest}
+     * 会 302 到 {@code /releases/tag/<tag>} —— 代理了 github.com 的镜像几乎都活着。
+     * 拿到 tag 后按本仓库资产命名规范反推 APK 文件名；下载端有「内容过小/包名校验」兜底，
+     * 推测的文件名不对只会 404 换通道，不会装错包。</p>
+     */
+    private static Info queryWeb(UpdateVersion.Channel channel, String local) throws Exception {
+        OkHttpClient client = PlainHttp.systemDnsNoRedirect();
+        Request request = new Request.Builder()
+                .url(channel.apiUrl)
+                .header("User-Agent", "TVBox-Car/" + local)
+                .build();
+        String location = null;
+        try (Response response = client.newCall(request).execute()) {
+            location = response.header("Location");
+            Log.i(TAG, "web probe " + channel.label + " code=" + response.code() + " location=" + location);
+            if (location == null || location.length() == 0) {
+                // 有的镜像直接跟随重定向返回 200 页面：从 HTML 里挖 tag
+                ResponseBody body = response.body();
+                if (response.code() == 200 && body != null) {
+                    location = extractTagFromHtml(body.string());
+                }
+            }
+        }
+        String tag = UpdateVersion.tagFromRedirect(location);
+        if (tag == null || tag.length() == 0) {
+            throw new IOException("releases/latest 未返回 tag（location=" + location + "）");
+        }
+        boolean hasUpdate = UpdateVersion.hasUpdate(local, tag);
+        String[] names = UpdateVersion.assetNamesForTag(tag);
+        String apkName = names.length > 0 ? names[0] : null;
+        String apkUrlRaw = apkName == null ? null
+                : "https://github.com/" + OWNER + "/" + REPO + "/releases/download/" + tag + "/" + apkName;
+        String apkUrl = apkUrlRaw == null ? null : channel.apply(apkUrlRaw);
+        String releasePage = "https://github.com/" + OWNER + "/" + REPO + "/releases/tag/" + tag;
+        return new Info(tag, hasUpdate, local, tag, "", apkUrl, apkUrlRaw, apkName, 0L,
+                channel.label, releasePage);
+    }
+
+    /** 从 releases/latest 的 HTML 里挖第一个 {@code /releases/tag/<tag>}（镜像跟随重定向时的兜底）。 */
+    private static String extractTagFromHtml(String html) {
+        if (html == null || html.length() == 0) return null;
+        java.util.regex.Matcher matcher =
+                java.util.regex.Pattern.compile("/releases/tag/([A-Za-z0-9._\\-]+)").matcher(html);
+        return matcher.find() ? matcher.group(1) : null;
     }
 
     // ---------------- 下载 ----------------
@@ -523,77 +578,14 @@ public final class AppUpdate {
             // 某些网络下 netd 会卡满 20 秒才报 UnknownHostException。
             return AppStackClient.HOLDER;
         }
-        return SystemDnsClient.HOLDER;
-    }
-
-    /**
-     * 系统 DNS 客户端：懒加载，全程复用一个连接池。
-     *
-     * <p>{@code connectTimeout} 管不到 DNS —— OkHttp 直接调用 {@code Dns.lookup()} 阻塞等待。
-     * 实测某台车机上 netd 解析要卡满 20 秒，三个通道两轮就是 2 分钟，用户只会以为「没反应」。
-     * 所以这里包一层自带超时的 DNS。</p>
-     */
-    private static final class SystemDnsClient {
-        static final OkHttpClient HOLDER = new OkHttpClient.Builder()
-                .dns(new TimeoutDns(okhttp3.Dns.SYSTEM, DNS_TIMEOUT_MS))
-                .connectTimeout(8, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
-                .writeTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
-                .followRedirects(true)
-                .followSslRedirects(true)
-                .build();
+        // 系统 DNS 直连：绕开 App 栈在部分车机上 DNS 全挂的问题，实现统一收在 PlainHttp。
+        return PlainHttp.systemDns();
     }
 
     private static final class AppStackClient {
-        static final OkHttpClient HOLDER = OkHttp.client(TIMEOUT_MS).newBuilder()
-                .dns(new TimeoutDns(OkHttp.dns(), DNS_TIMEOUT_MS))
-                .build();
+        static final OkHttpClient HOLDER = PlainHttp.withDnsTimeout(OkHttp.client(TIMEOUT_MS));
     }
 
-    /** DNS 解析硬超时：单域名最多等这么久，超时按解析失败处理。 */
-    private static final long DNS_TIMEOUT_MS = 2500L;
-
-    /** 给任意 {@link okhttp3.Dns} 加硬超时，避免解析阶段无限等待。 */
-    private static final class TimeoutDns implements okhttp3.Dns {
-        private final okhttp3.Dns delegate;
-        private final long timeoutMs;
-
-        TimeoutDns(okhttp3.Dns delegate, long timeoutMs) {
-            this.delegate = delegate == null ? okhttp3.Dns.SYSTEM : delegate;
-            this.timeoutMs = timeoutMs;
-        }
-
-        @Override
-        public java.util.List<java.net.InetAddress> lookup(final String hostname)
-                throws java.net.UnknownHostException {
-            java.util.concurrent.Future<java.util.List<java.net.InetAddress>> future =
-                    DNS_POOL.submit(() -> delegate.lookup(hostname));
-            try {
-                return future.get(timeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS);
-            } catch (java.util.concurrent.TimeoutException timeout) {
-                future.cancel(true);
-                Log.w(TAG, "dns timeout after " + timeoutMs + "ms: " + hostname);
-                throw new java.net.UnknownHostException(hostname + "（解析超时 " + timeoutMs + "ms）");
-            } catch (InterruptedException interrupted) {
-                future.cancel(true);
-                Thread.currentThread().interrupt();
-                throw new java.net.UnknownHostException(hostname + "（解析被中断）");
-            } catch (Exception error) {
-                Throwable cause = error.getCause() == null ? error : error.getCause();
-                if (cause instanceof java.net.UnknownHostException) {
-                    throw (java.net.UnknownHostException) cause;
-                }
-                throw new java.net.UnknownHostException(hostname + "（" + cause + "）");
-            }
-        }
-    }
-
-    private static final java.util.concurrent.ExecutorService DNS_POOL =
-            java.util.concurrent.Executors.newCachedThreadPool(runnable -> {
-                Thread thread = new Thread(runnable, "update-dns");
-                thread.setDaemon(true);
-                return thread;
-            });
 
     private static void post(Runnable runnable) {
         MAIN.post(runnable);

@@ -118,13 +118,18 @@ public final class UpdateVersionHostTest {
         eq(custom[0].label, "自定义", "user mirror goes first");
         check(custom[0].apiUrl.startsWith("https://my-mirror.example/https://api.github.com/"),
                 "user mirror prefixes the api url, got " + custom[0].apiUrl);
-        // 用户把镜像设成内置值时不能重复添加
+        // 用户把镜像设成内置值时不能重复添加（API 与 Web 通道各自去重：
+        // 同一前缀会有「API + Web」两条，这是设计内，不算重复）
         UpdateVersion.Channel[] dedup = UpdateVersion.channels("o", "r", "https://ghfast.top/");
-        int ghfastCount = 0;
+        int ghfastApiCount = 0;
+        int ghfastWebCount = 0;
         for (UpdateVersion.Channel channel : dedup) {
-            if (channel.apiUrl.contains("ghfast.top")) ghfastCount++;
+            if (!channel.apiUrl.contains("ghfast.top")) continue;
+            if (channel.web) ghfastWebCount++;
+            else ghfastApiCount++;
         }
-        eqInt(ghfastCount, 1, "duplicate mirror is not added twice");
+        eqInt(ghfastApiCount, 1, "duplicate mirror is not added twice (api)");
+        eqInt(ghfastWebCount, 1, "duplicate mirror is not added twice (web)");
 
         // ---------- 下载候选（查询通 ≠ 下载通，必须能换通道重试） ----------
         String rawAsset = "https://github.com/o/r/releases/download/v1/app.apk";
@@ -132,7 +137,8 @@ public final class UpdateVersionHostTest {
         check(fromDirect.length >= 3, "direct + mirrors, got " + fromDirect.length);
         eq(fromDirect[0], rawAsset, "direct channel tries the raw url first");
         check(fromDirect[1].contains("ghfast.top"), "ghfast next, got " + fromDirect[1]);
-        check(fromDirect[2].contains("ghproxy.net"), "ghproxy third, got " + fromDirect[2]);
+        check(fromDirect[2].contains("gh-proxy.com"), "gh-proxy third, got " + fromDirect[2]);
+        check(fromDirect[3].contains("ghproxy.net"), "ghproxy fourth, got " + fromDirect[3]);
         // 同一地址不重复出现
         boolean dup = false;
         for (int i = 0; i < fromDirect.length; i++) {
@@ -188,6 +194,48 @@ public final class UpdateVersionHostTest {
         check(!md.contains("---"), "table separator row dropped, got:\n" + md);
         check(md.contains("链接"), "link text kept, got:\n" + md);
         check(!md.contains("example.com"), "link target dropped, got:\n" + md);
+
+        // ---------- Web 通道：302 Location 解析 tag + 资产名反推 ----------
+        // 车机上 api.github.com 与镜像 API 前缀全挂时，靠 github.com/.../releases/latest
+        // 的 302 兜底。解析错了 tag 就一切全错，所以这里逐样例盯死。
+        eq(UpdateVersion.tagFromRedirect(
+                "https://github.com/736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r59"),
+                "v3.1.0-car.7-r59", "absolute location parsed");
+        eq(UpdateVersion.tagFromRedirect("/736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r60"),
+                "v3.1.0-car.7-r60", "relative location parsed");
+        eq(UpdateVersion.tagFromRedirect(
+                "https://github.com/o/r/releases/tag/v1.2-r9?utm=x"),
+                "v1.2-r9", "query string stripped");
+        eq(UpdateVersion.tagFromRedirect("https://github.com/o/r"), null, "no marker -> null");
+        eq(UpdateVersion.tagFromRedirect(null), null, "null location -> null");
+        eq(UpdateVersion.tagFromRedirect("https://x/releases/tag/"), null, "empty tag -> null");
+
+        String[] assetNames = UpdateVersion.assetNamesForTag("v3.1.0-car.7-r60");
+        eqInt(assetNames.length, 3, "three asset candidates");
+        eq(assetNames[0], "TVBox-Original-Feature-3.1.0-car.7-r60.apk", "leading v stripped for asset name");
+        eq(UpdateVersion.assetNamesForTag("3.1.0-car.7-r60")[0],
+                "TVBox-Original-Feature-3.1.0-car.7-r60.apk", "tag without v also works");
+        eqInt(UpdateVersion.assetNamesForTag(null).length, 0, "null tag -> no candidates");
+        eqInt(UpdateVersion.assetNamesForTag("").length, 0, "empty tag -> no candidates");
+
+        // 通道表：API 通道在前，Web 通道在后，镜像前缀两边对齐
+        UpdateVersion.Channel[] chans = UpdateVersion.channels("o", "r", "");
+        check(chans.length > 4, "api + web channels present, got " + chans.length);
+        boolean apiFirst = true;
+        boolean sawWeb = false;
+        for (UpdateVersion.Channel channel : chans) {
+            if (channel.web) {
+                sawWeb = true;
+                check(channel.apiUrl.contains("github.com/") && !channel.apiUrl.contains("api.github.com"),
+                        "web channel targets github.com pages, got " + channel.apiUrl);
+            } else if (sawWeb) {
+                apiFirst = false;
+            }
+        }
+        check(sawWeb, "at least one web channel");
+        check(apiFirst, "web channels come after all api channels");
+        eq(UpdateVersion.webLatestUrl("o", "r"),
+                "https://github.com/o/r/releases/latest", "web url shape");
 
         System.out.println("UpdateVersionHostTest PASS (" + checks + " checks)");
     }

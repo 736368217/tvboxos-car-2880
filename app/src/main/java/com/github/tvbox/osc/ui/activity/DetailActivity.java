@@ -906,7 +906,12 @@ public class DetailActivity extends BaseActivity {
                         // 详情页是"真的打开过"的地方：这里就把封面落盘，之后历史/收藏
                         // 即使站点删图或车机没网也能显示。
                         com.github.tvbox.osc.cache.CoverStore.remember(mContext, coverUrl, mVideo.name, sourceKey);
-                        com.github.tvbox.osc.util.ImgUtil.load(coverUrl, ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 300), AutoSizeUtils.mm2px(mContext, 400), mVideo.name);
+                        // 先查本地缓存再走网络：车机 App 网络栈挂了时 Glide 连不上图床，
+                        // 但只要落盘成功过一次（CoverStore 走系统 DNS），这里就能直接显示。
+                        String localCover = com.github.tvbox.osc.cache.CoverStore.findLocalPath(
+                                mContext, coverUrl, mVideo.name, sourceKey);
+                        String coverModel = TextUtils.isEmpty(localCover) ? coverUrl : localCover;
+                        com.github.tvbox.osc.util.ImgUtil.load(coverModel, ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 300), AutoSizeUtils.mm2px(mContext, 400), mVideo.name);
                     } else {
                         ivThumb.setImageDrawable(com.github.tvbox.osc.util.ImgUtil.createTextDrawable(mVideo.name));
                     }

@@ -9,6 +9,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
@@ -130,7 +131,7 @@ public class ImgUtil {
                 .load(getUrl(url))
                 .placeholder(placeholder)
                 .error(fallback)
-                .listener(getListener(view, scaleType, fallback))
+                .listener(getListener(url, view, scaleType, fallback))
                 .apply(options)
                 .into(view);
     }
@@ -157,7 +158,7 @@ public class ImgUtil {
                 .load(getUrl(url))
                 .placeholder(placeholder)
                 .error(fallback)
-                .listener(getListener(view, ImageView.ScaleType.CENTER_CROP, fallback))
+                .listener(getListener(url, view, ImageView.ScaleType.CENTER_CROP, fallback))
                 .apply(options)
                 .into(view);
     }
@@ -341,15 +342,23 @@ public class ImgUtil {
         headers.put(key, value.trim());
     }
 
-    private static RequestListener<Bitmap> getListener(final ImageView view, final ImageView.ScaleType scaleType, final Drawable fallback) {
+    private static RequestListener<Bitmap> getListener(final String url, final ImageView view,
+                                                       final ImageView.ScaleType scaleType, final Drawable fallback) {
         return new RequestListener<Bitmap>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                // 封面排查的关键证据：列表页全是色块时，看这里就知道是网络失败还是解码失败。
+                // 自查：adb logcat -s CoverCache
+                Throwable root = null;
+                if (e != null && e.getRootCauses() != null && !e.getRootCauses().isEmpty()) {
+                    root = e.getRootCauses().get(0);
+                }
+                Log.w("CoverCache", "glide load failed url=" + (url == null ? "null" : url.substring(0, Math.min(96, url.length())))
+                        + " root=" + (root == null ? String.valueOf(e) : root.toString()));
                 view.setScaleType(scaleType);
                 view.setImageDrawable(fallback);
                 return true;
             }
-
             @Override
             public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                 view.setScaleType(scaleType);
