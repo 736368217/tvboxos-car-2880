@@ -34,6 +34,8 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
     private ImageView artworkView;
     private DanmuSeekListener danmuSeekListener;
     private final Handler mEnhanceMain = new Handler(Looper.getMainLooper());
+    /** 诊断用：上一次真正生效的应用内增益，避免拖动时刷屏。 */
+    private float mLastLoggedGain = -1f;
 
 
     public MyVideoView(@NonNull Context context) {
@@ -341,6 +343,12 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
         float base = com.github.tvbox.osc.car.VolumeBoostMath.playerVolume(gain);
         super.setVolume(base, base);
         CarEnhance.setAppGain(this, gain);
+        if (Math.abs(gain - mLastLoggedGain) >= 0.01f) {
+            mLastLoggedGain = gain;
+            android.util.Log.i("CarAudio", "app_gain request=" + Math.round(gain * 100)
+                    + "% playerVolume=" + base + " pcmCapable=" + usesPcmGain()
+                    + " engine=" + (mMediaPlayer == null ? "null" : mMediaPlayer.getClass().getName()));
+        }
     }
 
     @Override

@@ -150,6 +150,8 @@ public class ExoPlayer extends ExoMediaPlayer {
         } catch (Throwable th) {
             LOG.i("echo-exo-disable-async-codec-queue-skip:" + th.getClass().getSimpleName());
         }
+        android.util.Log.i("CarAudio", "renderers_factory=" + factory.getClass().getName()
+                + " decoderFallback=true extMode=PREFER");
         return factory;
     }
 
@@ -523,12 +525,17 @@ public class ExoPlayer extends ExoMediaPlayer {
                                            boolean enableAudioTrackPlaybackParams, boolean enableOffload) {
             AudioProcessor[] processors = new AudioProcessor[]{
                     xyz.doikki.videoplayer.exo.AudioGainProcessor.INSTANCE};
-            return new DefaultAudioSink.Builder(context)
+            DefaultAudioSink sink = new DefaultAudioSink.Builder(context)
                     .setAudioProcessors(processors)
                     .setEnableFloatOutput(enableFloatOutput)
                     .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
                     .setOffloadMode(DefaultAudioSink.OFFLOAD_MODE_DISABLED)
                     .build();
+            android.util.Log.i("CarAudio", "sink_built floatOut=" + enableFloatOutput
+                    + " atParams=" + enableAudioTrackPlaybackParams
+                    + " offloadArg=" + enableOffload + " processors=" + processors.length
+                    + " gain=" + xyz.doikki.videoplayer.exo.AudioGainProcessor.INSTANCE.getGain());
+            return sink;
         }
     }
 

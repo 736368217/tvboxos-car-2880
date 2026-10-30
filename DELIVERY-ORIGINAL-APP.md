@@ -485,3 +485,27 @@ SHA-256 `9957DDBBCE70774504B7551908C07654E8936630A26FB66DCDCA5E85950A5168`。
 - 车机 car.7 存量版本与 r39 起的所有构建统一使用证书 SHA-256 `2FEB63C511CD725795CADC8FA890F9CBC754FE59C0BBFE0787AC33F94F44FA9C`（Android Debug，来自 `~/.android/debug.keystore.recovered-20261023`）。
 - r29–r38 误用了重新生成的 debug 证书 `9D81D8DB1EF20E058212F4070344D2E2D5DFF34BF63B823767D32C92338C90CB`，与车机存量版本不一致，安装会报 `INSTALL_FAILED_UPDATE_INCOMPATIBLE`（应用未安装：软件包与现有软件包存在冲突）。
 - 规则：每次签名前先确认证书摘要，不要依赖自动重建的 debug.keystore；换机或清理 `~/.android` 后必须先从备份恢复。
+
+## r56（诊断版）：音量 >100% 问题的专注交付包
+
+用户反馈「音量仍然无法增大」。此前 r44（`LoudnessEnhancer`）与 r48（ExoPlayer PCM 增益）两轮
+都只有**应用侧日志**证据，而开发期模拟器全程静音租用（`mumu-pool acquire --mute`），
+**从未做过听觉验证**。所以本轮定位是**先取证、再修**，不改变任何行为。
+
+- 交付包：`car/handover/volume-boost/`（README + 问题/架构/历次尝试/假设与证伪/坑/复现/插桩规格，共 8 份）
+- 诊断构建：`3.1.0-car.7-r56`（versionCode 29），相对 r55 只新增日志：
+  - 新 tag `CarAudioGain`（处理器内部）：`configure n=… enc=… accepted=…`、
+    `queue n=… gain=… level_in=… level_out=…`、`configure REJECTED enc=…`
+    —— 用来证明「处理器是否真在链路里」「采样是否真的被放大」；
+  - `CarAudio sink_built floatOut=… offloadArg=… processors=1` / `renderers_factory=…`
+    —— 证明 `buildAudioSink` 覆写真的被执行；
+  - `runtime_apply` 增加 `factor=`、`applied=`、`engine=`、`pcmStored=`、`pcmQueued=`；
+  - `app_gain request=N% playerVolume=… pcmCapable=… engine=…` —— 证明手势链路与引擎身份。
+- 本轮验证：`BUILD SUCCESSFUL`；产物 DEX 内 14 个诊断串全部命中；
+  `AudioGainProcessorHostTest PASS`（宿主 JVM 直驱真实处理器，同时证明日志异常不会破坏音频路径）；
+  签名证书仍为 `2feb63c5…fa9c`。
+- 产物：`TVBox-Original-Feature-3.1.0-car.7-r56-diag.apk`，52,730,073 bytes，
+  SHA-256 `02FAD567D31D2DD8B17BEC7FEDF234961807960AB74BB4FC12288686C1E854D4`。
+- **仍未验证**：车机上「200% 真的更响」尚无任何证据。下一步：抓一份车机日志，按
+  `car/handover/volume-boost/06-INSTRUMENTATION.md` 的判读矩阵把
+  「没走到增益（H1/H2）」与「走到了没用（H3）」分开。

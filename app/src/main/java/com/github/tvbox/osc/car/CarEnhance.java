@@ -73,10 +73,15 @@ public final class CarEnhance {
         if (pcm) view.applyPcmGain(appGain * volumeFactor);
         AudioEffectController.apply(mode, session, boost);
         Log.i("CarAudio", "runtime_apply mode=" + mode + " session=" + session + " gain=" + appGain
+                + " factor=" + volumeFactor + " applied=" + (appGain * volumeFactor)
                 + " path=" + (pcm ? "pcm" : "loudness") + " boostMb=" + boost
                 + " enabled=" + AudioEffectController.isActive()
                 + " state=" + view.getCurrentPlayState()
-                + " player=" + System.identityHashCode(view.getMediaPlayer()));
+                + " player=" + System.identityHashCode(view.getMediaPlayer())
+                + " engine=" + (view.getMediaPlayer() == null ? "null"
+                        : view.getMediaPlayer().getClass().getName())
+                + " pcmStored=" + xyz.doikki.videoplayer.exo.AudioGainProcessor.INSTANCE.getGain()
+                + " pcmQueued=" + xyz.doikki.videoplayer.exo.AudioGainProcessor.INSTANCE.queueCount());
     }
 
     /**
