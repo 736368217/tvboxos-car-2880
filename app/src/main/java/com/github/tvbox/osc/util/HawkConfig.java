@@ -38,5 +38,9 @@ public class HawkConfig {
     public static final String NOW_DATE = "now_date"; //当前日期
     public static final String REMOTE_TVBOX = "remote_tvbox_host";
     public static final String IJK_CACHE_PLAY = "ijk_cache_play";
+    // ---- 画面增强（超分 / 补帧 / 滤镜）：仅本项目新增，取值见 VideoEnhanceHelper ----
+    public static final String VIDEO_ENHANCE = "video_enhance"; // 滤镜预设 0=原画 1=臻彩 …
+    public static final String VIDEO_SR_TIER = "video_sr_tier"; // 超分 0=关 1..3
+    public static final String VIDEO_MEMC_TIER = "video_memc_tier"; // 补帧 0=关 1..3
     public static boolean hotVodDelete;
 }

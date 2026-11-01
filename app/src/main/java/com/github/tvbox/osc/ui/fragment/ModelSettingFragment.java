@@ -34,6 +34,7 @@ import com.github.tvbox.osc.util.HistoryHelper;
 import com.github.tvbox.osc.util.LOG;
 import com.github.tvbox.osc.util.OkGoHelper;
 import com.github.tvbox.osc.util.PlayerHelper;
+import com.github.tvbox.osc.util.VideoEnhanceHelper;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.model.Progress;
@@ -72,6 +73,10 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvFastSearchText;
     private TextView tvRecStyleText;
     private TextView tvIjkCachePlay;
+    // 画面增强三项（本项目新增）
+    private TextView tvFilterValue;
+    private TextView tvSrValue;
+    private TextView tvMemcValue;
 
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
@@ -121,6 +126,12 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvPlay.setText(PlayerHelper.getPlayerName(Hawk.get(HawkConfig.PLAY_TYPE, 0)));
         tvRender.setText(PlayerHelper.getRenderName(Hawk.get(HawkConfig.PLAY_RENDER, 0)));
         tvIjkCachePlay.setText(Hawk.get(HawkConfig.IJK_CACHE_PLAY, false) ? "开启" : "关闭");
+        tvFilterValue = findViewById(R.id.tvFilterValue);
+        tvSrValue = findViewById(R.id.tvSrValue);
+        tvMemcValue = findViewById(R.id.tvMemcValue);
+        tvFilterValue.setText(VideoEnhanceHelper.filterName());
+        tvSrValue.setText(VideoEnhanceHelper.srName());
+        tvMemcValue.setText(VideoEnhanceHelper.memcName());
         findViewById(R.id.llDebug).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -460,6 +471,114 @@ public class ModelSettingFragment extends BaseLazyFragment {
                         return oldItem.intValue() == newItem.intValue();
                     }
                 }, renders, defaultPos);
+                dialog.show();
+            }
+        });
+        findViewById(R.id.llFilter).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int defaultPos = VideoEnhanceHelper.filterMode();
+                ArrayList<Integer> modes = new ArrayList<>();
+                for (int i = 0; i < VideoEnhanceHelper.filterCount(); i++) modes.add(i);
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("请选择画面滤镜（下次起播生效）");
+                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        VideoEnhanceHelper.setFilterMode(value);
+                        tvFilterValue.setText(VideoEnhanceHelper.filterName());
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return VideoEnhanceHelper.filterNameOf(val);
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, modes, defaultPos);
+                dialog.show();
+            }
+        });
+        findViewById(R.id.llSr).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int defaultPos = VideoEnhanceHelper.srTier();
+                ArrayList<Integer> tiers = new ArrayList<>();
+                tiers.add(0);
+                tiers.add(1);
+                tiers.add(2);
+                tiers.add(3);
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("请选择超分档位（下次起播生效）");
+                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        VideoEnhanceHelper.setSrTier(value);
+                        tvSrValue.setText(VideoEnhanceHelper.srName());
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return VideoEnhanceHelper.srNameOf(val);
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, tiers, defaultPos);
+                dialog.show();
+            }
+        });
+        findViewById(R.id.llMemc).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int defaultPos = VideoEnhanceHelper.memcTier();
+                ArrayList<Integer> tiers = new ArrayList<>();
+                tiers.add(0);
+                tiers.add(1);
+                tiers.add(2);
+                tiers.add(3);
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("请选择补帧档位（下次起播生效）");
+                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        VideoEnhanceHelper.setMemcTier(value);
+                        tvMemcValue.setText(VideoEnhanceHelper.memcName());
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return VideoEnhanceHelper.memcNameOf(val);
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, tiers, defaultPos);
                 dialog.show();
             }
         });
