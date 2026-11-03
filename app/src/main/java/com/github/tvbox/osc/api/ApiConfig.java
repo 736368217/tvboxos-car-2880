@@ -1,6 +1,8 @@
 package com.github.tvbox.osc.api;
 
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -20,6 +22,7 @@ import com.github.tvbox.osc.util.AdBlocker;
 import com.github.tvbox.osc.util.DefaultConfig;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.MD5;
+import com.github.tvbox.osc.util.MirrorFetch;
 import com.github.tvbox.osc.util.VideoParseRuler;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -65,6 +68,8 @@ public class ApiConfig {
     private SourceBean emptyHome = new SourceBean();
 
     private JarLoader jarLoader = new JarLoader();
+    /** 网络回调统一切回主线程。 */
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private JsLoader jsLoader = new JsLoader();
 
     private String userAgent = "okhttp/3.15";
@@ -126,13 +131,13 @@ public class ApiConfig {
         return "".getBytes();
     }
 
-    public void loadConfig(boolean useCache, LoadConfigCallback callback, Activity activity) {
-        String apiUrl = Hawk.get(HawkConfig.API_URL, "");
+        public void loadConfig(final boolean useCache, final LoadConfigCallback callback, Activity activity) {
+        final String apiUrl = Hawk.get(HawkConfig.API_URL, "");
         if (apiUrl.isEmpty()) {
             callback.error("-1");
             return;
         }
-        File cache = new File(App.getInstance().getFilesDir().getAbsolutePath() + "/" + MD5.encode(apiUrl));
+        final File cache = new File(App.getInstance().getFilesDir().getAbsolutePath() + "/" + MD5.encode(apiUrl));
         if (useCache && cache.exists()) {
             try {
                 parseJson(apiUrl, cache);
@@ -142,15 +147,17 @@ public class ApiConfig {
                 th.printStackTrace();
             }
         }
-        String TempKey = null, configUrl = "", pk = ";pk;";
+        String tempKey = null;
+        String configUrl = "";
+        String pk = ";pk;";
         if (apiUrl.contains(pk)) {
             String[] a = apiUrl.split(pk);
-            TempKey = a[1];
-            if (apiUrl.startsWith("clan")){
+            tempKey = a[1];
+            if (apiUrl.startsWith("clan")) {
                 configUrl = clanToAddress(a[0]);
-            }else if (apiUrl.startsWith("http")){
+            } else if (apiUrl.startsWith("http")) {
                 configUrl = a[0];
-            }else {
+            } else {
                 configUrl = "http://" + a[0];
             }
         } else if (apiUrl.startsWith("clan")) {
@@ -160,22 +167,44 @@ public class ApiConfig {
         } else {
             configUrl = apiUrl;
         }
-        String configKey = TempKey;
-        OkGo.<String>get(configUrl)
-                .headers("User-Agent", userAgent)
-                .headers("Accept", requestAccept)
-                .execute(new AbsCallback<String>() {
+        final String fetchUrl = configUrl;
+        final String configKey = tempKey;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String json;
+                try {
+                    // 直连优先，失败自动换镜像（见 MirrorFetch）；单次尝试有超时，不会长时间无响应
+                    json = prepareContent(apiUrl, configKey,
+                            MirrorFetch.fetchText(fetchUrl, userAgent, requestAccept));
+                } catch (Throwable th) {
+                    th.printStackTrace();
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (cache.exists()) {
+                                try {
+                                    parseJson(apiUrl, cache);
+                                    callback.success();
+                                    return;
+                                } catch (Throwable inner) {
+                                    inner.printStackTrace();
+                                }
+                            }
+                            callback.error("拉取配置失败");
+                        }
+                    });
+                    return;
+                }
+                mainHandler.post(new Runnable() {
                     @Override
-                    public void onSuccess(Response<String> response) {
+                    public void run() {
                         try {
-                            String json = response.body();
                             parseJson(apiUrl, json);
                             try {
                                 File cacheDir = cache.getParentFile();
-                                if (!cacheDir.exists())
-                                    cacheDir.mkdirs();
-                                if (cache.exists())
-                                    cache.delete();
+                                if (!cacheDir.exists()) cacheDir.mkdirs();
+                                if (cache.exists()) cache.delete();
                                 FileOutputStream fos = new FileOutputStream(cache);
                                 fos.write(json.getBytes("UTF-8"));
                                 fos.flush();
@@ -189,46 +218,26 @@ public class ApiConfig {
                             callback.error("解析配置失败");
                         }
                     }
-
-                    @Override
-                    public void onError(Response<String> response) {
-                        super.onError(response);
-                        if (cache.exists()) {
-                            try {
-                                parseJson(apiUrl, cache);
-                                callback.success();
-                                return;
-                            } catch (Throwable th) {
-                                th.printStackTrace();
-                            }
-                        }
-                        callback.error("拉取配置失败\n" + (response.getException() != null ? response.getException().getMessage() : ""));
-                    }
-
-                    public String convertResponse(okhttp3.Response response) throws Throwable {
-                        String result = "";
-                        if (response.body() == null) {
-                            result = "";
-                        } else {
-                            result = FindResult(response.body().string(), configKey);
-                        }
-
-                        if (apiUrl.startsWith("clan")) {
-                            result = clanContentFix(clanToAddress(apiUrl), result);
-                        }
-                        //假相對路徑
-                        result = fixContentPath(apiUrl,result);
-                        return result;
-                    }
                 });
+            }
+        }).start();
+    }
+
+    /** 与原 convertResponse 等价：解包 + clan 路径修正 + 相对路径修正。 */
+    private String prepareContent(String apiUrl, String configKey, String raw) {
+        String result = raw == null ? "" : FindResult(raw, configKey);
+        if (apiUrl.startsWith("clan")) {
+            result = clanContentFix(clanToAddress(apiUrl), result);
+        }
+        return fixContentPath(apiUrl, result);
     }
 
 
-    public void loadJar(boolean useCache, String spider, LoadConfigCallback callback) {
-        String[] urls = spider.split(";md5;");
-        String jarUrl = urls[0];
-        String md5 = urls.length > 1 ? urls[1].trim() : "";
-        File cache = new File(App.getInstance().getFilesDir().getAbsolutePath() + "/csp.jar");
+        public void loadJar(final boolean useCache, final String spider, final LoadConfigCallback callback) {
+        final String[] urls = spider.split(";md5;");
+        final String jarUrl = urls[0];
+        final String md5 = urls.length > 1 ? urls[1].trim() : "";
+        final File cache = new File(App.getInstance().getFilesDir().getAbsolutePath() + "/csp.jar");
 
         if (!md5.isEmpty() || useCache) {
             if (cache.exists() && (useCache || MD5.getFileMd5(cache).equalsIgnoreCase(md5))) {
@@ -241,52 +250,42 @@ public class ApiConfig {
             }
         }
 
-        boolean isJarInImg = jarUrl.startsWith("img+");
-        jarUrl = jarUrl.replace("img+", "");
-        OkGo.<File>get(jarUrl)
-                .headers("User-Agent", userAgent)
-                .headers("Accept", requestAccept)
-                .execute(new AbsCallback<File>() {
-
+        final boolean isJarInImg = jarUrl.startsWith("img+");
+        final String downloadUrl = jarUrl.replace("img+", "");
+        new Thread(new Runnable() {
             @Override
-            public File convertResponse(okhttp3.Response response) throws Throwable {
-                File cacheDir = cache.getParentFile();
-                if (!cacheDir.exists())
-                    cacheDir.mkdirs();
-                if (cache.exists())
-                    cache.delete();
-                FileOutputStream fos = new FileOutputStream(cache);
-                if(isJarInImg) {
-                    String respData = response.body().string();
-                    byte[] imgJar = getImgJar(respData);
-                    fos.write(imgJar);
-                } else {
-                    fos.write(response.body().bytes());
-                }
-                fos.flush();
-                fos.close();
-                return cache;
-            }
-
-            @Override
-            public void onSuccess(Response<File> response) {
-                if (response.body().exists()) {
-                    if (jarLoader.load(response.body().getAbsolutePath())) {
-                        callback.success();
+            public void run() {
+                boolean ok = false;
+                try {
+                    if (isJarInImg) {
+                        String respData = MirrorFetch.fetchText(downloadUrl, userAgent, requestAccept);
+                        byte[] imgJar = getImgJar(respData);
+                        FileOutputStream fos = new FileOutputStream(cache);
+                        fos.write(imgJar);
+                        fos.flush();
+                        fos.close();
                     } else {
-                        callback.error("");
+                        // 直连优先，失败自动换镜像；写 .part 再改名，避免半截 jar
+                        MirrorFetch.download(downloadUrl, cache, userAgent);
                     }
-                } else {
-                    callback.error("");
+                    ok = jarLoader.load(cache.getAbsolutePath());
+                } catch (Throwable th) {
+                    th.printStackTrace();
+                    if (cache.exists() && cache.length() == 0) cache.delete();
                 }
+                final boolean success = ok;
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (success) {
+                            callback.success();
+                        } else {
+                            callback.error("");
+                        }
+                    }
+                });
             }
-
-            @Override
-            public void onError(Response<File> response) {
-                super.onError(response);
-                callback.error("");
-            }
-        });
+        }).start();
     }
 
     private void parseJson(String apiUrl, File f) throws Throwable {
@@ -541,7 +540,12 @@ public class ApiConfig {
             LiveChannelGroup liveChannelGroup = new LiveChannelGroup();
             liveChannelGroup.setLiveChannels(new ArrayList<LiveChannelItem>());
             liveChannelGroup.setGroupIndex(groupIndex++);
-            String groupName = ((JsonObject) groupElement).get("group").getAsString().trim();
+            // 现代订阅常写 "lives": [{}]（直播源留空），旧代码在这里 NPE 会打断整段解析。
+            JsonObject groupObject = (JsonObject) groupElement;
+            if (groupObject.get("group") == null || groupObject.get("channels") == null || !groupObject.get("channels").isJsonArray()) {
+                continue;
+            }
+            String groupName = groupObject.get("group").getAsString().trim();
             String[] splitGroupName = groupName.split("_", 2);
             liveChannelGroup.setGroupName(splitGroupName[0]);
             if (splitGroupName.length > 1)
