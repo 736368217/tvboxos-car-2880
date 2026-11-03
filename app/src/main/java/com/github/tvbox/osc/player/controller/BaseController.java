@@ -62,6 +62,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
 
     public BaseController(@NonNull Context context) {
         super(context);
+        mAppVolume = loadAppVolume();
         mHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
@@ -90,10 +91,12 @@ public abstract class BaseController extends BaseVideoController implements Gest
 
     public BaseController(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        mAppVolume = loadAppVolume();
     }
 
     public BaseController(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mAppVolume = loadAppVolume();
     }
 
     private TextView mSlideInfo;
@@ -107,10 +110,6 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         mGestureDetector = new GestureDetector(getContext(), this);
         setOnTouchListener(this);
-        mAppVolume = loadAppVolume();
-        post(() -> {
-            if (mControlWrapper != null) mControlWrapper.setVolume(mAppVolume);
-        });
         mSlideInfo = findViewWithTag("vod_control_slide_info");
         mLoading = findViewWithTag("vod_control_loading");
         mPauseRoot = findViewWithTag("vod_control_pause");
@@ -138,7 +137,8 @@ public abstract class BaseController extends BaseVideoController implements Gest
 
     private float loadAppVolume() {
         int percent = Hawk.get(HawkConfig.VOLUME_GAIN, 100);
-        return clampVolume(percent / 100f);
+        // No engine exists during construction; do not discard a saved boost here.
+        return Math.max(0f, Math.min(2f, percent / 100f));
     }
 
     /** 应用内音量增益（0..2）：0=静音，1=原始，>1=增幅；不改系统音量。 */
@@ -149,6 +149,12 @@ public abstract class BaseController extends BaseVideoController implements Gest
     }
 
     public float getAppVolume() { return mAppVolume; }
+
+    @Override
+    public void setMediaPlayer(xyz.doikki.videoplayer.controller.MediaPlayerControl player) {
+        super.setMediaPlayer(player);
+        mControlWrapper.setVolume(mAppVolume);
+    }
 
     /** 亮度手势默认关闭：亮度交给系统。 */
     public boolean isBrightnessGestureEnabled() {
@@ -258,13 +264,9 @@ public abstract class BaseController extends BaseVideoController implements Gest
 
     /** 把当前音量夹到播放器允许的范围，并同步给播放器。 */
     private void applyVolumeLimit() {
-        float limited = clampVolume(mAppVolume);
-        if (Math.abs(limited - mAppVolume) < 0.001f) return;
-        mAppVolume = limited;
-        if (mControlWrapper != null) mControlWrapper.setVolume(mAppVolume);
-        Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
-        LOG.i("volume_limited_by_player -> " + Math.round(mAppVolume * 100)
-                + "% boost=" + canBoostVolume());
+        // An engine capability limit is not a user edit: keep the requested preference intact.
+        float effective = clampVolume(mAppVolume);
+        if (mControlWrapper != null) mControlWrapper.setVolume(effective);
     }
 
     protected boolean isInPlaybackState() {
@@ -310,7 +312,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mChangePosition = false;
         mChangeBrightness = false;
         mChangeVolume = false;
-        mVolumeStart = mAppVolume;
+        mVolumeStart = clampVolume(mAppVolume);
         return true;
     }
 
@@ -432,16 +434,13 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mHandler.sendEmptyMessageDelayed(101, 1000);
     }
 
-    /** 全屏高度滑动对应 100% 增益变化（0..200% 区间的一半），线性、无累加。 */
-    private static final float VOLUME_SLIDE_RANGE = 1.0f;
-
     protected void slideToChangeVolume(float deltaY) {
         int height = Math.max(1, getMeasuredHeight());
-        if (mVolumeStart < 0f) mVolumeStart = mAppVolume;
+        if (mVolumeStart < 0f) mVolumeStart = clampVolume(mAppVolume);
         // deltaY 是「按下点 → 当前点」的累计位移，必须基于起手音量算，
         // 不能再叠加到 mAppVolume（旧写法每个 move 事件都加一次累计值，几十像素就 0%→200%）。
-        float deltaV = deltaY / height * VOLUME_SLIDE_RANGE;
-        float requestedVolume = mVolumeStart + deltaV;
+        float requestedVolume = com.github.tvbox.osc.car.VolumeBoostMath.gestureVolume(
+                mVolumeStart, deltaY, height);
         if (!canBoostVolume() && deltaY > 0 && requestedVolume > 1.001f
                 && mControlWrapper != null && mControlWrapper.requestVolumeBoost(requestedVolume)) {
             mAppVolume = Math.max(1f, Math.min(2f, requestedVolume));

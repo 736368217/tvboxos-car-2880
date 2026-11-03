@@ -58,6 +58,8 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
     /** 应用内音量（0..2），跨 prepare / 切集保持；不写系统音量 */
     private float mVolumeLeft = 1.0f;
     private float mVolumeRight = 1.0f;
+    private float mDuckVolumeFactor = 1f;
+    private boolean mPausingForAudioFocus;
     protected PlayerFactory<P> mPlayerFactory;//工厂类，用于实例化播放核心
     @Nullable
     protected BaseVideoController mVideoController;//控制器
@@ -293,9 +295,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     protected void setOptions() {
         mMediaPlayer.setLooping(mIsLooping);
-        float left = mIsMute ? 0.0f : mVolumeLeft;
-        float right = mIsMute ? 0.0f : mVolumeRight;
-        mMediaPlayer.setVolume(left, right);
+        applyVolume();
     }
 
     /**
@@ -623,13 +623,19 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
     /**
      * 暂停播放
      */
+    void pauseForAudioFocus() {
+        mPausingForAudioFocus = true;
+        try { pause(); }
+        finally { mPausingForAudioFocus = false; }
+    }
+
     @Override
     public void pause() {
         if (isInPlaybackState()) {
             // Honor user pause even during a brief internal IJK producer handoff.
             if (mMediaPlayer.isPlaying()) mMediaPlayer.pause();
             setPlayState(STATE_PAUSED);
-            if (mAudioFocusHelper != null && !isMute()) {
+            if (!mPausingForAudioFocus && mAudioFocusHelper != null) {
                 mAudioFocusHelper.abandonFocus();
             }
             mPlayerContainer.setKeepScreenOn(false);
@@ -640,6 +646,11 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      * 继续播放
      */
     public void resume() {
+        // Audio-only / freeform playback may still be running when the Activity returns.
+        if (isInPlaybackState() && mMediaPlayer.isPlaying()) {
+            if (mAudioFocusHelper != null && !isMute()) mAudioFocusHelper.requestFocus();
+            applyVolume();
+        }
         if (isInPlaybackState() && !mMediaPlayer.isPlaying()) {
             assert mRenderView != null;
             View renderView = mRenderView.getView();
@@ -872,11 +883,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
     @Override
     public void setMute(boolean isMute) {
         this.mIsMute = isMute;
-        if (mMediaPlayer != null) {
-            float left = isMute ? 0.0f : mVolumeLeft;
-            float right = isMute ? 0.0f : mVolumeRight;
-            mMediaPlayer.setVolume(left, right);
-        }
+        applyVolume();
     }
 
     /**
@@ -1050,22 +1057,30 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
     public void setVolume(float v1, float v2) {
         mVolumeLeft = v1;
         mVolumeRight = v2;
-        if (mMediaPlayer != null) {
-            mMediaPlayer.setVolume(v1, v2);
-        }
+        applyVolume();
     }
 
     /** 临时压低音量（音频焦点丢失），不改变保存的应用音量。 */
     public void duckVolume(float factor) {
-        if (mMediaPlayer != null) {
-            mMediaPlayer.setVolume(mVolumeLeft * factor, mVolumeRight * factor);
-        }
+        mDuckVolumeFactor = Float.isNaN(factor) ? 1f : Math.max(0f, Math.min(1f, factor));
+        applyVolume();
     }
 
     /** 恢复保存的应用音量。 */
     public void restoreVolume() {
+        mDuckVolumeFactor = 1f;
+        applyVolume();
+    }
+
+    protected float getVolumeFactor() {
+        return mIsMute ? 0f : mDuckVolumeFactor;
+    }
+
+    /** Reapply output without changing the user's saved volume or temporary focus state. */
+    protected void applyVolume() {
         if (mMediaPlayer != null) {
-            mMediaPlayer.setVolume(mVolumeLeft, mVolumeRight);
+            float factor = getVolumeFactor();
+            mMediaPlayer.setVolume(mVolumeLeft * factor, mVolumeRight * factor);
         }
     }
 

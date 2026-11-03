@@ -67,7 +67,7 @@ public final class CarEnhance {
         int session = view.getAudioSessionId();
         boolean pcm = view.usesPcmGain();
         int boost = pcm ? 0 : VolumeBoostMath.millibel(gain, factor);
-        if (pcm) view.applyPcmGain(gain * factor);
+        view.syncAudioVolume();
         AudioEffectController.apply(mode, session, boost);
         Log.i("CarAudio", "runtime_apply mode=" + mode + " session=" + session + " gain=" + gain
                 + " factor=" + factor + " applied=" + (gain * factor)
@@ -92,13 +92,6 @@ public final class CarEnhance {
     public static float appGain() {
         MyVideoView view = activeVideo.get();
         return view == null ? 1f : view.getAppAudioGain();
-    }
-
-    /** 静音(true)/恢复(false) 或音频焦点闪避时只更新当前 View。 */
-    public static void setVolumeFactor(MyVideoView view, float factor) {
-        if (view == null) return;
-        view.setAudioVolumeFactor(factor);
-        applyAudio(view);
     }
 
     public static void releaseAudio() {

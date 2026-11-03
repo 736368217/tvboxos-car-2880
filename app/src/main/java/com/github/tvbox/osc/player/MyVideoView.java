@@ -41,7 +41,6 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
     /** 诊断用：上一次真正生效的应用内增益，避免拖动时刷屏。 */
     private float mLastLoggedGain = -1f;
     private volatile float mAppAudioGain = 1f;
-    private volatile float mAudioVolumeFactor = 1f;
     private VolumeBoostRequestListener mVolumeBoostRequestListener;
 
     public void setVolumeBoostRequestListener(VolumeBoostRequestListener listener) {
@@ -343,41 +342,47 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
             ((xyz.doikki.videoplayer.render.GlEnhanceRenderView) mRenderView).setPlaybackActive(active);
         }
     }
-    /**
-     * 应用内音量：0..1 直接交给播放器（ExoPlayer/IJK 都只吃 0..1），
-     * >1 的部分交给 LoudnessEnhancer，否则 100% 和 200% 听感完全一样。
-     */
+    /** User gain is stored once; PCM and AudioTrack must not both attenuate it. */
     @Override
     public void setVolume(float v1, float v2) {
-        float gain = Math.max(v1, v2);
-        float base = com.github.tvbox.osc.car.VolumeBoostMath.playerVolume(gain);
+        setAppAudioGain(Math.max(v1, v2));
+        // Keep the base view's saved channels in sync, but route output through applyVolume().
+        float base = com.github.tvbox.osc.car.VolumeBoostMath.playerVolume(mAppAudioGain);
         super.setVolume(base, base);
-        CarEnhance.setAppGain(this, gain);
-        if (Math.abs(gain - mLastLoggedGain) >= 0.01f) {
-            mLastLoggedGain = gain;
-            android.util.Log.i("CarAudio", "app_gain request=" + Math.round(gain * 100)
-                    + "% playerVolume=" + base + " pcmCapable=" + usesPcmGain()
-                    + " engine=" + (mMediaPlayer == null ? "null" : mMediaPlayer.getClass().getName()));
+        if (Math.abs(mAppAudioGain - mLastLoggedGain) >= 0.01f) {
+            mLastLoggedGain = mAppAudioGain;
+            Log.i("CarAudio", "app_gain request=" + Math.round(mAppAudioGain * 100)
+                    + "% pcmCapable=" + usesPcmGain());
         }
     }
 
     @Override
-    public void setMute(boolean isMute) {
-        super.setMute(isMute);
-        CarEnhance.setVolumeFactor(this, isMute ? 0f : 1f);
+    protected void setOptions() {
+        super.setOptions();
+        applyVolume();
     }
 
     @Override
-    public void duckVolume(float factor) {
-        super.duckVolume(factor);
-        CarEnhance.setVolumeFactor(this, factor);
+    protected void applyVolume() {
+        CarEnhance.applyAudio(this);
+    }
+
+    /** Used on prepare, focus changes, foreground resume and window reattachment. */
+    public void syncAudioVolume() {
+        if (mMediaPlayer == null) return;
+        float factor = getAudioVolumeFactor();
+        boolean pcm = usesPcmGain();
+        float base = com.github.tvbox.osc.car.VolumeBoostMath.outputVolume(mAppAudioGain, factor, pcm);
+        mMediaPlayer.setVolume(base, base);
+        if (pcm) applyPcmGain(com.github.tvbox.osc.car.VolumeBoostMath.pcmGain(mAppAudioGain, factor));
     }
 
     @Override
-    public void restoreVolume() {
-        super.restoreVolume();
-        CarEnhance.setVolumeFactor(this, 1f);
+    protected void setPlayerState(int state) {
+        super.setPlayerState(state);
+        applyVolume();
     }
+
     /** ExoPlayer 走 PCM 采样增益（不依赖车机系统音效）；其它引擎返回 false。 */
     public boolean usesPcmGain() {
         return mMediaPlayer instanceof com.github.tvbox.osc.player.ExoPlayer;
@@ -409,11 +414,7 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
     }
 
     public float getAudioVolumeFactor() {
-        return mAudioVolumeFactor;
-    }
-
-    public void setAudioVolumeFactor(float factor) {
-        mAudioVolumeFactor = Math.max(0f, Math.min(1f, factor));
+        return getVolumeFactor();
     }
 
     public float getPcmGain() {

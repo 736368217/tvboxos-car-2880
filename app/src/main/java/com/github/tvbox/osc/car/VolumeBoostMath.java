@@ -30,6 +30,21 @@ public final class VolumeBoostMath {
         return clamp(gain, 0f, 1f);
     }
 
+    /** PCM owns user gain, while AudioTrack is unity; non-PCM owns attenuation itself. */
+    public static float outputVolume(float gain, float factor, boolean pcm) {
+        return pcm ? 1f : playerVolume(gain) * clamp(factor, 0f, 1f);
+    }
+
+    public static float pcmGain(float gain, float factor) {
+        return clamp(gain, 0f, 2f) * clamp(factor, 0f, 1f);
+    }
+
+    /** Nearest 5-percent detent, computed from the entire gesture rather than move count. */
+    public static float gestureVolume(float start, float deltaY, int height) {
+        float value = clamp(start, 0f, 2f) + deltaY / Math.max(1, height);
+        return Math.round(clamp(value, 0f, 2f) * 20f) / 20f;
+    }
+
     private static float clamp(float value, float min, float max) {
         if (Float.isNaN(value)) return min;
         return Math.max(min, Math.min(max, value));
