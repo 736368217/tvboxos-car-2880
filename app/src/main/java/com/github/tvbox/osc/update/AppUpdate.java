@@ -343,46 +343,57 @@ public final class AppUpdate {
                     + " candidates=" + candidates.length + " first=" + (candidates.length > 0 ? candidates[0] : "-"));
             delete(target);
             List<String> failures = new ArrayList<>();
-            for (int i = 0; i < candidates.length; i++) {
-                String url = candidates[i];
-                if (task.isCancelled()) {
-                    delete(partial);
-                    post(() -> callback.onError("已取消下载"));
-                    return;
-                }
-                try {
-                    Log.i(TAG, "download try " + (i + 1) + "/" + candidates.length + " url=" + url);
-                    transfer(task, url, partial, info, target, callback, i < candidates.length - 1);
-                    if (partial.length() < MIN_APK_BYTES) {
-                        delete(partial);
-                        throw new IOException("内容过小（" + (partial.exists() ? partial.length() : 0) + " 字节），可能是错误页");
-                    }
-                    if (!partial.renameTo(target)) {
-                        throw new IOException("无法重命名到 " + target.getName());
-                    }
-                    post(() -> callback.onProgress(target.length(), target.length()));
-                    String problem = verify(appContext, target);
-                    if (problem != null) {
-                        delete(target);
-                        Log.w(TAG, "verify failed: " + problem);
-                        post(() -> callback.onError(problem));
+            // 多轮：弱网下单个地址断流很常见，第二轮会把没下完的部分用 Range 续上，
+            // 而不是像以前那样一失败就删掉重下 50 MB。
+            for (int pass = 0; pass < DOWNLOAD_PASSES; pass++) {
+                for (int i = 0; i < candidates.length; i++) {
+                    String url = candidates[i];
+                    if (task.isCancelled()) {
+                        post(() -> callback.onError("已取消下载（已下载部分保留，可继续）"));
                         return;
                     }
-                    Log.i(TAG, "download done file=" + target + " bytes=" + target.length()
-                            + " package=" + appContext.getPackageName() + " url=" + url);
-                    post(() -> callback.onDone(target));
-                    return;
-                } catch (Exception error) {
-                    delete(partial);
-                    String message = error.getClass().getSimpleName()
-                            + (error.getMessage() == null ? "" : (": " + error.getMessage()));
-                    failures.add(message);
-                    Log.w(TAG, "download failed " + (i + 1) + "/" + candidates.length + " : " + message);
+                    long already = partial.exists() ? partial.length() : 0L;
+                    // 已经拿到完整体积就不用再请求了
+                    if (info.apkSize > 0 && already >= info.apkSize) break;
+                    try {
+                        Log.i(TAG, "download try pass=" + (pass + 1) + " " + (i + 1) + "/" + candidates.length
+                                + " resume_from=" + already + " url=" + url);
+                        transfer(task, url, partial, info, target, callback,
+                                i < candidates.length - 1 || pass < DOWNLOAD_PASSES - 1);
+                        if (partial.length() < MIN_APK_BYTES) {
+                            delete(partial);
+                            throw new IOException("内容过小（" + (partial.exists() ? partial.length() : 0) + " 字节），可能是错误页");
+                        }
+                        if (!partial.renameTo(target)) {
+                            throw new IOException("无法重命名到 " + target.getName());
+                        }
+                        post(() -> callback.onProgress(target.length(), target.length()));
+                        String problem = verify(appContext, target);
+                        if (problem != null) {
+                            delete(target);
+                            // 连半成品一起删：包名/签名/版本对不上时，续传也补不回来。
+                            delete(partial);
+                            Log.w(TAG, "verify failed: " + problem);
+                            post(() -> callback.onError(problem));
+                            return;
+                        }
+                        post(() -> callback.onDone(target));
+                        return;
+                    } catch (Exception error) {
+                        String message = error.getClass().getSimpleName()
+                                + (error.getMessage() == null ? "" : (": " + error.getMessage()));
+                        failures.add(message);
+                        Log.w(TAG, "download failed pass=" + (pass + 1) + " " + (i + 1) + "/" + candidates.length
+                                + " kept=" + (partial.exists() ? partial.length() : 0) + " : " + message);
+                    }
                 }
             }
             String summary = failures.isEmpty() ? "没有可用地址" : failures.get(0);
-            Log.w(TAG, "download failed on every candidate (" + failures.size() + "): " + failures);
-            post(() -> callback.onError("下载失败（" + failures.size() + " 个地址都不可用）：" + summary));
+            Log.w(TAG, "download failed on every candidate (" + failures.size() + "): " + failures
+                    + " kept=" + (partial.exists() ? partial.length() : 0));
+            final long kept = partial.exists() ? partial.length() : 0L;
+            post(() -> callback.onError("下载失败（" + failures.size() + " 次尝试都不可用）：" + summary
+                    + (kept > 0 ? "。已保留 " + (kept / 1024 / 1024) + " MB，重试会接着下。" : "")));
         });
         return task;
     }
@@ -395,22 +406,46 @@ public final class AppUpdate {
         return prefix;
     }
 
+    /** 整份清单最多跑几轮（第二轮靠 Range 续传补齐断流的部分）。 */
+    private static final int DOWNLOAD_PASSES = 2;
+
     // 慢速切换：GitHub 资产域名常被限速到几十 KB/s，而它「不报错」，用户只会看着进度条
     // 十几分钟不动。所以前几个候选若在观察窗内太慢就主动放弃，把机会给镜像。
     private static final long SLOW_WINDOW_MS = 20000L;
-    // 观察窗内至少要拿到总大小的这个比例（约 125 KB/s @50MB），否则判定为慢速。
-    private static final double SLOW_MIN_FRACTION = 0.05;
+    // 观察窗内至少要拿到总大小的这个比例（约 50 KB/s @50MB），否则判定为慢速。
+    // 车机走 4G 常见 60~150 KB/s，阈值定高会把本来能下完的直连误杀。
+    private static final double SLOW_MIN_FRACTION = 0.02;
     // 最后一个候选是兜底：允许它慢速跑完，不再放弃。
-    private static final long SLOW_MIN_BYTES = 2L * 1024 * 1024;
+    private static final long SLOW_MIN_BYTES = 1024 * 1024L;
 
-    /** 单地址下载到 partial；取消/超时/太慢会抛异常，由调用方换下一个地址。 */
+    /** 下载专用客户端：系统 DNS + 放宽读超时（断流常见的弱网下 20 秒太短），并允许断点续传。 */
+    private static OkHttpClient downloadClient() {
+        return DownloadClient.HOLDER;
+    }
+
+    private static final class DownloadClient {
+        static final OkHttpClient HOLDER = PlainHttp.systemDns().newBuilder()
+                .readTimeout(75, java.util.concurrent.TimeUnit.SECONDS)
+                .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .build();
+    }
+
+    /**
+     * 单地址下载到 partial；取消/超时/太慢会抛异常，由调用方换下一个地址或下一轮。
+     *
+     * <p>已经存在的 partial 会用 {@code Range} 请求续传：服务端支持就只补缺的那段（206），
+     * 不支持就整体重下（200）。这样弱网断流不用每次都丢掉已下载的几十 MB。</p>
+     */
     private static void transfer(Task task, String url, File partial, Info info, File target,
                                  DownloadCallback callback, boolean allowSlowAbort) throws IOException {
-        OkHttpClient client = client(true);
-        Request request = new Request.Builder()
+        OkHttpClient client = downloadClient();
+        long resumeFrom = partial.exists() ? partial.length() : 0L;
+        Request.Builder builder = new Request.Builder()
                 .url(url)
-                .header("User-Agent", "TVBox-Car/" + info.localVersion)
-                .build();
+                .header("User-Agent", "TVBox-Car/" + info.localVersion);
+        if (resumeFrom > 0) builder.header("Range", "bytes=" + resumeFrom + "-");
+        Request request = builder.build();
         long lastPost = 0L;
         long startedAt = System.currentTimeMillis();
         try (Response response = client.newCall(request).execute()) {
@@ -418,23 +453,28 @@ public final class AppUpdate {
             if (!response.isSuccessful() || body == null) {
                 throw new IOException("HTTP " + response.code());
             }
-            long total = body.contentLength() > 0 ? body.contentLength() : info.apkSize;
+            // 206 = 服务端按 Range 补了后半段，追加写；否则是整份，从头覆盖。
+            boolean append = response.code() == 206 && resumeFrom > 0;
+            long resumeDone = append ? resumeFrom : 0L;
+            long total = body.contentLength() > 0 ? body.contentLength() + resumeDone : info.apkSize;
             long slowTarget = Math.max(SLOW_MIN_BYTES, (long) (total * SLOW_MIN_FRACTION));
             try (InputStream in = body.byteStream();
-                 FileOutputStream out = new FileOutputStream(partial)) {
+                 FileOutputStream out = new FileOutputStream(partial, append)) {
                 byte[] buffer = new byte[64 * 1024];
-                long done = 0L;
+                long done = resumeDone;
                 int read;
                 while ((read = in.read(buffer)) > 0) {
                     if (task.isCancelled()) throw new IOException("已取消");
                     out.write(buffer, 0, read);
                     done += read;
                     long now = System.currentTimeMillis();
-                    if (allowSlowAbort && now - startedAt >= SLOW_WINDOW_MS && done < slowTarget) {
+                    // 续传时「慢速」按本轮新增量算，否则早已存在的字节会让慢速判定失效。
+                    if (allowSlowAbort && now - startedAt >= SLOW_WINDOW_MS
+                            && done - resumeDone < slowTarget) {
                         out.flush();
-                        long kbps = done * 1000L / Math.max(1L, now - startedAt) / 1024L;
+                        long kbps = (done - resumeDone) * 1000L / Math.max(1L, now - startedAt) / 1024L;
                         throw new IOException("速度过慢（" + kbps + " KB/s，"
-                                + Math.max(1, (now - startedAt) / 1000L) + " 秒仅 " + done + " 字节）");
+                                + Math.max(1, (now - startedAt) / 1000L) + " 秒仅 " + (done - resumeDone) + " 字节）");
                     }
                     if (now - lastPost >= PROGRESS_INTERVAL_MS) {
                         lastPost = now;

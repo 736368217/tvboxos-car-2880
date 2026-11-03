@@ -7,8 +7,8 @@ android {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
         // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 33
-        versionName '3.1.0-car.7-r61'
+        versionCode 34
+        versionName '3.1.0-car.7-r62'
         // r59: 修复静默更新弹窗归属 HomeActivity 窗口、播放页覆盖时不可见的问题
         // r59: 自动检查改为无窗口化，结果暂存后在获得焦点的前台窗口显示
         // r59: HomeActivity 每次恢复重新排队静默检查（仍受 6h 节流约束）
@@ -170,6 +170,7 @@ dependencies {
     implementation 'androidx.room:room-runtime:2.3.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.squareup.okio:okio:2.8.0'
+    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.45-androidx'
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.45-androidx'
     implementation 'com.kingja.loadsir:loadsir:1.3.8'
     implementation 'com.google.code.gson:gson:2.10.1'

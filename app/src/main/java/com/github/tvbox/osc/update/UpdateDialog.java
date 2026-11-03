@@ -66,7 +66,7 @@ public class UpdateDialog extends BaseDialog {
         btnSkip.setOnClickListener(v -> onSkipClick());
         btnManual.setOnClickListener(v -> {
             if (!acceptClick()) return;
-            AppUpdate.openReleasePage(getContext(), info);
+            copyDownloadLink();
         });
         setCanceledOnTouchOutside(true);
         setOnDismissListener(dialog -> {
@@ -217,6 +217,36 @@ public class UpdateDialog extends BaseDialog {
         else startCheck(true);
     }
 
+    /**
+     * 复制下载地址到剪贴板。
+     *
+     * <p>为什么不是直接开浏览器：车机上的「默认浏览器」经常没配、或者被系统换成只能看网页的
+     * 精简壳，点开就是一个空白页，比不起作用还容易让人以为坏了。复制链接后用户可以在
+     * 车机浏览器、手机浏览器或电脑上自行粘贴，这条路不依赖任何默认应用。</p>
+     */
+    private void copyDownloadLink() {
+        if (info == null) return;
+        // 优先复制已经套好当前可用通道的地址；它同时被用作应用内下载的首选，
+        // 可用性比裸 GitHub 地址高。都没有就退到 Release 页。
+        String link = info.apkUrl != null && info.apkUrl.length() > 0 ? info.apkUrl
+                : (info.apkUrlRaw != null && info.apkUrlRaw.length() > 0 ? info.apkUrlRaw : info.releasePage);
+        if (link == null || link.length() == 0) {
+            Toast.makeText(getContext(), "没有可复制的地址", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            android.content.ClipboardManager manager = (android.content.ClipboardManager)
+                    getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            if (manager == null) throw new IllegalStateException("no clipboard service");
+            manager.setPrimaryClip(android.content.ClipData.newPlainText("TVBox 更新地址", link));
+            Toast.makeText(getContext(), "下载地址已复制，可粘贴到浏览器", Toast.LENGTH_LONG).show();
+            tvHint.setText("已复制下载地址：" + link);
+        } catch (Exception error) {
+            Log.w(TAG, "copy link failed: " + error);
+            tvHint.setText("复制失败：" + link);
+        }
+    }
+
     private void onSkipClick() {
         if (!acceptClick()) return;
         if (info != null && info.tag != null) {
@@ -273,10 +303,10 @@ public class UpdateDialog extends BaseDialog {
         }
         if (AppUpdate.install(getContext(), downloaded)) {
             progressBox.setVisibility(View.GONE);
-            tvHint.setText("已唤起系统安装器，按提示完成安装即可。");
+            tvHint.setText("已唤起系统安装器，按提示完成安装即可。若系统安装器被车机禁用，点「复制链接」拿去别处装。");
             btnUpdate.setText("再次安装");
         } else {
-            applyStateError("无法唤起安装器，可点「浏览器下载」手动安装");
+            applyStateError("无法唤起安装器，可点「复制链接」把地址拿去别处安装");
         }
     }
 

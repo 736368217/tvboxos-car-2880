@@ -146,7 +146,7 @@
                 android:textSize="@dimen/ts_24" />
         </LinearLayout>
 
-        <!-- 次要操作：跳过此版本 / 浏览器手动下载（应用内下载失败时的兜底） -->
+        <!-- 次要操作：跳过此版本 / 复制下载地址（车机装不上时拿走去别处装） -->
         <LinearLayout
             android:id="@+id/subButtons"
             android:layout_width="match_parent"
@@ -183,7 +183,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:padding="@dimen/vs_10"
-                android:text="浏览器下载"
+                android:text="复制链接"
                 android:textColor="@color/dialog_text_primary"
                 android:textSize="@dimen/ts_22" />
         </LinearLayout>
