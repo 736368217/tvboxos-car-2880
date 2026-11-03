@@ -63,10 +63,49 @@ public final class CoverStore {
     /** 下载失败退避：key=缓存文件名，value=最早可重试时间。 */
     private static final java.util.Map<String, Long> RETRY_BACKOFF =
             java.util.Collections.synchronizedMap(new java.util.HashMap<>());
-    /** 失败后等多久才允许重试。 */
-    private static final long RETRY_BACKOFF_MS = 60_000L;
-
     private static final AtomicBoolean TRIMMING = new AtomicBoolean(false);
+
+    private static final android.os.Handler MAIN = new android.os.Handler(android.os.Looper.getMainLooper());
+
+    /** 从内联头信息里解析出的请求头（{@code @Referer=} / {@code @Cookie=} / {@code @User-Agent=} / {@code @Headers=}）。 */
+    private static java.util.Map<String, String> inlineHeaders(String pic) {
+        java.util.Map<String, String> headers = new java.util.HashMap<>();
+        if (pic == null) return headers;
+        headers.put("User-Agent", "TVBox-Car/CoverCache");
+        int at = pic.indexOf("@Headers=");
+        if (at > 0) {
+            String raw = pic.substring(at + "@Headers=".length());
+            int next = raw.indexOf('@');
+            if (next > 0) raw = raw.substring(0, next);
+            try {
+                String decoded = java.net.URLDecoder.decode(raw, "UTF-8");
+                org.json.JSONObject json = new org.json.JSONObject(decoded);
+                for (java.util.Iterator<String> it = json.keys(); it.hasNext(); ) {
+                    String key = it.next();
+                    String value = json.optString(key, "");
+                    if (!key.isEmpty() && !value.isEmpty()) headers.put(key, value);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        headers.putAll(inlineHeader(pic, "@Referer=", "Referer"));
+        headers.putAll(inlineHeader(pic, "@Cookie=", "Cookie"));
+        headers.putAll(inlineHeader(pic, "@User-Agent=", "User-Agent"));
+        return headers;
+    }
+
+    private static java.util.Map<String, String> inlineHeader(String pic, String marker, String name) {
+        java.util.Map<String, String> out = new java.util.HashMap<>();
+        int at = pic.indexOf(marker);
+        if (at <= 0) return out;
+        String value = pic.substring(at + marker.length());
+        int next = value.indexOf('@');
+        if (next > 0) value = value.substring(0, next);
+        if (!value.isEmpty()) out.put(name, value);
+        return out;
+    }
+
+    private static final long RETRY_BACKOFF_MS = 60_000L;
 
     private CoverStore() {
     }
@@ -88,6 +127,28 @@ public final class CoverStore {
         //noinspection ResultOfMethodCallIgnored
         file.setLastModified(System.currentTimeMillis());
         return file;
+    }
+
+    /** 按片名+来源查找本地缓存文件的绝对路径。 */
+    public static String findLocalPath(android.content.Context context, String pic, String name, String sourceKey) {
+        File file = findLocal(context, pic, name, sourceKey);
+        return file == null ? "" : file.getAbsolutePath();
+    }
+
+    /**
+     * 只按内容键（片名 + 来源）查找；封面 URL 为空的老记录靠它兜底。
+     *
+     * <p>早版本写历史时可能压根没存 pic，这类记录纯 URL 键无从查起，但内容键仍然有效 ——
+     * 只要这部片子曾经显示/缓存过封面，就能继续显示真图，而不是永远色块。</p>
+     */
+    public static String findLocalPathByContent(android.content.Context context, String name, String sourceKey) {
+        String contentName = CoverKey.contentFileName(name, sourceKey);
+        if (contentName == null || !CoverKey.isValidFileName(contentName)) return "";
+        File file = new File(dir(context), contentName);
+        if (!file.exists() || file.length() <= 0) return "";
+        //noinspection ResultOfMethodCallIgnored
+        file.setLastModified(System.currentTimeMillis());
+        return file.getAbsolutePath();
     }
 
     /** 本地绝对路径；没有缓存返回空串。 */
@@ -128,12 +189,6 @@ public final class CoverStore {
         return byContent;
     }
 
-    /** 按片名+来源查找本地缓存文件的绝对路径。 */
-    public static String findLocalPath(android.content.Context context, String pic, String name, String sourceKey) {
-        File file = findLocal(context, pic, name, sourceKey);
-        return file == null ? "" : file.getAbsolutePath();
-    }
-
     private static void copy(File target, File source) throws java.io.IOException {
         try (InputStream in = new java.io.FileInputStream(source);
              FileOutputStream out = new FileOutputStream(target)) {
@@ -161,6 +216,20 @@ public final class CoverStore {
      */
     public static void remember(final android.content.Context context, final String pic,
                                 final String name, final String sourceKey) {
+        remember(context, pic, name, sourceKey, null);
+    }
+
+    /**
+     * 同 {@link #remember(android.content.Context, String, String, String)}，但落盘成功（或本地本来就有）
+     * 时在主线程回调 {@code onReady}。
+     *
+     * <p>为什么需要：车机上图片网络慢，列表项先看到的是色块占位；等后台把封面存下来再 refresh
+     * 一下，用户就能看到真图 —— 而不是一直停在色块直到下次进页面。</p>
+     *
+     * @param onReady 可空；主线程回调
+     */
+    public static void remember(final android.content.Context context, final String pic,
+                                final String name, final String sourceKey, final Runnable onReady) {
         if (context == null) return;
         final android.content.Context app = context.getApplicationContext();
         String name2 = CoverKey.fileName(pic);
@@ -178,6 +247,7 @@ public final class CoverStore {
                 } catch (Exception ignored) {
                 }
             }
+            if (onReady != null) MAIN.post(onReady);
             return;
         }
         if (contentTarget != null && contentTarget.exists() && contentTarget.length() > 0) {
@@ -185,6 +255,7 @@ public final class CoverStore {
             try {
                 copy(target, contentTarget);
                 Log.i(TAG, "restored " + target.getName() + " from content key");
+                if (onReady != null) MAIN.post(onReady);
                 return;
             } catch (Exception ignored) {
             }
@@ -194,8 +265,10 @@ public final class CoverStore {
         if (blockedUntil != null && System.currentTimeMillis() < blockedUntil) return;
         if (!IN_FLIGHT.add(name2)) return;
         POOL.execute(() -> {
+            boolean cached = false;
             try {
                 download(app, pic, target);
+                cached = true;
                 if (contentTarget != null && !contentTarget.exists() && target.exists()) {
                     try {
                         copy(contentTarget, target);
@@ -208,8 +281,9 @@ public final class CoverStore {
                 RETRY_BACKOFF.put(name2, System.currentTimeMillis() + RETRY_BACKOFF_MS);
             } finally {
                 IN_FLIGHT.remove(name2);
-                RETRY_BACKOFF.remove(name2);
+                if (cached) RETRY_BACKOFF.remove(name2);
             }
+            if (cached && onReady != null) MAIN.post(onReady);
         });
     }
 
@@ -232,10 +306,15 @@ public final class CoverStore {
     }
 
     private static void downloadVia(OkHttpClient client, android.content.Context context, String pic, File target) throws Exception {
-        Request request = new Request.Builder()
-                .url(pic)
-                .header("User-Agent", "TVBox-Car/CoverCache")
-                .build();
+        // 地址里可能带 @Headers= / @Referer= 这类内联头：URL 用归一化后的干净地址，
+        // 头单独加。不带 Referer/Cookie 时，防盗链图床一律 403，封面永远存不下来。
+        String cleanUrl = CoverKey.normalize(pic);
+        if (cleanUrl.length() == 0) throw new java.io.IOException("封面地址为空");
+        Request.Builder builder = new Request.Builder().url(cleanUrl);
+        for (java.util.Map.Entry<String, String> entry : inlineHeaders(pic).entrySet()) {
+            builder.header(entry.getKey(), entry.getValue());
+        }
+        Request request = builder.build();
         File temp = new File(target.getAbsolutePath() + ".part");
         try (Response response = client.newCall(request).execute()) {
             ResponseBody body = response.body();

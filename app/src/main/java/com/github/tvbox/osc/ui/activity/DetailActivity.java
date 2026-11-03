@@ -903,15 +903,23 @@ public class DetailActivity extends BaseActivity {
                     setTextShow(tvDes, "内容简介：", removeHtmlTag(mVideo.des));
                     if (!TextUtils.isEmpty(mVideo.pic)) {
                         String coverUrl = DefaultConfig.checkReplaceProxy(mVideo.pic);
-                        // 详情页是"真的打开过"的地方：这里就把封面落盘，之后历史/收藏
-                        // 即使站点删图或车机没网也能显示。
-                        com.github.tvbox.osc.cache.CoverStore.remember(mContext, coverUrl, mVideo.name, sourceKey);
                         // 先查本地缓存再走网络：车机 App 网络栈挂了时 Glide 连不上图床，
                         // 但只要落盘成功过一次（CoverStore 走系统 DNS），这里就能直接显示。
                         String localCover = com.github.tvbox.osc.cache.CoverStore.findLocalPath(
                                 mContext, coverUrl, mVideo.name, sourceKey);
                         String coverModel = TextUtils.isEmpty(localCover) ? coverUrl : localCover;
                         com.github.tvbox.osc.util.ImgUtil.load(coverModel, ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 300), AutoSizeUtils.mm2px(mContext, 400), mVideo.name);
+                        // 详情页是"真的打开过"的地方：这里就把封面落盘，之后历史/收藏
+                        // 即使站点删图或车机没网也能显示；落盘成功立即换成真图。
+                        final int coverW = AutoSizeUtils.mm2px(mContext, 300);
+                        final int coverH = AutoSizeUtils.mm2px(mContext, 400);
+                        com.github.tvbox.osc.cache.CoverStore.remember(mContext, coverUrl, mVideo.name, sourceKey, () -> {
+                            String ready = com.github.tvbox.osc.cache.CoverStore.findLocalPath(
+                                    mContext, coverUrl, mVideo.name, sourceKey);
+                            if (TextUtils.isEmpty(ready)) return;
+                            com.github.tvbox.osc.util.ImgUtil.load(new java.io.File(ready).getAbsolutePath(),
+                                    ivThumb, AutoSizeUtils.mm2px(mContext, 10), coverW, coverH, mVideo.name);
+                        });
                     } else {
                         ivThumb.setImageDrawable(com.github.tvbox.osc.util.ImgUtil.createTextDrawable(mVideo.name));
                     }
@@ -1886,6 +1894,11 @@ public class DetailActivity extends BaseActivity {
             vodInfo.playNote = vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex).name;
         } catch (Throwable th) {
             vodInfo.playNote = "";
+        }
+        // 历史记录必须带上封面地址：为空时从前面的详情对象补，否则这条记录永远只剩色块
+        // （老版本留下的空 pic 记录现在只能靠内容键兜底，补一次以后就有真实地址了）。
+        if (TextUtils.isEmpty(vodInfo.pic) && mVideo != null && !TextUtils.isEmpty(mVideo.pic)) {
+            vodInfo.pic = mVideo.pic;
         }
         RoomDataManger.insertVodRecord(sourceKey, vodInfo);
         // 写历史的同时补一次封面缓存：老记录（本次改动前产生的最多）也会被逐步补齐。

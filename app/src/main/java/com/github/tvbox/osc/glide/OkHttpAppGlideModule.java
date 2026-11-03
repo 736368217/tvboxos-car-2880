@@ -16,7 +16,8 @@ import java.io.InputStream;
 public class OkHttpAppGlideModule extends AppGlideModule {
     @Override
     public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
-        registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(com.github.catvod.net.OkHttp.client()));
+        // 图片专用的混搭客户端：系统 DNS（车机 App 栈 DNS 会全挂）+ App 栈代理规则。
+        registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(com.github.tvbox.osc.util.PlainHttp.systemDnsWithAppStack()));
     }
 
     @Override

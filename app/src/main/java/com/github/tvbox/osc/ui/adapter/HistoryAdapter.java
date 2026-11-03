@@ -56,14 +56,22 @@ public class HistoryAdapter extends BaseQuickAdapter<VodInfo, BaseViewHolder> {
     private void loadCover(ImageView ivThumb, VodInfo item) {
         String pic = com.github.tvbox.osc.util.DefaultConfig.checkReplaceProxy(
                 item.pic == null ? "" : item.pic);
-        if (TextUtils.isEmpty(pic)) {
-            // 色块第一类：历史记录里根本没存封面地址（老版本写入或源就没给）。
-            Log.i(CoverStore.TAG, "history cover: empty pic name=" + item.name);
-            ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
-            return;
-        }
         int width = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultWidth);
         int height = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultHeight);
+        if (TextUtils.isEmpty(pic)) {
+            // 色块第一类：历史记录里根本没存封面地址（早版本写入或源就没给）。
+            // 但仍可能按内容键（片名+来源）命中之前存过的封面，不能直接放弃。
+            String byContent = CoverStore.findLocalPathByContent(mContext, item.name, item.sourceKey);
+            if (!TextUtils.isEmpty(byContent)) {
+                Log.i(CoverStore.TAG, "history cover: content-key hit name=" + item.name);
+                ImgUtil.load(new java.io.File(byContent).getAbsolutePath(), ivThumb,
+                        AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
+            } else {
+                Log.i(CoverStore.TAG, "history cover: no pic and no content key name=" + item.name);
+                ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
+            }
+            return;
+        }
         String local = CoverStore.findLocalPath(mContext, pic, item.name, item.sourceKey);
         if (!TextUtils.isEmpty(local)) {
             // 命中本地缓存（URL 键或片名键）：直接显示，不再走网络。
@@ -76,7 +84,20 @@ public class HistoryAdapter extends BaseQuickAdapter<VodInfo, BaseViewHolder> {
         Log.i(CoverStore.TAG, "history cover: network fallback name=" + item.name
                 + " url=" + pic.substring(0, Math.min(96, pic.length())));
         ImgUtil.load(pic, ivThumb, AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
-        // 这次既然能加载到，就顺手存一份（同时写 URL 键与片名键），下次站点挂了也能显示。
-        CoverStore.remember(mContext, pic, item.name, item.sourceKey);
+        // 标注当前绑定，防止落盘回调回来时 view 已被复用给别的条目。
+        ivThumb.setTag(R.id.ivThumb, pic);
+        final int thumbWidth = width;
+        final int thumbHeight = height;
+        // 落盘成功就立刻换成真图：车机上图片网络慢，不能只靠这一手网络加载，
+        // 否则用户先看到色块，切走再回来才可能有图。
+        CoverStore.remember(mContext, pic, item.name, item.sourceKey, () -> {
+            String ready = CoverStore.findLocalPath(mContext, pic, item.name, item.sourceKey);
+            if (TextUtils.isEmpty(ready)) return;
+            Object bound = ivThumb.getTag(R.id.ivThumb);
+            if (!(bound instanceof String) || !pic.equals(bound)) return;
+            Log.i(CoverStore.TAG, "history cover: resolved from disk after download name=" + item.name);
+            ImgUtil.load(new java.io.File(ready).getAbsolutePath(), ivThumb,
+                    AutoSizeUtils.mm2px(mContext, 10), thumbWidth, thumbHeight, item.name);
+        });
     }
 }

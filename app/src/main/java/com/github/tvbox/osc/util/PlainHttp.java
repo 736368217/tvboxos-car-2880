@@ -45,6 +45,25 @@ public final class PlainHttp {
         return base.newBuilder().dns(new TimeoutDns(base.dns(), DNS_TIMEOUT_MS)).build();
     }
 
+    /**
+     * 图片用：保留 App 栈的代理规则/超时，但把 DNS 换成系统 DNS。
+     *
+     * <p>为什么要这层混搭：App 栈的 {@code OkDns} 在部分车机上全挂（系统能解析、它抛
+     * UnknownHostException），图片加载排在首页/详情/历史/收藏所有列表上，走它就会整片
+     * 变随机色块；而用户配的代理规则又必须保留，否则那些只能走代理的网络反而不通。
+     * 所以只替换 DNS，代理选择器、认证器、超时全部沿用 App 栈。</p>
+     */
+    public static OkHttpClient systemDnsWithAppStack() {
+        return AppStackImage.HOLDER;
+    }
+
+    private static final class AppStackImage {
+        static final OkHttpClient HOLDER = com.github.catvod.net.OkHttp.client(15000)
+                .newBuilder()
+                .dns(new TimeoutDns(Dns.SYSTEM, DNS_TIMEOUT_MS))
+                .build();
+    }
+
     private static final class Holder {
         static final OkHttpClient SYSTEM = build(true);
         static final OkHttpClient SYSTEM_NO_REDIRECT = build(false);
