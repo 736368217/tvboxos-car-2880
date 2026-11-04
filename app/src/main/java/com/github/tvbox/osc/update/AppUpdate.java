@@ -64,6 +64,16 @@ public final class AppUpdate {
     private static final String OWNER = "736368217";
     private static final String REPO = "tvboxos-car-2880";
 
+    /**
+     * 官方发布通道：阿里云发布根（SMB 上传，公网由 dl.z736.vip 提供）。
+     *
+     * <p>发布脚本会在 {@code <软件名>/latest.json} 写版本清单，里面带文件大小和 SHA-256。
+     * 这条通道不经过 GitHub，车机网络下最稳，所以检查顺序是「官方 → GitHub」。</p>
+     */
+    private static final String OFFICIAL_BASE = "https://dl.z736.vip/";
+    private static final String OFFICIAL_HOST = "dl.z736.vip";
+    private static final String OFFICIAL_SOFTWARE = "tvbox-car";
+
     /** 自动检查的最小间隔；启动检查受它节流。 */
     private static final long AUTO_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
     private static final int TIMEOUT_MS = 15000;
@@ -107,10 +117,12 @@ public final class AppUpdate {
         public final long apkSize;
         public final String channelLabel;
         public final String releasePage;
+        /** 官方清单给出的 SHA-256（大写十六进制）；GitHub 通道为 null。 */
+        public final String sha256;
 
         Info(String tag, boolean hasUpdate, String localVersion, String remoteVersion, String notes,
              String apkUrl, String apkUrlRaw, String apkName, long apkSize, String channelLabel,
-             String releasePage) {
+             String releasePage, String sha256) {
             this.tag = tag;
             this.hasUpdate = hasUpdate;
             this.localVersion = localVersion;
@@ -122,6 +134,7 @@ public final class AppUpdate {
             this.apkSize = apkSize;
             this.channelLabel = channelLabel;
             this.releasePage = releasePage;
+            this.sha256 = sha256;
         }
     }
 
@@ -185,15 +198,42 @@ public final class AppUpdate {
         POOL.execute(() -> {
             String local = localVersion(appContext);
             String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
-            UpdateVersion.Channel[] channels = UpdateVersion.channels(OWNER, REPO, mirror);
             List<String> failures = new ArrayList<>();
+
+            // ① 官方发布通道优先：阿里云发布根，带 SHA-256，且不依赖 GitHub 可达性。
+            Info official = null;
+            try {
+                final Info officialResult = queryOfficial(local);
+                if (officialResult.hasUpdate) {
+                    remember(officialResult);
+                    Log.i(TAG, "check ok channel=" + officialResult.channelLabel + " force=" + force
+                            + " local=" + local + " remote=" + officialResult.remoteVersion
+                            + " hasUpdate=true sha256=" + (officialResult.sha256 != null));
+                    post(() -> callback.onResult(officialResult, null));
+                    return;
+                }
+                official = officialResult;
+                Log.i(TAG, "official up to date local=" + local
+                        + " remote=" + officialResult.remoteVersion);
+            } catch (Exception error) {
+                String reason = describe(error);
+                failures.add("官方=" + reason);
+                Log.w(TAG, "official check failed: " + reason);
+            }
+            UpdateVersion.Channel[] channels = UpdateVersion.channels(OWNER, REPO, mirror);
             // 两轮：先用系统 DNS 直连（最快、最常见），全挂了再用 App 自己的网络栈
             // （带用户的 DoH / 代理规则）兜底 —— 有些网络只有后者能出去。
-            for (int round = 0; round < 2; round++) {
+            boolean githubLatest = false;
+            for (int round = 0; round < 2 && !githubLatest; round++) {
                 boolean plain = round == 0;
                 for (UpdateVersion.Channel channel : channels) {
                     try {
                         Info info = query(channel, local, plain);
+                        if (!info.hasUpdate && official != null) {
+                            // 官方清单可达且说自己是最新：它带 sha256、与发布源一致，优先采信。
+                            githubLatest = true;
+                            break;
+                        }
                         remember(info);
                         Log.i(TAG, "check ok channel=" + channel.label
                                 + (plain ? "(系统DNS)" : "(应用网络)") + " force=" + force
@@ -210,12 +250,95 @@ public final class AppUpdate {
                     }
                 }
             }
+            // ③ 官方通道再试一次：冷启动/刚联网时系统 DNS 往往要好几秒才通（实测 MuMu 首次
+            //    所有域名全超时、十几秒后同一域名秒回），一次失败不代表官方不可达。此时
+            //    DNS 已热，再给官方一次机会，别把「有新版」误报成「已是最新」。
+            if (official == null) {
+                try {
+                    final Info retry = queryOfficial(local);
+                    if (retry.hasUpdate) {
+                        remember(retry);
+                        Log.i(TAG, "check ok channel=" + retry.channelLabel + "(retry) force=" + force
+                                + " local=" + local + " remote=" + retry.remoteVersion
+                                + " hasUpdate=true sha256=" + (retry.sha256 != null));
+                        post(() -> callback.onResult(retry, null));
+                        return;
+                    }
+                    official = retry;
+                    Log.i(TAG, "official retry up to date local=" + local
+                            + " remote=" + retry.remoteVersion);
+                } catch (Exception error) {
+                    Log.w(TAG, "official retry failed: " + describe(error));
+                }
+            }
+            final Info officialFinal = official;
+            if (officialFinal != null) {
+                remember(officialFinal);
+                Log.i(TAG, "check ok channel=" + officialFinal.channelLabel + " local=" + local
+                        + " remote=" + officialFinal.remoteVersion + " hasUpdate=false");
+                post(() -> callback.onResult(officialFinal, null));
+                return;
+            }
             Log.w(TAG, "check failed on every channel: " + failures);
             String message = failures.isEmpty()
                     ? "没有可用的更新通道"
                     : "更新检查失败（" + failures.size() + " 次尝试都不可达）：" + failures.get(0);
             post(() -> callback.onResult(null, message));
         });
+    }
+
+    /** 官方清单地址（发布脚本生成，更新器轮询它）。 */
+    public static String officialManifestUrl() {
+        return OFFICIAL_BASE + OFFICIAL_SOFTWARE + "/latest.json";
+    }
+
+    /**
+     * 查官方清单：先系统 DNS，再 App 网络栈（有些网络只有后者能出去）。
+     *
+     * <p>不能复用 GitHub 那套 gh 镜像前缀：那些镜像只代理 github.com / api.github.com，
+     * 套到 dl.z736.vip 上必然 404。</p>
+     */
+    private static Info queryOfficial(String local) throws Exception {
+        Exception last = null;
+        for (int round = 0; round < 2; round++) {
+            boolean plain = round == 0;
+            OkHttpClient client = plain ? PlainHttp.systemDns()
+                    : PlainHttp.withDnsTimeout(OkHttp.client(TIMEOUT_MS));
+            try {
+                return queryOfficialOnce(client, local, plain);
+            } catch (Exception error) {
+                last = error;
+                Log.w(TAG, "official " + (plain ? "system-dns" : "app-stack")
+                        + " failed: " + describe(error));
+            }
+        }
+        throw last == null ? new IOException("官方清单不可用") : last;
+    }
+
+    private static Info queryOfficialOnce(OkHttpClient client, String local, boolean plain) throws Exception {
+        Request request = new Request.Builder()
+                .url(officialManifestUrl())
+                .header("Accept", "application/json")
+                .header("User-Agent", "TVBox-Car/" + local)
+                .header("Cache-Control", "no-cache")
+                .build();
+        String body;
+        try (Response response = client.newCall(request).execute()) {
+            ResponseBody responseBody = response.body();
+            body = responseBody == null ? "" : responseBody.string();
+            if (!response.isSuccessful()) throw new IOException("HTTP " + response.code());
+        }
+        OfficialManifest manifest = OfficialManifest.parse(body, OFFICIAL_BASE);
+        boolean hasUpdate = UpdateVersion.hasUpdate(local, manifest.version);
+        String tag = manifest.version.startsWith("v") ? manifest.version : "v" + manifest.version;
+        if (hasUpdate && (manifest.apkUrl == null || manifest.apkUrl.length() == 0)) {
+            throw new IOException("官方清单 " + manifest.version + " 没有下载地址");
+        }
+        String label = plain ? "官方(阿里云)" : "官方(应用网络)";
+        return new Info(tag, hasUpdate, local, manifest.version,
+                manifest.notes == null ? "" : manifest.notes.trim(),
+                manifest.apkUrl, manifest.apkUrl, manifest.apkName, manifest.apkSize, label,
+                OFFICIAL_BASE + OFFICIAL_SOFTWARE + "/", manifest.sha256);
     }
 
     private static Info query(UpdateVersion.Channel channel, String local, boolean plain) throws Exception {
@@ -241,7 +364,7 @@ public final class AppUpdate {
         if (json.optBoolean("draft", false) || json.optBoolean("prerelease", false)) {
             // 预发布/草稿不作为更新来源，避免把测试包推给用户
             return new Info(json.optString("tag_name"), false, local, local, "", null, null, null, 0,
-                    channel.label, null);
+                    channel.label, null, null);
         }
         // 只用 tag 判版本：Release 标题里可能顺带提到别的 rNN（例如「修 r48 的问题」），
         // 拿标题参与比较会解析出错误的迭代号。
@@ -270,7 +393,7 @@ public final class AppUpdate {
             throw new IOException("Release " + tag + " 没有可用的 APK 资产");
         }
         return new Info(tag, hasUpdate, local, remoteVersion, notes, apkUrl, apkUrlRaw, apkName, apkSize,
-                channel.label, releasePage);
+                channel.label, releasePage, null);
     }
 
     /**
@@ -312,7 +435,7 @@ public final class AppUpdate {
         String apkUrl = apkUrlRaw == null ? null : channel.apply(apkUrlRaw);
         String releasePage = "https://github.com/" + OWNER + "/" + REPO + "/releases/tag/" + tag;
         return new Info(tag, hasUpdate, local, tag, "", apkUrl, apkUrlRaw, apkName, 0L,
-                channel.label, releasePage);
+                channel.label, releasePage, null);
     }
 
     /** 从 releases/latest 的 HTML 里挖第一个 {@code /releases/tag/<tag>}（镜像跟随重定向时的兜底）。 */
@@ -338,7 +461,9 @@ public final class AppUpdate {
             String raw = info.apkUrlRaw != null ? info.apkUrlRaw : info.apkUrl;
             String preferred = prefixOf(info.apkUrl, info.apkUrlRaw);
             String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
-            String[] candidates = UpdateVersion.downloadCandidates(raw, preferred, mirror);
+            String[] candidates = isOfficialUrl(raw)
+                    ? new String[]{info.apkUrl != null ? info.apkUrl : raw}
+                    : UpdateVersion.downloadCandidates(raw, preferred, mirror);
             Log.i(TAG, "download start size=" + info.apkSize + " -> " + target
                     + " candidates=" + candidates.length + " first=" + (candidates.length > 0 ? candidates[0] : "-"));
             delete(target);
@@ -368,6 +493,18 @@ public final class AppUpdate {
                             throw new IOException("无法重命名到 " + target.getName());
                         }
                         post(() -> callback.onProgress(target.length(), target.length()));
+                        if (info.sha256 != null && info.sha256.length() == 64) {
+                            String actual = sha256(target);
+                            if (!actual.equalsIgnoreCase(info.sha256)) {
+                                delete(target);
+                                delete(partial);
+                                Log.w(TAG, "sha256 mismatch expected=" + info.sha256
+                                        + " actual=" + actual);
+                                post(() -> callback.onError("安装包校验失败（SHA-256 不一致），已删除，请重试"));
+                                return;
+                            }
+                            Log.i(TAG, "sha256 ok " + actual);
+                        }
                         String problem = verify(appContext, target);
                         if (problem != null) {
                             delete(target);
@@ -396,6 +533,30 @@ public final class AppUpdate {
                     + (kept > 0 ? "。已保留 " + (kept / 1024 / 1024) + " MB，重试会接着下。" : "")));
         });
         return task;
+    }
+
+    /** 官方地址（dl.z736.vip）不能套 gh 镜像前缀：镜像只代理 github，套上去必然 404。 */
+    private static boolean isOfficialUrl(String url) {
+        return url != null && url.toLowerCase(Locale.ROOT).contains("://" + OFFICIAL_HOST + "/");
+    }
+
+    /** 流式计算文件 SHA-256（大写十六进制），用于比对官方清单。 */
+    private static String sha256(File file) throws IOException {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (Exception error) {
+            throw new IOException("SHA-256 不可用");
+        }
+        try (InputStream in = new java.io.FileInputStream(file)) {
+            byte[] buffer = new byte[128 * 1024];
+            int read;
+            while ((read = in.read(buffer)) > 0) digest.update(buffer, 0, read);
+        }
+        byte[] hash = digest.digest();
+        StringBuilder builder = new StringBuilder(64);
+        for (byte value : hash) builder.append(String.format("%02X", value));
+        return builder.toString();
     }
 
     /** 把资产地址前缀拆出来，供下载候选排序用。 */
@@ -626,6 +787,13 @@ public final class AppUpdate {
         static final OkHttpClient HOLDER = PlainHttp.withDnsTimeout(OkHttp.client(TIMEOUT_MS));
     }
 
+
+    /** 统一异常描述，失败原因要能直接进日志和弹窗。 */
+    static String describe(Throwable error) {
+        if (error == null) return "未知错误";
+        String message = error.getMessage();
+        return error.getClass().getSimpleName() + (message == null ? "" : (": " + message));
+    }
 
     private static void post(Runnable runnable) {
         MAIN.post(runnable);

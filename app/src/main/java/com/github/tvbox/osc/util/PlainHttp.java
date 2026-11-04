@@ -24,8 +24,14 @@ import okhttp3.OkHttpClient;
 public final class PlainHttp {
 
     private static final String TAG = "PlainHttp";
-    /** DNS 解析硬超时：单域名最多等这么久，超时按解析失败处理。 */
-    private static final long DNS_TIMEOUT_MS = 2500L;
+    /**
+     * DNS 解析硬超时：单域名最多等这么久，超时按解析失败处理。
+     *
+     * <p>实测 2500ms 太短：车机/MuMu 冷启动或刚切网时，第一次 getaddrinfo 常要 3-6 秒
+     * 才通（十秒后同一域名 <100ms 返回）。按 2.5 秒判死会把「通但慢」误判成「不可达」，
+     * 于是官方更新通道被整段跳过。这里放到 6 秒，仍远小于系统默认的 20 秒级等待。</p>
+     */
+    private static final long DNS_TIMEOUT_MS = 6000L;
 
     private PlainHttp() {
     }
