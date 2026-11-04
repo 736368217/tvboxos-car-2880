@@ -1890,6 +1890,9 @@ public class DetailActivity extends BaseActivity {
         if (TextUtils.isEmpty(vodInfo.pic) && mVideo != null && !TextUtils.isEmpty(mVideo.pic)) {
             vodInfo.pic = mVideo.pic;
         }
+        // 订阅详情接口曾返回挂在 API 域名下的 404 封面地址；写库前统一修到图片 CDN，
+        // 避免「看一次就多一条永远没封面的历史」。
+        vodInfo.pic = com.github.tvbox.osc.cache.CoverBinder.repairUrl(vodInfo.pic);
         RoomDataManger.insertVodRecord(sourceKey, vodInfo);
         // 写历史的同时补一次封面缓存：老记录（本次改动前产生的最多）也会被逐步补齐。
         if (!TextUtils.isEmpty(vodInfo.pic)) {
