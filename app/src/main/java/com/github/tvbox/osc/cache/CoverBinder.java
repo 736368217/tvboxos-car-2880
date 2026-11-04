@@ -40,6 +40,26 @@ public final class CoverBinder {
     private CoverBinder() {
     }
 
+    /**
+     * 修正订阅返回的坏封面地址。
+     *
+     * <p>「爱动漫」订阅的详情接口把 vod_pic 返回成相对路径，旧版 JS 统一补到 API 域名
+     * m3u8.girigirilove.com，实测 404；真图在 jpg.girigirilove.com。列表页因为返回的是
+     * 完整 jpg URL 所以一直有图，但写进历史的详情 pic 是坏地址 —— 这解释了「软件没变、
+     * 另一客户端最近的历史也全没封面」。这里兼容已经写进数据库的旧记录，订阅侧同步修 JS。</p>
+     */
+    public static String repairUrl(String pic) {
+        if (TextUtils.isEmpty(pic)) return "";
+        String value = pic.trim();
+        String clean = CoverKey.normalize(value);
+        if (clean.matches("(?i)^https?://(?:m3u8\\.)?girigirilove\\.com/(?:upload/vod|vod)/.+$")) {
+            String path = clean.replaceFirst("(?i)^https?://(?:m3u8\\.)?girigirilove\\.com/", "");
+            String suffix = value.substring(clean.length());
+            return "https://jpg.girigirilove.com/" + path + suffix;
+        }
+        return value;
+    }
+
     /** 绑定到 item_grid 风格的卡片。width/height 为像素，<=0 时用 ImgUtil 默认值。 */
     public static void bind(ImageView view, String rawPic, String name, String sourceKey,
                             int widthPx, int heightPx) {
@@ -52,7 +72,8 @@ public final class CoverBinder {
         } catch (Throwable ignored) {
         }
 
-        final String pic = DefaultConfig.checkReplaceProxy(rawPic == null ? "" : rawPic);
+        final String pic = repairUrl(DefaultConfig.checkReplaceProxy(
+                rawPic == null ? "" : rawPic));
         final String contentPath = CoverStore.findLocalPathByContent(
                 view.getContext(), name, sourceKey);
         final String localPath = TextUtils.isEmpty(contentPath)
