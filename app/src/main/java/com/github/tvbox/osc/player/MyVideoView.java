@@ -410,7 +410,7 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
     }
 
     public void setAppAudioGain(float gain) {
-        mAppAudioGain = Math.max(0f, Math.min(2f, gain));
+        mAppAudioGain = com.github.tvbox.osc.car.VolumeBoostMath.clampGain(gain);
     }
 
     public float getAudioVolumeFactor() {

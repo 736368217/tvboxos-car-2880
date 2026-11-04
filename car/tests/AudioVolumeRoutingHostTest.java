@@ -13,7 +13,7 @@ public final class AudioVolumeRoutingHostTest {
         if (Math.abs(actual - expected) > .0001f) throw new AssertionError(label + ": " + actual + " != " + expected);
     }
     public static void main(String[] args) throws Exception {
-        for (float gain : new float[]{0f, .05f, .5f, 1f, 1.5f, 2f}) {
+        for (float gain : new float[]{0f, .05f, .5f, 1f, 1.5f, 2f, 2.5f, 3f}) {
             for (float factor : new float[]{0f, .1f, 1f}) {
                 final float effective = VolumeBoostMath.pcmGain(gain, factor);
                 AudioGainProcessor pcm = AudioGainProcessor.create(() -> effective);
@@ -36,7 +36,8 @@ public final class AudioVolumeRoutingHostTest {
         eq(VolumeBoostMath.gestureVolume(1f, 50f, 1000), 1.05f, "up one detent");
         eq(VolumeBoostMath.gestureVolume(1f, -50f, 1000), .95f, "down one detent");
         eq(VolumeBoostMath.gestureVolume(.97f, 50f, 1000), 1f, "legacy percent snapped");
-        eq(VolumeBoostMath.gestureVolume(2f, 1000f, 1000), 2f, "upper clamp");
+        eq(VolumeBoostMath.gestureVolume(2f, 1000f, 1000), 3f, "one full-screen gesture from 200% reaches 300%");
+        eq(VolumeBoostMath.gestureVolume(3f, 1000f, 1000), 3f, "upper clamp 300%");
         eq(VolumeBoostMath.gestureVolume(0f, -1000f, 1000), 0f, "lower clamp");
         for (int dy = -2400; dy <= 2400; dy++) {
             float value = VolumeBoostMath.gestureVolume(1f, dy, 1620);

@@ -40,37 +40,7 @@ public class CollectAdapter extends BaseQuickAdapter<VodCollect, BaseViewHolder>
         ImageView ivThumb = helper.getView(R.id.ivThumb);
         int width = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultWidth);
         int height = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultHeight);
-        String cover = TextUtils.isEmpty(item.pic)
-                ? "" : com.github.tvbox.osc.util.DefaultConfig.checkReplaceProxy(item.pic);
-        if (TextUtils.isEmpty(cover)) {
-            String byContent = com.github.tvbox.osc.cache.CoverStore.findLocalPathByContent(
-                    mContext, item.name, item.sourceKey);
-            if (!TextUtils.isEmpty(byContent)) {
-                ImgUtil.load(new java.io.File(byContent).getAbsolutePath(), ivThumb,
-                        AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
-            } else {
-                ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
-            }
-            return;
-        }
-        // 与历史页同策略：先读本地缓存，命中就零网络；否则加载并顺手落盘。
-        String local = com.github.tvbox.osc.cache.CoverStore.findLocalPath(mContext, cover, item.name, item.sourceKey);
-        if (!TextUtils.isEmpty(local)) {
-            ImgUtil.load(new java.io.File(local).getAbsolutePath(), ivThumb,
-                    AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
-            return;
-        }
-        ImgUtil.load(cover, ivThumb, AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
-        ivThumb.setTag(R.id.ivThumb, cover);
-        // 落盘成功立刻换真图（车机网络慢，不能只等这一手网络加载）。
-        com.github.tvbox.osc.cache.CoverStore.remember(mContext, cover, item.name, item.sourceKey, () -> {
-            String ready = com.github.tvbox.osc.cache.CoverStore.findLocalPath(
-                    mContext, cover, item.name, item.sourceKey);
-            if (TextUtils.isEmpty(ready)) return;
-            Object bound = ivThumb.getTag(R.id.ivThumb);
-            if (!(bound instanceof String) || !cover.equals(bound)) return;
-            ImgUtil.load(new java.io.File(ready).getAbsolutePath(), ivThumb,
-                    AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
-        });
+        com.github.tvbox.osc.cache.CoverBinder.bind(ivThumb, item.pic, item.name,
+                item.sourceKey, width, height);
     }
 }

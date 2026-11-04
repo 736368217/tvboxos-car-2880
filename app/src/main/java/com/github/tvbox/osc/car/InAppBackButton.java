@@ -264,6 +264,9 @@ public final class InAppBackButton {
     }
     public static int getHideSeconds() { return validHideSeconds(integer(HawkConfig.BACK_HIDE_SECONDS, 4)); }
 
+    /** 当前是否处于「常驻不隐藏」（旧备份可能把 0 写进来，r68 UI 可以改回 4 秒）。 */
+    public static boolean isAutoHideDisabled() { return getHideSeconds() == 0; }
+
     /** 可视杠宽度 dp（4–28）。 */
     public static int getBarWidthDp() { return clampInt(integer(HawkConfig.BACK_BAR_WIDTH_DP, 12), 4, 28); }
     /** 可视杠高度 dp（48–220）。 */

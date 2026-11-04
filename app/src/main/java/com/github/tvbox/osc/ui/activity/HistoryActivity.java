@@ -174,6 +174,9 @@ public class HistoryActivity extends BaseActivity {
             vodInfoList.add(vodInfo);
         }
         historyAdapter.setNewData(vodInfoList);
+        // r68：点进历史记录时，对「之前没封面的旧记录」重新向站源取一次详情/搜索，
+        // 拿到 pic 就写回数据库并落盘；成功后通过 RefreshEvent 自动刷新本页。
+        com.github.tvbox.osc.cache.HistoryCoverRepair.repairMissing(this, vodInfoList);
     }
 
 
@@ -182,6 +185,12 @@ public class HistoryActivity extends BaseActivity {
         if (event.type == RefreshEvent.TYPE_HISTORY_REFRESH) {
             initData();
         }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 从详情页返回、桌面切回都重新读一次历史：新封面写库后立即生效。
+        initData();
     }
 
     @Override

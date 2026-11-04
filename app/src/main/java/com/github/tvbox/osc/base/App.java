@@ -7,6 +7,7 @@ import com.github.tvbox.osc.bean.VodInfo;
 import com.github.tvbox.osc.callback.EmptyCallback;
 import com.github.tvbox.osc.callback.LoadingCallback;
 import com.github.tvbox.osc.data.AppDataManager;
+import com.github.tvbox.osc.diag.DiagLog;
 import com.github.tvbox.osc.server.ControlManager;
 import com.github.tvbox.osc.util.AppManager;
 import com.github.tvbox.osc.util.EpgUtil;
@@ -41,7 +42,7 @@ public class App extends MultiDexApplication {
         super.onCreate();
         instance = this;
         initParams();
-        // OKGo
+        DiagLog.start(this);
         OkGoHelper.init(); //台标获取
         EpgUtil.init();
         // 初始化Web服务器

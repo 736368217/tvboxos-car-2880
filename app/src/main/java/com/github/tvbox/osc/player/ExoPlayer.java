@@ -76,7 +76,7 @@ public class ExoPlayer extends ExoMediaPlayer {
 
     public synchronized void setAudioGain(float gain) {
         if (Float.isNaN(gain)) return;
-        audioGain = Math.max(0f, Math.min(2f, gain));
+        audioGain = com.github.tvbox.osc.car.VolumeBoostMath.clampGain(gain);
         for (xyz.doikki.videoplayer.exo.AudioGainProcessor processor : audioGainProcessors) {
             processor.setGain(audioGain);
         }

@@ -1693,7 +1693,8 @@ public class PlayFragment extends BaseLazyFragment {
         final String url = webPlayUrl;
         final HashMap<String, String> headers = webHeaderMap == null ? null : new HashMap<>(webHeaderMap);
         volumeBoostSwitchInProgress = true;
-        pendingVolumeBoostAfterSwitch = Math.max(1f, Math.min(2f, requestedGain));
+        pendingVolumeBoostAfterSwitch = Math.max(1f,
+                com.github.tvbox.osc.car.VolumeBoostMath.clampGain(requestedGain));
         mHandler.post(() -> switchToExoForVolumeBoost(url, headers));
         return true;
     }

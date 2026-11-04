@@ -903,25 +903,15 @@ public class DetailActivity extends BaseActivity {
                     setTextShow(tvDes, "内容简介：", removeHtmlTag(mVideo.des));
                     if (!TextUtils.isEmpty(mVideo.pic)) {
                         String coverUrl = DefaultConfig.checkReplaceProxy(mVideo.pic);
-                        // 先查本地缓存再走网络：车机 App 网络栈挂了时 Glide 连不上图床，
-                        // 但只要落盘成功过一次（CoverStore 走系统 DNS），这里就能直接显示。
-                        String localCover = com.github.tvbox.osc.cache.CoverStore.findLocalPath(
-                                mContext, coverUrl, mVideo.name, sourceKey);
-                        String coverModel = TextUtils.isEmpty(localCover) ? coverUrl : localCover;
-                        com.github.tvbox.osc.util.ImgUtil.load(coverModel, ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 300), AutoSizeUtils.mm2px(mContext, 400), mVideo.name);
-                        // 详情页是"真的打开过"的地方：这里就把封面落盘，之后历史/收藏
-                        // 即使站点删图或车机没网也能显示；落盘成功立即换成真图。
-                        final int coverW = AutoSizeUtils.mm2px(mContext, 300);
-                        final int coverH = AutoSizeUtils.mm2px(mContext, 400);
-                        com.github.tvbox.osc.cache.CoverStore.remember(mContext, coverUrl, mVideo.name, sourceKey, () -> {
-                            String ready = com.github.tvbox.osc.cache.CoverStore.findLocalPath(
-                                    mContext, coverUrl, mVideo.name, sourceKey);
-                            if (TextUtils.isEmpty(ready)) return;
-                            com.github.tvbox.osc.util.ImgUtil.load(new java.io.File(ready).getAbsolutePath(),
-                                    ivThumb, AutoSizeUtils.mm2px(mContext, 10), coverW, coverH, mVideo.name);
-                        });
+                        // r68：详情页与历史/收藏共用 CoverBinder —— 本地封面直接 decodeFile，
+                        // 不受 Glide 网络失败回调盖成色块的影响。
+                        com.github.tvbox.osc.cache.CoverBinder.bind(ivThumb, coverUrl,
+                                mVideo.name, sourceKey,
+                                AutoSizeUtils.mm2px(mContext, 300), AutoSizeUtils.mm2px(mContext, 400));
                     } else {
-                        ivThumb.setImageDrawable(com.github.tvbox.osc.util.ImgUtil.createTextDrawable(mVideo.name));
+                        com.github.tvbox.osc.cache.CoverBinder.bind(ivThumb, "",
+                                mVideo.name, sourceKey,
+                                AutoSizeUtils.mm2px(mContext, 300), AutoSizeUtils.mm2px(mContext, 400));
                     }
 
                     if (vodInfo.seriesMap != null && vodInfo.seriesMap.size() > 0) {

@@ -19,6 +19,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.github.tvbox.osc.car.VolumeBoostMath;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.LOG;
 import com.orhanobut.hawk.Hawk;
@@ -128,7 +129,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
     }
 
     private float maxVolume() {
-        return canBoostVolume() ? 2f : 1f;
+        return canBoostVolume() ? VolumeBoostMath.MAX_GAIN : 1f;
     }
 
     private float clampVolume(float v) {
@@ -138,10 +139,10 @@ public abstract class BaseController extends BaseVideoController implements Gest
     private float loadAppVolume() {
         int percent = Hawk.get(HawkConfig.VOLUME_GAIN, 100);
         // No engine exists during construction; do not discard a saved boost here.
-        return Math.max(0f, Math.min(2f, percent / 100f));
+        return VolumeBoostMath.clampGain(percent / 100f);
     }
 
-    /** 应用内音量增益（0..2）：0=静音，1=原始，>1=增幅；不改系统音量。 */
+    /** 应用内音量增益（0..3）：0=静音，1=原始，>1=增幅；不改系统音量。 */
     public void setAppVolume(float volume) {
         mAppVolume = clampVolume(volume);
         if (mControlWrapper != null) mControlWrapper.setVolume(mAppVolume);
@@ -443,7 +444,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
                 mVolumeStart, deltaY, height);
         if (!canBoostVolume() && deltaY > 0 && requestedVolume > 1.001f
                 && mControlWrapper != null && mControlWrapper.requestVolumeBoost(requestedVolume)) {
-            mAppVolume = Math.max(1f, Math.min(2f, requestedVolume));
+            mAppVolume = Math.max(1f, VolumeBoostMath.clampGain(requestedVolume));
             mControlWrapper.setVolume(mAppVolume);
             Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
             int targetPercent = Math.round(mAppVolume * 100);

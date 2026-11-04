@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
  * 并对部分api做了封装，方便使用
  */
 public class ControlWrapper implements MediaPlayerControl, IVideoController {
+    /** 应用内增益上限（倍数）；与 car 层 VolumeBoostMath.MAX_GAIN 保持一致。 */
+    private static final float MAX_VOLUME_GAIN = 3f;
 
     private MediaPlayerControl mPlayerControl;
     private IVideoController mController;
@@ -97,7 +99,7 @@ public class ControlWrapper implements MediaPlayerControl, IVideoController {
 
     /** 应用内播放音量 0..2（0=静音，1=原始，>1=增幅）；不改系统音量。 */
     public void setVolume(float volume) {
-        float v = Math.max(0f, Math.min(2f, volume));
+        float v = Math.max(0f, Math.min(MAX_VOLUME_GAIN, volume));
         if (mPlayerControl instanceof xyz.doikki.videoplayer.player.VideoView) {
             ((xyz.doikki.videoplayer.player.VideoView) mPlayerControl).setVolume(v, v);
         }

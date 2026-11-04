@@ -36,6 +36,7 @@ final class FloatingBackBallView extends View {
     private int idleMillis = 4000, pointerId;
     private int barColor = 0xFF38BDF8, barAlpha = 90;
     private boolean active, touching, dragging, ignoreStream, dockLeft = true;
+    private boolean hidden;
 
     FloatingBackBallView(InAppBackHostLayout host) {
         super(host.getContext());
@@ -53,7 +54,19 @@ final class FloatingBackBallView extends View {
     }
 
     private void enterIdle() {
-        if (active && !touching && spring == null) animateIdle(1f, 220);
+        if (!active || touching || spring != null) {
+            // 触摸/回弹期间被排进来的旧任务：重新排一次，不能就此让球永远留在前台。
+            scheduleIdle();
+            return;
+        }
+        if (idleMillis <= 0) return;   // 用户显式选了「常驻」
+        // 真正隐藏：缩边 + 淡出到 0，并停止接收触摸。之前的「idle」只是变暗变半透明，
+        // 球其实一直挂在前台，看起来就是设置里的「几秒后自动隐藏」完全没生效。
+        hidden = true;
+        setClickable(false);
+        setAlpha(0f);
+        setVisibility(INVISIBLE);
+        animateIdle(1f, 220);
     }
 
     void configure(float unitScale, boolean large, int idleMillis) {
@@ -115,7 +128,12 @@ final class FloatingBackBallView extends View {
         removeCallbacks(idle);
         if (appearance != null) appearance.cancel();
         appearance = null;
-        if (idleFraction != 0) animateIdle(0, 120);
+        // 从隐藏状态唤醒：恢复可见、可点，再排一次自动隐藏。
+        hidden = false;
+        setClickable(true);
+        setVisibility(VISIBLE);
+        idleFraction = 0f;
+        renderPosition();
         scheduleIdle();
     }
 
@@ -141,7 +159,7 @@ final class FloatingBackBallView extends View {
         // The offset is always relative to the stable dock; repeated wake/idle cannot accumulate it.
         setX(baseX + BackNavPolicy.idleOffset(visualSize, dockLeft, idleFraction));
         setY(baseY);
-        setAlpha((.9f + (.38f - .9f) * idleFraction) * (barAlpha / 100f));
+        setAlpha(hidden ? 0f : (.9f + (.38f - .9f) * idleFraction) * (barAlpha / 100f));
         invalidate();
     }
 

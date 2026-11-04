@@ -102,7 +102,7 @@ public class HawkConfig {
     public static final String VIDEO_INTERP = "video_interp"; // legacy 0/1, kept in sync with VIDEO_MEMC_TIER
     public static final String VIDEO_SR_TIER = "video_sr_tier"; // 0 off, 1 SGSR, 2 FSR, 3 anime
     public static final String VIDEO_MEMC_TIER = "video_memc_tier"; // 0 off, 1 oversample, 2 cubic, 3 safe-flow
-    public static final String VOLUME_GAIN = "app_volume_gain"; // 0-200, default 100 (app-level gain, not system volume)
+    public static final String VOLUME_GAIN = "app_volume_gain"; // 0-300, default 100 (app-level gain, not system volume)
     public static final String BRIGHTNESS_GESTURE = "brightness_gesture"; // default false: brightness follows system
     // 应用内更新：启动静默检查 + 设置页手动检查
     public static final String UPDATE_AUTO_CHECK = "update_auto_check"; // default true

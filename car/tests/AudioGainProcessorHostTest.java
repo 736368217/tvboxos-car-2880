@@ -76,6 +76,12 @@ public final class AudioGainProcessorHostTest {
         check(doubled[3] == -32768, "200% saturates at -full scale, got " + doubled[3]);
         check(doubled[4] == 32767 && doubled[5] == -32768, "already full scale stays clamped");
 
+        // 300%（r68 新上限）：三倍增益确实到达采样层，而不是被中间 clamp 吃掉
+        short[] tripled = run16(processor, 3f, 1000, -1000, 20000, -20000);
+        check(tripled[0] == 3000, "300% must triple positive samples, got " + tripled[0]);
+        check(tripled[1] == -3000, "300% must triple negative samples, got " + tripled[1]);
+        check(tripled[2] == 32767 && tripled[3] == -32768, "300% saturates at full scale");
+
         // 150%：单调放大
         short[] oneAndHalf = run16(processor, 1.5f, 1000, -1000);
         check(oneAndHalf[0] == 1500, "150% → 1500, got " + oneAndHalf[0]);
@@ -92,7 +98,7 @@ public final class AudioGainProcessorHostTest {
 
         // 越界输入被夹紧，NaN 不改变当前增益
         processor.setGain(5f);
-        check(processor.getGain() == 2f, "gain clamps to 2.0");
+        check(processor.getGain() == 3f, "r68 gain clamps to 3.0");
         processor.setGain(-3f);
         check(processor.getGain() == 0f, "negative gain clamps to 0");
         processor.setGain(1.25f);

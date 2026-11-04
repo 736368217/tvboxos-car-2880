@@ -30,7 +30,8 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
     }
 
     private static final String TAG = "CarAudioGain";
-
+    /** r68：增益上限 300%，与 car 层 VolumeBoostMath.MAX_GAIN 一致。 */
+    private static final float MAX_GAIN = 3f;
     private final GainProvider gainProvider;
     private volatile float gain = 1f;
     private int encoding = C.ENCODING_PCM_16BIT;
@@ -76,7 +77,7 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
 
     private static float clampGain(float value) {
         if (Float.isNaN(value)) return 1f;
-        return Math.max(0f, Math.min(2f, value));
+        return Math.max(0f, Math.min(MAX_GAIN, value));
     }
 
     @Override

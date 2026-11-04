@@ -1,7 +1,5 @@
 package com.github.tvbox.osc.ui.adapter;
 
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -13,7 +11,6 @@ import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.bean.VodInfo;
-import com.github.tvbox.osc.cache.CoverStore;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.ImgUtil;
 
@@ -54,50 +51,9 @@ public class HistoryAdapter extends BaseQuickAdapter<VodInfo, BaseViewHolder> {
      * 现在看过一次就会落盘，这里优先读本地文件，命中时零网络。</p>
      */
     private void loadCover(ImageView ivThumb, VodInfo item) {
-        String pic = com.github.tvbox.osc.util.DefaultConfig.checkReplaceProxy(
-                item.pic == null ? "" : item.pic);
-        int width = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultWidth);
-        int height = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultHeight);
-        if (TextUtils.isEmpty(pic)) {
-            // 色块第一类：历史记录里根本没存封面地址（早版本写入或源就没给）。
-            // 但仍可能按内容键（片名+来源）命中之前存过的封面，不能直接放弃。
-            String byContent = CoverStore.findLocalPathByContent(mContext, item.name, item.sourceKey);
-            if (!TextUtils.isEmpty(byContent)) {
-                Log.i(CoverStore.TAG, "history cover: content-key hit name=" + item.name);
-                ImgUtil.load(new java.io.File(byContent).getAbsolutePath(), ivThumb,
-                        AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
-            } else {
-                Log.i(CoverStore.TAG, "history cover: no pic and no content key name=" + item.name);
-                ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
-            }
-            return;
-        }
-        String local = CoverStore.findLocalPath(mContext, pic, item.name, item.sourceKey);
-        if (!TextUtils.isEmpty(local)) {
-            // 命中本地缓存（URL 键或片名键）：直接显示，不再走网络。
-            Log.i(CoverStore.TAG, "history cover: local hit name=" + item.name);
-            ImgUtil.load(new java.io.File(local).getAbsolutePath(), ivThumb,
-                    AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
-            return;
-        }
-        // 色块第二类：本地没缓存、走网络 —— 网络失败时 ImgUtil 的 onLoadFailed 会接着打日志。
-        Log.i(CoverStore.TAG, "history cover: network fallback name=" + item.name
-                + " url=" + pic.substring(0, Math.min(96, pic.length())));
-        ImgUtil.load(pic, ivThumb, AutoSizeUtils.mm2px(mContext, 10), width, height, item.name);
-        // 标注当前绑定，防止落盘回调回来时 view 已被复用给别的条目。
-        ivThumb.setTag(R.id.ivThumb, pic);
-        final int thumbWidth = width;
-        final int thumbHeight = height;
-        // 落盘成功就立刻换成真图：车机上图片网络慢，不能只靠这一手网络加载，
-        // 否则用户先看到色块，切走再回来才可能有图。
-        CoverStore.remember(mContext, pic, item.name, item.sourceKey, () -> {
-            String ready = CoverStore.findLocalPath(mContext, pic, item.name, item.sourceKey);
-            if (TextUtils.isEmpty(ready)) return;
-            Object bound = ivThumb.getTag(R.id.ivThumb);
-            if (!(bound instanceof String) || !pic.equals(bound)) return;
-            Log.i(CoverStore.TAG, "history cover: resolved from disk after download name=" + item.name);
-            ImgUtil.load(new java.io.File(ready).getAbsolutePath(), ivThumb,
-                    AutoSizeUtils.mm2px(mContext, 10), thumbWidth, thumbHeight, item.name);
-        });
+        int widthPx = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultWidth);
+        int heightPx = AutoSizeUtils.mm2px(mContext, ImgUtil.defaultHeight);
+        com.github.tvbox.osc.cache.CoverBinder.bind(ivThumb, item.pic, item.name,
+                item.sourceKey, widthPx, heightPx);
     }
 }

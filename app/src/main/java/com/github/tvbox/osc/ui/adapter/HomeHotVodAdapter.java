@@ -14,12 +14,12 @@ import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.bean.SourceBean;
+import com.github.tvbox.osc.cache.CoverBinder;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.ImgUtil;
 import com.orhanobut.hawk.Hawk;
 
 import java.util.ArrayList;
-
 import me.jessyan.autosize.utils.AutoSizeUtils;
 
 public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder> {
@@ -86,12 +86,14 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         int targetH = cardHeightPx > 0 ? cardHeightPx : AutoSizeUtils.mm2px(mContext, newHeight);
 
         String pic = item.pic == null ? "" : item.pic.trim();
-        if (!TextUtils.isEmpty(pic)) {
-            if (ImgUtil.isBase64Image(pic)) {
-                ivThumb.setImageBitmap(ImgUtil.decodeBase64ToBitmap(pic));
-            } else {
-                ImgUtil.load(pic, ivThumb, AutoSizeUtils.mm2px(mContext, 10), targetW, targetH, item.name);
-            }
+        if (!TextUtils.isEmpty(pic) && ImgUtil.isBase64Image(pic)) {
+            ivThumb.setImageBitmap(ImgUtil.decodeBase64ToBitmap(pic));
+        } else if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 2) {
+            // 首页「观看历史」也是历史记录：走 CoverBinder，优先本地落盘封面，
+            // 不再被 Glide 网络失败回调盖成色块。
+            CoverBinder.bind(ivThumb, pic, item.name, item.sourceKey, targetW, targetH);
+        } else if (!TextUtils.isEmpty(pic)) {
+            ImgUtil.load(pic, ivThumb, AutoSizeUtils.mm2px(mContext, 10), targetW, targetH, item.name);
         } else {
             ivThumb.setImageDrawable(ImgUtil.createTextDrawable(item.name));
         }

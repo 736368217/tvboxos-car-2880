@@ -156,6 +156,23 @@ public final class CoverStore {
         File file = localFile(context, pic);
         return file == null ? "" : file.getAbsolutePath();
     }
+    /** 用已有内容键文件补一个 URL 键副本（后台执行，不阻塞列表渲染）。 */
+    public static void reindex(final android.content.Context context, final String pic, final String sourcePath) {
+        if (context == null || pic == null || sourcePath == null) return;
+        final android.content.Context app = context.getApplicationContext();
+        POOL.execute(() -> {
+            try {
+                String name = CoverKey.fileName(pic);
+                if (name == null || !CoverKey.isValidFileName(name)) return;
+                File target = new File(dir(app), name);
+                if (target.exists() && target.length() > 0) return;
+                File source = new File(sourcePath);
+                if (!source.isFile()) return;
+                copy(target, source);
+            } catch (Throwable ignored) {
+            }
+        });
+    }
 
     /**
      * 按「URL → 片名+来源」两级查找本地缓存。
