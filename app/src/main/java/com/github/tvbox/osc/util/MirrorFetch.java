@@ -64,12 +64,59 @@ public final class MirrorFetch {
                 .build();
     }
 
-    /** 候选地址：直连 + 各镜像前缀（去重、保持顺序）。非 http(s) 原样返回单元素。 */
+    /**
+     * 把 raw.githubusercontent.com/{owner}/{repo}/{branch}/{path} 规范化为 jsDelivr CDN。
+     * jsDelivr 国内直连可用（实测 ~1.7s），但只放行文本类文件；二进制（.jar 等）会 403，
+     * 所以只用于配置/JS，jar 仍走 gh-proxy 系镜像。
+     */
+    public static String jsDelivr(String rawUrl) {
+        if (rawUrl == null) return null;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile(
+                "https?://raw\\.githubusercontent\\.com/([^/]+)/([^/]+)/([^/]+)/(.+)")
+                .matcher(rawUrl);
+        if (!m.matches()) return null;
+        return "https://cdn.jsdelivr.net/gh/" + m.group(1) + "/" + m.group(2)
+                + "@" + m.group(3) + "/" + m.group(4);
+    }
+
+    /**
+     * jsDelivr 的 gh 基址 → raw.githubusercontent.com 基址（fixContentPath 用）。
+     * 例：https://cdn.jsdelivr.net/gh/o/r@branch/  →  https://raw.githubusercontent.com/o/r/branch/
+     */
+    public static String rawFromJsDelivr(String base) {
+        if (base == null) return null;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile(
+                "https?://(?:cdn|fastly)\\.jsdelivr\\.net/gh/([^/]+)/([^/@]+)@([^/]+)/(.*)")
+                .matcher(base);
+        if (!m.matches()) return null;
+        String tail = m.group(4);
+        // base 末尾是配置文件所在目录；映射到 raw 时 branch 后接目录
+        return "https://raw.githubusercontent.com/" + m.group(1) + "/" + m.group(2)
+                + "/" + m.group(3) + "/" + tail;
+    }
+
+    /** 判断地址看起来是二进制资源（jsDelivr 会 403，不能作为候选）。 */
+    private static boolean isBinary(String url) {
+        String low = url.toLowerCase();
+        int q = low.indexOf('?');
+        if (q > 0) low = low.substring(0, q);
+        return low.endsWith(".jar") || low.endsWith(".apk") || low.endsWith(".zip")
+                || low.endsWith(".so") || low.endsWith(".dex");
+    }
+
+    /** 候选地址：直连 + CDN + 各镜像前缀（去重、保持顺序）。 */
     public static String[] candidates(String url) {
         if (url == null || url.length() == 0) return new String[0];
         List<String> out = new ArrayList<>();
         out.add(url);
         if (url.startsWith("http://") || url.startsWith("https://")) {
+            // jsDelivr 只对文本类资源放行；二进制走代理镜像
+            if (!isBinary(url)) {
+                String cdn = jsDelivr(url);
+                if (cdn != null && !out.contains(cdn)) out.add(cdn);
+                String fastly = cdn == null ? null : cdn.replace("cdn.jsdelivr.net", "fastly.jsdelivr.net");
+                if (fastly != null && !out.contains(fastly)) out.add(fastly);
+            }
             for (String mirror : MIRRORS) {
                 String candidate = mirror + url;
                 if (!out.contains(candidate)) out.add(candidate);
@@ -125,6 +172,18 @@ public final class MirrorFetch {
      * @return 实际写入字节数
      */
     public static long download(String url, File target, String userAgent) throws Exception {
+        return download(url, target, userAgent, "");
+    }
+
+    /**
+     * 下载文件到 target；先写 .part 再改名，避免半截文件被当成有效 jar。
+     *
+     * @param expectedMd5 配置里声明的 md5（可为空）；不为空时下载完立即校验，
+     *                    不匹配就删掉并重试用下一个候选（实测 ghproxy.net 会返回
+     *                    HTTP 200 但只给半截文件，不校验会留下坏 jar）。
+     * @return 实际写入字节数
+     */
+    public static long download(String url, File target, String userAgent, String expectedMd5) throws Exception {
         String[] urls = candidates(url);
         Exception last = null;
         File parent = target.getParentFile();
@@ -133,6 +192,14 @@ public final class MirrorFetch {
             long start = System.currentTimeMillis();
             try {
                 long written = downloadOnce(urls[i], target, userAgent);
+                if (expectedMd5 != null && expectedMd5.length() > 0) {
+                    String actual = com.github.tvbox.osc.util.MD5.getFileMd5(target);
+                    if (!expectedMd5.equalsIgnoreCase(actual)) {
+                        target.delete();
+                        throw new java.io.IOException("MD5 不匹配 expected=" + expectedMd5
+                                + " actual=" + actual + "（内容不完整或被改写）");
+                    }
+                }
                 Log.i(TAG, "file ok try=" + (i + 1) + "/" + urls.length
                         + " cost=" + (System.currentTimeMillis() - start) + "ms bytes=" + written
                         + " url=" + shorten(urls[i]));

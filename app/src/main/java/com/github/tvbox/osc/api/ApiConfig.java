@@ -1,6 +1,7 @@
 package com.github.tvbox.osc.api;
 
 import android.app.Activity;
+import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
 import android.net.Uri;
@@ -54,6 +55,10 @@ import java.util.regex.Pattern;
  * @description:
  */
 public class ApiConfig {
+    /** 内置示例订阅：xiaosa-unlimited（jsDelivr CDN，国内直连可用）。 */
+    public static final String DEFAULT_API_URL =
+            "https://cdn.jsdelivr.net/gh/736368217/tvbox@xiaosa-unlimited/api.json";
+
     private static ApiConfig instance;
     private LinkedHashMap<String, SourceBean> sourceBeanList;
     private SourceBean mHomeSource;
@@ -132,15 +137,19 @@ public class ApiConfig {
     }
 
         public void loadConfig(final boolean useCache, final LoadConfigCallback callback, Activity activity) {
-        final String apiUrl = Hawk.get(HawkConfig.API_URL, "");
+        String apiUrl = Hawk.get(HawkConfig.API_URL, "");
         if (apiUrl.isEmpty()) {
-            callback.error("-1");
-            return;
+            // 老版本首次启动没有任何默认订阅，首页永远空白 —— 用户会以为「订阅功能坏了」。
+            // 内置一份国内直连可达的示例订阅（jsDelivr CDN，只对文本类放行）。
+            apiUrl = DEFAULT_API_URL;
+            Hawk.put(HawkConfig.API_URL, apiUrl);
+            Log.i(MirrorFetch.TAG, "api_url empty -> default " + apiUrl);
         }
+        final String configUrlForCache = apiUrl;
         final File cache = new File(App.getInstance().getFilesDir().getAbsolutePath() + "/" + MD5.encode(apiUrl));
         if (useCache && cache.exists()) {
             try {
-                parseJson(apiUrl, cache);
+                parseJson(configUrlForCache, cache);
                 callback.success();
                 return;
             } catch (Throwable th) {
@@ -175,7 +184,7 @@ public class ApiConfig {
                 final String json;
                 try {
                     // 直连优先，失败自动换镜像（见 MirrorFetch）；单次尝试有超时，不会长时间无响应
-                    json = prepareContent(apiUrl, configKey,
+                    json = prepareContent(configUrlForCache, configKey,
                             MirrorFetch.fetchText(fetchUrl, userAgent, requestAccept));
                 } catch (Throwable th) {
                     th.printStackTrace();
@@ -184,7 +193,7 @@ public class ApiConfig {
                         public void run() {
                             if (cache.exists()) {
                                 try {
-                                    parseJson(apiUrl, cache);
+                                    parseJson(configUrlForCache, cache);
                                     callback.success();
                                     return;
                                 } catch (Throwable inner) {
@@ -200,7 +209,7 @@ public class ApiConfig {
                     @Override
                     public void run() {
                         try {
-                            parseJson(apiUrl, json);
+                            parseJson(configUrlForCache, json);
                             try {
                                 File cacheDir = cache.getParentFile();
                                 if (!cacheDir.exists()) cacheDir.mkdirs();
@@ -266,7 +275,7 @@ public class ApiConfig {
                         fos.close();
                     } else {
                         // 直连优先，失败自动换镜像；写 .part 再改名，避免半截 jar
-                        MirrorFetch.download(downloadUrl, cache, userAgent);
+                        MirrorFetch.download(downloadUrl, cache, userAgent, md5);
                     }
                     ok = jarLoader.load(cache.getAbsolutePath());
                 } catch (Throwable th) {
@@ -697,7 +706,12 @@ public class ApiConfig {
                 url = "http://" + url;
             }
             if(url.startsWith("clan://"))url=clanToAddress(url);
-            content = content.replace("./", url.substring(0,url.lastIndexOf("/") + 1));
+            String base = url.substring(0, url.lastIndexOf("/") + 1);
+            // jsDelivr 的 @branch 路径不能当相对资源基址：会把 ./spider.jar 拼成 403 的 CDN 地址。
+            // 统一还原成 raw.githubusercontent.com，由 MirrorFetch 展开 CDN/代理候选。
+            String rawBase = MirrorFetch.rawFromJsDelivr(base);
+            if (rawBase != null) base = rawBase;
+            content = content.replace("./", base);
         }
         return content;
     }
