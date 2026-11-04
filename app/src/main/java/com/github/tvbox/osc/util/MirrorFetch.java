@@ -33,14 +33,18 @@ public final class MirrorFetch {
     public static final String TAG = "SubFetch";
 
     /** 镜像前缀，按实测可用性排序；直连始终排第一。 */
+    /** 镜像前缀，按实测「能拿全文件」排序；直连始终排第一。 */
     private static final String[] MIRRORS = {
-            "https://ghproxy.net/",
             "https://gh-proxy.com/",
             "https://ghfast.top/",
+            "https://ghproxy.net/",   // 实测会 200 但只给半截文件，靠 md5 校验兜底
     };
 
     private static final int CONNECT_TIMEOUT_SEC = 12;
     private static final int READ_TIMEOUT_SEC = 30;
+    /** 单次请求总时长硬上限：readTimeout 只管两次 read 的间隔，服务器一直慢慢吐仍会拖很久
+     *  （实测直连资产 118 秒才失败）。callTimeout 从调用开始算，超时必断。 */
+    private static final int CALL_TIMEOUT_SEC = 45;
 
     /** 慢速放弃阈值：前 25 秒拿不到 256KB 就换下一个候选，避免死等慢速直连。 */
     private static final long SLOW_WINDOW_MS = 25000L;
@@ -56,6 +60,7 @@ public final class MirrorFetch {
 
     private static final class Holder {
         static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+                .callTimeout(CALL_TIMEOUT_SEC, TimeUnit.SECONDS)
                 .connectTimeout(CONNECT_TIMEOUT_SEC, TimeUnit.SECONDS)
                 .readTimeout(READ_TIMEOUT_SEC, TimeUnit.SECONDS)
                 .writeTimeout(READ_TIMEOUT_SEC, TimeUnit.SECONDS)
@@ -172,7 +177,21 @@ public final class MirrorFetch {
      * @return 实际写入字节数
      */
     public static long download(String url, File target, String userAgent) throws Exception {
-        return download(url, target, userAgent, "");
+        return download(url, target, userAgent, "", 0L, "");
+    }
+
+    /**
+     * TV 更新用：除 md5 外还可用「声明的文件大小」和 SHA-256 判定完整性。
+     * 任一候选不满足就删掉换下一个（ghproxy.net 常返回 200 但只给半截文件）。
+     */
+    public static long download(String url, File target, String userAgent,
+                                long expectedSize, String expectedSha256) throws Exception {
+        return download(url, target, userAgent, "", expectedSize, expectedSha256);
+    }
+
+    /** 兼容 ApiConfig：只按 md5 校验（订阅 spider.jar 用）。 */
+    public static long download(String url, File target, String userAgent, String expectedMd5) throws Exception {
+        return download(url, target, userAgent, expectedMd5, 0L, "");
     }
 
     /**
@@ -183,7 +202,8 @@ public final class MirrorFetch {
      *                    HTTP 200 但只给半截文件，不校验会留下坏 jar）。
      * @return 实际写入字节数
      */
-    public static long download(String url, File target, String userAgent, String expectedMd5) throws Exception {
+    public static long download(String url, File target, String userAgent, String expectedMd5,
+                                long expectedSize, String expectedSha256) throws Exception {
         String[] urls = candidates(url);
         Exception last = null;
         File parent = target.getParentFile();
@@ -198,6 +218,18 @@ public final class MirrorFetch {
                         target.delete();
                         throw new java.io.IOException("MD5 不匹配 expected=" + expectedMd5
                                 + " actual=" + actual + "（内容不完整或被改写）");
+                    }
+                }
+                if (expectedSize > 0 && written != expectedSize) {
+                    target.delete();
+                    throw new java.io.IOException("文件大小不符 expected=" + expectedSize
+                            + " actual=" + written + "（内容被截断）");
+                }
+                if (expectedSha256 != null && expectedSha256.length() > 0) {
+                    String actual = sha256(target);
+                    if (!expectedSha256.equalsIgnoreCase(actual)) {
+                        target.delete();
+                        throw new java.io.IOException("SHA-256 不匹配（内容不完整或被改写）");
                     }
                 }
                 Log.i(TAG, "file ok try=" + (i + 1) + "/" + urls.length
@@ -254,6 +286,21 @@ public final class MirrorFetch {
             throw new java.io.IOException("无法重命名下载文件");
         }
         return written;
+    }
+
+    private static String sha256(File file) {
+        try (java.io.FileInputStream in = new java.io.FileInputStream(file)) {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] buffer = new byte[64 * 1024];
+            int read;
+            while ((read = in.read(buffer)) > 0) digest.update(buffer, 0, read);
+            byte[] hash = digest.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte v : hash) sb.append(String.format("%02X", v));
+            return sb.toString();
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     private static String shorten(String url) {

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- TV 遥控专用：所有可操作项都是 focusable，方向键可上下/左右切换，确认键触发 -->
+    <LinearLayout
+        android:layout_width="@dimen/vs_600"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/shape_dialog_bg_main"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/vs_30"
+        android:paddingTop="@dimen/vs_20"
+        android:paddingRight="@dimen/vs_30"
+        android:paddingBottom="@dimen/vs_20">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="软件更新"
+            android:textColor="@color/color_CC000000"
+            android:textSize="@dimen/ts_26"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_10"
+            android:gravity="center"
+            android:textColor="@color/color_CC000000"
+            android:textSize="@dimen/ts_24" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/vs_200"
+            android:layout_marginTop="@dimen/vs_10"
+            android:focusable="false">
+
+            <TextView
+                android:id="@+id/tvNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_20" />
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_10"
+            android:gravity="center"
+            android:focusable="false"
+            android:textColor="@color/color_CC000000"
+            android:textSize="@dimen/ts_20" />
+
+        <!-- 两个大按钮，横排：左右键切换，确认键触发；始终 focusable -->
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_20">
+
+            <TextView
+                android:id="@+id/btnUpdate"
+                android:layout_width="@dimen/vs_50"
+                android:layout_height="@dimen/vs_60"
+                android:layout_margin="@dimen/vs_10"
+                android:layout_weight="1"
+                android:background="@drawable/button_dialog_main"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="center"
+                android:maxLines="1"
+                android:nextFocusRight="@+id/btnSkip"
+                android:text="立即更新"
+                android:textColor="@color/color_FFFFFF"
+                android:textSize="@dimen/ts_24" />
+
+            <TextView
+                android:id="@+id/btnSkip"
+                android:layout_width="@dimen/vs_50"
+                android:layout_height="@dimen/vs_60"
+                android:layout_margin="@dimen/vs_10"
+                android:layout_weight="1"
+                android:background="@drawable/button_dialog_main"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="center"
+                android:maxLines="1"
+                android:nextFocusLeft="@+id/btnUpdate"
+                android:text="暂不更新"
+                android:textColor="@color/color_FFFFFF"
+                android:textSize="@dimen/ts_24" />
+        </TableRow>
+    </LinearLayout>
+</FrameLayout>

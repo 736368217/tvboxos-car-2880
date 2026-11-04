@@ -26,6 +26,8 @@ import com.github.tvbox.osc.ui.dialog.ApiDialog;
 import com.github.tvbox.osc.ui.dialog.BackupDialog;
 import com.github.tvbox.osc.ui.dialog.SearchRemoteTvDialog;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
+import com.github.tvbox.osc.ui.dialog.TvUpdateDialog;
+import com.github.tvbox.osc.update.TvUpdate;
 import com.github.tvbox.osc.ui.dialog.XWalkInitDialog;
 import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.FileUtils;
@@ -73,6 +75,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvFastSearchText;
     private TextView tvRecStyleText;
     private TextView tvIjkCachePlay;
+    private TextView tvUpdateValue;
     // 画面增强三项（本项目新增）
     private TextView tvFilterValue;
     private TextView tvSrValue;
@@ -126,6 +129,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvPlay.setText(PlayerHelper.getPlayerName(Hawk.get(HawkConfig.PLAY_TYPE, 0)));
         tvRender.setText(PlayerHelper.getRenderName(Hawk.get(HawkConfig.PLAY_RENDER, 0)));
         tvIjkCachePlay.setText(Hawk.get(HawkConfig.IJK_CACHE_PLAY, false) ? "开启" : "关闭");
+        tvUpdateValue = findViewById(R.id.tvUpdateValue);
+        tvUpdateValue.setText(TvUpdate.localVersionName(mContext));
         tvFilterValue = findViewById(R.id.tvFilterValue);
         tvSrValue = findViewById(R.id.tvSrValue);
         tvMemcValue = findViewById(R.id.tvMemcValue);
@@ -165,6 +170,16 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 FastClickCheckUtil.check(v);
                 BackupDialog dialog = new BackupDialog(mActivity);
                 dialog.show();
+            }
+        });
+        findViewById(R.id.llCheckUpdate).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                // TV 习惯：只在用户主动点「检查更新」时才弹窗，绝不自动抢遥控焦点。
+                // 结果/失败原因同时写回这一行的右侧文字，电视上不用依赖一闪而过的 Toast。
+                tvUpdateValue.setText("检查中…");
+                TvUpdateDialog.checkAndShow(mActivity, tvUpdateValue);
             }
         });
         findViewById(R.id.llAbout).setOnClickListener(new View.OnClickListener() {
