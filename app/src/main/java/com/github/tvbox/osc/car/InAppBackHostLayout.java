@@ -28,6 +28,8 @@ final class InAppBackHostLayout extends FrameLayout {
     private ViewTreeObserver observedTree;
     private String mode, side;
     private boolean resumed, disposed, hideOnRoot, playbackHidden, haptic, geometryDirty = true;
+    private boolean lastShowBall, lastShowEdge, lastShowSwipe, visibilityApplied;
+    private long lastWakeMs;
     private float displayDensity = 1f, tokenScale = 1f;
     private float insetLeft, insetTop, insetRight, insetBottom;
     private float safeLeft, safeTop, safeRight, safeBottom;
@@ -119,13 +121,27 @@ final class InAppBackHostLayout extends FrameLayout {
     }
 
     void wake() {
+        wakeAt(-1f, -1f);
+    }
+
+    /** 页面 DOWN 时带上触点：隐藏后只有落在边缘热区的触摸才把条拉回来。 */
+    void wakeAt(float x, float y) {
         if (disposed || !resumed) return;
+        // 车机的触摸/按键会被重复派发；每次 DOWN 都 wake 会不断重置隐藏计时，
+        // 于是「几秒后自动隐藏」永远等不到。加冷却：1 秒内只真正唤醒一次。
+        long now = android.os.SystemClock.uptimeMillis();
+        if (now - lastWakeMs < 1000L) {
+            recheckRootAfterNavigation();
+            return;
+        }
+        lastWakeMs = now;
         ball.wake();
-        edge.wake();
+        if (x >= 0f && y >= 0f) edge.wakeFromEdge(x, y);
+        else edge.wake();
         swipe.wake();
-        // Defer visibility changes until after the initiating DOWN has reached its original target.
         recheckRootAfterNavigation();
     }
+
     void setPlaybackHidden(boolean hidden) {
         if (playbackHidden == hidden) return;
         playbackHidden = hidden;
@@ -159,7 +175,16 @@ final class InAppBackHostLayout extends FrameLayout {
         boolean showBall = show && !swipeMode && !HawkConfig.BACK_MODE_EDGE.equals(mode);
         boolean showEdge = show && !swipeMode && !HawkConfig.BACK_MODE_FLOATING.equals(mode);
         boolean showSwipe = show && swipeMode;
-        android.util.Log.i("InAppBack", "vis mode=" + mode + " show=" + show
+        // 这个方法会被 attach / layout / focus / rootCheck 反复调用（现场日志 147 次）。
+        // 以前每次都 setActive(true) 会把已淡出的边缘条/球重新点亮并重启隐藏计时，
+        // 结果看起来就是「一直显示关不掉」。只在显示状态真正变化时才碰它们。
+        if (visibilityApplied && showBall == lastShowBall && showEdge == lastShowEdge
+                && showSwipe == lastShowSwipe) return;
+        visibilityApplied = true;
+        lastShowBall = showBall;
+        lastShowEdge = showEdge;
+        lastShowSwipe = showSwipe;
+        android.util.Log.i("InAppBack", "vis_changed mode=" + mode + " show=" + show
                 + " ball=" + showBall + " edge=" + showEdge + " swipe=" + showSwipe
                 + " resumed=" + resumed + " playbackHidden=" + playbackHidden + " rootHidden=" + rootHidden);
         ball.setVisibility(showBall ? VISIBLE : INVISIBLE);
@@ -171,7 +196,7 @@ final class InAppBackHostLayout extends FrameLayout {
     }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) wake();
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) wakeAt(event.getX(), event.getY());
         return super.dispatchTouchEvent(event);
     }
 

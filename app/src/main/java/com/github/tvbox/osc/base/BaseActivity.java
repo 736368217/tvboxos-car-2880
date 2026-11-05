@@ -101,7 +101,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event != null && event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            InAppBackButton.wake(this);
+            InAppBackButton.wakeAt(this, event.getX(), event.getY());
         }
         return super.dispatchTouchEvent(event);
     }

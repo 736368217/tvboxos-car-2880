@@ -62,6 +62,11 @@ public final class InAppBackButton {
 
     /** Wake only: never synchronously move a hit box under the initiating page touch. */
     public static void wake(Activity activity) { update(activity, WAKE); }
+    public static void wakeAt(Activity activity, float x, float y) {
+        if (activity == null) return;
+        InAppBackHostLayout host = find(activity);
+        if (host != null) host.wakeAt(x, y);
+    }
     public static void setPlaybackHidden(Activity activity, boolean hidden) {
         if (activity == null) return;
         if (Looper.myLooper() != Looper.getMainLooper()) {

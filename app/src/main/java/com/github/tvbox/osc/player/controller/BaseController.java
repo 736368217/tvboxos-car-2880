@@ -45,6 +45,11 @@ public abstract class BaseController extends BaseVideoController implements Gest
     private boolean mChangePosition;
     private boolean mChangeBrightness;
     private boolean mChangeVolume;
+    /** 一次手势的主轴锁定：NONE=尚未定轴，X=进度，Y=亮度/音量，IGNORE=放弃。 */
+    private static final int AXIS_NONE = 0, AXIS_X = 1, AXIS_Y = 2, AXIS_IGNORE = 3;
+    private int mGestureAxis = AXIS_NONE;
+    private float mDownX, mDownY;
+    private int mAxisSlopPx;
     private boolean mCanChangePosition = true;
     private boolean mEnableInNormal;
     private boolean mCanSlide;
@@ -256,18 +261,32 @@ public abstract class BaseController extends BaseVideoController implements Gest
     public void setPlayState(int playState) {
         super.setPlayState(playState);
         mCurPlayState = playState;
-        // 播放器就绪/切换时才拿得到真正的引擎类型：此时把音量收敛到当前播放器允许的上限。
-        // 例如从 EXO（可到 200%）切到 IJK，之前存下的 180% 必须立刻压回 100%。
+        // 播放器就绪/切换（含切窗口回来 onResume 触发的 PLAYING）后，必须把**用户偏好**
+        // 重新下发给当前引擎。r68 在这里只 clamp 到能力上限，结果能力探测短暂返回 false
+        // 时把 view/processor 压成 1f 却仍显示 300%，用户听到 1x —— 这就是「300% 和
+        // 100% 一个声音」的状态分裂。现在改为：能力可用就直接下发保存值；不可用则
+        // 只压本次运行值（不写 Hawk），并保留偏好让下次 EXO 就绪时恢复。
         if (playState == VideoView.STATE_PREPARED || playState == VideoView.STATE_PLAYING) {
-            applyVolumeLimit();
+            reapplyAppVolume();
         }
     }
 
-    /** 把当前音量夹到播放器允许的范围，并同步给播放器。 */
-    private void applyVolumeLimit() {
-        // An engine capability limit is not a user edit: keep the requested preference intact.
-        float effective = clampVolume(mAppVolume);
-        if (mControlWrapper != null) mControlWrapper.setVolume(effective);
+    /** 重下发用户音量偏好；能力不支持时仅收敛运行值，绝不改写持久化偏好。 */
+    private void reapplyAppVolume() {
+        float preferred = com.github.tvbox.osc.car.VolumeBoostMath.clampGain(
+                Hawk.get(HawkConfig.VOLUME_GAIN, 100) / 100f);
+        boolean supported = canBoostVolume();
+        float effective = supported ? preferred : Math.min(1f, preferred);
+        mAppVolume = preferred;   // 保持 controller 与 UI 显示的是用户偏好
+        if (mControlWrapper != null) {
+            mControlWrapper.setVolume(effective);
+            if (supported && effective > 1.001f) {
+                // 某些引擎在 setVolume 之后会重建 sink；补一次增益广播保证 processor 拿到 3f。
+                mControlWrapper.setVolume(effective);
+            }
+        }
+        LOG.i("volume_reapply preferred=" + Math.round(preferred * 100)
+                + "% effective=" + Math.round(effective * 100) + "% supported=" + supported);
     }
 
     protected boolean isInPlaybackState() {
@@ -288,10 +307,6 @@ public abstract class BaseController extends BaseVideoController implements Gest
                 && !PlayerUtils.isEdge(getContext(), event);
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        return mGestureDetector.onTouchEvent(event);
-    }
 
     /**
      * 手指按下的瞬间
@@ -313,6 +328,10 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mChangePosition = false;
         mChangeBrightness = false;
         mChangeVolume = false;
+        mGestureAxis = AXIS_NONE;
+        mDownX = e.getX();
+        mDownY = e.getY();
+        mAxisSlopPx = Math.max(12, android.view.ViewConfiguration.get(getContext()).getScaledTouchSlop() * 2);
         mVolumeStart = clampVolume(mAppVolume);
         return true;
     }
@@ -345,25 +364,29 @@ public abstract class BaseController extends BaseVideoController implements Gest
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
         if (!canHandleGesture(e1)) return true;
-        float deltaX = e1.getX() - e2.getX();
-        float deltaY = e1.getY() - e2.getY();
-        if (mFirstTouch) {
-            mChangePosition = Math.abs(distanceX) >= Math.abs(distanceY);
-            if (!mChangePosition) {
-                //半屏宽度
+        // 用「按下点 → 当前点」的累计位移定轴，绝不用单个 MOVE 的逐帧增量。
+        // 起始抖动在垂直手势里常常带一点横向噪声，旧写法第一个 MOVE 就把它判成进度，
+        // 然后整段手势锁死进度 —— 用户想上下拉调音量却跳了播放位置。
+        float deltaX = mDownX - e2.getX();
+        float deltaY = mDownY - e2.getY();
+        float absX = Math.abs(deltaX), absY = Math.abs(deltaY);
+        if (mGestureAxis == AXIS_NONE) {
+            if (Math.max(absX, absY) < mAxisSlopPx) return true;  // 轻微抖动：不定轴、不动作
+            int axis = com.github.tvbox.osc.car.GestureAxis.decide(
+                    deltaX, deltaY, mAxisSlopPx, 1.2f, mCanChangePosition);
+            if (axis == com.github.tvbox.osc.car.GestureAxis.NONE) return true;
+            mGestureAxis = axis == com.github.tvbox.osc.car.GestureAxis.X ? AXIS_X
+                    : axis == com.github.tvbox.osc.car.GestureAxis.Y ? AXIS_Y : AXIS_IGNORE;
+            mChangePosition = mGestureAxis == AXIS_X;
+            if (mGestureAxis == AXIS_Y) {
                 int halfScreen = PlayerUtils.getScreenWidth(getContext(), true) / 2;
-                if (e2.getX() > halfScreen) {
+                if (mDownX > halfScreen) {
                     mChangeVolume = true;
                 } else {
                     mChangeBrightness = isBrightnessGestureEnabled();
                 }
+                if (!mChangeBrightness && !mChangeVolume) mGestureAxis = AXIS_IGNORE;
             }
-
-            if (mChangePosition) {
-                //根据用户设置是否可以滑动调节进度来决定最终是否可以滑动调节进度
-                mChangePosition = mCanChangePosition;
-            }
-
             if (mChangePosition || mChangeBrightness || mChangeVolume) {
                 for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
                     IControlComponent component = next.getKey();
@@ -371,9 +394,14 @@ public abstract class BaseController extends BaseVideoController implements Gest
                         ((IGestureComponent) component).onStartSlide();
                     }
                 }
+                LOG.i("gesture_axis axis=" + (mChangePosition ? "X" : "Y")
+                        + " action=" + (mChangePosition ? "position"
+                            : mChangeVolume ? "volume" : "brightness")
+                        + " dx=" + Math.round(deltaX) + " dy=" + Math.round(deltaY));
             }
             mFirstTouch = false;
         }
+        // 锁定之后整段手势只执行这一个分支，中途方向变化也不切换功能。
         if (mChangePosition) {
             slideToChangePosition(deltaX);
         } else if (mChangeBrightness) {
@@ -500,25 +528,19 @@ public abstract class BaseController extends BaseVideoController implements Gest
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        //滑动结束时事件处理
-        if (!mGestureDetector.onTouchEvent(event)) {
-            int action = event.getAction();
-            switch (action) {
-                case MotionEvent.ACTION_UP:
-                    stopSlide();
-                    if (mSeekPosition >= 0) {
-                        mControlWrapper.seekTo(mSeekPosition);
-                        mSeekPosition = -1;
-                    }
-                    break;
-                case MotionEvent.ACTION_CANCEL:
-                    stopSlide();
-                    mSeekPosition = -1;
-                    break;
-            }
+    public boolean onTouch(View v, MotionEvent event) {
+        int action = event.getActionMasked();
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            // 手势结束：解锁主轴，下一次按下重新判定；进度只在本次锁定为 X 轴时提交。
+            boolean commit = action == MotionEvent.ACTION_UP
+                    && mGestureAxis == AXIS_X && mSeekPosition >= 0;
+            if (commit && mControlWrapper != null) mControlWrapper.seekTo(mSeekPosition);
+            mSeekPosition = -1;
+            mGestureAxis = AXIS_NONE;
+            mChangePosition = mChangeBrightness = mChangeVolume = false;
+            stopSlide();
         }
-        return super.onTouchEvent(event);
+        return mGestureDetector.onTouchEvent(event);
     }
 
     private void stopSlide() {

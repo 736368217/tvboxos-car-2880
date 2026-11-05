@@ -48,11 +48,24 @@ final class EdgePullBackView extends View {
         animateAlpha(0f, 220);
     }
 
+    /** 淡出后不主动接受触摸，避免连续的系统事件把隐藏计时无限重置。 */
+    boolean isHidden() { return visibleAlpha <= 0.01f; }
+
     private void scheduleHide() {
         removeCallbacks(hideTask);
         if (active && !capturing && visibleAlpha > 0.01f && idleMillis > 0) {
             postDelayed(hideTask, idleMillis);
         }
+    }
+
+    /** 由宿主按冷却节奏调用；真正隐藏后只允许边缘热区把条拉回来。 */
+    void wakeFromEdge(float x, float y) {
+        if (!active || capturing) return;
+        int hitSide = BackNavPolicy.edgeHit(x / unitScale, y / unitScale,
+                getWidth() / unitScale, centerY / unitScale, showsLeft(), showsRight(),
+                Math.max(36f, barWidthDp * 3f), Math.max(140f, barHeightDp + 56f));
+        if (hitSide == 0 && isHidden()) return;
+        wake();
     }
 
     private void animateAlpha(float target, long duration) {
