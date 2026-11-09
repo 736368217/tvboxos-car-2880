@@ -29,6 +29,7 @@ final class InAppBackHostLayout extends FrameLayout {
     private String mode, side;
     private boolean resumed, disposed, hideOnRoot, playbackHidden, haptic, geometryDirty = true;
     private boolean lastShowBall, lastShowEdge, lastShowSwipe, visibilityApplied;
+    private boolean mEdgeCapture;
     private long lastWakeMs;
     private float displayDensity = 1f, tokenScale = 1f;
     private float insetLeft, insetTop, insetRight, insetBottom;
@@ -121,23 +122,28 @@ final class InAppBackHostLayout extends FrameLayout {
     }
 
     void wake() {
-        wakeAt(-1f, -1f);
+        wakeAt(-1f, -1f, false);
     }
 
-    /** 页面 DOWN 时带上触点：隐藏后只有落在边缘热区的触摸才把条拉回来。 */
+    /** 页面 DOWN：普通触摸用于「点亮」，但边缘手势必须永远可用。 */
     void wakeAt(float x, float y) {
+        wakeAt(x, y, false);
+    }
+
+    /**
+     * @param forceEdge true 表示这次 DOWN 已由边缘视图确认命中，必须无条件放行。
+     *                  冷却只用于抑制车机重复派发造成的「一直点亮」，绝不拦截手势本身。
+     */
+    private void wakeAt(float x, float y, boolean forceEdge) {
         if (disposed || !resumed) return;
-        // 车机的触摸/按键会被重复派发；每次 DOWN 都 wake 会不断重置隐藏计时，
-        // 于是「几秒后自动隐藏」永远等不到。加冷却：1 秒内只真正唤醒一次。
         long now = android.os.SystemClock.uptimeMillis();
-        if (now - lastWakeMs < 1000L) {
+        if (!EdgeHitPolicy.allowWake(now, lastWakeMs, 1000L, forceEdge)) {
             recheckRootAfterNavigation();
             return;
         }
         lastWakeMs = now;
         ball.wake();
-        if (x >= 0f && y >= 0f) edge.wakeFromEdge(x, y);
-        else edge.wake();
+        edge.wake();
         swipe.wake();
         recheckRootAfterNavigation();
     }
@@ -147,6 +153,7 @@ final class InAppBackHostLayout extends FrameLayout {
         playbackHidden = hidden;
         applyVisibility();
     }
+
 
     void recheckRootAfterNavigation() {
         removeCallbacks(rootCheck);
@@ -179,7 +186,14 @@ final class InAppBackHostLayout extends FrameLayout {
         // 以前每次都 setActive(true) 会把已淡出的边缘条/球重新点亮并重启隐藏计时，
         // 结果看起来就是「一直显示关不掉」。只在显示状态真正变化时才碰它们。
         if (visibilityApplied && showBall == lastShowBall && showEdge == lastShowEdge
-                && showSwipe == lastShowSwipe) return;
+                && showSwipe == lastShowSwipe) {
+            // 即使显示状态没变，也要保证边缘视图的 active 与 visible 没被别的路径关掉。
+            // 部分界面被系统回收/重建后曾出现「逻辑上 showEdge=true、视图却 inactive」
+            // 从而整条边缘拉不出来的情况。
+            if (showEdge && edge.getVisibility() != VISIBLE) edge.setVisibility(VISIBLE);
+            if (showBall && ball.getVisibility() != VISIBLE) ball.setVisibility(VISIBLE);
+            return;
+        }
         visibilityApplied = true;
         lastShowBall = showBall;
         lastShowEdge = showEdge;
@@ -187,6 +201,7 @@ final class InAppBackHostLayout extends FrameLayout {
         android.util.Log.i("InAppBack", "vis_changed mode=" + mode + " show=" + show
                 + " ball=" + showBall + " edge=" + showEdge + " swipe=" + showSwipe
                 + " resumed=" + resumed + " playbackHidden=" + playbackHidden + " rootHidden=" + rootHidden);
+        ball.setVisibility(showBall ? VISIBLE : INVISIBLE);
         ball.setVisibility(showBall ? VISIBLE : INVISIBLE);
         edge.setVisibility(showEdge ? VISIBLE : INVISIBLE);
         swipe.setVisibility(showSwipe ? VISIBLE : INVISIBLE);
@@ -196,7 +211,31 @@ final class InAppBackHostLayout extends FrameLayout {
     }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) wakeAt(event.getX(), event.getY());
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            boolean edgeDown = lastShowEdge && EdgeHitPolicy.hit(event.getX(), event.getY(),
+                    getWidth(), 0f, getHeight(),
+                    Math.max(dp(40), dp(InAppBackButton.getBarWidthDp()) * 3f), true, true) != 0;
+            wakeAt(event.getX(), event.getY(), edgeDown);
+            if (edgeDown) {
+                MotionEvent copy = MotionEvent.obtain(event);
+                boolean handled = edge.onTouchEvent(copy);
+                copy.recycle();
+                if (handled) {
+                    mEdgeCapture = true;
+                    return true;
+                }
+            }
+        }
+        if (mEdgeCapture) {
+            int action = event.getActionMasked();
+            MotionEvent copy = MotionEvent.obtain(event);
+            boolean handled = edge.onTouchEvent(copy);
+            copy.recycle();
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                mEdgeCapture = false;
+            }
+            if (handled) return true;
+        }
         return super.dispatchTouchEvent(event);
     }
 

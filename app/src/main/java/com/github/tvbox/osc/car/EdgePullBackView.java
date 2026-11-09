@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.view.MotionEvent;
@@ -16,19 +17,34 @@ import android.view.animation.LinearInterpolator;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.orhanobut.hawk.Hawk;
 
-/** Full-window drawing surface that only accepts DOWN inside a local 28x120dp pill hit box. */
+/**
+ * 边缘返回：对标 Swipe Navigation Gesture 3.0 的「拉动有光芒」交互。
+ *
+ * <p>视觉：**静态只有一根极细的导引线**（简约、几乎不挡内容）；手指从屏幕边缘向内拉时，
+ * 用 {@code Path.cubicTo} 画一条从边缘鼓向手指的水滴/拉伸手柄，叠加径向渐变光芒与箭头，
+ * 越接近触发阈值越亮；松手若未达阈值则弹性收回。对标作品用的是一张
+ * {@code swipe_stretch_left.png} 发光贴图，这里用纯 Canvas 渐变重画，避免引入第三方资源，
+ * 效果等价且可随进度连续变化。</p>
+ *
+ * <p>命中区：r71 之前只认「小棍附近 36×140dp」一小块，播放页/全屏页手指稍偏就完全拉不出来。
+ * 现在 DOWN 判定改为**整条屏幕边缘带**（x 在边缘热区内、y 覆盖可用高度），与对标作品的
+ * 全高 Overlay 一致；页面中央触摸仍然完全穿透，不拦截内容。</p>
+ */
 final class EdgePullBackView extends View {
     private final InAppBackHostLayout host;
     private final BackNavPolicy.EdgeGesture gesture = new BackNavPolicy.EdgeGesture();
     private final Paint pill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint line = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint glow = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint arrowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint text = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
     private final Path wave = new Path();
     private final Path arrow = new Path();
     private ValueAnimator retraction;
     private float unitScale = 1, centerY, minY, maxY, startCenterY, pullDp, progress;
+    private float pullY;   // 光芒跟随手指所在高度，而不是固定画在导引线中心
     private int barWidthDp = 12, barHeightDp = 96, barColor = 0xFF38BDF8, barAlpha = 55;
     private boolean active, capturing, ignoreStream, pullLeft, armed;
     private String side = HawkConfig.BACK_SIDE_LEFT, skin = HawkConfig.BACK_SKIN_TEARDROP;
@@ -38,17 +54,16 @@ final class EdgePullBackView extends View {
     private ValueAnimator fade;
     private final Runnable hideTask = this::fadeOut;
 
-    private void cancelHide() {
-        removeCallbacks(hideTask);
-    }
+    private static final int GLOW_CORE = 0xFF7DD3FC;
+    private static final int GLOW_EDGE = 0x0038BDF8;
 
-    /** 闲置到点后淡出；点按/拖动/任何页面触摸都会重新唤醒。 */
+    private void cancelHide() { removeCallbacks(hideTask); }
+
     private void fadeOut() {
         if (!active || capturing || visibleAlpha <= 0.01f) return;
         animateAlpha(0f, 220);
     }
 
-    /** 淡出后不主动接受触摸，避免连续的系统事件把隐藏计时无限重置。 */
     boolean isHidden() { return visibleAlpha <= 0.01f; }
 
     private void scheduleHide() {
@@ -58,14 +73,15 @@ final class EdgePullBackView extends View {
         }
     }
 
-    /** 由宿主按冷却节奏调用；真正隐藏后只允许边缘热区把条拉回来。 */
-    void wakeFromEdge(float x, float y) {
+    /**
+     * 页面 DOWN 唤醒：**只负责点亮导引线，不负责手势**。
+     * 手势由本 View 自己的 onTouchEvent 判定，且必须始终可用（隐藏态也能一拉就出）。
+     */
+    void wake() {
         if (!active || capturing) return;
-        int hitSide = BackNavPolicy.edgeHit(x / unitScale, y / unitScale,
-                getWidth() / unitScale, centerY / unitScale, showsLeft(), showsRight(),
-                Math.max(36f, barWidthDp * 3f), Math.max(140f, barHeightDp + 56f));
-        if (hitSide == 0 && isHidden()) return;
-        wake();
+        cancelHide();
+        if (visibleAlpha < 1f) animateAlpha(1f, 120);
+        scheduleHide();
     }
 
     private void animateAlpha(float target, long duration) {
@@ -80,16 +96,6 @@ final class EdgePullBackView extends View {
         fade.start();
     }
 
-    /** 供宿主在页面触摸/按键时唤醒。 */
-    void wake() {
-        if (!active || capturing) return;
-        cancelHide();
-        if (visibleAlpha < 1f) {
-            animateAlpha(1f, 120);
-        }
-        scheduleHide();
-    }
-
     private void beginReposition() {
         if (active && capturing && gesture.longPress()) {
             host.feedback(this, false);
@@ -102,12 +108,16 @@ final class EdgePullBackView extends View {
         this.host = host;
         setClickable(false);
         setFocusable(false);
-        // This full-window drawing surface must not mask the underlying accessibility tree.
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         line.setStyle(Paint.Style.STROKE);
         line.setStrokeCap(Paint.Cap.ROUND);
         line.setStrokeJoin(Paint.Join.ROUND);
-        text.setColor(0xFFFFFFFF);
+        glow.setStyle(Paint.Style.FILL);
+        arrowPaint.setStyle(Paint.Style.STROKE);
+        arrowPaint.setStrokeCap(Paint.Cap.ROUND);
+        arrowPaint.setStrokeJoin(Paint.Join.ROUND);
+        arrowPaint.setColor(0xFFFFFFFF);
+        text.setColor(0xFFE2E8F0);
         text.setFakeBoldText(true);
     }
 
@@ -148,33 +158,34 @@ final class EdgePullBackView extends View {
         }
         invalidate();
     }
-
-    /** Reference SVG token in the current car viewport, not the Android density bucket. */
     private float dp(float value) { return value * unitScale; }
     private boolean showsLeft() { return !HawkConfig.BACK_SIDE_RIGHT.equals(side); }
     private boolean showsRight() { return !HawkConfig.BACK_SIDE_LEFT.equals(side); }
 
+    private int hitSide(float x, float y) {
+        float w = Math.max(dp(40), dp(barWidthDp) * 3f);
+        return EdgeHitPolicy.hit(x, y, getWidth(),
+                minY - dp(120), maxY + dp(120), w, showsLeft(), showsRight());
+    }
 
     @Override public boolean onTouchEvent(MotionEvent event) {
         if (!active) return false;
         int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
-            int hitSide = BackNavPolicy.edgeHit(event.getX() / unitScale, event.getY() / unitScale,
-                    getWidth() / unitScale, centerY / unitScale, showsLeft(), showsRight(),
-                    Math.max(36f, barWidthDp * 3f), Math.max(140f, barHeightDp + 56f));
-            if (hitSide == 0) return false;
+            int sideHit = hitSide(event.getX(), event.getY());
+            if (sideHit == 0) return false;       // 空白区永远穿透
             stopMotion();
             cancelHide();
-            if (visibleAlpha < 1f) {
-                if (fade != null) fade.cancel();
-                visibleAlpha = 1f;
-            }
+            if (fade != null) fade.cancel();
+            visibleAlpha = 1f;                    // 隐藏态也能一拉即出
             capturing = true;
-            pullLeft = hitSide < 0;
+            pullLeft = sideHit < 0;
             startCenterY = centerY;
+            pullY = event.getY();
             gesture.begin(event.getX() / unitScale, event.getY() / unitScale, pullLeft);
             postDelayed(longPress, BackNavPolicy.LONG_PRESS_MS);
             getParent().requestDisallowInterceptTouchEvent(true);
+            invalidate();
             return true;
         }
         if (action == MotionEvent.ACTION_POINTER_DOWN || action == MotionEvent.ACTION_POINTER_UP) {
@@ -188,7 +199,6 @@ final class EdgePullBackView extends View {
             if (gesture.move(event.getX() / unitScale, event.getY() / unitScale)) host.feedback(this, true);
             if (gesture.state() != BackNavPolicy.EdgeGesture.State.WAITING) removeCallbacks(longPress);
             if (gesture.state() == BackNavPolicy.EdgeGesture.State.REPOSITIONING) {
-                // Keep the original finger-to-pill offset instead of teleporting the center to the finger.
                 centerY = BackNavPolicy.clamp(startCenterY + dp(gesture.deltaY()), minY, maxY);
             } else if (gesture.state() == BackNavPolicy.EdgeGesture.State.PULLING) {
                 pullDp = BackNavPolicy.pullWidth(gesture.rawPull());
@@ -214,23 +224,20 @@ final class EdgePullBackView extends View {
         scheduleHide();
         if (getParent() != null) getParent().requestDisallowInterceptTouchEvent(false);
         retract();
-        if (back) host.performBack(); // Dispatch on UP, not at the end of the 180ms return animation.
+        if (back) host.performBack();
     }
 
     private void retract() {
         if (retraction != null) retraction.cancel();
         final float start = pullDp;
         final float startProgress = progress;
-        if (start <= 0) {
-            armed = false;
-            invalidate();
-            return;
-        }
+        if (start <= 0) { armed = false; invalidate(); return; }
         retraction = ValueAnimator.ofFloat(0, .45f);
         retraction.setDuration(220);
         retraction.setInterpolator(new LinearInterpolator());
         retraction.addUpdateListener(animation -> {
-            pullDp = Math.max(0, BackNavPolicy.springPosition(start, 0, 0, (float) animation.getAnimatedValue()));
+            float seconds = (float) animation.getAnimatedValue();
+            pullDp = Math.max(0, BackNavPolicy.springPosition(start, 0, 0, seconds));
             progress = startProgress * BackNavPolicy.clamp(pullDp / start, 0, 1);
             invalidate();
         });
@@ -248,114 +255,90 @@ final class EdgePullBackView extends View {
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (visibleAlpha <= 0.01f) return;
-
-        // 小棍与拉出抽屉是同一个东西的两个状态：拉出时小棍淡出、抽屉淡入，
-        // 避免"杠还在 + 抽屉又画一份"的重叠。
-        float morph = BackNavPolicy.clamp(pullDp / 10f, 0f, 1f);
-        morph = morph * morph * (3f - 2f * morph); // smoothstep
-        if (morph < 0.999f) {
-            if (showsLeft()) drawPill(canvas, true, 1f - morph);
-            if (showsRight()) drawPill(canvas, false, 1f - morph);
-        }
+        drawTrack(canvas);
         if (pullDp <= .1f) return;
-
-        int layer = Math.round(255f * morph);
+        int layer = Math.round(255f * BackNavPolicy.clamp(pullDp / 10f, 0f, 1f));
         int save = canvas.saveLayerAlpha(0, 0, getWidth(), getHeight(), layer);
-        canvas.translate(pullLeft ? 0 : getWidth(), centerY);
+        canvas.translate(pullLeft ? 0 : getWidth(), capturing ? pullY : centerY);
         if (!pullLeft) canvas.scale(-1, 1);
-        float width = dp(pullDp);
-        boolean capsule = HawkConfig.BACK_SKIN_CAPSULE.equals(skin);
-        line.setStrokeWidth(dp(armed ? 2.2f : 1.8f));
-        line.setColor(capsule ? 0xFF38BDF8 : armed ? 0xFF7DD3FC : 0xFF94A3B8);
-        line.setAlpha(255);
-        fill.setShader(armed && !capsule ? new LinearGradient(0, 0, Math.max(1, width), 0,
-                0xF20284C7, 0xF238BDF8, Shader.TileMode.CLAMP) : null);
-        fill.setColor(capsule ? 0xF21E293B : 0xE01E293B);
-        if (capsule) drawCapsule(canvas, width);
-        else drawTeardrop(canvas, width);
+        drawStretch(canvas, dp(pullDp));
         canvas.restoreToCount(save);
     }
 
-    private void drawPill(Canvas canvas, boolean left, float alphaScale) {
-        float inset = dp(2);
-        float width = dp(barWidthDp);
-        float height = dp(barHeightDp);
-        float x = left ? inset : getWidth() - inset - width;
-        rect.set(x, centerY - height / 2f, x + width, centerY + height / 2f);
-        boolean adjusting = capturing && left == pullLeft
-                && gesture.state() == BackNavPolicy.EdgeGesture.State.REPOSITIONING;
-        pill.setColor(adjusting ? 0xFFFBBF24 : barColor);
-        // 透明度可配置；调整位置时临时满不透明，便于看清拖动。
-        pill.setAlpha(adjusting ? 255
-                : Math.round(255f * barAlpha / 100f * visibleAlpha * Math.max(0f, alphaScale)));
-        canvas.drawRoundRect(rect, width / 2f, width / 2f, pill);
+    /** 静态态：一根极细的半透明导引线 + 中心微光点，简约、不挡内容。 */
+    private void drawTrack(Canvas canvas) {
+        float pull = BackNavPolicy.clamp(pullDp / 10f, 0f, 1f);
+        float alpha = Math.max(0f, 1f - pull) * visibleAlpha * barAlpha / 100f;
+        float w = Math.max(dp(2), dp(barWidthDp) * .22f);
+        float h = dp(Math.min(barHeightDp, 74));
+        pill.setColor(barColor);
+        pill.setAlpha(Math.round(255 * alpha * .55f));
+        if (showsLeft()) {
+            rect.set(dp(2), centerY - h / 2f, dp(2) + w, centerY + h / 2f);
+            canvas.drawRoundRect(rect, w / 2f, w / 2f, pill);
+        }
+        if (showsRight()) {
+            rect.set(getWidth() - dp(2) - w, centerY - h / 2f, getWidth() - dp(2), centerY + h / 2f);
+            canvas.drawRoundRect(rect, w / 2f, w / 2f, pill);
+        }
+        if (pull < .01f && visibleAlpha > .5f) {
+            // 中心一点冷光，提示「这里可以拉」，不做任何文字/大色块
+            glow.setShader(new RadialGradient(dp(2) + w / 2f, centerY, dp(12),
+                    GLOW_CORE, GLOW_EDGE, Shader.TileMode.CLAMP));
+            glow.setAlpha(Math.round(255 * alpha));
+            canvas.drawCircle(dp(2) + w / 2f, centerY, dp(12), glow);
+            glow.setShader(null);
+        }
     }
 
-    private void drawTeardrop(Canvas canvas, float width) {
-        float halfHeight = Math.min(dp(80), Math.max(dp(38), width * 1.2f));
+    /** 拉动态：对标作品的 cubicTo 拉伸手柄 + 径向光芒 + 箭头。 */
+    private void drawStretch(Canvas canvas, float width) {
+        float half = Math.min(dp(78), Math.max(dp(30), width * 1.05f));
         wave.reset();
-        wave.moveTo(0, -halfHeight);
-        wave.cubicTo(0, -halfHeight * .57f, width, -halfHeight * .405f, width, 0);
-        wave.cubicTo(width, halfHeight * .405f, 0, halfHeight * .57f, 0, halfHeight);
+        wave.moveTo(0, -half);
+        wave.cubicTo(0, -half * .46f, width, -half * .38f, width, 0);
+        wave.cubicTo(width, half * .38f, 0, half * .46f, 0, half);
         wave.close();
+
+        // 光芒：沿手柄推进的径向渐变，越接近触发越亮
+        float glowRadius = Math.max(dp(28), width * 1.15f);
+        float cx = width * .62f;
+        glow.setShader(new RadialGradient(cx, 0, glowRadius,
+                GLOW_CORE, GLOW_EDGE, Shader.TileMode.CLAMP));
+        glow.setAlpha(Math.round(90 + 150 * progress));
+        canvas.drawCircle(cx, 0, glowRadius, glow);
+        glow.setShader(null);
+
+        // 手柄本体：冷色渐变，armed 时更亮
+        fill.setShader(new LinearGradient(0, -half, width, half,
+                armed ? 0xF40284C7 : 0xC00F172A,
+                armed ? 0xF27DD3FC : 0xD038BDF8,
+                Shader.TileMode.CLAMP));
         canvas.drawPath(wave, fill);
+        fill.setShader(null);
+
+        line.setStyle(Paint.Style.STROKE);
+        line.setStrokeWidth(dp(armed ? 2f : 1.4f));
+        line.setColor(armed ? 0xFFE0F2FE : 0xB07DD3FC);
+        line.setAlpha(Math.round(200 + 55 * progress));
         canvas.drawPath(wave, line);
-        float cx = width * .56f;
-        if (armed) {
-            float radius = Math.min(dp(16), width * .36f);
-            pill.setColor(0x600F172A);
-            canvas.drawCircle(cx, 0, radius, pill);
-            line.setColor(0xFFE0F2FE);
-            canvas.drawCircle(cx, 0, radius, line);
-        }
-        drawChevron(canvas, cx, Math.min(dp(8) * (armed ? 1.2f : .85f + .15f * progress), width * .36f));
-    }
 
-    private void drawCapsule(Canvas canvas, float width) {
-        float capsuleWidth = dp(BackNavPolicy.capsuleWidth(pullDp, progress));
-        float halfHeight = Math.min(dp(22), capsuleWidth * .25f);
-        rect.set(0, -halfHeight, capsuleWidth, halfHeight);
-        canvas.drawRoundRect(rect, halfHeight, halfHeight, fill);
-        canvas.drawRoundRect(rect, halfHeight, halfHeight, line);
-        int save = canvas.save();
-        if (!pullLeft) {
-            canvas.translate(capsuleWidth, 0);
-            canvas.scale(-1, 1);
-        }
-        if (armed && capsuleWidth >= dp(76)) {
-            float iconRadius = dp(14), iconX = pullLeft ? capsuleWidth - dp(23) : dp(23);
-            pill.setColor(0xFF0284C7);
-            canvas.drawCircle(iconX, 0, iconRadius, pill);
-            line.setColor(0xFF7DD3FC);
-            line.setStrokeWidth(dp(1));
-            canvas.drawCircle(iconX, 0, iconRadius, line);
-            float textLeft = pullLeft ? dp(10) : iconX + iconRadius + dp(5);
-            float textRight = pullLeft ? iconX - iconRadius - dp(5) : capsuleWidth - dp(10);
-            String label = "\u677e\u624b\u8fd4\u56de";
-            text.setColor(0xFFE2E8F0);
-            text.setTextSize(dp(11));
-            float available = Math.max(1, textRight - textLeft);
-            text.setTextSize(dp(11) * Math.min(1, available / Math.max(1, text.measureText(label))));
-            text.setTextAlign(Paint.Align.CENTER);
-            canvas.drawText(label, (textLeft + textRight) / 2f, -(text.ascent() + text.descent()) / 2f, text);
-            drawChevron(canvas, iconX, dp(7), 1);
-        } else drawChevron(canvas, capsuleWidth * .5f, Math.min(dp(8), capsuleWidth * .16f), 1);
-        canvas.restoreToCount(save);
-    }
-
-    private void drawChevron(Canvas canvas, float cx, float span) {
-        drawChevron(canvas, cx, span, pullLeft ? 1 : -1);
-    }
-
-    private void drawChevron(Canvas canvas, float cx, float span, float direction) {
-        line.setColor(0xFFFFFFFF);
-        line.setAlpha(Math.round(255 * progress * Math.min(1, pullDp / 16f)));
-        line.setStrokeWidth(dp(3));
+        // 箭头：随进度放大，触发阈值后显示「松手返回」
+        float span = Math.min(dp(11), width * .3f) * (.7f + .3f * progress);
+        arrowPaint.setStrokeWidth(dp(3));
+        arrowPaint.setAlpha(Math.round(220 * Math.min(1f, .3f + progress)));
         arrow.reset();
-        arrow.moveTo(cx + direction * span * .45f, -span);
-        arrow.lineTo(cx - direction * span * .55f, 0);
-        arrow.lineTo(cx + direction * span * .45f, span);
-        canvas.drawPath(arrow, line);
+        arrow.moveTo(cx + span * .45f, -span);
+        arrow.lineTo(cx - span * .55f, 0);
+        arrow.lineTo(cx + span * .45f, span);
+        canvas.drawPath(arrow, arrowPaint);
+        if (armed && width > dp(64)) {
+            String label = "\u677e\u624b\u8fd4\u56de";
+            text.setTextAlign(Paint.Align.CENTER);
+            text.setTextSize(dp(10));
+            text.setAlpha(230);
+            canvas.drawText(label, width * .5f, -half - dp(8), text);
+        }
     }
 
     private void stopMotion() {
@@ -364,12 +347,8 @@ final class EdgePullBackView extends View {
         retraction = null;
         gesture.end(true);
         capturing = ignoreStream = armed = false;
-        pullDp = progress = 0;
-    }
-
-    @Override protected void onDetachedFromWindow() {
-        active = false;
-        stopMotion();
-        super.onDetachedFromWindow();
+        pullDp = progress = 0f;
+        setPressed(false);
+        if (getParent() != null) getParent().requestDisallowInterceptTouchEvent(false);
     }
 }
