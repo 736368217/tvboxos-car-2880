@@ -8,20 +8,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * App-level PCM gain for ExoPlayer.
+ * App-level PCM gain + automatic level alignment for ExoPlayer.
  *
- * <p>ExoPlayer's {@code setVolume()} only accepts 0..1 (it ends up in AudioTrack volume),
- * so anything above 100 % has to be applied to the decoded samples. This processor multiplies
- * every PCM sample by the current gain, saturating to the sample range.</p>
- *
- * <p>A processor instance belongs to exactly one {@code DefaultAudioSink}. Extension renderer
- * factories can construct more than one sink, so production callers use a per-sink instance and
- * a shared gain provider owned by the ExoPlayer. This prevents BaseAudioProcessor buffers/state
- * from being concurrently shared across audio renderers.</p>
- *
- * <p>Diagnostics use tag {@code CarAudioGain}: {@code configure} proves the processor is in the
- * sink chain; {@code queue} includes input/output sample magnitudes. Logs are throttled and safe
- * on a plain JVM because {@code AudioGainProcessorHostTest} drives this class without Android.</p>
+ * <p>Network video tracks are often ~-33 dBFS while music is near 0 dBFS. Even 300 % sounds
+ * quiet, so users compensate with the *system* volume (shared with music) and keep adjusting
+ * back and forth. {@link AutoLevel} raises quiet tracks toward a music-like target while the
+ * app gain stays at 100 %; soft-clipping replaces hard clipping. Once the user changes the
+ * app gain, auto alignment steps aside. One processor per DefaultAudioSink.</p>
  */
 public final class AudioGainProcessor extends BaseAudioProcessor {
 
@@ -30,17 +23,18 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
     }
 
     private static final String TAG = "CarAudioGain";
-    /** r68：增益上限 300%，与 car 层 VolumeBoostMath.MAX_GAIN 一致。 */
     private static final float MAX_GAIN = 3f;
     private final GainProvider gainProvider;
     private volatile float gain = 1f;
+    private final AutoLevel autoLevel = new AutoLevel();
+    private volatile boolean autoLevelEnabled = true;
     private int encoding = C.ENCODING_PCM_16BIT;
 
-    // ---------------------------------------------------------------- diagnostics
     private long configureCalls;
     private long queueCalls;
     private float lastAppliedGain = -1f;
     private float lastLoggedGain = 1f;
+    private float lastMakeup = 1f;
 
     public AudioGainProcessor() {
         this(null);
@@ -50,14 +44,21 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         this.gainProvider = gainProvider;
     }
 
-    /** A standalone processor for tests or a sink that owns its gain state. */
     public static AudioGainProcessor create() {
         return new AudioGainProcessor();
     }
 
-    /** A sink-owned processor whose gain is read from its owning player. */
     public static AudioGainProcessor create(GainProvider gainProvider) {
         return new AudioGainProcessor(gainProvider);
+    }
+
+    public void setAutoLevelEnabled(boolean enabled) {
+        autoLevelEnabled = enabled;
+        autoLevel.reset();
+    }
+
+    public boolean isAutoLevelEnabled() {
+        return autoLevelEnabled;
     }
 
     public void setGain(float gain) {
@@ -67,6 +68,7 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
             lastLoggedGain = next;
             log("set_gain " + this.gain + " -> " + next + " (queue_calls=" + queueCalls + ")");
         }
+        if (Math.abs(next - this.gain) > 0.001f) autoLevel.reset();
         this.gain = next;
     }
 
@@ -90,14 +92,15 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
                     + " enc=" + encodingName(inputAudioFormat.encoding)
                     + " sampleRate=" + inputAudioFormat.sampleRate
                     + " channels=" + inputAudioFormat.channelCount
-                    + " accepted=" + kept + " gain=" + getGain());
+                    + " accepted=" + kept + " gain=" + getGain()
+                    + " autoLevel=" + autoLevelEnabled);
         }
         if (kept) {
             encoding = inputAudioFormat.encoding;
+            autoLevel.reset();
             return inputAudioFormat;
         }
-        log("configure REJECTED enc=" + encodingName(inputAudioFormat.encoding)
-                + " -> gain cannot be applied");
+        log("configure REJECTED enc=" + encodingName(inputAudioFormat.encoding));
         throw new UnhandledAudioFormatException(inputAudioFormat);
     }
 
@@ -105,22 +108,48 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
     public void queueInput(ByteBuffer inputBuffer) {
         int remaining = inputBuffer.remaining();
         if (remaining <= 0) return;
-        float currentGain = getGain();
+        float userGain = getGain();
         boolean report = queueCalls < 3 || queueCalls % 500 == 0;
         boolean isFloat = encoding == C.ENCODING_PCM_FLOAT;
-        long levelIn = 0;
-        long levelOut = 0;
+        int samples = remaining / (isFloat ? 4 : 2);
 
         ByteBuffer output = replaceOutputBuffer(remaining);
         output.order(ByteOrder.nativeOrder());
         inputBuffer.order(ByteOrder.nativeOrder());
 
+        float peak = 0f;
+        long levelIn = 0;
+        long levelOut = 0;
+        int pos = inputBuffer.position();
+
         if (isFloat) {
-            while (inputBuffer.remaining() >= 4) {
+            for (int i = 0; i < samples; i++) {
+                float v = Math.abs(inputBuffer.getFloat(pos + i * 4));
+                if (v > peak) peak = v;
+            }
+        } else {
+            int peakAbs = 0;
+            for (int i = 0; i < samples; i++) {
+                int v = Math.abs(inputBuffer.getShort(pos + i * 2));
+                if (v > peakAbs) peakAbs = v;
+            }
+            peak = peakAbs / 32767f;
+        }
+
+        float makeup = autoLevelEnabled && Math.abs(userGain - 1f) < 0.001f
+                ? autoLevel.update(peak, samples) : 1f;
+        float combined = AutoLevel.combined(makeup, userGain, 1f);
+        boolean muted = combined < 0.0001f;
+        boolean boosted = combined > 1.0001f;
+        lastMakeup = makeup;
+
+        if (isFloat) {
+            for (int i = 0; i < samples; i++) {
                 float in = inputBuffer.getFloat();
-                float value = in * currentGain;
-                if (value > 1f) value = 1f;
-                else if (value < -1f) value = -1f;
+                float amplified = in * combined;
+                float value = muted ? 0f
+                        : boosted && (amplified > 0.72f || amplified < -0.72f)
+                        ? AutoLevel.softClip(amplified) : amplified;
                 if (report) {
                     levelIn += Math.round(Math.abs(in) * 1_000_000f);
                     levelOut += Math.round(Math.abs(value) * 1_000_000f);
@@ -128,43 +157,50 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
                 output.putFloat(value);
             }
         } else {
-            while (inputBuffer.remaining() >= 2) {
+            for (int i = 0; i < samples; i++) {
                 int in = inputBuffer.getShort();
-                int value = Math.round(in * currentGain);
-                if (value > Short.MAX_VALUE) value = Short.MAX_VALUE;
-                else if (value < Short.MIN_VALUE) value = Short.MIN_VALUE;
+                int out;
+                if (muted) {
+                    out = 0;
+                } else if (Math.abs(combined - 1f) < 0.0001f) {
+                    out = in;   // exact unity passthrough, no float quantisation loss
+                } else {
+                    float amplified = (in / 32768f) * combined;
+                    float clipped = boosted && (amplified > 0.72f || amplified < -0.72f)
+                            ? AutoLevel.softClip(amplified) : amplified;
+                    out = Math.max(Short.MIN_VALUE,
+                            Math.min(Short.MAX_VALUE, Math.round(clipped * 32767f)));
+                }
                 if (report) {
                     levelIn += Math.abs(in);
-                    levelOut += Math.abs(value);
+                    levelOut += Math.abs(out);
                 }
-                output.putShort((short) value);
+                output.putShort((short) out);
             }
         }
         output.flip();
 
         queueCalls++;
         if (report) {
-            lastAppliedGain = currentGain;
-            log("queue n=" + queueCalls + " gain=" + currentGain
+            lastAppliedGain = combined;
+            log("queue n=" + queueCalls + " gain=" + userGain
+                    + " makeup=" + lastMakeup + " combined=" + lastAppliedGain
+                    + " peak=" + peak
                     + " enc=" + encodingName(encoding)
-                    + " samples=" + (remaining / (isFloat ? 4 : 2))
+                    + " samples=" + samples
                     + " level_in=" + levelIn + " level_out=" + levelOut);
         }
     }
 
-    public float appliedGain() {
-        return lastAppliedGain;
-    }
-
-    public long queueCount() {
-        return queueCalls;
-    }
+    public float appliedGain() { return lastAppliedGain; }
+    public float makeup() { return lastMakeup; }
+    public long queueCount() { return queueCalls; }
 
     private static void log(String message) {
         try {
             android.util.Log.i(TAG, message);
         } catch (Throwable ignored) {
-            // The Android stub throws on a plain host JVM; diagnostics must not affect processing.
+            // Android stub throws on a plain host JVM.
         }
     }
 

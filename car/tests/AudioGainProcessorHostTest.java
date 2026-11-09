@@ -72,15 +72,17 @@ public final class AudioGainProcessorHostTest {
         short[] doubled = run16(processor, 2f, 1000, -1000, 20000, -20000, 32767, -32768);
         check(doubled[0] == 2000, "200% must double positive samples, got " + doubled[0]);
         check(doubled[1] == -2000, "200% must double negative samples, got " + doubled[1]);
-        check(doubled[2] == 32767, "200% saturates at +full scale, got " + doubled[2]);
-        check(doubled[3] == -32768, "200% saturates at -full scale, got " + doubled[3]);
-        check(doubled[4] == 32767 && doubled[5] == -32768, "already full scale stays clamped");
+        // r73：满量程改用软限幅，避免硬削顶失真；要求不回绕、不超满量程、仍比小信号响。
+        check(doubled[2] > 20000 && doubled[2] <= 32767, "200% soft-clips +full scale, got " + doubled[2]);
+        check(doubled[3] < -20000 && doubled[3] >= -32768, "200% soft-clips -full scale, got " + doubled[3]);
+        check(doubled[4] > 20000 && doubled[5] < -20000, "already full scale stays clean");
 
         // 300%（r68 新上限）：三倍增益确实到达采样层，而不是被中间 clamp 吃掉
         short[] tripled = run16(processor, 3f, 1000, -1000, 20000, -20000);
         check(tripled[0] == 3000, "300% must triple positive samples, got " + tripled[0]);
         check(tripled[1] == -3000, "300% must triple negative samples, got " + tripled[1]);
-        check(tripled[2] == 32767 && tripled[3] == -32768, "300% saturates at full scale");
+        check(tripled[2] > 20000 && tripled[2] <= 32767 && tripled[3] < -20000 && tripled[3] >= -32768,
+                "300% soft-clips full scale");
 
         // 150%：单调放大
         short[] oneAndHalf = run16(processor, 1.5f, 1000, -1000);
@@ -111,7 +113,9 @@ public final class AudioGainProcessorHostTest {
         float[] floats = runFloat(processor, 2f, 0.25f, -0.25f, 0.9f, -0.9f);
         check(Math.abs(floats[0] - 0.5f) < 1e-6, "float 200% → 0.5, got " + floats[0]);
         check(Math.abs(floats[1] + 0.5f) < 1e-6, "float 200% → -0.5, got " + floats[1]);
-        check(floats[2] == 1f && floats[3] == -1f, "float saturates at ±1");
+        // r73：软限幅不再硬钳到 ±1，但必须不超 ±1、不回绕、且比输入大
+        check(floats[2] <= 1f && floats[2] > 0.9f && floats[3] >= -1f && floats[3] < -0.9f,
+                "float soft-clips within ±1");
 
         // 不支持的编码必须声明为「未处理」，让音频链路回落而不是静默丢采样
         boolean rejected = false;
