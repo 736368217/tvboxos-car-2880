@@ -30,11 +30,39 @@ import xyz.doikki.videoplayer.render.RenderViewFactory;
 import xyz.doikki.videoplayer.render.TextureRenderViewFactory;
 
 public class PlayerHelper {
+
+    /**
+     * 加载 IJK native 库；任何一个失败就回退 ExoPlayer。
+     * 原版把 UnsatisfiedLinkError 吞在 loadLibrary 里，loadLibrariesOnce 会误判为成功，
+     * 随后 new IjkMediaPlayer() 才失败，TV 上表现为「点开视频一片黑」。
+     */
+    private static PlayerFactory tryIjkOrExo(final IJKCode codec) {
+        boolean ok = true;
+        try {
+            tv.danmaku.ijk.media.player.IjkMediaPlayer.loadLibrariesOnce(new IjkLibLoader() {
+                @Override
+                public void loadLibrary(String s) throws UnsatisfiedLinkError, SecurityException {
+                    System.loadLibrary(s);
+                }
+            });
+        } catch (Throwable th) {
+            ok = false;
+            android.util.Log.w("TvPlayer", "IJK native 库加载失败，回退 ExoPlayer: " + th);
+            th.printStackTrace();
+        }
+        if (!ok) return ExoMediaPlayerFactory.create();
+        return new PlayerFactory<IjkMediaPlayer>() {
+            @Override
+            public IjkMediaPlayer createPlayer(Context context) {
+                return new IjkMediaPlayer(context, codec);
+            }
+        };
+    }
     public static void updateCfg(VideoView videoView, JSONObject playerCfg) {
         updateCfg(videoView,playerCfg,-1);
     }
     public static void updateCfg(VideoView videoView, JSONObject playerCfg,int forcePlayerType) {
-        int playerType = Hawk.get(HawkConfig.PLAY_TYPE, 0);
+        int playerType = Hawk.get(HawkConfig.PLAY_TYPE, 2);
         int renderType = Hawk.get(HawkConfig.PLAY_RENDER, 0);
         String ijkCode = Hawk.get(HawkConfig.IJK_CODEC, "软解码");
         int scale = Hawk.get(HawkConfig.PLAY_SCALE, 0);
@@ -50,26 +78,7 @@ public class PlayerHelper {
         IJKCode codec = ApiConfig.get().getIJKCodec(ijkCode);
         PlayerFactory playerFactory;
         if (playerType == 1) {
-            playerFactory = new PlayerFactory<IjkMediaPlayer>() {
-                @Override
-                public IjkMediaPlayer createPlayer(Context context) {
-                    return new IjkMediaPlayer(context, codec);
-                }
-            };
-            try {
-                tv.danmaku.ijk.media.player.IjkMediaPlayer.loadLibrariesOnce(new IjkLibLoader() {
-                    @Override
-                    public void loadLibrary(String s) throws UnsatisfiedLinkError, SecurityException {
-                        try {
-                            System.loadLibrary(s);
-                        } catch (Throwable th) {
-                            th.printStackTrace();
-                        }
-                    }
-                });
-            } catch (Throwable th) {
-                th.printStackTrace();
-            }
+            playerFactory = tryIjkOrExo(codec);
         } else if (playerType == 2) {
             playerFactory = ExoMediaPlayerFactory.create();
         } else {
@@ -95,29 +104,10 @@ public class PlayerHelper {
     }
 
     public static void updateCfg(VideoView videoView) {
-        int playType = Hawk.get(HawkConfig.PLAY_TYPE, 0);
+        int playType = Hawk.get(HawkConfig.PLAY_TYPE, 2);
         PlayerFactory playerFactory;
         if (playType == 1) {
-            playerFactory = new PlayerFactory<IjkMediaPlayer>() {
-                @Override
-                public IjkMediaPlayer createPlayer(Context context) {
-                    return new IjkMediaPlayer(context, null);
-                }
-            };
-            try {
-                tv.danmaku.ijk.media.player.IjkMediaPlayer.loadLibrariesOnce(new IjkLibLoader() {
-                    @Override
-                    public void loadLibrary(String s) throws UnsatisfiedLinkError, SecurityException {
-                        try {
-                            System.loadLibrary(s);
-                        } catch (Throwable th) {
-                            th.printStackTrace();
-                        }
-                    }
-                });
-            } catch (Throwable th) {
-                th.printStackTrace();
-            }
+            playerFactory = tryIjkOrExo(null);
         } else if (playType == 2) {
             playerFactory = ExoMediaPlayerFactory.create();
         } else {
@@ -144,18 +134,18 @@ public class PlayerHelper {
 
 
     public static void init() {
+        // 默认播放器已是 ExoPlayer(2)，不必在启动时强行加载老 ijk so。
+        // 只有用户显式选了 IJK 才加载；失败时明确记日志，避免静默进坏状态。
+        if (Hawk.get(HawkConfig.PLAY_TYPE, 2) != 1) return;
         try {
             tv.danmaku.ijk.media.player.IjkMediaPlayer.loadLibrariesOnce(new IjkLibLoader() {
                 @Override
                 public void loadLibrary(String s) throws UnsatisfiedLinkError, SecurityException {
-                    try {
-                        System.loadLibrary(s);
-                    } catch (Throwable th) {
-                        th.printStackTrace();
-                    }
+                    System.loadLibrary(s);
                 }
             });
         } catch (Throwable th) {
+            android.util.Log.w("TvPlayer", "启动时 IJK native 库加载失败（播放会自动回退 Exo）: " + th);
             th.printStackTrace();
         }
     }

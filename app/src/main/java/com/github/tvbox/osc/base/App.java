@@ -64,8 +64,14 @@ public class App extends MultiDexApplication {
         // Hawk
         Hawk.init(this).build();
         Hawk.put(HawkConfig.DEBUG_OPEN, false);
+        // oldTv 原版默认强制 IJK(1)，其自带 32 位 ijk so 在较新 TV 上常加载失败，
+        // 而 PlayerHelper 又把 UnsatisfiedLinkError 吞掉 —— 表现就是播放黑屏。
+        // 对齐上游 main：默认与迁移都用 ExoPlayer(2)，不再依赖那组老 so。
         if (!Hawk.contains(HawkConfig.PLAY_TYPE)) {
-            Hawk.put(HawkConfig.PLAY_TYPE, 1);
+            Hawk.put(HawkConfig.PLAY_TYPE, 2);
+        } else if (Hawk.get(HawkConfig.PLAY_TYPE, 2) == 0
+                || Hawk.get(HawkConfig.PLAY_TYPE, 2) == 1) {
+            Hawk.put(HawkConfig.PLAY_TYPE, 2);
         }
     }
 
