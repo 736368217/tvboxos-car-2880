@@ -60,8 +60,11 @@ public final class OfficialManifest {
         if (version == null || version.length() == 0) {
             throw new IllegalArgumentException("官方清单缺少 version");
         }
-        String software = stringField(head, "software");
-        String notes = stringField(head, "notes");
+        String software = stringField(body, "software");
+        // r75：发布脚本把 notes 放在 files 数组之后。旧实现只截 files 之前的 head 去找，
+        // 官方优先通道永远返回空说明，更新弹窗显示「该版本没有填写更新说明」。
+        // 顶层标量字段要在整个对象里找，files 的嵌套对象仍只从 firstObject 读。
+        String notes = stringField(body, "notes");
 
         String apkName = null;
         String apkUrl = null;

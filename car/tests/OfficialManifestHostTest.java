@@ -99,6 +99,15 @@ public final class OfficialManifestHostTest {
                 "{\"version\":\"1.0\",\"notes\":\"修 \\\"音量\\\"\\n第二行\",\"files\":[{\"url\":\"/a.apk\"}]}",
                 BASE).notes, "修 \"音量\"\n第二行", "notes unescaped");
         eq(OfficialManifest.parse("{\"version\":\"1.0\"}", BASE).notes, "", "notes optional");
+        // r75 真实发布形状：notes 位于 files/releasedAt 之后，且含转义换行。
+        String published = "{\"software\":\"tvbox-car\",\"version\":\"3.1.0-car.7-r74\","
+                + "\"files\":[{\"name\":\"TVBox.apk\",\"url\":\"/tvbox-car/r74/TVBox.apk\"}],"
+                + "\"releasedAt\":\"2026-11-10T18:25:45+0800\","
+                + "\"notes\":\"r74 更新说明\\n- 修复历史封面\\n- 用户需注意\"}";
+        OfficialManifest notesAfterFiles = OfficialManifest.parse(published, BASE);
+        eq(notesAfterFiles.notes, "r74 更新说明\n- 修复历史封面\n- 用户需注意",
+                "notes after files array parsed");
+        eq(notesAfterFiles.apkName, "TVBox.apk", "files metadata still parsed with trailing notes");
 
         // 版本比较仍按迭代号优先（官方清单用 versionName 写法）
         check(UpdateVersion.hasUpdate("3.1.0-car.7-r64", "3.1.0-car.7-r65"), "r64 -> r65 is an update");
