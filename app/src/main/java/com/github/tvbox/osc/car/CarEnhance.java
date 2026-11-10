@@ -71,6 +71,8 @@ public final class CarEnhance {
         AudioEffectController.apply(mode, session, boost);
         Log.i("CarAudio", "runtime_apply mode=" + mode + " session=" + session + " gain=" + gain
                 + " factor=" + factor + " applied=" + (gain * factor)
+                + " max_gain=" + VolumeBoostMath.MAX_GAIN
+                + " auto_level=" + AutoLevelPreference.enabled()
                 + " path=" + (pcm ? "pcm" : "loudness") + " boostMb=" + boost
                 + " enabled=" + AudioEffectController.isActive()
                 + " state=" + view.getCurrentPlayState()

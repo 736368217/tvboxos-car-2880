@@ -146,10 +146,11 @@ public final class DiagLog {
                 deviceId, totalBytes() / 1024.0 / 1024.0, last);
     }
 
-    /** 立即写一行标记（关键操作用）。 */
+    /** 立即写一行标记（关键操作用）：本地环形日志 + logcat 双写，便于服务端和用户反馈对齐。 */
     public static void event(String message) {
         if (app == null) return;
         writeMarker("EVENT " + message);
+        Log.i("CarFeedback", message);
     }
 
     /** 持久随机设备 ID：应用数据被清除前不变，重启/版本升级都不变。 */

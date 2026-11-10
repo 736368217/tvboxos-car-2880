@@ -163,7 +163,7 @@ final class EdgePullBackView extends View {
     private boolean showsRight() { return !HawkConfig.BACK_SIDE_LEFT.equals(side); }
 
     private int hitSide(float x, float y) {
-        float w = Math.max(dp(40), dp(barWidthDp) * 3f);
+        float w = EdgeGeometry.hitWidthPx(getWidth(), Math.max(dp(40), dp(barWidthDp) * 3f));
         return EdgeHitPolicy.hit(x, y, getWidth(),
                 minY - dp(120), maxY + dp(120), w, showsLeft(), showsRight());
     }
@@ -293,16 +293,18 @@ final class EdgePullBackView extends View {
 
     /** 拉动态：对标作品的 cubicTo 拉伸手柄 + 径向光芒 + 箭头。 */
     private void drawStretch(Canvas canvas, float width) {
-        float half = Math.min(dp(78), Math.max(dp(30), width * 1.05f));
+        float safeWidth = Math.min(width, EdgeGeometry.maxVisualWidthPx(getWidth()));
+        float half = EdgeGeometry.leafHalfHeightPx(getHeight(),
+                Math.min(dp(78), Math.max(dp(30), safeWidth * 1.05f)));
         wave.reset();
         wave.moveTo(0, -half);
-        wave.cubicTo(0, -half * .46f, width, -half * .38f, width, 0);
-        wave.cubicTo(width, half * .38f, 0, half * .46f, 0, half);
+        wave.cubicTo(0, -half * .46f, safeWidth, -half * .38f, safeWidth, 0);
+        wave.cubicTo(safeWidth, half * .38f, 0, half * .46f, 0, half);
         wave.close();
 
         // 光芒：沿手柄推进的径向渐变，越接近触发越亮
-        float glowRadius = Math.max(dp(28), width * 1.15f);
-        float cx = width * .62f;
+        float glowRadius = Math.max(dp(28), safeWidth * 1.15f);
+        float cx = safeWidth * .62f;
         glow.setShader(new RadialGradient(cx, 0, glowRadius,
                 GLOW_CORE, GLOW_EDGE, Shader.TileMode.CLAMP));
         glow.setAlpha(Math.round(90 + 150 * progress));
@@ -310,7 +312,7 @@ final class EdgePullBackView extends View {
         glow.setShader(null);
 
         // 手柄本体：冷色渐变，armed 时更亮
-        fill.setShader(new LinearGradient(0, -half, width, half,
+        fill.setShader(new LinearGradient(0, -half, safeWidth, half,
                 armed ? 0xF40284C7 : 0xC00F172A,
                 armed ? 0xF27DD3FC : 0xD038BDF8,
                 Shader.TileMode.CLAMP));
@@ -324,7 +326,7 @@ final class EdgePullBackView extends View {
         canvas.drawPath(wave, line);
 
         // 箭头：随进度放大，触发阈值后显示「松手返回」
-        float span = Math.min(dp(11), width * .3f) * (.7f + .3f * progress);
+        float span = Math.min(dp(11), safeWidth * .3f) * (.7f + .3f * progress);
         arrowPaint.setStrokeWidth(dp(3));
         arrowPaint.setAlpha(Math.round(220 * Math.min(1f, .3f + progress)));
         arrow.reset();
@@ -332,12 +334,12 @@ final class EdgePullBackView extends View {
         arrow.lineTo(cx - span * .55f, 0);
         arrow.lineTo(cx + span * .45f, span);
         canvas.drawPath(arrow, arrowPaint);
-        if (armed && width > dp(64)) {
+        if (armed && safeWidth > dp(64)) {
             String label = "\u677e\u624b\u8fd4\u56de";
             text.setTextAlign(Paint.Align.CENTER);
             text.setTextSize(dp(10));
             text.setAlpha(230);
-            canvas.drawText(label, width * .5f, -half - dp(8), text);
+            canvas.drawText(label, safeWidth * .5f, -half - dp(8), text);
         }
     }
 

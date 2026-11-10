@@ -3,16 +3,14 @@ package xyz.doikki.videoplayer.exo;
 /**
  * 自动电平对齐：把「网络视频音轨太轻」提升到与音乐相当的目标电平。
  *
- * <p>背景（现场日志硬证据）：{@code gain=3.0} 时 4096 个 16bit 样本
- * {@code level_in=2948248 → level_out=8844744}，比例精确 3 倍、没有削顶，但
- * level_in/4096≈720，仅占 16bit 满量程 32767 的 2.2%（约 -33 dBFS）。
- * 音乐母带通常接近 0 dBFS。「300% 不明显」不是倍数没生效，而是**音轨基准比音乐
- * 低十几 dB**；用户只能调系统音量补偿，而系统音量音乐/视频共用，于是
- * 「看视频调大 → 听歌过大」来回折腾。</p>
+ * <p>r76 用户反馈：手动顶到 300% 仍比音乐轻、且「没同步」。旧实现只在用户保持 100% 时
+ * 启用自动对齐，并把总增益封顶到 4×；现场日志 {@code gain=3.0 makeup=1.0
+ * combined=3.0 autoLevel=false} 正是「自动对齐让位」的硬证据。现在自动对齐**始终叠加**：
+ * 用户增益是相对音量的微调，自动补增益独立把轻音轨拉向音乐基准；组合增益上限放宽到
+ * 用户可接受的最大手动增益（500%）之上，由软限幅守住满量程、避免削顶失真。</p>
  *
- * <p>本类在 PCM 层做慢速、平滑的峰值归一化：测量近期峰值，若低于目标则逐步补增益，
- * 高于目标则逐步回落；与用户增益相乘后由调用方软限幅。增益变化用一阶平滑
- * （attack 慢、release 更慢），避免忽大忽小和抽气声。纯 Java，便于宿主机测试。</p>
+ * <p>增益变化用一阶平滑（attack 慢、release 更慢），避免忽大忽小和抽气声；纯 Java，
+ * 便于宿主机测试。</p>
  */
 public final class AutoLevel {
 
@@ -22,8 +20,8 @@ public final class AutoLevel {
     public static final float MAX_MAKEUP = 4f;
     /** 低于这个峰值视为静音，不抬增益。 */
     public static final float SILENCE_PEAK = 0.002f;
-    /** 自动对齐 × 用户增益的总增益上限，避免软限幅把整段压成方波。 */
-    public static final float MAX_TOTAL_GAIN = 4f;
+    /** 自动对齐 × 用户增益的总增益上限；留到 20×，实际由 softClip 守住输出电平。 */
+    public static final float MAX_TOTAL_GAIN = 20f;
 
     private static final float ATTACK = 0.02f;
     private static final float RELEASE = 0.005f;

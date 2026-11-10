@@ -77,7 +77,7 @@ public final class AudioGainProcessorHostTest {
         check(doubled[3] < -20000 && doubled[3] >= -32768, "200% soft-clips -full scale, got " + doubled[3]);
         check(doubled[4] > 20000 && doubled[5] < -20000, "already full scale stays clean");
 
-        // 300%（r68 新上限）：三倍增益确实到达采样层，而不是被中间 clamp 吃掉
+        // 300%：三倍增益确实到达采样层；r76 上限继续提高到 500%
         short[] tripled = run16(processor, 3f, 1000, -1000, 20000, -20000);
         check(tripled[0] == 3000, "300% must triple positive samples, got " + tripled[0]);
         check(tripled[1] == -3000, "300% must triple negative samples, got " + tripled[1]);
@@ -99,8 +99,8 @@ public final class AudioGainProcessorHostTest {
         check(afterChange[0] == 100, "gain change applies on the next buffer, got " + afterChange[0]);
 
         // 越界输入被夹紧，NaN 不改变当前增益
-        processor.setGain(5f);
-        check(processor.getGain() == 3f, "r68 gain clamps to 3.0");
+        processor.setGain(9f);
+        check(processor.getGain() == 5f, "r76 gain clamps to 5.0");
         processor.setGain(-3f);
         check(processor.getGain() == 0f, "negative gain clamps to 0");
         processor.setGain(1.25f);

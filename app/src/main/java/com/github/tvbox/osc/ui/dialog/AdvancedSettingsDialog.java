@@ -6,6 +6,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.github.tvbox.osc.car.AutoLevelPreference;
+import com.github.tvbox.osc.car.EdgeGeometry;
 import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.diag.DiagLog;
 import com.github.tvbox.osc.util.HawkConfig;
@@ -45,6 +46,8 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
         });
         tvAutoLevel = addRow("音量自动对齐", "", v -> {
             AutoLevelPreference.setEnabled(!AutoLevelPreference.enabled());
+            DiagLog.event("auto_level=" + (AutoLevelPreference.enabled() ? "on" : "off")
+                    + " user_gain=" + Hawk.get(HawkConfig.VOLUME_GAIN, 100) + "%");
             refresh();
         });
         tvDiagLog = addRow("诊断日志", DiagLog.status(), v -> {
@@ -63,6 +66,10 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
             InAppBackButton.setEnabled(activity, true);
             if (mode != null) InAppBackButton.setMode(activity, mode);
         }
+        DiagLog.event("back_mode=" + (enabled ? mode : "off")
+                + " hit_max=" + Math.round(EdgeGeometry.hitWidthPx(
+                        getContext().getResources().getDisplayMetrics().widthPixels,
+                        99999f)) + "px");
         refresh();
     }
 

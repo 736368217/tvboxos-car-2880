@@ -34,6 +34,7 @@ final class InAppBackHostLayout extends FrameLayout {
     private float displayDensity = 1f, tokenScale = 1f;
     private float insetLeft, insetTop, insetRight, insetBottom;
     private float safeLeft, safeTop, safeRight, safeBottom;
+    private View mEdgeCaptureView;
 
     InAppBackHostLayout(Activity activity) {
         super(activity);
@@ -160,7 +161,11 @@ final class InAppBackHostLayout extends FrameLayout {
         if (resumed && !disposed) post(rootCheck);
     }
 
-    void performBack() { InAppBackButton.performBack(owner.get()); }
+    void performBack() {
+        android.util.Log.i("InAppBack", "back_perform page=" + pageName()
+                + " mode=" + mode + " capture=" + mEdgeCapture);
+        InAppBackButton.performBack(owner.get());
+    }
 
     void feedback(View source, boolean confirm) {
         if (!haptic) return;
@@ -211,32 +216,62 @@ final class InAppBackHostLayout extends FrameLayout {
     }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            boolean edgeDown = lastShowEdge && EdgeHitPolicy.hit(event.getX(), event.getY(),
-                    getWidth(), 0f, getHeight(),
-                    Math.max(dp(40), dp(InAppBackButton.getBarWidthDp()) * 3f), true, true) != 0;
-            wakeAt(event.getX(), event.getY(), edgeDown);
-            if (edgeDown) {
-                MotionEvent copy = MotionEvent.obtain(event);
-                boolean handled = edge.onTouchEvent(copy);
+        if (disposed || !resumed) return super.dispatchTouchEvent(event);
+        int action = event.getActionMasked();
+        float x = event.getX(), y = event.getY();
+        View activeView = HawkConfig.BACK_MODE_SWIPE.equals(mode) ? swipe : edge;
+        if (action == MotionEvent.ACTION_DOWN) {
+            // r76：历史记录页等页面实测手势失效。旧逻辑只在 lastShowEdge=true 时把 DOWN
+            // 直接转给 edge，一旦 AutoSize/可见性刷新时序让这个缓存值滞后，整条手势就丢失。
+            // 现在无条件把完整 DOWN 交给当前激活视图自己判定；命中返回 true 才建立 capture，
+            // 空白区仍原样穿透给页面内容。
+            MotionEvent copy = MotionEvent.obtain(event);
+            boolean handled;
+            try {
+                handled = activeView.onTouchEvent(copy);
+            } finally {
                 copy.recycle();
-                if (handled) {
-                    mEdgeCapture = true;
-                    return true;
-                }
+            }
+            android.util.Log.i("InAppBack", "host_down page=" + pageName()
+                    + " mode=" + mode + " active=" + activeView.getClass().getSimpleName()
+                    + " x=" + (int) x + " y=" + (int) y
+                    + " w=" + getWidth() + " h=" + getHeight()
+                    + " hit=" + handled + " edgeVis=" + edge.getVisibility()
+                    + " swipeVis=" + swipe.getVisibility());
+            wakeAt(x, y, handled);
+            if (handled) {
+                mEdgeCapture = true;
+                mEdgeCaptureView = activeView;
+                return true;
             }
         }
-        if (mEdgeCapture) {
-            int action = event.getActionMasked();
+        if (mEdgeCapture && mEdgeCaptureView != null) {
             MotionEvent copy = MotionEvent.obtain(event);
-            boolean handled = edge.onTouchEvent(copy);
-            copy.recycle();
+            boolean handled;
+            try {
+                handled = mEdgeCaptureView.onTouchEvent(copy);
+            } finally {
+                copy.recycle();
+            }
+            if (action == MotionEvent.ACTION_MOVE) {
+                android.util.Log.i("InAppBack", "host_move page=" + pageName()
+                        + " x=" + (int) x + " y=" + (int) y + " handled=" + handled);
+            }
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                android.util.Log.i("InAppBack", "host_up page=" + pageName()
+                        + " action=" + action + " x=" + (int) x + " y=" + (int) y
+                        + " handled=" + handled);
                 mEdgeCapture = false;
+                mEdgeCaptureView = null;
             }
             if (handled) return true;
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    private String pageName() {
+        Activity a = owner.get();
+        return a == null ? "null" : a.getClass().getSimpleName();
     }
 
     @Override public boolean onInterceptTouchEvent(MotionEvent event) { return false; }
@@ -298,9 +333,14 @@ final class InAppBackHostLayout extends FrameLayout {
         float edgeMin = Math.max(top, halfBar);
         float edgeMax = Math.max(edgeMin, getHeight() - bottom - halfBar);
         edge.syncBounds(edgeMin, edgeMax);
+        float hitPx = EdgeGeometry.hitWidthPx(getWidth(),
+                Math.max(dp(40), dp(InAppBackButton.getBarWidthDp()) * 3f));
         android.util.Log.i("InAppBack", "geom mode=" + mode
                 + " host=" + getWidth() + "x" + getHeight()
                 + " scale=" + tokenScale + " dens=" + displayDensity
+                + " hitPx=" + (int) hitPx
+                + " visualMaxPx=" + (int) EdgeGeometry.maxVisualWidthPx(getWidth())
+                + " leafHalfMaxPx=" + (int) EdgeGeometry.leafHalfHeightPx(getHeight(), 99999f)
                 + " safe=" + (int) safeLeft + "," + (int) safeTop + "," + (int) safeRight + "," + (int) safeBottom
                 + " ballX=" + (int) ball.getX() + " ballY=" + (int) ball.getY()
                 + " ballSize=" + ball.getWidth() + "x" + ball.getHeight()

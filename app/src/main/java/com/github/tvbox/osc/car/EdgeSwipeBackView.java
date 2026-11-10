@@ -82,8 +82,12 @@ final class EdgeSwipeBackView extends View {
     private boolean showsLeft() { return !HawkConfig.BACK_SIDE_RIGHT.equals(side); }
     private boolean showsRight() { return !HawkConfig.BACK_SIDE_LEFT.equals(side); }
 
-    private float triggerPx() { return Math.max(dp(40f), token(triggerDp)); }
-    private float edgePx() { return Math.max(dp(16f), token(BackNavPolicy.SWIPE_EDGE_DP)); }
+    private float triggerPx() {
+        return EdgeGeometry.triggerPx(getWidth(), Math.max(dp(40f), token(triggerDp)));
+    }
+    private float edgePx() {
+        return EdgeGeometry.hitWidthPx(getWidth(), Math.max(dp(16f), token(BackNavPolicy.SWIPE_EDGE_DP)));
+    }
 
     @Override public boolean onTouchEvent(MotionEvent event) {
         if (!active) return false;
@@ -113,7 +117,7 @@ final class EdgeSwipeBackView extends View {
         if (action == MotionEvent.ACTION_MOVE) {
             float x = event.getX();
             float inward = fromLeft ? x - downX : downX - x;
-            float next = Math.max(0, Math.min(inward, token(BackNavPolicy.SWIPE_MAX_DP)));
+            float next = Math.max(0, Math.min(inward, EdgeGeometry.maxVisualWidthPx(getWidth())));
             long now = event.getEventTime();
             long dt = Math.max(1, now - lastMoveTime);
             velocityPx = (next - dragPx) / dt * 1000f;
@@ -198,7 +202,8 @@ final class EdgeSwipeBackView extends View {
         float originX = left ? 0 : getWidth();
 
         // 1) 拉伸带：边缘上下两点 → 手指位置的 cubic 曲线（SNG 的「橡胶带」形状）。
-        float half = Math.min(token(170f), Math.max(token(56f), w * .92f));
+        float half = EdgeGeometry.leafHalfHeightPx(getHeight(),
+                Math.min(token(170f), Math.max(token(56f), w * .92f)));
         float tipX = originX + sign * w;
         leaf.reset();
         leaf.moveTo(originX, y - half);

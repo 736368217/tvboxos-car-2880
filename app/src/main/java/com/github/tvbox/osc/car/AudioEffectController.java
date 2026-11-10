@@ -29,8 +29,8 @@ public final class AudioEffectController {
 
     private static final int FADE_STEPS = 16, MSG_FADE_STEP = 1;
     private static final long FADE_STEP_MILLIS = 32L;
-    /** LoudnessEnhancer 目标增益上限（mB）；+12 dB 已经很猛，避免破音。 */
-    private static final int MAX_BOOST_MB = 1200;
+    /** LoudnessEnhancer 目标增益上限（mB）；r76 与 500% PCM 增益对应约 +14 dB。 */
+    private static final int MAX_BOOST_MB = 1400;
 
     /** 500 ms fade-in (16 steps x 32 ms) driven on the main looper. */
     private static final Handler FADE = new Handler(Looper.getMainLooper(), new Handler.Callback() {

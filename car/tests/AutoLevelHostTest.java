@@ -38,9 +38,9 @@ public final class AutoLevelHostTest {
 
         // 组合增益：用户 100% 时就是自动补增益；300% 时总增益封顶
         near(AutoLevel.combined(4f, 1f, 1f), 4f, 0.0001f, "100% + makeup");
-        near(AutoLevel.combined(4f, 3f, 1f), AutoLevel.MAX_TOTAL_GAIN, 0.0001f, "300% capped");
+        near(AutoLevel.combined(4f, 3f, 1f), 12f, 0.0001f, "300% + makeup stays multiplied");
         near(AutoLevel.combined(4f, 3f, 0f), 0f, 0.0001f, "mute factor kills gain");
-        near(AutoLevel.combined(4f, 3f, 0.5f), 4f, 0.0001f, "duck factor capped");
+        near(AutoLevel.combined(4f, 3f, 0.5f), 6f, 0.0001f, "duck factor keeps auto alignment");
         near(AutoLevel.combined(Float.NaN, 3f, 1f), 1f, 0.0001f, "NaN safe");
 
         // 软限幅：小信号线性、大信号单调且不超 1

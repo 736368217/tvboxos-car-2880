@@ -23,7 +23,7 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
     }
 
     private static final String TAG = "CarAudioGain";
-    private static final float MAX_GAIN = 3f;
+    private static final float MAX_GAIN = 5f;
     private final GainProvider gainProvider;
     private volatile float gain = 1f;
     private final AutoLevel autoLevel = new AutoLevel();
@@ -136,8 +136,9 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
             peak = peakAbs / 32767f;
         }
 
-        float makeup = autoLevelEnabled && Math.abs(userGain - 1f) < 0.001f
-                ? autoLevel.update(peak, samples) : 1f;
+        // r76：自动对齐始终叠加，不再因用户手动调增益而让位；否则用户常驻 300%
+        // 时 makeup 永远为 1.0，轻音轨仍比音乐低十几 dB。
+        float makeup = autoLevelEnabled ? autoLevel.update(peak, samples) : 1f;
         float combined = AutoLevel.combined(makeup, userGain, 1f);
         boolean muted = combined < 0.0001f;
         boolean boosted = combined > 1.0001f;
@@ -183,12 +184,22 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         queueCalls++;
         if (report) {
             lastAppliedGain = combined;
-            log("queue n=" + queueCalls + " gain=" + userGain
-                    + " makeup=" + lastMakeup + " combined=" + lastAppliedGain
+            float ratio = levelIn == 0 ? 0f : (float) levelOut / levelIn;
+            log("queue n=" + queueCalls
+                    + " user_gain=" + userGain
+                    + " auto_level=" + autoLevelEnabled
+                    + " makeup=" + lastMakeup
+                    + " combined=" + lastAppliedGain
                     + " peak=" + peak
+                    + " target_peak=" + AutoLevel.TARGET_PEAK
+                    + " peak_dbfs=" + String.format(java.util.Locale.US, "%.1f",
+                            peak > 0 ? 20 * Math.log10(peak) : -90d)
+                    + " expected_peak=" + (peak * lastAppliedGain)
                     + " enc=" + encodingName(encoding)
                     + " samples=" + samples
-                    + " level_in=" + levelIn + " level_out=" + levelOut);
+                    + " level_in=" + levelIn + " level_out=" + levelOut
+                    + " measured_ratio=" + ratio
+                    + " auto_samples=" + autoLevel.totalSamples());
         }
     }
 

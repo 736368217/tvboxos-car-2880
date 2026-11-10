@@ -512,7 +512,13 @@ public abstract class BaseController extends BaseVideoController implements Gest
         Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
         int percent = Math.round(mAppVolume * 100);
         LOG.i("volume_gesture start=" + Math.round(mVolumeStart * 100) + "% dy="
-                + Math.round(deltaY) + " h=" + height + " -> " + percent + "%");
+                + Math.round(deltaY) + " h=" + height + " -> " + percent + "%"
+                + " max=" + Math.round(VolumeBoostMath.MAX_GAIN * 100) + "%"
+                + " auto_level=" + com.github.tvbox.osc.car.AutoLevelPreference.enabled()
+                + " pcm_capable=" + canBoostVolume());
+        com.github.tvbox.osc.diag.DiagLog.event("user_volume=" + percent + "%"
+                + " auto_level=" + com.github.tvbox.osc.car.AutoLevelPreference.enabled()
+                + " pcm_capable=" + canBoostVolume());
         for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
             IControlComponent component = next.getKey();
             if (component instanceof IGestureComponent) {

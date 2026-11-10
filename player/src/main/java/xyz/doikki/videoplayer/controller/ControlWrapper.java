@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
  */
 public class ControlWrapper implements MediaPlayerControl, IVideoController {
     /** 应用内增益上限（倍数）；与 car 层 VolumeBoostMath.MAX_GAIN 保持一致。 */
-    private static final float MAX_VOLUME_GAIN = 3f;
+    private static final float MAX_VOLUME_GAIN = 5f;
 
     private MediaPlayerControl mPlayerControl;
     private IVideoController mController;

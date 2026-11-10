@@ -28,20 +28,20 @@ public final class VolumeLimitHostTest {
 
     /** 与 BaseController/clampVolume 同构的最小实现，用来锁住边界行为。 */
     static float clamp(float v, boolean supportsBoost) {
-        float max = supportsBoost ? 3f : 1f;
+        float max = supportsBoost ? 5f : 1f;
         return Math.max(0f, Math.min(max, v));
     }
 
     public static void main(String[] args) {
-        // EXO（支持增益）：0..300%
+        // EXO（支持增益）：0..500%
         eq(clamp(0f, true), 0f, "exo: 0 stays 0");
         eq(clamp(0.5f, true), 0.5f, "exo: 50% passes through");
         eq(clamp(1f, true), 1f, "exo: 100% stays 100%");
         eq(clamp(1.8f, true), 1.8f, "exo: 180% allowed");
         eq(clamp(2f, true), 2f, "exo: 200% allowed");
-        eq(clamp(2.75f, true), 2.75f, "exo: 275% allowed (r68)");
-        eq(clamp(3f, true), 3f, "exo: 300% allowed");
-        eq(clamp(9f, true), 3f, "exo: clamps at 300%");
+        eq(clamp(4.25f, true), 4.25f, "exo: 425% allowed (r76)");
+        eq(clamp(5f, true), 5f, "exo: 500% allowed");
+        eq(clamp(9f, true), 5f, "exo: clamps at 500%");
 
         // 非 EXO（IJK / 系统播放器）：最高 100%
         eq(clamp(0f, false), 0f, "ijk: 0 stays 0");
