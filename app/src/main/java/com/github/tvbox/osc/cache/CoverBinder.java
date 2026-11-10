@@ -122,6 +122,9 @@ public final class CoverBinder {
             Bitmap bitmap = BitmapFactory.decodeFile(path, options);
             if (bitmap == null) {
                 Log.w(TAG, "cover: decode failed path=" + path);
+                // r74：这个文件已经证明本机解不开，立即走后台转码/删除，
+                // 避免同一坏文件每次绑定都失败、每次都重新走网络。
+                CoverStore.healFile(file);
                 return false;
             }
             view.setScaleType(ImageView.ScaleType.CENTER_CROP);

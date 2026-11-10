@@ -43,6 +43,8 @@ public class App extends MultiDexApplication {
         instance = this;
         initParams();
         DiagLog.start(this);
+        // r74：旧版本可能落盘过本机 BitmapFactory 解不开的封面，启动时后台转码/清理一次。
+        com.github.tvbox.osc.cache.CoverStore.healLegacyCovers(this);
         OkGoHelper.init(); //台标获取
         EpgUtil.init();
         // 初始化Web服务器

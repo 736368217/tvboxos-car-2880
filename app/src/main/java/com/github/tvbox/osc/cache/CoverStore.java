@@ -25,17 +25,8 @@ import okhttp3.ResponseBody;
 /**
  * 封面落盘缓存：把「看过的片子」的封面存到应用私有目录，之后不再依赖网络和图床。
  *
- * <p>为什么需要它：历史/收藏只保存封面 URL，图片能不能显示完全取决于 Glide 的
- * 按需磁盘缓存 —— 站点换图床、删图、限速、车机没网，都会让已经看过的片子退回
- * 「随机纯色块 + 片名首字」。那看起来就像封面坏了，其实只是没缓存。</p>
- *
- * <p>策略：</p>
- * <ul>
- *   <li>写入时机：详情页拿到播放地址（也就是真正"看过一次"）时调用 {@link #remember}；</li>
- *   <li>读取时机：历史卡片优先用 {@link #localFile}，命中就直接读本地，零网络；</li>
- *   <li>总量上限 {@link #MAX_BYTES}，超出按最后访问时间淘汰最旧的；</li>
- *   <li>单张上限 2MB，过大的图不缓存（避免把流量和空间都吃掉）。</li>
- * </ul>
+ * <p>r74 追加可解码性守门：下载后先验证/转码，启动时自愈旧版本留下的坏文件，
+ * 读取时拒收风险格式，避免「本地永远失败 → 回退网络 → 认为已缓存」的死循环。</p>
  *
  * <p>自查：{@code adb logcat -s CoverCache}</p>
  */
@@ -63,9 +54,18 @@ public final class CoverStore {
     /** 下载失败退避：key=缓存文件名，value=最早可重试时间。 */
     private static final java.util.Map<String, Long> RETRY_BACKOFF =
             java.util.Collections.synchronizedMap(new java.util.HashMap<>());
+    private static final long RETRY_BACKOFF_MS = 60_000L;
     private static final AtomicBoolean TRIMMING = new AtomicBoolean(false);
+    /** r74：自愈与下载/读取互斥，避免同一文件被并发改写。 */
+    private static final Object FILE_LOCK = new Object();
+    /** r74：同一个坏文件只排一次自愈任务，避免列表滚动时反复排队。 */
+    private static final java.util.Set<String> HEAL_IN_FLIGHT =
+            java.util.Collections.synchronizedSet(new java.util.HashSet<String>());
+    private static final android.os.Handler MAIN =
+            new android.os.Handler(android.os.Looper.getMainLooper());
 
-    private static final android.os.Handler MAIN = new android.os.Handler(android.os.Looper.getMainLooper());
+    private CoverStore() {
+    }
 
     /** 从内联头信息里解析出的请求头（{@code @Referer=} / {@code @Cookie=} / {@code @User-Agent=} / {@code @Headers=}）。 */
     private static java.util.Map<String, String> inlineHeaders(String pic) {
@@ -105,11 +105,6 @@ public final class CoverStore {
         return out;
     }
 
-    private static final long RETRY_BACKOFF_MS = 60_000L;
-
-    private CoverStore() {
-    }
-
     private static File dir(android.content.Context context) {
         File dir = new File(context.getFilesDir(), "cover");
         if (!dir.exists() && !dir.mkdirs()) {
@@ -118,12 +113,61 @@ public final class CoverStore {
         return dir;
     }
 
+    /**
+     * r74：封面文件是否可以直接交给 {@code BitmapFactory.decodeFile}。
+     * 只做 32 字节头快筛 + 显式校验标记；未验证的风险文件交给后台自愈。
+     */
+    public static boolean isReadableImage(File file) {
+        if (file == null || !file.isFile() || file.length() <= 0) return false;
+        if (!CoverImageIo.hasRiskyHeader(file)) return true;
+        if (CoverImageIo.isValidated(file)) return true;
+        healFile(file);
+        return false;
+    }
+
+    /** r74：App 启动时后台扫描一次，把旧版本落盘的不可解码封面转码或删掉。 */
+    public static void healLegacyCovers(final android.content.Context context) {
+        if (context == null) return;
+        final android.content.Context app = context.getApplicationContext();
+        POOL.execute(() -> {
+            File[] files = dir(app).listFiles((d, n) -> n.endsWith(".img"));
+            if (files == null || files.length == 0) return;
+            int normalized = 0, removed = 0;
+            for (File file : files) {
+                // 普通 .webp 头也可能因 skia 缺解码器而失败；这里做一次真实解码验证。
+                int result = healNow(file);
+                if (result == CoverImageIo.HEAL_NORMALIZED) normalized++;
+                if (result == CoverImageIo.HEAL_REMOVED) removed++;
+            }
+            Log.i(TAG, "cover heal: scanned=" + files.length
+                    + " normalized=" + normalized + " removed=" + removed);
+        });
+    }
+
+    /** r74：单个坏文件的后台自愈；由 CoverBinder 解码失败或读取快筛触发。 */
+    public static void healFile(final File file) {
+        if (file == null || !HEAL_IN_FLIGHT.add(file.getAbsolutePath())) return;
+        POOL.execute(() -> {
+            try {
+                healNow(file);
+            } finally {
+                HEAL_IN_FLIGHT.remove(file.getAbsolutePath());
+            }
+        });
+    }
+
+    private static int healNow(File file) {
+        synchronized (FILE_LOCK) {
+            return CoverImageIo.heal(file);
+        }
+    }
+
     /** 已缓存的本地文件；没有则返回 null。命中会 touch 一下用于 LRU 淘汰。 */
     public static File localFile(android.content.Context context, String pic) {
         String name = CoverKey.fileName(pic);
         if (name == null || !CoverKey.isValidFileName(name)) return null;
         File file = new File(dir(context), name);
-        if (!file.exists() || file.length() <= 0) return null;
+        if (!isReadableImage(file)) return null;
         //noinspection ResultOfMethodCallIgnored
         file.setLastModified(System.currentTimeMillis());
         return file;
@@ -135,17 +179,12 @@ public final class CoverStore {
         return file == null ? "" : file.getAbsolutePath();
     }
 
-    /**
-     * 只按内容键（片名 + 来源）查找；封面 URL 为空的老记录靠它兜底。
-     *
-     * <p>早版本写历史时可能压根没存 pic，这类记录纯 URL 键无从查起，但内容键仍然有效 ——
-     * 只要这部片子曾经显示/缓存过封面，就能继续显示真图，而不是永远色块。</p>
-     */
+    /** 只按内容键（片名 + 来源）查找；封面 URL 为空的老记录靠它兜底。 */
     public static String findLocalPathByContent(android.content.Context context, String name, String sourceKey) {
         String contentName = CoverKey.contentFileName(name, sourceKey);
         if (contentName == null || !CoverKey.isValidFileName(contentName)) return "";
         File file = new File(dir(context), contentName);
-        if (!file.exists() || file.length() <= 0) return "";
+        if (!isReadableImage(file)) return "";
         //noinspection ResultOfMethodCallIgnored
         file.setLastModified(System.currentTimeMillis());
         return file.getAbsolutePath();
@@ -156,48 +195,44 @@ public final class CoverStore {
         File file = localFile(context, pic);
         return file == null ? "" : file.getAbsolutePath();
     }
+
     /** 用已有内容键文件补一个 URL 键副本（后台执行，不阻塞列表渲染）。 */
     public static void reindex(final android.content.Context context, final String pic, final String sourcePath) {
         if (context == null || pic == null || sourcePath == null) return;
         final android.content.Context app = context.getApplicationContext();
         POOL.execute(() -> {
-            try {
-                String name = CoverKey.fileName(pic);
-                if (name == null || !CoverKey.isValidFileName(name)) return;
-                File target = new File(dir(app), name);
-                if (target.exists() && target.length() > 0) return;
-                File source = new File(sourcePath);
-                if (!source.isFile()) return;
-                copy(target, source);
-            } catch (Throwable ignored) {
+            synchronized (FILE_LOCK) {
+                try {
+                    String name = CoverKey.fileName(pic);
+                    if (name == null || !CoverKey.isValidFileName(name)) return;
+                    File target = new File(dir(app), name);
+                    if (target.exists() && target.length() > 0) return;
+                    File source = new File(sourcePath);
+                    if (!isReadableImage(source)) return;
+                    copyWithMarker(target, source);
+                } catch (Throwable ignored) {
+                }
             }
         });
     }
 
-    /**
-     * 按「URL → 片名+来源」两级查找本地缓存。
-     *
-     * <p>站点换图床后 URL 会变，纯 URL 键命不中；片名+来源是稳定的，
-     * 所以第二级用内容键兜底，避免「明明看过却变回色块」。</p>
-     *
-     * @return 命中的本地文件；都没有返回 null
-     */
+    /** 按「URL → 片名+来源」两级查找本地缓存。 */
     public static File findLocal(android.content.Context context, String pic, String name, String sourceKey) {
         File byUrl = localFile(context, pic);
         if (byUrl != null) return byUrl;
         String contentName = CoverKey.contentFileName(name, sourceKey);
         if (contentName == null || !CoverKey.isValidFileName(contentName)) return null;
         File byContent = new File(dir(context), contentName);
-        if (!byContent.exists() || byContent.length() <= 0) return null;
-        // 命中内容键：顺便用当前 URL 再存一份，之后走 URL 键就是 O(1)。
+        if (!isReadableImage(byContent)) return null;
         String urlName = CoverKey.fileName(pic);
         if (urlName != null && CoverKey.isValidFileName(urlName)) {
             File copy = new File(dir(context), urlName);
             if (!copy.exists()) {
                 try {
-                    copy(copy, byContent);
+                    synchronized (FILE_LOCK) {
+                        copyWithMarker(copy, byContent);
+                    }
                 } catch (Exception ignored) {
-                    // 复制失败不影响本次显示
                 }
             }
         }
@@ -215,36 +250,28 @@ public final class CoverStore {
         }
     }
 
-    /**
-     * 记下这张封面：本地已有就直接返回，否则后台下载。
-     *
-     * <p>调用点放在「确实看过」之后，不阻塞界面，失败只打日志。</p>
-     */
+    /** 复制封面时同步 .ok 标记，别让已验证的风险格式副本又被当成坏文件。 */
+    private static void copyWithMarker(File target, File source) throws java.io.IOException {
+        copy(target, source);
+        if (CoverImageIo.isValidated(source)) {
+            CoverImageIo.markValidated(target);
+        } else {
+            CoverImageIo.deleteValidationMarker(target);
+        }
+    }
+
+    /** 记下这张封面：本地已有就直接返回，否则后台下载。 */
     public static void remember(final android.content.Context context, final String pic) {
         remember(context, pic, null, null);
     }
 
-    /**
-     * 记下这张封面：本地已有就直接返回，否则后台下载。
-     *
-     * @param name      片名（可空）；给了就和 {@code sourceKey} 一起写一份内容键，
-     *                  之后站点换图床、URL 变了也能命中
-     * @param sourceKey 站点 key（可空）
-     */
+    /** 记下这张封面，并写一份内容键兜底。 */
     public static void remember(final android.content.Context context, final String pic,
                                 final String name, final String sourceKey) {
         remember(context, pic, name, sourceKey, null);
     }
 
-    /**
-     * 同 {@link #remember(android.content.Context, String, String, String)}，但落盘成功（或本地本来就有）
-     * 时在主线程回调 {@code onReady}。
-     *
-     * <p>为什么需要：车机上图片网络慢，列表项先看到的是色块占位；等后台把封面存下来再 refresh
-     * 一下，用户就能看到真图 —— 而不是一直停在色块直到下次进页面。</p>
-     *
-     * @param onReady 可空；主线程回调
-     */
+    /** 同上，但落盘成功后主线程回调 {@code onReady}。 */
     public static void remember(final android.content.Context context, final String pic,
                                 final String name, final String sourceKey, final Runnable onReady) {
         if (context == null) return;
@@ -255,29 +282,31 @@ public final class CoverStore {
         String contentName = CoverKey.contentFileName(name, sourceKey);
         final File contentTarget = contentName != null && CoverKey.isValidFileName(contentName)
                 ? new File(dir(app), contentName) : null;
-        if (target.exists() && target.length() > 0) {
+        if (isReadableImage(target)) {
             //noinspection ResultOfMethodCallIgnored
             target.setLastModified(System.currentTimeMillis());
             if (contentTarget != null && !contentTarget.exists()) {
                 try {
-                    copy(contentTarget, target);
+                    synchronized (FILE_LOCK) {
+                        copyWithMarker(contentTarget, target);
+                    }
                 } catch (Exception ignored) {
                 }
             }
             if (onReady != null) MAIN.post(onReady);
             return;
         }
-        if (contentTarget != null && contentTarget.exists() && contentTarget.length() > 0) {
-            // URL 变了但内容键还命中：补一份 URL 键，省一次下载。
+        if (contentTarget != null && isReadableImage(contentTarget)) {
             try {
-                copy(target, contentTarget);
+                synchronized (FILE_LOCK) {
+                    copyWithMarker(target, contentTarget);
+                }
                 Log.i(TAG, "restored " + target.getName() + " from content key");
                 if (onReady != null) MAIN.post(onReady);
                 return;
             } catch (Exception ignored) {
             }
         }
-        // 失败退避：60 秒内不重复发起，避免列表滚动时反复打注定失败的请求。
         Long blockedUntil = RETRY_BACKOFF.get(name2);
         if (blockedUntil != null && System.currentTimeMillis() < blockedUntil) return;
         if (!IN_FLIGHT.add(name2)) return;
@@ -288,7 +317,9 @@ public final class CoverStore {
                 cached = true;
                 if (contentTarget != null && !contentTarget.exists() && target.exists()) {
                     try {
-                        copy(contentTarget, target);
+                        synchronized (FILE_LOCK) {
+                            copyWithMarker(contentTarget, target);
+                        }
                     } catch (Exception ignored) {
                     }
                 }
@@ -305,9 +336,7 @@ public final class CoverStore {
     }
 
     private static void download(android.content.Context context, String pic, File target) throws Exception {
-        // 两轮：先系统 DNS 直连 —— 部分车机的 App 网络栈（DoH/代理规则）DNS 全挂，
-        // 封面落盘在那类机器上从来没成功过，历史列表永远只有色块；失败后再用 App 栈兜底
-        // （有些网络只有它能出去）。任何一轮成功，封面就永久落盘，之后零网络。
+        // 两轮：先系统 DNS 直连，再用 App 栈兜底。
         try {
             downloadVia(PlainHttp.systemDns(), context, pic, target);
             return;
@@ -322,9 +351,8 @@ public final class CoverStore {
         downloadVia(appStack, context, pic, target);
     }
 
-    private static void downloadVia(OkHttpClient client, android.content.Context context, String pic, File target) throws Exception {
-        // 地址里可能带 @Headers= / @Referer= 这类内联头：URL 用归一化后的干净地址，
-        // 头单独加。不带 Referer/Cookie 时，防盗链图床一律 403，封面永远存不下来。
+    private static void downloadVia(OkHttpClient client, android.content.Context context,
+                                    String pic, File target) throws Exception {
         String cleanUrl = CoverKey.normalize(pic);
         if (cleanUrl.length() == 0) throw new java.io.IOException("封面地址为空");
         Request.Builder builder = new Request.Builder().url(cleanUrl);
@@ -356,7 +384,19 @@ public final class CoverStore {
                 }
             }
             if (written <= 0) throw new java.io.IOException("空响应");
-            if (!temp.renameTo(target)) throw new java.io.IOException("无法重命名缓存文件");
+            synchronized (FILE_LOCK) {
+                // r74：先验证/转码，避免 HTML 错误页或本机解不开的扩展 WebP
+                // 被当成「已缓存」，形成永久 decode failed 循环。
+                if (!CoverImageIo.ensureDecodable(temp)) {
+                    throw new java.io.IOException("封面不可解码，拒收");
+                }
+                if (!temp.renameTo(target)) throw new java.io.IOException("无法重命名缓存文件");
+                if (CoverImageIo.hasRiskyHeader(target)) {
+                    CoverImageIo.markValidated(target);
+                } else {
+                    CoverImageIo.deleteValidationMarker(target);
+                }
+            }
             Log.i(TAG, "cached " + target.getName() + " bytes=" + written + " url=" + shortUrl(pic));
             trim(context);
         } finally {
@@ -381,7 +421,10 @@ public final class CoverStore {
             for (File file : ordered) {
                 if (total - freed <= MAX_BYTES) break;
                 long size = file.length();
-                if (file.delete()) freed += size;
+                if (file.delete()) {
+                    freed += size;
+                    CoverImageIo.deleteValidationMarker(file);
+                }
             }
             Log.i(TAG, "trim freed=" + freed + " keep=" + (total - freed) + " files=" + files.length);
         } finally {
