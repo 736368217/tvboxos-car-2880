@@ -5,7 +5,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.github.tvbox.osc.car.AutoLevelPreference;
 import com.github.tvbox.osc.car.EdgeGeometry;
 import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.diag.DiagLog;
@@ -15,8 +14,9 @@ import com.orhanobut.hawk.Hawk;
 /**
  * 设置页唯一的「高级设置」入口。
  *
- * <p>「返回组件」直接平铺成四个选项；亮度手势、自动隐藏、自动电平对齐、诊断日志
- * 都是一行开关，点一下就切换，不进二级弹窗。</p>
+ * <p>「返回组件」直接平铺成四个选项；亮度手势、自动隐藏、诊断日志都是一行开关，
+ * 点一下就切换，不进二级弹窗。r77 起删除「音量自动对齐」：动态增益会造成忽大忽小，
+ * 音量完全由用户手动 5% 档位控制。</p>
  */
 public class AdvancedSettingsDialog extends SettingSheetDialog {
 
@@ -25,7 +25,6 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
     private TextView tvBrightness;
     private TextView tvDiagLog;
     private TextView tvBackHide;
-    private TextView tvAutoLevel;
 
     public AdvancedSettingsDialog(@NonNull Context context, Runnable onChanged) {
         super(context, "高级设置");
@@ -42,12 +41,6 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
             int seconds = InAppBackButton.getHideSeconds();
             int next = seconds == 4 ? 6 : seconds == 6 ? 8 : seconds == 8 ? 0 : 4;
             InAppBackButton.setHideSeconds(ownerActivity(), next);
-            refresh();
-        });
-        tvAutoLevel = addRow("音量自动对齐", "", v -> {
-            AutoLevelPreference.setEnabled(!AutoLevelPreference.enabled());
-            DiagLog.event("auto_level=" + (AutoLevelPreference.enabled() ? "on" : "off")
-                    + " user_gain=" + Hawk.get(HawkConfig.VOLUME_GAIN, 100) + "%");
             refresh();
         });
         tvDiagLog = addRow("诊断日志", DiagLog.status(), v -> {
@@ -91,9 +84,6 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
         if (tvBackHide != null) {
             int seconds = InAppBackButton.getHideSeconds();
             tvBackHide.setText(seconds == 0 ? "关闭（常驻）" : seconds + " 秒");
-        }
-        if (tvAutoLevel != null) {
-            tvAutoLevel.setText(AutoLevelPreference.enabled() ? "开启（推荐）" : "关闭");
         }
         if (tvDiagLog != null) {
             tvDiagLog.setText("点此立即上传");

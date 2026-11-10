@@ -77,10 +77,8 @@ public class ExoPlayer extends ExoMediaPlayer {
     public synchronized void setAudioGain(float gain) {
         if (Float.isNaN(gain)) return;
         audioGain = com.github.tvbox.osc.car.VolumeBoostMath.clampGain(gain);
-        boolean auto = com.github.tvbox.osc.car.AutoLevelPreference.enabled();
         for (xyz.doikki.videoplayer.exo.AudioGainProcessor processor : audioGainProcessors) {
             processor.setGain(audioGain);
-            processor.setAutoLevelEnabled(auto);
         }
     }
 
@@ -91,9 +89,9 @@ public class ExoPlayer extends ExoMediaPlayer {
     private synchronized void registerAudioGainProcessor(
             xyz.doikki.videoplayer.exo.AudioGainProcessor processor) {
         processor.setGain(audioGain);
-        processor.setAutoLevelEnabled(com.github.tvbox.osc.car.AutoLevelPreference.enabled());
         audioGainProcessors.add(processor);
     }
+
 
     private synchronized void clearAudioGainProcessors() {
         audioGainProcessors.clear();

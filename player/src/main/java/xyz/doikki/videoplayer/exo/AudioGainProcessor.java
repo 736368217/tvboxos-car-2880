@@ -8,13 +8,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * App-level PCM gain + automatic level alignment for ExoPlayer.
+ * App-level PCM gain for ExoPlayer.
  *
- * <p>Network video tracks are often ~-33 dBFS while music is near 0 dBFS. Even 300 % sounds
- * quiet, so users compensate with the *system* volume (shared with music) and keep adjusting
- * back and forth. {@link AutoLevel} raises quiet tracks toward a music-like target while the
- * app gain stays at 100 %; soft-clipping replaces hard clipping. Once the user changes the
- * app gain, auto alignment steps aside. One processor per DefaultAudioSink.</p>
+ * <p>r77：彻底删除 r73–r76 的「音量自动对齐 / 动态电平平衡」。该功能每约 1 秒按峰值
+ * 自动改变增益，安静片段抬升、响片段回落，用户实测「声音忽大忽小」；且不在产品规划内。
+ * 现在只保留用户手动设定的固定增益（5% 档位、最高 500%），并用软限幅避免削顶失真。
+ * 一个 DefaultAudioSink 对应一个 processor。</p>
  */
 public final class AudioGainProcessor extends BaseAudioProcessor {
 
@@ -26,15 +25,12 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
     private static final float MAX_GAIN = 5f;
     private final GainProvider gainProvider;
     private volatile float gain = 1f;
-    private final AutoLevel autoLevel = new AutoLevel();
-    private volatile boolean autoLevelEnabled = true;
     private int encoding = C.ENCODING_PCM_16BIT;
 
     private long configureCalls;
     private long queueCalls;
     private float lastAppliedGain = -1f;
     private float lastLoggedGain = 1f;
-    private float lastMakeup = 1f;
 
     public AudioGainProcessor() {
         this(null);
@@ -52,15 +48,6 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         return new AudioGainProcessor(gainProvider);
     }
 
-    public void setAutoLevelEnabled(boolean enabled) {
-        autoLevelEnabled = enabled;
-        autoLevel.reset();
-    }
-
-    public boolean isAutoLevelEnabled() {
-        return autoLevelEnabled;
-    }
-
     public void setGain(float gain) {
         if (Float.isNaN(gain)) return;
         float next = clampGain(gain);
@@ -68,7 +55,6 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
             lastLoggedGain = next;
             log("set_gain " + this.gain + " -> " + next + " (queue_calls=" + queueCalls + ")");
         }
-        if (Math.abs(next - this.gain) > 0.001f) autoLevel.reset();
         this.gain = next;
     }
 
@@ -93,11 +79,10 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
                     + " sampleRate=" + inputAudioFormat.sampleRate
                     + " channels=" + inputAudioFormat.channelCount
                     + " accepted=" + kept + " gain=" + getGain()
-                    + " autoLevel=" + autoLevelEnabled);
+                    + " autoLevel=removed");
         }
         if (kept) {
             encoding = inputAudioFormat.encoding;
-            autoLevel.reset();
             return inputAudioFormat;
         }
         log("configure REJECTED enc=" + encodingName(inputAudioFormat.encoding));
@@ -109,6 +94,7 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         int remaining = inputBuffer.remaining();
         if (remaining <= 0) return;
         float userGain = getGain();
+        float combined = clampGain(userGain);
         boolean report = queueCalls < 3 || queueCalls % 500 == 0;
         boolean isFloat = encoding == C.ENCODING_PCM_FLOAT;
         int samples = remaining / (isFloat ? 4 : 2);
@@ -136,13 +122,8 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
             peak = peakAbs / 32767f;
         }
 
-        // r76：自动对齐始终叠加，不再因用户手动调增益而让位；否则用户常驻 300%
-        // 时 makeup 永远为 1.0，轻音轨仍比音乐低十几 dB。
-        float makeup = autoLevelEnabled ? autoLevel.update(peak, samples) : 1f;
-        float combined = AutoLevel.combined(makeup, userGain, 1f);
         boolean muted = combined < 0.0001f;
         boolean boosted = combined > 1.0001f;
-        lastMakeup = makeup;
 
         if (isFloat) {
             for (int i = 0; i < samples; i++) {
@@ -150,7 +131,7 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
                 float amplified = in * combined;
                 float value = muted ? 0f
                         : boosted && (amplified > 0.72f || amplified < -0.72f)
-                        ? AutoLevel.softClip(amplified) : amplified;
+                        ? softClip(amplified) : amplified;
                 if (report) {
                     levelIn += Math.round(Math.abs(in) * 1_000_000f);
                     levelOut += Math.round(Math.abs(value) * 1_000_000f);
@@ -168,7 +149,7 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
                 } else {
                     float amplified = (in / 32768f) * combined;
                     float clipped = boosted && (amplified > 0.72f || amplified < -0.72f)
-                            ? AutoLevel.softClip(amplified) : amplified;
+                            ? softClip(amplified) : amplified;
                     out = Math.max(Short.MIN_VALUE,
                             Math.min(Short.MAX_VALUE, Math.round(clipped * 32767f)));
                 }
@@ -187,25 +168,31 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
             float ratio = levelIn == 0 ? 0f : (float) levelOut / levelIn;
             log("queue n=" + queueCalls
                     + " user_gain=" + userGain
-                    + " auto_level=" + autoLevelEnabled
-                    + " makeup=" + lastMakeup
+                    + " makeup=removed"
                     + " combined=" + lastAppliedGain
                     + " peak=" + peak
-                    + " target_peak=" + AutoLevel.TARGET_PEAK
                     + " peak_dbfs=" + String.format(java.util.Locale.US, "%.1f",
                             peak > 0 ? 20 * Math.log10(peak) : -90d)
                     + " expected_peak=" + (peak * lastAppliedGain)
                     + " enc=" + encodingName(encoding)
                     + " samples=" + samples
                     + " level_in=" + levelIn + " level_out=" + levelOut
-                    + " measured_ratio=" + ratio
-                    + " auto_samples=" + autoLevel.totalSamples());
+                    + " measured_ratio=" + ratio);
         }
     }
 
     public float appliedGain() { return lastAppliedGain; }
-    public float makeup() { return lastMakeup; }
     public long queueCount() { return queueCalls; }
+
+    /** 软限幅：0.72 以下线性，以上平滑压回 ±1，避免 500% 时硬削顶失真。 */
+    private static float softClip(float value) {
+        if (Float.isNaN(value)) return 0f;
+        float sign = value < 0f ? -1f : 1f;
+        float x = Math.abs(value);
+        if (x <= 0.72f) return value;
+        float over = x - 0.72f;
+        return sign * (0.72f + 0.28f * (1f - (float) Math.exp(-over / 0.42f)));
+    }
 
     private static void log(String message) {
         try {

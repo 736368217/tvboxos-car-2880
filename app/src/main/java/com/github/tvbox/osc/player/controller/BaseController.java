@@ -514,10 +514,8 @@ public abstract class BaseController extends BaseVideoController implements Gest
         LOG.i("volume_gesture start=" + Math.round(mVolumeStart * 100) + "% dy="
                 + Math.round(deltaY) + " h=" + height + " -> " + percent + "%"
                 + " max=" + Math.round(VolumeBoostMath.MAX_GAIN * 100) + "%"
-                + " auto_level=" + com.github.tvbox.osc.car.AutoLevelPreference.enabled()
                 + " pcm_capable=" + canBoostVolume());
         com.github.tvbox.osc.diag.DiagLog.event("user_volume=" + percent + "%"
-                + " auto_level=" + com.github.tvbox.osc.car.AutoLevelPreference.enabled()
                 + " pcm_capable=" + canBoostVolume());
         for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
             IControlComponent component = next.getKey();
