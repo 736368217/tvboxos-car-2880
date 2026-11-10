@@ -33,6 +33,9 @@ import androidx.viewpager.widget.ViewPager;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.base.BaseActivity;
+import com.github.tvbox.osc.cache.PlaybackSession;
+import com.github.tvbox.osc.cache.PlaybackSessionPolicy;
+import com.github.tvbox.osc.ui.activity.DetailActivity;
 import com.github.tvbox.osc.base.BaseLazyFragment;
 import com.github.tvbox.osc.bean.AbsSortXml;
 import com.github.tvbox.osc.bean.Movie;
@@ -452,6 +455,8 @@ public class HomeActivity extends BaseActivity {
                     @Override
                     public void run() {
                         initData();
+                        // r78：等订阅/站源加载完成后，再重建上次播放页，避免「没找到数据」。
+                        restorePlaybackIfNeeded();
                     }
                 }, 50);
             }
@@ -672,6 +677,7 @@ public class HomeActivity extends BaseActivity {
     private void doExit() {
         // 如果两次返回间隔小于 2000 毫秒，则退出应用
         if (System.currentTimeMillis() - mExitTime < 2000) {
+            PlaybackSession.clear(this);
             AppManager.getInstance().finishAllActivity();
             unregisterEventBus();
             ControlManager.get().stopServer();
@@ -695,6 +701,38 @@ public class HomeActivity extends BaseActivity {
         mHandler.postDelayed(refreshTopLayoutRunnable, 450);
         mHandler.post(mRunnable);
         scheduleUpdateCheck();
+        restorePlaybackIfNeeded();
+    }
+
+    /** r78：从其他应用/桌面切回来，若播放页被任务栈清掉，则按持久会话重建详情页。 */
+    private void restorePlaybackIfNeeded() {
+        if (!PlaybackSessionPolicy.shouldRestore(
+                PlaybackSession.isActive(this),
+                !PlaybackSession.needsRestore(this),
+                PlaybackSession.updated(this),
+                System.currentTimeMillis(),
+                12L * 60L * 60L * 1000L)) {
+            return;
+        }
+        String source = PlaybackSession.sourceKey(this);
+        String id = PlaybackSession.vodId(this);
+        if (source.isEmpty() || id.isEmpty()) {
+            PlaybackSession.clear(this);
+            return;
+        }
+        Bundle bundle = new Bundle();
+        bundle.putString("id", id);
+        bundle.putString("sourceKey", source);
+        bundle.putString("title", PlaybackSession.name(this));
+        bundle.putString("picture", PlaybackSession.pic(this));
+        if (!PlaybackSession.claimRestore(this)) return;
+        com.github.tvbox.osc.diag.DiagLog.event("playback_restore id=" + id
+                + " position=" + PlaybackSession.position(this)
+                + " full=" + PlaybackSession.fullscreen(this));
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtras(bundle);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
 

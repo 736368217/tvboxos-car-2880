@@ -1,6 +1,8 @@
 package com.github.tvbox.osc.base;
 
 import android.app.Activity;
+import android.app.Application;
+import android.os.Bundle;
 import androidx.multidex.MultiDexApplication;
 
 import com.github.tvbox.osc.bean.VodInfo;
@@ -62,6 +64,33 @@ public class App extends MultiDexApplication {
         PlayerHelper.init();
         QuickJSLoader.init();
         FileUtils.cleanPlayerCache();
+        registerForegroundCallbacks();
+    }
+
+    /** r78：App 级前后台标记；即使播放页被系统回收，也知道「上次是在后台播放」。 */
+    private void registerForegroundCallbacks() {
+        registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+            private int resumed;
+            @Override public void onActivityResumed(Activity activity) {
+                if (resumed == 0) {
+                    // 不调用 foreground()：只有真正回到播放页才清除待恢复标记。
+                    com.github.tvbox.osc.diag.DiagLog.event("app_foreground");
+                }
+                resumed++;
+            }
+            @Override public void onActivityPaused(Activity activity) {
+                resumed = Math.max(0, resumed - 1);
+                if (resumed == 0) {
+                    com.github.tvbox.osc.cache.PlaybackSession.background(activity);
+                    com.github.tvbox.osc.diag.DiagLog.event("app_background");
+                }
+            }
+            @Override public void onActivityCreated(Activity activity, Bundle savedInstanceState) { }
+            @Override public void onActivityStarted(Activity activity) { }
+            @Override public void onActivityStopped(Activity activity) { }
+            @Override public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
+            @Override public void onActivityDestroyed(Activity activity) { }
+        });
     }
 
     private void initParams() {

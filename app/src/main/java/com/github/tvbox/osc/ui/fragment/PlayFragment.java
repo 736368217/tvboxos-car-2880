@@ -1381,8 +1381,10 @@ public class PlayFragment extends BaseLazyFragment {
         ApiConfig.get().setCurrentPlaySourceKey(sourceKey);
         initPlayerCfg();
         triedLineFlags.clear();
-        // 从后台/任务栈恢复时按快照回到原进度，而不是从头播或回主页。
+        // r78：从后台/任务栈恢复时按会话回到原进度，而不是从头播或回主页。
         final long resumePosition = com.github.tvbox.osc.cache.PlaybackSnapshot.position(getContext());
+        com.github.tvbox.osc.cache.PlaybackSession.begin(getContext(), mVodInfo, sourceKey,
+                resumePosition, 0L, mVideoView != null && mVideoView.isFullScreen());
         if (resumePosition > 1000L) {
             com.github.tvbox.osc.cache.PlaybackSnapshot.clear(getContext());
             mHandler.postDelayed(() -> {
@@ -1551,12 +1553,18 @@ public class PlayFragment extends BaseLazyFragment {
     @Override
     public void onPause() {
         super.onPause();
-        // 切到别的窗口/桌面时保存「放到哪一秒」；小窗、预览、音频播放一律保存。
-        // 之前这里只有 pause()，一旦系统回收 Activity 就没有任何恢复依据，
-        // 回来只能从主页重新开始 —— 用户说的「切一下其他窗口播放状态保不住」。
+        // r78：切到别的窗口/桌面时保存完整播放会话；系统回收 Activity 后仍可回详情页原进度。
         if (mVideoView != null && mVodInfo != null && !TextUtils.isEmpty(sourceKey)) {
+            long position = mVideoView.getCurrentPosition();
+            long duration = mVideoView.getDuration();
+            boolean full = mVideoView.isFullScreen();
             com.github.tvbox.osc.cache.PlaybackSnapshot.save(getContext(), mVodInfo, sourceKey,
-                    mVideoView.getCurrentPosition(), mVideoView.getDuration());
+                    position, duration);
+            com.github.tvbox.osc.cache.PlaybackSession.begin(getContext(), mVodInfo, sourceKey,
+                    position, duration, full);
+            com.github.tvbox.osc.cache.PlaybackSession.background(getContext());
+            com.github.tvbox.osc.diag.DiagLog.event("playback_background position=" + position
+                    + " full=" + full + " name=" + mVodInfo.name);
         }
         if (mVideoView != null && !exitingPreview && !hasAudioOnlyPlayback()) {
             mVideoView.pause();
@@ -1567,6 +1575,8 @@ public class PlayFragment extends BaseLazyFragment {
     public void onResume() {
         super.onResume();
         exitingPreview = false;
+        com.github.tvbox.osc.cache.PlaybackSession.foreground(getContext());
+        com.github.tvbox.osc.diag.DiagLog.event("playback_foreground");
         if (mVideoView != null) {
             mVideoView.resume();
         }
@@ -1588,6 +1598,7 @@ public class PlayFragment extends BaseLazyFragment {
 
     @Override
     public void onDestroyView() {
+        // r78：不在这里 clear()，否则系统回收详情页时保活会话反而被自己抹掉。
         audioPlayback = false;
         switchingPlayback = false;
         MusicPlaybackService.stop(getContext(), this);

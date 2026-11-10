@@ -36,6 +36,7 @@ import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.base.BaseActivity;
+import com.github.tvbox.osc.cache.PlaybackSession;
 import com.github.tvbox.osc.bean.AbsXml;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.bean.SourceBean;
@@ -1904,6 +1905,7 @@ public class DetailActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        // 系统回收/配置重建不 clear()，保留 r78 保活会话；用户主动退出由 clearAfterUserExit() 调用。
         resetDetailFallback();
         super.onDestroy();
         try {
@@ -1957,6 +1959,7 @@ public class DetailActivity extends BaseActivity {
                 th.printStackTrace();
             }
         }
+        PlaybackSession.clear(this);
         super.onBackPressed();
     }
 

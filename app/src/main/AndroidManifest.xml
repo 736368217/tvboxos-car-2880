@@ -37,7 +37,7 @@
             android:name=".ui.activity.HomeActivity"
             android:exported="true"
             android:alwaysRetainTaskState="true"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:screenOrientation="sensorLandscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
