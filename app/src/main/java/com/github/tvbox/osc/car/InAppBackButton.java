@@ -240,14 +240,9 @@ public final class InAppBackButton {
     }
 
     public static boolean isEnabled() { return bool(HawkConfig.IN_APP_BACK, true); }
+    /** 方案 A 只允许 edge/bar；旧 floating/both/swipe 全部迁移到默认 edge。 */
     public static String getMode() {
-        String raw = text(HawkConfig.BACK_MODE, "");
-        String normalized = mode(raw);
-        if (!bool(HawkConfig.BACK_MODE_EXPLICIT, false)
-                && (raw.length() == 0 || HawkConfig.BACK_MODE_FLOATING.equals(normalized))) {
-            return HawkConfig.BACK_MODE_EDGE;
-        }
-        return raw.length() == 0 ? HawkConfig.BACK_MODE_EDGE : normalized;
+        return mode(text(HawkConfig.BACK_MODE, ""));
     }
     public static String getSide() { return side(text(HawkConfig.BACK_SIDE, HawkConfig.BACK_SIDE_LEFT)); }
     public static boolean isLarge() { return bool(HawkConfig.BACK_LARGE, false); }
@@ -272,23 +267,7 @@ public final class InAppBackButton {
     /** 当前是否处于「常驻不隐藏」（旧备份可能把 0 写进来，r68 UI 可以改回 4 秒）。 */
     public static boolean isAutoHideDisabled() { return getHideSeconds() == 0; }
 
-    /** 可视杠宽度 dp（4–28）。 */
-    public static int getBarWidthDp() { return clampInt(integer(HawkConfig.BACK_BAR_WIDTH_DP, 12), 4, 28); }
-    /** 可视杠高度 dp（48–220）。 */
-    public static int getBarHeightDp() { return clampInt(integer(HawkConfig.BACK_BAR_HEIGHT_DP, 96), 48, 220); }
-    /** 杠颜色 ARGB。 */
-    public static int getBarColor() { return integer(HawkConfig.BACK_BAR_COLOR, 0xFF38BDF8); }
-    /** 杠不透明度 10–100（百分比）。 */
-    public static int getBarAlpha() { return clampInt(integer(HawkConfig.BACK_BAR_ALPHA, 55), 10, 100); }
-    /** 贴边滑动模式的触发距离 dp（40–140）。 */
-    public static int getSwipeTriggerDp() { return clampInt(integer(HawkConfig.BACK_SWIPE_TRIGGER_DP, 84), 40, 140); }
-
-    public static void setBarWidthDp(Activity a, int value) { put(a, HawkConfig.BACK_BAR_WIDTH_DP, clampInt(value, 4, 28)); }
-    public static void setBarHeightDp(Activity a, int value) { put(a, HawkConfig.BACK_BAR_HEIGHT_DP, clampInt(value, 48, 220)); }
-    public static void setBarColor(Activity a, int value) { put(a, HawkConfig.BACK_BAR_COLOR, value); }
-    public static void setBarAlpha(Activity a, int value) { put(a, HawkConfig.BACK_BAR_ALPHA, clampInt(value, 10, 100)); }
-    public static void setSwipeTriggerDp(Activity a, int value) { put(a, HawkConfig.BACK_SWIPE_TRIGGER_DP, clampInt(value, 40, 140)); }
-
+    /** 方案 A 的返回杠几何改为 BackDisplayMetrics 按屏幕自适应；旧 dp 偏好不再读取。 */
     private static int clampInt(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
     }
@@ -322,12 +301,12 @@ public final class InAppBackButton {
         return value == 0 || value == 4 || value == 6 || value == 8 ? value : 4;
     }
 
+    /** 方案 A：旧 floating / both / swipe / 空值统一迁移到新边缘手势；bar 保留为备用。 */
     private static String mode(String raw) {
         String value = raw == null ? "" : raw.toLowerCase(Locale.ROOT);
-        if ("1".equals(value) || "edge_pull_only".equals(value) || HawkConfig.BACK_MODE_EDGE.equals(value)) return HawkConfig.BACK_MODE_EDGE;
-        if ("2".equals(value) || "dual_enabled".equals(value) || HawkConfig.BACK_MODE_BOTH.equals(value)) return HawkConfig.BACK_MODE_BOTH;
-        if ("3".equals(value) || "swipe_edge".equals(value) || HawkConfig.BACK_MODE_SWIPE.equals(value)) return HawkConfig.BACK_MODE_SWIPE;
-        return HawkConfig.BACK_MODE_FLOATING;
+        if (HawkConfig.BACK_MODE_BAR.equals(value) || "back_bar".equals(value)
+                || "bar_backup".equals(value) || "4".equals(value)) return HawkConfig.BACK_MODE_BAR;
+        return HawkConfig.BACK_MODE_EDGE;
     }
 
     private static String side(String raw) {

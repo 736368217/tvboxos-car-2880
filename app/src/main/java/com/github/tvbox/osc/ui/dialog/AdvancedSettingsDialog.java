@@ -5,7 +5,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.github.tvbox.osc.car.EdgeGeometry;
 import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.diag.DiagLog;
 import com.github.tvbox.osc.util.HawkConfig;
@@ -14,14 +13,14 @@ import com.orhanobut.hawk.Hawk;
 /**
  * 设置页唯一的「高级设置」入口。
  *
- * <p>「返回组件」直接平铺成四个选项；亮度手势、自动隐藏、诊断日志都是一行开关，
- * 点一下就切换，不进二级弹窗。r77 起删除「音量自动对齐」：动态增益会造成忽大忽小，
- * 音量完全由用户手动 5% 档位控制。</p>
+ * <p>方案 A：返回组件只保留两个互斥方案 —— 新边缘返回（默认）与旧返回杠（备用）；
+ * 悬浮球与旧贴边横滑从 UI 和运行时一起移除。其余开关沿用 App 原有弹窗风格，
+ * 点一行即切换，不进二级弹窗。</p>
  */
 public class AdvancedSettingsDialog extends SettingSheetDialog {
 
     private final Runnable onChanged;
-    private final OptionRow[] backOptions = new OptionRow[4];
+    private final OptionRow[] backOptions = new OptionRow[3];
     private TextView tvBrightness;
     private TextView tvDiagLog;
     private TextView tvBackHide;
@@ -30,9 +29,10 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
         super(context, "高级设置");
         this.onChanged = onChanged;
         backOptions[0] = addOption("关闭", false, v -> applyBack(false, null));
-        backOptions[1] = addOption("边缘拉出", false, v -> applyBack(true, HawkConfig.BACK_MODE_EDGE));
-        backOptions[2] = addOption("悬浮球", false, v -> applyBack(true, HawkConfig.BACK_MODE_FLOATING));
-        backOptions[3] = addOption("边缘滑动", false, v -> applyBack(true, HawkConfig.BACK_MODE_SWIPE));
+        backOptions[1] = addOption("新边缘返回（默认）", false,
+                v -> applyBack(true, HawkConfig.BACK_MODE_EDGE));
+        backOptions[2] = addOption("旧返回杠（备用）", false,
+                v -> applyBack(true, HawkConfig.BACK_MODE_BAR));
         tvBrightness = addRow("亮度手势", "", v -> {
             Hawk.put(HawkConfig.BRIGHTNESS_GESTURE, !Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false));
             refresh();
@@ -60,24 +60,20 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
             if (mode != null) InAppBackButton.setMode(activity, mode);
         }
         DiagLog.event("back_mode=" + (enabled ? mode : "off")
-                + " hit_max=" + Math.round(EdgeGeometry.hitWidthPx(
-                        getContext().getResources().getDisplayMetrics().widthPixels,
-                        99999f)) + "px");
+                + " screen=" + getContext().getResources().getDisplayMetrics().widthPixels
+                + "x" + getContext().getResources().getDisplayMetrics().heightPixels
+                + " density=" + getContext().getResources().getDisplayMetrics().densityDpi);
         refresh();
     }
 
     private void refresh() {
         boolean enabled = InAppBackButton.isEnabled();
         String mode = InAppBackButton.getMode();
-        boolean edge = enabled && !HawkConfig.BACK_MODE_FLOATING.equals(mode)
-                && !HawkConfig.BACK_MODE_SWIPE.equals(mode) && !HawkConfig.BACK_MODE_BOTH.equals(mode);
-        boolean ball = enabled && (HawkConfig.BACK_MODE_FLOATING.equals(mode)
-                || HawkConfig.BACK_MODE_BOTH.equals(mode));
-        boolean swipe = enabled && HawkConfig.BACK_MODE_SWIPE.equals(mode);
+        boolean edge = enabled && !HawkConfig.BACK_MODE_BAR.equals(mode);
+        boolean bar = enabled && HawkConfig.BACK_MODE_BAR.equals(mode);
         if (backOptions[0] != null) backOptions[0].setSelected(!enabled);
         if (backOptions[1] != null) backOptions[1].setSelected(edge);
-        if (backOptions[2] != null) backOptions[2].setSelected(ball);
-        if (backOptions[3] != null) backOptions[3].setSelected(swipe);
+        if (backOptions[2] != null) backOptions[2].setSelected(bar);
         if (tvBrightness != null) {
             tvBrightness.setText(Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false) ? "开启" : "关闭");
         }

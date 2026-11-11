@@ -1139,9 +1139,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
             back = "返回关闭";
         } else {
             String mode = InAppBackButton.getMode();
-            back = HawkConfig.BACK_MODE_SWIPE.equals(mode) ? "边缘滑动"
-                    : HawkConfig.BACK_MODE_FLOATING.equals(mode) ? "悬浮球"
-                    : HawkConfig.BACK_MODE_BOTH.equals(mode) ? "双模共存" : "边缘拉出";
+            back = HawkConfig.BACK_MODE_BAR.equals(mode) ? "旧返回杠" : "新边缘返回";
         }
         String brightness = Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false) ? "亮度开" : "亮度关";
         tvAdvancedSummary.setText(back + " · " + brightness);

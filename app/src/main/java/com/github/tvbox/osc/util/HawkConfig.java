@@ -74,10 +74,15 @@ public class HawkConfig {
     public static final String BACK_POSITION_Y = "inapp_back_y";
     public static final String BACK_EDGE_POSITION_Y = "inapp_back_edge_y";
     public static final String BACK_SIDE = "inapp_back_side";
+    /** @deprecated 方案 A 已取消悬浮球；仅保留常量用于把旧偏好归一化到新边缘手势。 */
     public static final String BACK_MODE_FLOATING = "floating";
+    /** 方案 A 默认：新边缘手势（窄触发带 + 小幅橡皮筋，按屏幕自适应）。 */
     public static final String BACK_MODE_EDGE = "edge";
+    /** 方案 A 备用：找回的旧返回杠（贴边圆角竖杠，短按返回）。 */
+    public static final String BACK_MODE_BAR = "bar";
+    /** @deprecated 旧双模；方案 A 归一化到 edge。 */
     public static final String BACK_MODE_BOTH = "both";
-    /** 第三种返回方式：贴边横滑返回（复刻 Swipe Navigation Gesture 的拉伸手柄手感）。 */
+    /** @deprecated 旧贴边横滑；方案 A 归一化到 edge。 */
     public static final String BACK_MODE_SWIPE = "swipe";
     public static final String BACK_SWIPE_TRIGGER_DP = "inapp_back_swipe_trigger"; // 40-140 dp
     public static final String BACK_SIDE_LEFT = "left";
