@@ -45,24 +45,30 @@ dumpsys display 分辨率与 rotation：
 是否成功进入 DetailActivity / PlayFragment：
 ```
 
-## 4. 每次发布必须带更新说明（用户明确要求）
+## 4. 推送代码 ≠ 发布更新；每次发布必须带简短说明
 
-现状（r73 之前）：`dl-publish.sh` 生成的 `latest.json` 只有
-`software / version / files / releasedAt`，App 更新弹窗显示「该版本没有填写更新说明」。
+> r79 事故复盘：只把代码合并/推送到 `main`，用户端自动更新不会收到新版本。App 官方优先读取
+> `https://dl.z736.vip/tvbox-car/latest.json`，GitHub Release 是兜底/交付通道；必须把 APK 和 notes
+> 发到 `tvbox-car` + `TVBox`，再创建对应 GitHub Release，才算完成一次自动更新发布。
 
 规范：
 
-1. `publish_release.py` 增加第四个参数 `--notes <文件>`（UTF-8 纯文本，2–5 行、要点式）；
-2. 服务端 `dl-publish.sh` 把说明写进 `latest.json` 的 `notes` 字段；
-3. `AppUpdate` / `UpdateDialog` 读取并展示 `notes`，为空时再显示兜底文案；
-4. GitHub Release 的 notes 与官方通道 `notes` 保持一致；
-5. **没有 notes 不许发版**。说明写「改了什么 / 用户要注意什么」，不写内部实现细节。
+1. 用户确认实现/报告后，默认流程是 **提交 → 合入 main → 推进 versionCode/versionName → 构建签名 → 发布 → 校验**，不能停在「已推送」。
+2. 每次发布写 **2–5 行短说明**（约 100–250 字）：第一行 `rNN 更新说明`，后续用 `- ` 要点写「改了什么 / 用户要注意什么」；不写内部实现细节，不写空话。
+3. `publish_release.py` 必须带 `--notes <UTF-8 文件>`；脚本拒绝无 notes、空白 notes 或少于 10 字的说明。
+4. 服务端 `dl-publish.sh` 把说明写进 `latest.json` 的 `notes` 字段；`tvbox-car` 与 `TVBox` 两个通道都要发。
+5. `AppUpdate` / `UpdateDialog` 读取并展示 `notes`；GitHub Release 的 notes 与官方通道完全一致。
+6. r75 前旧 App 只能解析 `files` 之前的 notes，升级到 r75+ 后才会显示官方通道说明；「已是最新」弹窗说明栏为空是正常状态，不算 notes 丢失。
+7. 发布后必须校验：`latest.json.version == APK versionName`、三处 notes 非空且一致、三处 SHA-256 一致、官方 URL 下载下来的 APK 哈希与本地一致。
+8. **没有 notes 不许发版；没有三通道校验不许回复用户「已发布」。**
 
-## 5. 发布前自检清单
+## 5. 发布自检清单
 
 - [ ] 订阅源与横屏已按 §1/§2 配置（若本轮涉及播放/详情/音量验收）
-- [ ] `latest.json` 含非空 `notes`
-- [ ] GitHub Release notes 与之一致
-- [ ] APK digest（本地 / 官方 / GitHub）三者一致
+- [ ] `main` 已推送，`versionCode/versionName` 已推进，不是停留在上一个 rNN
+- [ ] `tvbox-car/latest.json` 与 `TVBox/latest.json` 都指向新版本
+- [ ] 两处 `latest.json` 含非空 `notes`，且为 2–5 行短说明
+- [ ] GitHub Release notes 与官方通道一致；`--target` 是完整 40 位 SHA
+- [ ] APK digest（本地 / 两个官方通道 / GitHub）四处一致，且官方 URL 下载哈希通过
 - [ ] MuMu 租约已释放，未碰 `do_not_touch` 实例
 - [ ] 报告中「未验证」项写明原因，不编造结论
