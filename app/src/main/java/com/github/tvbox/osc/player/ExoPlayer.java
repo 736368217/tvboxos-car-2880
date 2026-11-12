@@ -59,7 +59,38 @@ public class ExoPlayer extends ExoMediaPlayer {
                 .build());
         setRenderersFactory(buildRenderersFactory(context, this));
         memory = AudioTrackMemory.getInstance(context);
+        // 两个音量相关开关：在 initPlayer() 之前读入偏好。
+        setAudioUsageMedia(readBool(com.github.tvbox.osc.util.HawkConfig.AUDIO_USAGE_MEDIA, true));
+        sourceLevelMatchEnabled = readBool(com.github.tvbox.osc.util.HawkConfig.SOURCE_LEVEL_MATCH, true);
         LOG.i("echo-exo-low-memory-load-control");
+    }
+
+    /** 片源电平补偿偏好；processor 建好时套用。 */
+    private volatile boolean sourceLevelMatchEnabled = true;
+
+    private static boolean readBool(String key, boolean fallback) {
+        try {
+            Object raw = com.orhanobut.hawk.Hawk.get(key, fallback);
+            if (raw instanceof Boolean) return (Boolean) raw;
+            String text = String.valueOf(raw);
+            if ("true".equalsIgnoreCase(text)) return true;
+            if ("false".equalsIgnoreCase(text)) return false;
+        } catch (Throwable ignored) {
+            // Hawk 未初始化时退回默认值。
+        }
+        return fallback;
+    }
+
+    /** 运行中切换片源电平补偿。 */
+    public synchronized void setSourceLevelMatchEnabled(boolean enabled) {
+        sourceLevelMatchEnabled = enabled;
+        for (xyz.doikki.videoplayer.exo.AudioGainProcessor processor : audioGainProcessors) {
+            processor.setSourceLevelMatchEnabled(enabled);
+        }
+    }
+
+    public boolean isSourceLevelMatchEnabled() {
+        return sourceLevelMatchEnabled;
     }
 
     /**
@@ -89,6 +120,7 @@ public class ExoPlayer extends ExoMediaPlayer {
     private synchronized void registerAudioGainProcessor(
             xyz.doikki.videoplayer.exo.AudioGainProcessor processor) {
         processor.setGain(audioGain);
+        processor.setSourceLevelMatchEnabled(sourceLevelMatchEnabled);
         audioGainProcessors.add(processor);
     }
 

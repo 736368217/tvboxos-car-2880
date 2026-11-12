@@ -80,6 +80,7 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
                 DefaultBandwidthMeter.getSingletonInstance(mAppContext),
                 new DefaultAnalyticsCollector(Clock.DEFAULT))
                 .build();
+        applyAudioAttributes();
         setOptions();
 
         // 播放器日志（当开启日志且 mTrackSelector 为 MappingTrackSelector 时）
@@ -100,6 +101,51 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
 
     public void setLoadControl(LoadControl loadControl) {
         mLoadControl = loadControl;
+    }
+
+    /** 是否显式声明 USAGE_MEDIA/CONTENT_TYPE_MOVIE（与音乐 App 同一系统媒体通道）。 */
+    private boolean audioUsageMedia = true;
+
+    /**
+     * 音频属性对齐开关。
+     *
+     * <p>ExoPlayer 默认 AudioAttributes 是 USAGE_UNKNOWN/CONTENT_TYPE_UNKNOWN。
+     * 在本车机上 USAGE_UNKNOWN 与 USAGE_MEDIA 同属 MUSIC 上下文（CarAudioContext 第 85 行），
+     * 走同一条 BUS00_MEDIA，所以本开关通常不改变路由；它的作用是：
+     * <ul>
+     *   <li>让系统/车机把本 App 识别为"媒体播放器"（音量键、媒体面板、焦点优先级）；</li>
+     *   <li>排除某些 OEM 音量表按 usage 分档的差异。</li>
+     * </ul>
+     * 若实测无效可以关掉，行为回到 ExoPlayer 默认。</p>
+     */
+    public void setAudioUsageMedia(boolean enabled) {
+        this.audioUsageMedia = enabled;
+        applyAudioAttributes();
+    }
+
+    public boolean isAudioUsageMedia() {
+        return audioUsageMedia;
+    }
+
+    /** 应用当前选择的 AudioAttributes；mInternalPlayer 未就绪时静默跳过（initPlayer 会再调）。 */
+    private void applyAudioAttributes() {
+        if (mInternalPlayer == null) return;
+        try {
+            if (audioUsageMedia) {
+                // ExoPlayer 2.19.1 的 Builder 同时设置 usage 与 content type。
+                com.google.android.exoplayer2.audio.AudioAttributes exoAttrs =
+                        new com.google.android.exoplayer2.audio.AudioAttributes.Builder()
+                                .setUsage(com.google.android.exoplayer2.C.USAGE_MEDIA)
+                                .setContentType(com.google.android.exoplayer2.C.AUDIO_CONTENT_TYPE_MOVIE)
+                                .build();
+                mInternalPlayer.setAudioAttributes(exoAttrs, true);
+                Log.i("CarAudio", "audio_attrs=USAGE_MEDIA/CONTENT_TYPE_MOVIE handleFocus=true");
+            } else {
+                Log.i("CarAudio", "audio_attrs=exo_default (USAGE_UNKNOWN)");
+            }
+        } catch (Throwable error) {
+            Log.i("CarAudio", "audio_attrs_failed:" + error.getClass().getSimpleName());
+        }
     }
 
     @Override

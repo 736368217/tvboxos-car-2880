@@ -32,6 +32,13 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
     private float lastAppliedGain = -1f;
     private float lastLoggedGain = 1f;
 
+    /**
+     * 静态片源电平补偿：每个片源开头测一次峰值、锁定补偿量，整片不变。
+     * 与已删除的动态自动电平不同，不会逐秒起伏（详见 SourceLevelLock 注释）。
+     */
+    private final SourceLevelLock sourceLevel = new SourceLevelLock();
+    private int configuredSampleRate = 48000;
+
     public AudioGainProcessor() {
         this(null);
     }
@@ -63,6 +70,33 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         return provider == null ? gain : clampGain(provider.getGain());
     }
 
+    /**
+     * 片源电平补偿开关。关闭后行为与 r77 完全一致（只应用固定用户增益）。
+     * 可在播放中切换：关闭立即生效（下一块即不再补偿），开启会重新测量。
+     */
+    public void setSourceLevelMatchEnabled(boolean enabled) {
+        if (sourceLevel.isEnabled() == enabled) return;
+        sourceLevel.setEnabled(enabled);
+        if (enabled) {
+            sourceLevel.begin(configuredSampleRate);
+        }
+        log("source_level_match=" + enabled);
+    }
+
+    public boolean isSourceLevelMatchEnabled() {
+        return sourceLevel.isEnabled();
+    }
+
+    /** 诊断：当前片源锁定后的补偿倍数。 */
+    public float sourceLevelMakeup() {
+        return sourceLevel.currentMakeup();
+    }
+
+    /** 诊断：测量窗口内的片源峰值（dBFS）。 */
+    public float sourceLevelDbfs() {
+        return sourceLevel.measuredDbfs();
+    }
+
     private static float clampGain(float value) {
         if (Float.isNaN(value)) return 1f;
         return Math.max(0f, Math.min(MAX_GAIN, value));
@@ -83,6 +117,10 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         }
         if (kept) {
             encoding = inputAudioFormat.encoding;
+            // 新片源/新格式：重置静态电平测量。
+            configuredSampleRate = inputAudioFormat.sampleRate > 0
+                    ? inputAudioFormat.sampleRate : 48000;
+            sourceLevel.begin(configuredSampleRate);
             return inputAudioFormat;
         }
         log("configure REJECTED enc=" + encodingName(inputAudioFormat.encoding));
@@ -123,6 +161,20 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         }
 
         boolean muted = combined < 0.0001f;
+
+        // 静态片源补偿：锁定前返回 1.0（不改声音），锁定后返回固定值。
+        //
+        // 语义：补偿先把片源拉回正常基准（−33 dBFS → 接近音乐电平），
+        // 手动增益再在基准之上叠加。两者都表达"更响"，不该互相抵消，
+        // 所以补偿不受 MAX_GAIN 限制——它改的是"基准"，不是"用户档位"。
+        // 最终波形由软限幅兜底（0.72 以上指数压回 ±1），不会硬削顶。
+        //
+        // 为什么不会像 r73 那样"忽大忽小"：makeup 在整片内恒定，
+        // 只有 userGain 会变（且只在用户主动操作时变），不存在逐秒起伏。
+        float makeup = muted ? 1f : sourceLevel.apply(peak, samples);
+        if (makeup > 1.0001f) {
+            combined = combined * makeup;   // 不立即 clamp，交给下面的软限幅
+        }
         boolean boosted = combined > 1.0001f;
 
         if (isFloat) {
@@ -168,7 +220,12 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
             float ratio = levelIn == 0 ? 0f : (float) levelOut / levelIn;
             log("queue n=" + queueCalls
                     + " user_gain=" + userGain
-                    + " makeup=removed"
+                    + " makeup=" + String.format(java.util.Locale.US, "%.3f", makeup)
+                    + " makeup_locked=" + sourceLevel.isLocked()
+                    + " locked_value=" + String.format(java.util.Locale.US, "%.3f",
+                            sourceLevel.lockedValue())
+                    + " source_dbfs=" + String.format(java.util.Locale.US, "%.1f",
+                            sourceLevel.measuredDbfs())
                     + " combined=" + lastAppliedGain
                     + " peak=" + peak
                     + " peak_dbfs=" + String.format(java.util.Locale.US, "%.1f",

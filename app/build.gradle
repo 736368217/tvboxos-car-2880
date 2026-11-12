@@ -7,8 +7,11 @@ android {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
         // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 51
-        versionName '3.1.0-car.7-r79'
+        versionCode 52
+        versionName '3.1.0-car.7-r80'
+        // r80: 音量根因定案（视频音轨 −33 dBFS vs 音乐 0 dBFS），非系统问题
+        // r80: 新增「视频音量自动对齐」开关（静态片源电平补偿，整片锁定不变）
+        // r80: 新增「音频通道对齐音乐」开关（显式 USAGE_MEDIA/CONTENT_TYPE_MOVIE）
         // r59: 修复静默更新弹窗归属 HomeActivity 窗口、播放页覆盖时不可见的问题
         // r59: 自动检查改为无窗口化，结果暂存后在获得焦点的前台窗口显示
         // r59: HomeActivity 每次恢复重新排队静默检查（仍受 6h 节流约束）

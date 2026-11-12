@@ -24,6 +24,8 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
     private TextView tvBrightness;
     private TextView tvDiagLog;
     private TextView tvBackHide;
+    private TextView tvSourceLevel;
+    private TextView tvAudioUsage;
 
     public AdvancedSettingsDialog(@NonNull Context context, Runnable onChanged) {
         super(context, "高级设置");
@@ -35,6 +37,20 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
                 v -> applyBack(true, HawkConfig.BACK_MODE_BAR));
         tvBrightness = addRow("亮度手势", "", v -> {
             Hawk.put(HawkConfig.BRIGHTNESS_GESTURE, !Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false));
+            refresh();
+        });
+        // 音量开关 1：片源电平补偿（视频音轨比音乐低约 33 dB，开启后每片只测一次并锁定）
+        tvSourceLevel = addRow("视频音量自动对齐", "", v -> {
+            boolean next = !Hawk.get(HawkConfig.SOURCE_LEVEL_MATCH, true);
+            com.github.tvbox.osc.car.CarEnhance.setSourceLevelMatchEnabled(next);
+            DiagLog.event("source_level_match=" + next);
+            refresh();
+        });
+        // 音量开关 2：音频属性对齐（显式 USAGE_MEDIA/CONTENT_TYPE_MOVIE，与音乐 App 同通道）
+        tvAudioUsage = addRow("音频通道对齐音乐", "", v -> {
+            boolean next = !Hawk.get(HawkConfig.AUDIO_USAGE_MEDIA, true);
+            com.github.tvbox.osc.car.CarEnhance.setAudioUsageMediaEnabled(next);
+            DiagLog.event("audio_usage_media=" + next);
             refresh();
         });
         tvBackHide = addRow("几秒后自动隐藏", "", v -> {
@@ -76,6 +92,14 @@ public class AdvancedSettingsDialog extends SettingSheetDialog {
         if (backOptions[2] != null) backOptions[2].setSelected(bar);
         if (tvBrightness != null) {
             tvBrightness.setText(Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false) ? "开启" : "关闭");
+        }
+        if (tvSourceLevel != null) {
+            tvSourceLevel.setText(Hawk.get(HawkConfig.SOURCE_LEVEL_MATCH, true)
+                    ? "开启（推荐）" : "关闭");
+        }
+        if (tvAudioUsage != null) {
+            tvAudioUsage.setText(Hawk.get(HawkConfig.AUDIO_USAGE_MEDIA, true)
+                    ? "开启（推荐）" : "关闭");
         }
         if (tvBackHide != null) {
             int seconds = InAppBackButton.getHideSeconds();

@@ -100,6 +100,34 @@ public final class CarEnhance {
         AudioEffectController.release();
     }
 
+    // ------------------------------------------------- 音量两开关（对当前播放器即时生效）
+
+    /** 读取「视频音量自动对齐」偏好；默认开启。 */
+    public static boolean sourceLevelMatchEnabled() {
+        Object raw = Hawk.get(HawkConfig.SOURCE_LEVEL_MATCH, true);
+        return !(raw instanceof Boolean) || (Boolean) raw;
+    }
+
+    public static void setSourceLevelMatchEnabled(boolean enabled) {
+        Hawk.put(HawkConfig.SOURCE_LEVEL_MATCH, enabled);
+        MyVideoView view = activeVideo.get();
+        if (view != null) view.setSourceLevelMatchEnabled(enabled);
+        Log.i("CarAudio", "pref source_level_match=" + enabled);
+    }
+
+    /** 读取「音频通道对齐音乐」偏好；默认开启。 */
+    public static boolean audioUsageMediaEnabled() {
+        Object raw = Hawk.get(HawkConfig.AUDIO_USAGE_MEDIA, true);
+        return !(raw instanceof Boolean) || (Boolean) raw;
+    }
+
+    public static void setAudioUsageMediaEnabled(boolean enabled) {
+        Hawk.put(HawkConfig.AUDIO_USAGE_MEDIA, enabled);
+        MyVideoView view = activeVideo.get();
+        if (view != null) view.setAudioUsageMedia(enabled);
+        Log.i("CarAudio", "pref audio_usage_media=" + enabled);
+    }
+
     // ------------------------------------------------------------------ video
 
     public static int videoMode() {

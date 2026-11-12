@@ -108,6 +108,11 @@ public class HawkConfig {
     public static final String VIDEO_SR_TIER = "video_sr_tier"; // 0 off, 1 SGSR, 2 FSR, 3 anime
     public static final String VIDEO_MEMC_TIER = "video_memc_tier"; // 0 off, 1 oversample, 2 cubic, 3 safe-flow
     public static final String VOLUME_GAIN = "app_volume_gain"; // 0-500, default 100 (app-level gain, not system volume)
+    // 视频音轨电平补偿：视频音轨实测只有满刻度约 2%（-33 dBFS），音乐母带接近 100%。
+    // 开启后每个片源开头测一次峰值、锁定补偿量，整片不变（不是逐秒变化的动态增益）。
+    public static final String SOURCE_LEVEL_MATCH = "source_level_match"; // default true
+    // 音频属性对齐：显式声明 USAGE_MEDIA/CONTENT_TYPE_MOVIE，与音乐 App 走同一系统媒体通道。
+    public static final String AUDIO_USAGE_MEDIA = "audio_usage_media"; // default true
     public static final String BRIGHTNESS_GESTURE = "brightness_gesture"; // default false: brightness follows system
     // 应用内更新：启动静默检查 + 设置页手动检查
     public static final String UPDATE_AUTO_CHECK = "update_auto_check"; // default true

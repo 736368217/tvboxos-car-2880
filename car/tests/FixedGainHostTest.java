@@ -40,9 +40,15 @@ public final class FixedGainHostTest {
         processor.configure(new AudioProcessor.AudioFormat(48000, 2, C.ENCODING_PCM_16BIT));
         processor.flush();
 
+        // 前 4 秒是 SourceLevelLock 的测量期，输出会随淡入变化；
+        // 先走完测量期，再验证锁定后的长期稳定性（这正是 r73 动态补偿失败的地方）。
+        for (int i = 0; i < 4; i++) {
+            run(processor, 96000, 720);
+        }
+
         int[] reference = null;
         for (int window = 0; window < 8; window++) {
-            // 每个窗口 96000 帧 = 旧 AutoLevel 的一个 1 秒测量窗。
+            // 每个窗口 96000 帧 = 1 秒；锁定后同一输入输出必须逐样本一致。
             int[] quiet = run(processor, 96000, 720);
             int[] loud = run(processor, 96000, 6000);
             check(Math.abs(processor.getGain() - 3f) < 0.0001f,
@@ -52,7 +58,7 @@ public final class FixedGainHostTest {
             } else {
                 check(reference[0] == quiet[0] && reference[100] == quiet[100]
                                 && reference[1000] == quiet[1000],
-                        "window " + window + " quiet output must not drift");
+                        "window " + window + " quiet output must not drift after lock");
             }
             check(Math.abs(loud[0]) >= Math.abs(quiet[0]), "loud input remains louder");
         }
