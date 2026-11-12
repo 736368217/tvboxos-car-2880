@@ -75,6 +75,19 @@ jobs:
           echo "pythonLocation=$pythonLocation"
           echo "ANDROID_HOME=$ANDROID_HOME"
 
+
+      # 诊断用：从 CI runner（境外网络）探测官方发布通道是否可达。
+      # 不含任何凭据；失败也不会让构建挂掉。
+      - name: Probe official channel reachability
+        run: |
+          echo "probe from GitHub Actions runner:"
+          curl -sS --connect-timeout 8 --max-time 15 -o /dev/null \
+            -w 'https_dl_z736_vip=%{http_code}\n' \
+            https://dl.z736.vip/tvbox-car/latest.json || echo "https_dl_z736_vip=unreachable"
+          (timeout 8 bash -c 'cat < /dev/null > /dev/tcp/121.40.69.97/22' \
+            && echo "ssh22=open" || echo "ssh22=closed")
+          (timeout 8 bash -c 'cat < /dev/null > /dev/tcp/121.40.69.97/4450' \
+            && echo "smb4450=open" || echo "smb4450=closed")
       # 优先用 Actions Secret（更安全），未配置时回退到仓库里的共享备份。
       - name: Restore shared debug keystore
         env:
