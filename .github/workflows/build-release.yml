@@ -54,13 +54,19 @@ jobs:
         with:
           python-version: '3.8'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
+      # GitHub runner 自带 Android SDK；不要用 setup-android action（它会去装已下线的 tools 包而失败）。
       - name: Install Android packages
         run: |
-          yes | sdkmanager --licenses >/dev/null 2>&1 || true
-          sdkmanager "platforms;android-33" "build-tools;30.0.3" "platform-tools"
+          set -euo pipefail
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -1)
+          echo "sdkmanager=$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
+          "$SDKMANAGER" "platforms;android-33" "build-tools;30.0.3" "platform-tools"
 
       - name: Show toolchain
         run: |
