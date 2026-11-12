@@ -1,0 +1,168 @@
+name: Build TVBox car APK
+
+# 云端打包：用共享 debug.keystore 签名，产物与本地原打包机证书一致，可直接覆盖安装。
+# 手动触发；默认只构建并上传 artifact，不会自动发版。
+on:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: '构建成功后创建 GitHub Release（必须填写 notes）'
+        required: false
+        type: boolean
+        default: false
+      publish_official:
+        description: '同时发布到 dl.z736.vip 官方通道（需 RELEASE_* secrets）'
+        required: false
+        type: boolean
+        default: false
+      notes:
+        description: '更新说明 2–5 行；create_release / publish_official 打开时必填'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate release notes
+        if: ${{ inputs.create_release || inputs.publish_official }}
+        env:
+          NOTES: ${{ inputs.notes }}
+        run: |
+          if [ -z "$NOTES" ]; then
+            echo "::error::发布必须带 2–5 行 notes（发布规范：没有 notes 不许发版）"
+            exit 1
+          fi
+          echo "notes length: ${#NOTES}"
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Chaquopy 硬性要求 Python 3.8；3.12 会让 generatePythonRequirements 失败。
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platforms;android-33" "build-tools;30.0.3" "platform-tools"
+
+      - name: Show toolchain
+        run: |
+          java -version 2>&1 | head -1
+          python --version
+          echo "pythonLocation=$pythonLocation"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+
+      # 优先用 Actions Secret（更安全），未配置时回退到仓库里的共享备份。
+      - name: Restore shared debug keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p build-ci
+          if [ -n "$KEYSTORE_B64" ]; then
+            printf '%s' "$KEYSTORE_B64" | base64 -d > build-ci/debug.keystore
+            echo "keystore source: Actions Secret DEBUG_KEYSTORE_BASE64"
+          else
+            cp car/ci/debug.keystore build-ci/debug.keystore
+            echo "keystore source: car/ci/debug.keystore (repository)"
+          fi
+          keytool -list -v -keystore build-ci/debug.keystore -storepass android \
+            -alias androiddebugkey 2>/dev/null | grep -i 'SHA256:' | head -1
+
+      - name: Build unsigned APK
+        env:
+          TVBOX_BUILD_PYTHON: ${{ env.pythonLocation }}/python
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assemblePythonRelease --no-daemon --console=plain
+
+      - name: Sign and verify APK
+        run: |
+          set -euo pipefail
+          BT="$ANDROID_HOME/build-tools/30.0.3"
+          VERSION=$(grep -oP "versionName '\K[^']+" app/build.gradle)
+          VC=$(grep -oP 'versionCode \K[0-9]+' app/build.gradle)
+          UNSIGNED=app/build/outputs/apk/python/release/TVBox_release-python.apk
+          OUT="build-ci/TVBox-Original-Feature-${VERSION}.apk"
+          echo "version=$VERSION versionCode=$VC"
+          "$BT/zipalign" -f -p 4 "$UNSIGNED" build-ci/aligned.apk
+          "$BT/apksigner" sign --ks build-ci/debug.keystore \
+            --ks-pass pass:android --key-pass pass:android \
+            --ks-key-alias androiddebugkey \
+            --v1-signing-enabled true --v2-signing-enabled true --v4-signing-enabled true \
+            --out "$OUT" build-ci/aligned.apk
+          "$BT/apksigner" verify --verbose --print-certs "$OUT"
+          CERT=$("$BT/apksigner" verify --print-certs "$OUT" \
+            | grep -oP 'SHA-256 digest: \K[0-9a-f]+' | head -1)
+          echo "certificate SHA-256: $CERT"
+          if [ "$CERT" != "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c" ]; then
+            echo "::error::证书不是原打包机 debug.keystore，拒绝发布"
+            exit 1
+          fi
+          "$BT/aapt2" dump badging "$OUT" | grep -E 'package:|versionCode|versionName' | head -2
+          sha256sum "$OUT"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "OUT_APK=$OUT" >> "$GITHUB_ENV"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tvbox-car-${{ env.VERSION }}
+          path: ${{ env.OUT_APK }}
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: ${{ inputs.create_release }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          printf '%s' "$NOTES" > build-ci/notes.txt
+          gh release create "v${VERSION}" --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" --title "TVBox ${VERSION}" \
+            --notes-file build-ci/notes.txt "$OUT_APK"
+
+      # 可选：从 CI runner（境外网络）发布到官方通道。需先在仓库配置
+      # RELEASE_HOST / RELEASE_USER / RELEASE_PASSWORD 三个 Actions Secrets；
+      # 未配置时只打印 warning 并跳过，不会导致构建失败。
+      - name: Publish to official channel (optional)
+        if: ${{ inputs.publish_official }}
+        env:
+          RELEASE_HOST: ${{ secrets.RELEASE_HOST }}
+          RELEASE_USER: ${{ secrets.RELEASE_USER }}
+          RELEASE_PASSWORD: ${{ secrets.RELEASE_PASSWORD }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          if [ -z "$RELEASE_HOST" ] || [ -z "$RELEASE_PASSWORD" ]; then
+            echo "::warning::未配置 RELEASE_HOST / RELEASE_PASSWORD secrets，跳过官方通道发布"
+            exit 0
+          fi
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sshpass
+          export SSHPASS="$RELEASE_PASSWORD"
+          NAME="TVBox-Original-Feature-${VERSION}.apk"
+          printf '%s' "$NOTES" > build-ci/notes.txt
+          SSH="sshpass -e ssh -o StrictHostKeyChecking=no"
+          SCP="sshpass -e scp -o StrictHostKeyChecking=no"
+          $SCP "$OUT_APK" "$RELEASE_USER@$RELEASE_HOST:/tmp/$NAME"
+          $SCP build-ci/notes.txt "$RELEASE_USER@$RELEASE_HOST:/tmp/notes.txt"
+          $SSH "$RELEASE_USER@$RELEASE_HOST" \
+            "/usr/local/sbin/dl-publish.sh tvbox-car $VERSION /tmp/$NAME /tmp/notes.txt && \
+             /usr/local/sbin/dl-publish.sh TVBox $VERSION /tmp/$NAME /tmp/notes.txt"
+          echo "official channels published: tvbox-car + TVBox $VERSION"
