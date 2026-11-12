@@ -1,8 +1,9 @@
 # 共享签名密钥（覆盖安装用）
 
-`debug.keystore` 是**原打包机** `~/.android/debug.keystore` 的备份。r74–r80 的官方包都是用它签的，
-车机上已安装的版本只认这把证书；换任何别的 keystore（包括 `.github/workflows/TVBoxOSC.jks`，
-alias `tvboxosc`）都会导致 `INSTALL_FAILED_UPDATE_INCOMPATIBLE`，只能卸载重装。
+`debug.keystore` 是**原打包机** `~/.android/debug.keystore` 的备份。r74–r80 的发布包都是用它签的
+（r81 起发布通道改为 GitHub Release，官方 `dl.z736.vip` 已废弃）。车机上已安装的版本只认这把证书；
+换任何别的 keystore（包括 `.github/workflows/TVBoxOSC.jks`，alias `tvboxosc`）都会导致
+`INSTALL_FAILED_UPDATE_INCOMPATIBLE`，只能卸载重装。
 
 Android Studio 每台机器的 debug keystore 都是首次构建时随机生成的，所以其他机器必须用这份
 共享文件签名，包才能覆盖安装。

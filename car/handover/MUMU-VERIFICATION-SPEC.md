@@ -45,30 +45,29 @@ dumpsys display 分辨率与 rotation：
 是否成功进入 DetailActivity / PlayFragment：
 ```
 
-## 4. 推送代码 ≠ 发布更新；每次发布必须带简短说明
+## 4. 推送代码 ≠ 发布更新；GitHub Release 是唯一发布通道
 
-> r79 事故复盘：只把代码合并/推送到 `main`，用户端自动更新不会收到新版本。App 官方优先读取
-> `https://dl.z736.vip/tvbox-car/latest.json`，GitHub Release 是兜底/交付通道；必须把 APK 和 notes
-> 发到 `tvbox-car` + `TVBox`，再创建对应 GitHub Release，才算完成一次自动更新发布。
+> 2026-11-12 起：官方 `dl.z736.vip` / `tvbox-car` / `TVBox` 通道**已废弃**。
+> 服务器 121.40.69.97 的 22 / 443 / 4450 全部不可达，本机与 GitHub Actions 境外 runner
+> 均实测不通；不要再执行 `publish_release.py`、`dl-publish.sh`、SMB 上传或 `latest.json` 校验。
+> r81 起 `AppUpdate.OFFICIAL_CHANNEL_ENABLED=false`，App 直接查 GitHub Release 多通道。
 
 规范：
 
 1. 用户确认实现/报告后，默认流程是 **提交 → 合入 main → 推进 versionCode/versionName → 构建签名 → 发布 → 校验**，不能停在「已推送」。
 2. 每次发布写 **2–5 行短说明**（约 100–250 字）：第一行 `rNN 更新说明`，后续用 `- ` 要点写「改了什么 / 用户要注意什么」；不写内部实现细节，不写空话。
-3. `publish_release.py` 必须带 `--notes <UTF-8 文件>`；脚本拒绝无 notes、空白 notes 或少于 10 字的说明。
-4. 服务端 `dl-publish.sh` 把说明写进 `latest.json` 的 `notes` 字段；`tvbox-car` 与 `TVBox` 两个通道都要发。
-5. `AppUpdate` / `UpdateDialog` 读取并展示 `notes`；GitHub Release 的 notes 与官方通道完全一致。
-6. r75 前旧 App 只能解析 `files` 之前的 notes，升级到 r75+ 后才会显示官方通道说明；「已是最新」弹窗说明栏为空是正常状态，不算 notes 丢失。
-7. 发布后必须校验：`latest.json.version == APK versionName`、三处 notes 非空且一致、三处 SHA-256 一致、官方 URL 下载下来的 APK 哈希与本地一致。
-8. **没有 notes 不许发版；没有三通道校验不许回复用户「已发布」。**
+3. 用 `gh release create v<version> --repo 736368217/tvboxos-car-2880 --target <完整 40 位 SHA> --title ... --notes-file <UTF-8 文件> <APK>` 发布；没有 `--notes-file` 不许发版。
+4. `--target` 必须是完整 40 位 SHA，短 SHA 会报 `HTTP 422`。
+5. 签名统一用 `car/ci/debug.keystore`（证书 `2FEB63C5…FA9C`）；云端打包用 `.github/workflows/build-release.yml` 的 `workflow_dispatch`，签名后有证书硬校验。
+6. 发布后校验：`gh release view` 的 tag / target / asset digest 与本地 APK 一致，notes 非空且为 2–5 行。
+7. **没有 notes 不许发版；没有 Release 校验不许回复用户「已发布」。**
 
 ## 5. 发布自检清单
 
-- [ ] 订阅源与横屏已按 §1/§2 配置（若本轮涉及播放/详情/音量验收）
-- [ ] `main` 已推送，`versionCode/versionName` 已推进，不是停留在上一个 rNN
-- [ ] `tvbox-car/latest.json` 与 `TVBox/latest.json` 都指向新版本
-- [ ] 两处 `latest.json` 含非空 `notes`，且为 2–5 行短说明
-- [ ] GitHub Release notes 与官方通道一致；`--target` 是完整 40 位 SHA
-- [ ] APK digest（本地 / 两个官方通道 / GitHub）四处一致，且官方 URL 下载哈希通过
+- [ ] `main` 已推送，`versionCode/versionName` 已推进到新 rNN
+- [ ] APK 用 `car/ci/debug.keystore` 签名，`apksigner verify` 证书为 `2FEB63C5…FA9C`
+- [ ] GitHub Release 已创建，notes 2–5 行且非空
+- [ ] Release `--target` 是完整 40 位 SHA，asset digest 与本地 APK SHA-256 一致
+- [ ] 没有向 `dl.z736.vip` / `tvbox-car` / `TVBox` 发布任何东西（旧通道已废弃）
 - [ ] MuMu 租约已释放，未碰 `do_not_touch` 实例
 - [ ] 报告中「未验证」项写明原因，不编造结论

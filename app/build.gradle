@@ -7,8 +7,9 @@ android {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
         // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 52
-        versionName '3.1.0-car.7-r80'
+        versionCode 53
+        versionName '3.1.0-car.7-r81'
+        // r81: 官方 dl.z736.vip 发布通道下线，更新检查改为只走 GitHub Release
         // r80: 音量根因定案（视频音轨 −33 dBFS vs 音乐 0 dBFS），非系统问题
         // r80: 新增「视频音量自动对齐」开关（静态片源电平补偿，整片锁定不变）
         // r80: 新增「音频通道对齐音乐」开关（显式 USAGE_MEDIA/CONTENT_TYPE_MOVIE）

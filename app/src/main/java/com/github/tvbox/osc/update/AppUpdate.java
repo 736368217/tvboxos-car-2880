@@ -48,7 +48,8 @@ import okhttp3.ResponseBody;
  *   <li><b>版本判断走 {@link UpdateVersion}</b>：本项目迭代号 {@code rNN} 与 versionCode 不同步，
  *       必须按迭代号比，否则 r44→r48 会被判成「已是最新」。</li>
  *   <li><b>多通道</b>：自定义镜像 → 直连 → ghfast → ghproxy。壳里常见 GitHub 不可达，
- *       逐个试，第一个成功的通道同时决定下载地址的前缀（保证下载走同一条路）。</li>
+ *       逐个试，第一个成功的通道同时决定下载地址的前缀（保证下载走同一条路）。
+ *       r81 起这是唯一主通道；官方 dl.z736.vip 已下线，见 {@code OFFICIAL_CHANNEL_ENABLED}。</li>
  *   <li><b>安装前校验</b>：包名、versionCode、签名摘要三项都对得上才交给安装器。
  *       签名不一致会直接 `INSTALL_FAILED_UPDATE_INCOMPATIBLE`，提前拦掉比装到一半失败好。</li>
  *   <li><b>全部后台线程</b>，结果回主线程；进度做了节流，避免刷爆 UI。</li>
@@ -67,12 +68,16 @@ public final class AppUpdate {
     /**
      * 官方发布通道：阿里云发布根（SMB 上传，公网由 dl.z736.vip 提供）。
      *
-     * <p>发布脚本会在 {@code <软件名>/latest.json} 写版本清单，里面带文件大小和 SHA-256。
-     * 这条通道不经过 GitHub，车机网络下最稳，所以检查顺序是「官方 → GitHub」。</p>
+     * <p>r81 起停用：服务器 121.40.69.97 的 22 / 443 / 4450 全部不可达，
+     * {@code <软件名>/latest.json} 已无人维护。更新检查改为直接走 GitHub Release
+     * 多通道，不再先等一台死服务器超时。解析与下载代码保留，若以后换回自建发布根，
+     * 把 {@link #OFFICIAL_CHANNEL_ENABLED} 打开即可恢复「官方 → GitHub」旧顺序。</p>
      */
     private static final String OFFICIAL_BASE = "https://dl.z736.vip/";
     private static final String OFFICIAL_HOST = "dl.z736.vip";
     private static final String OFFICIAL_SOFTWARE = "tvbox-car";
+    /** r81: 官方通道已下线；置 true 可恢复旧顺序。 */
+    private static final boolean OFFICIAL_CHANNEL_ENABLED = false;
 
     /** 自动检查的最小间隔；启动检查受它节流。 */
     private static final long AUTO_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
@@ -200,25 +205,28 @@ public final class AppUpdate {
             String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
             List<String> failures = new ArrayList<>();
 
-            // ① 官方发布通道优先：阿里云发布根，带 SHA-256，且不依赖 GitHub 可达性。
+            // ① 官方通道（r81 起默认关闭，见 OFFICIAL_CHANNEL_ENABLED）。
+            //    服务器已下线，检查更新直接走 GitHub Release 多通道。
             Info official = null;
-            try {
-                final Info officialResult = queryOfficial(local);
-                if (officialResult.hasUpdate) {
-                    remember(officialResult);
-                    Log.i(TAG, "check ok channel=" + officialResult.channelLabel + " force=" + force
-                            + " local=" + local + " remote=" + officialResult.remoteVersion
-                            + " hasUpdate=true sha256=" + (officialResult.sha256 != null));
-                    post(() -> callback.onResult(officialResult, null));
-                    return;
+            if (OFFICIAL_CHANNEL_ENABLED) {
+                try {
+                    final Info officialResult = queryOfficial(local);
+                    if (officialResult.hasUpdate) {
+                        remember(officialResult);
+                        Log.i(TAG, "check ok channel=" + officialResult.channelLabel + " force=" + force
+                                + " local=" + local + " remote=" + officialResult.remoteVersion
+                                + " hasUpdate=true sha256=" + (officialResult.sha256 != null));
+                        post(() -> callback.onResult(officialResult, null));
+                        return;
+                    }
+                    official = officialResult;
+                    Log.i(TAG, "official up to date local=" + local
+                            + " remote=" + officialResult.remoteVersion);
+                } catch (Exception error) {
+                    String reason = describe(error);
+                    failures.add("官方=" + reason);
+                    Log.w(TAG, "official check failed: " + reason);
                 }
-                official = officialResult;
-                Log.i(TAG, "official up to date local=" + local
-                        + " remote=" + officialResult.remoteVersion);
-            } catch (Exception error) {
-                String reason = describe(error);
-                failures.add("官方=" + reason);
-                Log.w(TAG, "official check failed: " + reason);
             }
             UpdateVersion.Channel[] channels = UpdateVersion.channels(OWNER, REPO, mirror);
             // 两轮：先用系统 DNS 直连（最快、最常见），全挂了再用 App 自己的网络栈
@@ -250,34 +258,36 @@ public final class AppUpdate {
                     }
                 }
             }
-            // ③ 官方通道再试一次：冷启动/刚联网时系统 DNS 往往要好几秒才通（实测 MuMu 首次
-            //    所有域名全超时、十几秒后同一域名秒回），一次失败不代表官方不可达。此时
-            //    DNS 已热，再给官方一次机会，别把「有新版」误报成「已是最新」。
-            if (official == null) {
-                try {
-                    final Info retry = queryOfficial(local);
-                    if (retry.hasUpdate) {
-                        remember(retry);
-                        Log.i(TAG, "check ok channel=" + retry.channelLabel + "(retry) force=" + force
-                                + " local=" + local + " remote=" + retry.remoteVersion
-                                + " hasUpdate=true sha256=" + (retry.sha256 != null));
-                        post(() -> callback.onResult(retry, null));
-                        return;
+            if (OFFICIAL_CHANNEL_ENABLED) {
+                // ③ 官方通道再试一次：冷启动/刚联网时系统 DNS 往往要好几秒才通（实测 MuMu 首次
+                //    所有域名全超时、十几秒后同一域名秒回），一次失败不代表官方不可达。此时
+                //    DNS 已热，再给官方一次机会，别把「有新版」误报成「已是最新」。
+                if (official == null) {
+                    try {
+                        final Info retry = queryOfficial(local);
+                        if (retry.hasUpdate) {
+                            remember(retry);
+                            Log.i(TAG, "check ok channel=" + retry.channelLabel + "(retry) force=" + force
+                                    + " local=" + local + " remote=" + retry.remoteVersion
+                                    + " hasUpdate=true sha256=" + (retry.sha256 != null));
+                            post(() -> callback.onResult(retry, null));
+                            return;
+                        }
+                        official = retry;
+                        Log.i(TAG, "official retry up to date local=" + local
+                                + " remote=" + retry.remoteVersion);
+                    } catch (Exception error) {
+                        Log.w(TAG, "official retry failed: " + describe(error));
                     }
-                    official = retry;
-                    Log.i(TAG, "official retry up to date local=" + local
-                            + " remote=" + retry.remoteVersion);
-                } catch (Exception error) {
-                    Log.w(TAG, "official retry failed: " + describe(error));
                 }
-            }
-            final Info officialFinal = official;
-            if (officialFinal != null) {
-                remember(officialFinal);
-                Log.i(TAG, "check ok channel=" + officialFinal.channelLabel + " local=" + local
-                        + " remote=" + officialFinal.remoteVersion + " hasUpdate=false");
-                post(() -> callback.onResult(officialFinal, null));
-                return;
+                final Info officialFinal = official;
+                if (officialFinal != null) {
+                    remember(officialFinal);
+                    Log.i(TAG, "check ok channel=" + officialFinal.channelLabel + " local=" + local
+                            + " remote=" + officialFinal.remoteVersion + " hasUpdate=false");
+                    post(() -> callback.onResult(officialFinal, null));
+                    return;
+                }
             }
             Log.w(TAG, "check failed on every channel: " + failures);
             String message = failures.isEmpty()

@@ -1,7 +1,8 @@
 name: Build TVBox car APK
 
-# 云端打包：用共享 debug.keystore 签名，产物与本地原打包机证书一致，可直接覆盖安装。
+# 云端打包：用共享 debug.keystore 签名，产物与原打包机证书一致，可直接覆盖安装。
 # 手动触发；默认只构建并上传 artifact，不会自动发版。
+# 发布通道只有 GitHub Release（dl.z736.vip 官方通道已于 2026-11-12 废弃）。
 on:
   workflow_dispatch:
     inputs:
@@ -10,13 +11,8 @@ on:
         required: false
         type: boolean
         default: false
-      publish_official:
-        description: '同时发布到 dl.z736.vip 官方通道（需 RELEASE_* secrets）'
-        required: false
-        type: boolean
-        default: false
       notes:
-        description: '更新说明 2–5 行；create_release / publish_official 打开时必填'
+        description: '更新说明 2–5 行；create_release 打开时必填'
         required: false
         type: string
 
@@ -32,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate release notes
-        if: ${{ inputs.create_release || inputs.publish_official }}
+        if: ${{ inputs.create_release }}
         env:
           NOTES: ${{ inputs.notes }}
         run: |
@@ -75,19 +71,6 @@ jobs:
           echo "pythonLocation=$pythonLocation"
           echo "ANDROID_HOME=$ANDROID_HOME"
 
-
-      # 诊断用：从 CI runner（境外网络）探测官方发布通道是否可达。
-      # 不含任何凭据；失败也不会让构建挂掉。
-      - name: Probe official channel reachability
-        run: |
-          echo "probe from GitHub Actions runner:"
-          curl -sS --connect-timeout 8 --max-time 15 -o /dev/null \
-            -w 'https_dl_z736_vip=%{http_code}\n' \
-            https://dl.z736.vip/tvbox-car/latest.json || echo "https_dl_z736_vip=unreachable"
-          (timeout 8 bash -c 'cat < /dev/null > /dev/tcp/121.40.69.97/22' \
-            && echo "ssh22=open" || echo "ssh22=closed")
-          (timeout 8 bash -c 'cat < /dev/null > /dev/tcp/121.40.69.97/4450' \
-            && echo "smb4450=open" || echo "smb4450=closed")
       # 优先用 Actions Secret（更安全），未配置时回退到仓库里的共享备份。
       - name: Restore shared debug keystore
         env:
@@ -156,32 +139,3 @@ jobs:
           gh release create "v${VERSION}" --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" --title "TVBox ${VERSION}" \
             --notes-file build-ci/notes.txt "$OUT_APK"
-
-      # 可选：从 CI runner（境外网络）发布到官方通道。需先在仓库配置
-      # RELEASE_HOST / RELEASE_USER / RELEASE_PASSWORD 三个 Actions Secrets；
-      # 未配置时只打印 warning 并跳过，不会导致构建失败。
-      - name: Publish to official channel (optional)
-        if: ${{ inputs.publish_official }}
-        env:
-          RELEASE_HOST: ${{ secrets.RELEASE_HOST }}
-          RELEASE_USER: ${{ secrets.RELEASE_USER }}
-          RELEASE_PASSWORD: ${{ secrets.RELEASE_PASSWORD }}
-          NOTES: ${{ inputs.notes }}
-        run: |
-          if [ -z "$RELEASE_HOST" ] || [ -z "$RELEASE_PASSWORD" ]; then
-            echo "::warning::未配置 RELEASE_HOST / RELEASE_PASSWORD secrets，跳过官方通道发布"
-            exit 0
-          fi
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq sshpass
-          export SSHPASS="$RELEASE_PASSWORD"
-          NAME="TVBox-Original-Feature-${VERSION}.apk"
-          printf '%s' "$NOTES" > build-ci/notes.txt
-          SSH="sshpass -e ssh -o StrictHostKeyChecking=no"
-          SCP="sshpass -e scp -o StrictHostKeyChecking=no"
-          $SCP "$OUT_APK" "$RELEASE_USER@$RELEASE_HOST:/tmp/$NAME"
-          $SCP build-ci/notes.txt "$RELEASE_USER@$RELEASE_HOST:/tmp/notes.txt"
-          $SSH "$RELEASE_USER@$RELEASE_HOST" \
-            "/usr/local/sbin/dl-publish.sh tvbox-car $VERSION /tmp/$NAME /tmp/notes.txt && \
-             /usr/local/sbin/dl-publish.sh TVBox $VERSION /tmp/$NAME /tmp/notes.txt"
-          echo "official channels published: tvbox-car + TVBox $VERSION"
