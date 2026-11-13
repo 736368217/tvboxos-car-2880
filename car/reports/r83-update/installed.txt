@@ -1,0 +1,6 @@
+﻿
+    versionCode=56 minSdk=19 targetSdk=28
+    versionName=3.1.0-car.7-r84
+    signatures=PackageSignatures{150861f version:3, signatures:[54fce98a], past signatures:[]}
+
+

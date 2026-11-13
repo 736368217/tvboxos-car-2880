@@ -1,0 +1,15 @@
+﻿
+11-13 17:18:55.660  2105  2686 I AppUpdate: probe ok first=https://ghfast.top/https://github.com/736368217/tvboxos-car-
+2880/releases/download/v3.1.0-car.7-r84/TVBox-Original-Feature-3.1.0-car.7-r84.apk healthy=4/4
+11-13 17:18:55.660  2105  2686 I AppUpdate: download start size=52754642 -> /storage/emulated/0/Android/data/com.github
+.tvbox.osc.jun/files/apk/TVBox-Original-Feature-3.1.0-car.7-r84.apk candidates=4 first=https://ghfast.top/https://githu
+b.com/736368217/tvboxos-car-2880/releases/download/v3.1.0-car.7-r84/TVBox-Original-Feature-3.1.0-car.7-r84.apk
+11-13 17:18:55.661  2105  2686 I AppUpdate: download try pass=1 1/4 resume_from=0 url=https://ghfast.top/https://github
+.com/736368217/tvboxos-car-2880/releases/download/v3.1.0-car.7-r84/TVBox-Original-Feature-3.1.0-car.7-r84.apk
+11-13 17:19:35.374  2105  2686 I AppUpdate: verify ok package=com.github.tvbox.osc.jun versionCode=56 sig=2FEB63C511CD7
+257…
+11-13 17:19:35.433  2105  2105 I AppUpdate: install launched file=TVBox-Original-Feature-3.1.0-car.7-r84.apk uri=conten
+t://com.github.tvbox.osc.jun.fileprovider/beta_external_files_path/com.github.tvbox.osc.jun/files/apk/TVBox-Original-Fe
+ature-3.1.0-car.7-r84.apk
+
+
