@@ -1,0 +1,3 @@
+e69a227502f17b82b111e9a2574a77bca06122825e4b4f78337b709c77c5247e  /data/app/~~uc4dOxJEQJgWQNuOz3keZA==/com.github.tvbox.osc.jun-cGDgptZuhN4Afg4-2gIMew==/base.apk
+    versionCode=54 minSdk=19 targetSdk=28
+    versionName=3.1.0-car.7-r82

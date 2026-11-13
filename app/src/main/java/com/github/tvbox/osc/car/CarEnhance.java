@@ -115,6 +115,14 @@ public final class CarEnhance {
         Log.i("CarAudio", "pref source_level_match=" + enabled);
     }
 
+    public static String audioCompensationStatus() {
+        if (!sourceLevelMatchEnabled()) return "已关闭";
+        MyVideoView view = activeVideo.get();
+        if (view == null || view.getMediaPlayer() == null) return "下次 EXO 播放时测量";
+        if (!(view.getMediaPlayer() instanceof com.github.tvbox.osc.player.ExoPlayer)) return "当前播放器不支持；仅 EXO 生效";
+        return ((com.github.tvbox.osc.player.ExoPlayer) view.getMediaPlayer()).getSourceLevelStatus();
+    }
+
     /** 读取「音频通道对齐音乐」偏好；默认开启。 */
     public static boolean audioUsageMediaEnabled() {
         Object raw = Hawk.get(HawkConfig.AUDIO_USAGE_MEDIA, true);

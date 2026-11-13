@@ -1,0 +1,46 @@
+BackDisplayMetricsHostTest PASS (81 checks)
+EdgeBackPolicyHostTest PASS (57 checks)
+BackBarPolicyHostTest PASS (13 checks)
+PASS: 740 Back navigation policy checks
+GestureAxisHostTest PASS (15 checks)
+CoverFormatHostTest PASS checks=27
+CoverKeyHostTest PASS (49 checks)
+OfficialManifestHostTest PASS (24 checks)
+UpdateVersionHostTest PASS (95 checks)
+VolumeBoostMathHostTest PASS (25 checks)
+VolumeLimitHostTest PASS (18 checks)
+FixedGainHostTest PASS checks=26
+SourceLevelLockHostTest
+  lock math: PASS
+  processor quiet source: PASS (boost 720 -> 2880)
+  switch off/on: PASS (off=720 on=2880)
+SourceLevelLockHostTest PASS checks=441
+SourceLevelFramesHostTest PASS checks=28 PCM off=1000 on=4000 ratio=4.0 at500=19999
+PlaybackSessionPolicyHostTest PASS checks=6
+AudioGainProcessorHostTest PASS
+AudioVolumeRoutingHostTest PASS (4958 checks)
+PASS: exact old/new audio and video curves, immutable data, linked SGSR sharpness, temporal cut/pause/seek, 4K policy and switches
+PASS: 11 presets, stable IDs, legacy migration, corrupt preference fallback, distinct immutable curves
+PASS: 44 runtime configurations, 88 SDR/HDR cases, 1936 transition comparisons, independent switches and immutable publication
+AudioFocusHelperHostTest PASS (77 checks)
+=== BackDisplayMetricsHostTest ===
+=== EdgeBackPolicyHostTest ===
+=== BackBarPolicyHostTest ===
+=== BackNavPolicyHostTest ===
+=== GestureAxisHostTest ===
+=== CoverFormatHostTest ===
+=== CoverKeyHostTest ===
+=== OfficialManifestHostTest ===
+=== UpdateVersionHostTest ===
+=== VolumeBoostMathHostTest ===
+=== VolumeLimitHostTest ===
+=== FixedGainHostTest ===
+=== SourceLevelLockHostTest ===
+=== SourceLevelFramesHostTest ===
+=== PlaybackSessionPolicyHostTest ===
+=== AudioGainProcessorHostTest ===
+=== AudioVolumeRoutingHostTest ===
+=== Car6PostProcessTest ===
+=== VideoEnhancePresetTest ===
+=== Car7RuntimeConfigTest ===
+ALL_HOST_TESTS_PASS

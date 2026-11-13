@@ -1381,10 +1381,15 @@ public class PlayFragment extends BaseLazyFragment {
         ApiConfig.get().setCurrentPlaySourceKey(sourceKey);
         initPlayerCfg();
         triedLineFlags.clear();
-        // r78：从后台/任务栈恢复时按会话回到原进度，而不是从头播或回主页。
-        final long resumePosition = com.github.tvbox.osc.cache.PlaybackSnapshot.position(getContext());
+        boolean matchingSnapshot = com.github.tvbox.osc.cache.PlaybackSnapshot.has(getContext())
+                && TextUtils.equals(sourceKey, com.github.tvbox.osc.cache.PlaybackSnapshot.sourceKey(getContext()))
+                && mVodInfo != null && TextUtils.equals(mVodInfo.id, com.github.tvbox.osc.cache.PlaybackSnapshot.vodId(getContext()));
+        final long resumePosition = matchingSnapshot ? com.github.tvbox.osc.cache.PlaybackSnapshot.position(getContext()) : 0L;
+        boolean full = getActivity() instanceof com.github.tvbox.osc.ui.activity.DetailActivity
+                ? ((com.github.tvbox.osc.ui.activity.DetailActivity) getActivity()).isFullPreview()
+                : mVideoView != null && mVideoView.isFullScreen();
         com.github.tvbox.osc.cache.PlaybackSession.begin(getContext(), mVodInfo, sourceKey,
-                resumePosition, 0L, mVideoView != null && mVideoView.isFullScreen());
+                resumePosition, 0L, full);
         if (resumePosition > 1000L) {
             com.github.tvbox.osc.cache.PlaybackSnapshot.clear(getContext());
             mHandler.postDelayed(() -> {
@@ -1553,18 +1558,18 @@ public class PlayFragment extends BaseLazyFragment {
     @Override
     public void onPause() {
         super.onPause();
-        // r78：切到别的窗口/桌面时保存完整播放会话；系统回收 Activity 后仍可回详情页原进度。
-        if (mVideoView != null && mVodInfo != null && !TextUtils.isEmpty(sourceKey)) {
+        // A pause is not a new playback start. Back may already have cleared recovery.
+        android.app.Activity owner = getActivity();
+        boolean saveSession = !exitingPreview && owner != null && !owner.isFinishing();
+        if (saveSession && mVideoView != null && mVodInfo != null && !TextUtils.isEmpty(sourceKey)) {
             long position = mVideoView.getCurrentPosition();
             long duration = mVideoView.getDuration();
-            boolean full = mVideoView.isFullScreen();
-            com.github.tvbox.osc.cache.PlaybackSnapshot.save(getContext(), mVodInfo, sourceKey,
-                    position, duration);
-            com.github.tvbox.osc.cache.PlaybackSession.begin(getContext(), mVodInfo, sourceKey,
+            boolean full = owner instanceof com.github.tvbox.osc.ui.activity.DetailActivity
+                    ? ((com.github.tvbox.osc.ui.activity.DetailActivity) owner).isFullPreview()
+                    : mVideoView.isFullScreen();
+            com.github.tvbox.osc.cache.PlaybackSession.progress(getContext(), mVodInfo, sourceKey,
                     position, duration, full);
-            com.github.tvbox.osc.cache.PlaybackSession.background(getContext());
-            com.github.tvbox.osc.diag.DiagLog.event("playback_background position=" + position
-                    + " full=" + full + " name=" + mVodInfo.name);
+            com.github.tvbox.osc.diag.DiagLog.event("playback_pause_saved position=" + position + " full=" + full);
         }
         if (mVideoView != null && !exitingPreview && !hasAudioOnlyPlayback()) {
             mVideoView.pause();
@@ -2301,6 +2306,7 @@ public class PlayFragment extends BaseLazyFragment {
     }
 
     void cancelPlayTimeout() {
+        if (mHandler == null) return;
         mHandler.removeMessages(MSG_RESOLVE_PLAY_URL_TIMEOUT);
         mHandler.removeMessages(MSG_SWITCH_LINE_PLAY_TIMEOUT);
     }

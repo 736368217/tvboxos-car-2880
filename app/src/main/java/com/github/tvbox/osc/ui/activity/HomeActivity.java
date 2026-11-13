@@ -379,6 +379,7 @@ public class HomeActivity extends BaseActivity {
     private void initData() {
         if (dataInitOk && jarInitOk) {
             loadHomeSort(false);
+            restorePlaybackIfNeeded();
             if (hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 LOG.e("有");
             } else {
@@ -706,6 +707,7 @@ public class HomeActivity extends BaseActivity {
 
     /** r78：从其他应用/桌面切回来，若播放页被任务栈清掉，则按持久会话重建详情页。 */
     private void restorePlaybackIfNeeded() {
+        if (!dataInitOk || !jarInitOk) return;
         if (!PlaybackSessionPolicy.shouldRestore(
                 PlaybackSession.isActive(this),
                 !PlaybackSession.needsRestore(this),
@@ -725,6 +727,7 @@ public class HomeActivity extends BaseActivity {
         bundle.putString("sourceKey", source);
         bundle.putString("title", PlaybackSession.name(this));
         bundle.putString("picture", PlaybackSession.pic(this));
+        bundle.putBoolean("restore_fullscreen", PlaybackSession.fullscreen(this));
         if (!PlaybackSession.claimRestore(this)) return;
         com.github.tvbox.osc.diag.DiagLog.event("playback_restore id=" + id
                 + " position=" + PlaybackSession.position(this)
@@ -732,6 +735,12 @@ public class HomeActivity extends BaseActivity {
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtras(bundle);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        android.app.Activity existing = AppManager.getInstance().getActivity(DetailActivity.class);
+        if (existing != null && !existing.isFinishing() && !existing.isDestroyed()
+                && android.text.TextUtils.equals(id, existing.getIntent().getStringExtra("id"))
+                && android.text.TextUtils.equals(source, existing.getIntent().getStringExtra("sourceKey"))) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        }
         startActivity(intent);
     }
 

@@ -1,0 +1,64 @@
+--------- beginning of main
+11-13 13:30:18.424  2347  2347 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+11-13 13:30:18.433  2347  2347 I AndroidRuntime: Using default boot image
+11-13 13:30:18.433  2347  2347 I AndroidRuntime: Leaving lock profiling enabled
+11-13 13:30:18.664  2347  2347 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+11-13 13:30:19.822  2357  2357 I CarFeedback: app_foreground
+11-13 13:30:41.646  2357  2357 I CarAudio: runtime_apply mode=0 session=0 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=loudness boostMb=0 enabled=false state=0 player=0 engine=null pcmStored=-1.0 pcmQueued=-1
+11-13 13:30:41.646  2357  2357 I CarAudio: app_gain request=100% pcmCapable=false
+11-13 13:30:41.649  2357  2357 I CarFeedback: playback_foreground
+11-13 13:30:41.735  2357  2357 I CarAudio: renderers_factory=androidx.base.nj$e decoderFallback=true extMode=PREFER
+11-13 13:30:41.764  2357  2357 I CarAudio: sink_built floatOut=false atParams=false offloadArg=false processors=1 gain=1.0
+11-13 13:30:41.787  2357  2357 I CarAudio: audio_attrs=MEDIA/MOVIE focus_owner=VideoView handleFocus=false
+11-13 13:30:41.788  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=0 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=0
+11-13 13:30:41.788  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=0 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=0
+11-13 13:30:41.789  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=1 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=0
+11-13 13:30:41.958  2357  2544 I CarAudioGain: configure enc=2 sampleRate=48000 channels=1 accepted=true gain=1.0
+11-13 13:30:41.984  2357  2544 I CarAudioGain: queue n=1 user_gain=1.0 makeup=1.0 makeup_locked=false locked_value=1.0 source_dbfs=-38.03216 combined=1.0 peak=0.012542725 samples=1024 frames=1024 level_in=267303 level_out=267303 measured_ratio=1.0
+11-13 13:30:41.985  2357  2544 I CarAudioGain: queue n=2 user_gain=1.0 makeup=1.0 makeup_locked=false locked_value=1.0 source_dbfs=-38.03216 combined=1.0 peak=0.012481689 samples=1024 frames=1024 level_in=267412 level_out=267412 measured_ratio=1.0
+11-13 13:30:41.985  2357  2544 I CarAudioGain: queue n=3 user_gain=1.0 makeup=1.0 makeup_locked=false locked_value=1.0 source_dbfs=-37.989998 combined=1.0 peak=0.01260376 samples=1024 frames=1024 level_in=267561 level_out=267561 measured_ratio=1.0
+11-13 13:30:42.074  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=2 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=13
+11-13 13:30:42.075  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=2 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=13
+11-13 13:30:42.089  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=2 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=15
+11-13 13:30:42.098  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=2 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=15
+11-13 13:30:42.103  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=15
+11-13 13:30:42.105  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=15
+11-13 13:30:45.863  2357  2544 I CarAudioGain: makeup_locked peak=0.01260376 makeup=4.0 frames=192512 channels=1
+11-13 13:30:45.873  2357  2544 I CarAudioGain: queue n=189 user_gain=1.0 makeup=1.128 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=1.128 peak=0.012512207 samples=1024 frames=1024 level_in=264498 level_out=298323 measured_ratio=1.1278838
+11-13 13:30:45.903  2357  2544 I CarAudioGain: queue n=190 user_gain=1.0 makeup=1.256 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=1.256 peak=0.012451172 samples=1024 frames=1024 level_in=263981 level_out=331551 measured_ratio=1.2559654
+11-13 13:30:45.923  2357  2544 I CarAudioGain: queue n=191 user_gain=1.0 makeup=1.384 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=1.384 peak=0.012573242 samples=1024 frames=1024 level_in=267840 level_out=370681 measured_ratio=1.3839643
+11-13 13:30:45.946  2357  2544 I CarAudioGain: queue n=192 user_gain=1.0 makeup=1.512 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=1.512 peak=0.01260376 samples=1024 frames=1024 level_in=269348 level_out=407224 measured_ratio=1.5118879
+11-13 13:30:45.965  2357  2544 I CarAudioGain: queue n=193 user_gain=1.0 makeup=1.64 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=1.64 peak=0.012481689 samples=1024 frames=1024 level_in=264109 level_out=433138 measured_ratio=1.6399971
+11-13 13:30:45.988  2357  2544 I CarAudioGain: queue n=194 user_gain=1.0 makeup=1.768 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=1.768 peak=0.012481689 samples=1024 frames=1024 level_in=264174 level_out=467025 measured_ratio=1.7678689
+11-13 13:30:46.006  2357  2544 I CarAudioGain: queue n=195 user_gain=1.0 makeup=1.896 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=1.896 peak=0.012451172 samples=1024 frames=1024 level_in=264710 level_out=501868 measured_ratio=1.8959163
+11-13 13:30:46.026  2357  2544 I CarAudioGain: queue n=196 user_gain=1.0 makeup=2.0240002 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=2.0240002 peak=0.012573242 samples=1024 frames=1024 level_in=269065 level_out=544593 measured_ratio=2.0240202
+11-13 13:30:46.046  2357  2544 I CarAudioGain: queue n=197 user_gain=1.0 makeup=2.152 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=2.152 peak=0.012573242 samples=1024 frames=1024 level_in=266768 level_out=574078 measured_ratio=2.1519747
+11-13 13:30:46.068  2357  2544 I CarAudioGain: queue n=198 user_gain=1.0 makeup=2.2800002 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=2.2800002 peak=0.012451172 samples=1024 frames=1024 level_in=263422 level_out=600584 measured_ratio=2.279931
+11-13 13:30:46.097  2357  2544 I CarAudioGain: queue n=199 user_gain=1.0 makeup=2.408 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=2.408 peak=0.012451172 samples=1024 frames=1024 level_in=264187 level_out=636151 measured_ratio=2.4079573
+11-13 13:30:46.117  2357  2544 I CarAudioGain: queue n=200 user_gain=1.0 makeup=2.536 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=2.536 peak=0.012451172 samples=1024 frames=1024 level_in=266849 level_out=676722 measured_ratio=2.5359735
+11-13 13:30:46.137  2357  2544 I CarAudioGain: queue n=201 user_gain=1.0 makeup=2.664 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=2.664 peak=0.012512207 samples=1024 frames=1024 level_in=267265 level_out=711994 measured_ratio=2.664
+11-13 13:30:46.160  2357  2544 I CarAudioGain: queue n=202 user_gain=1.0 makeup=2.792 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=2.792 peak=0.012512207 samples=1024 frames=1024 level_in=264973 level_out=739788 measured_ratio=2.7919374
+11-13 13:30:46.179  2357  2544 I CarAudioGain: queue n=203 user_gain=1.0 makeup=2.92 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=2.92 peak=0.012451172 samples=1024 frames=1024 level_in=263578 level_out=769630 measured_ratio=2.9199326
+11-13 13:30:46.199  2357  2544 I CarAudioGain: queue n=204 user_gain=1.0 makeup=3.048 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=3.048 peak=0.012573242 samples=1024 frames=1024 level_in=267153 level_out=814253 measured_ratio=3.0478902
+11-13 13:30:46.218  2357  2544 I CarAudioGain: queue n=205 user_gain=1.0 makeup=3.176 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=3.176 peak=0.012573242 samples=1024 frames=1024 level_in=269435 level_out=855691 measured_ratio=3.1758718
+11-13 13:30:46.241  2357  2544 I CarAudioGain: queue n=206 user_gain=1.0 makeup=3.3040001 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=3.3040001 peak=0.012512207 samples=1024 frames=1024 level_in=265207 level_out=876207 measured_ratio=3.3038607
+11-13 13:30:46.271  2357  2544 I CarAudioGain: queue n=207 user_gain=1.0 makeup=3.4320002 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=3.4320002 peak=0.012573242 samples=1024 frames=1024 level_in=266133 level_out=913354 measured_ratio=3.4319456
+11-13 13:30:46.289  2357  2544 I CarAudioGain: queue n=208 user_gain=1.0 makeup=3.5600002 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=3.5600002 peak=0.012573242 samples=1024 frames=1024 level_in=266345 level_out=948149 measured_ratio=3.5598528
+11-13 13:30:46.309  2357  2544 I CarAudioGain: queue n=209 user_gain=1.0 makeup=3.6880002 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=3.6880002 peak=0.012573242 samples=1024 frames=1024 level_in=268863 level_out=991551 measured_ratio=3.6879416
+11-13 13:30:46.330  2357  2544 I CarAudioGain: queue n=210 user_gain=1.0 makeup=3.8160002 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=3.8160002 peak=0.012542725 samples=1024 frames=1024 level_in=267508 level_out=1020784 measured_ratio=3.8159008
+11-13 13:30:46.353  2357  2544 I CarAudioGain: queue n=211 user_gain=1.0 makeup=3.9440002 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=3.9440002 peak=0.012451172 samples=1024 frames=1024 level_in=264163 level_out=1041808 measured_ratio=3.9438074
+11-13 13:30:46.369  2357  2544 I CarAudioGain: queue n=212 user_gain=1.0 makeup=4.0 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=4.0 peak=0.012451172 samples=1024 frames=1024 level_in=264647 level_out=1058588 measured_ratio=4.0
+11-13 13:30:52.362  2357  2357 I CarFeedback: playback_pause_saved position=63023 full=true
+11-13 13:30:52.374  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=4 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=492
+11-13 13:30:52.530  2357  2357 I CarFeedback: app_background
+11-13 13:30:54.248  2357  2357 I CarFeedback: app_foreground
+11-13 13:31:04.329  2357  2357 I CarFeedback: playback_restore id=file:///sdcard/Download/r82-quiet-test.mp4 position=63023 full=true
+11-13 13:31:04.415  2357  2357 I CarFeedback: playback_foreground
+11-13 13:31:04.422  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=493
+11-13 13:31:04.425  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=494
+11-13 13:31:04.426  2357  2357 I CarAudio: runtime_apply mode=0 session=81 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=128557297 engine=androidx.base.nj pcmStored=1.0 pcmQueued=494
+11-13 13:31:04.658  2357  2544 I CarAudioGain: queue n=501 user_gain=1.0 makeup=4.0 makeup_locked=true locked_value=4.0 source_dbfs=-37.989998 combined=4.0 peak=0.012512207 samples=1024 frames=1024 level_in=267265 level_out=1069060 measured_ratio=4.0
+11-13 13:31:04.975  2357  2357 I CarFeedback: playback_back action=collapse_fullscreen
+11-13 13:31:06.309  2357  2357 I CarFeedback: playback_back action=leave_detail session_active=false
+11-13 13:31:06.743  2357  2357 I CarAudio: runtime_apply mode=0 session=0 gain=1.0 factor=1.0 applied=1.0 max_gain=5.0 auto_level=removed path=loudness boostMb=0 enabled=false state=3 player=0 engine=null pcmStored=-1.0 pcmQueued=-1
+11-13 13:31:21.027  2347  2347 I AndroidRuntime: VM exiting with result code 0.

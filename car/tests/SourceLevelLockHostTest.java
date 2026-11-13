@@ -24,9 +24,9 @@ public final class SourceLevelLockHostTest {
     }
 
     private static int[] run(AudioGainProcessor processor, int frames, int amplitude) {
-        ByteBuffer in = ByteBuffer.allocateDirect(frames * 2).order(ByteOrder.nativeOrder());
-        for (int i = 0; i < frames; i++) {
-            in.putShort((short) Math.round(amplitude * Math.sin(i * 0.05)));
+        ByteBuffer in = ByteBuffer.allocateDirect(frames * 2 * 2).order(ByteOrder.nativeOrder());
+        for (int i = 0; i < frames * 2; i++) {
+            in.putShort((short) Math.round(amplitude * Math.sin((i / 2) * 0.05)));
         }
         in.flip();
         processor.queueInput(in);

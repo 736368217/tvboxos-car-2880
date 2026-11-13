@@ -67,6 +67,7 @@ final class InAppBackHostLayout extends FrameLayout {
 
     void refresh() {
         if (disposed) return;
+        releaseGesture();
         ModeSide parsed = ModeSide.read();
         mode = parsed.mode;
         side = parsed.side;
@@ -180,6 +181,7 @@ final class InAppBackHostLayout extends FrameLayout {
                 capturing = result != EdgeBackPolicy.Action.NONE;
                 log("down", x, y, result, action);
                 wakeAt(x, y, result != EdgeBackPolicy.Action.NONE);
+                if (capturing) main.removeCallbacks(hideTask);
                 if (!capturing) return super.dispatchTouchEvent(event);
                 affordance.setPresentation(true, mode == EdgeBackPolicy.Mode.BACK_BAR);
                 return true;

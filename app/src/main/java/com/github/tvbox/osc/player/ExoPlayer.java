@@ -198,10 +198,19 @@ public class ExoPlayer extends ExoMediaPlayer {
     }
 
     @Override
-    public void setDataSource(String path, Map<String, String> headers) {
+    public synchronized void setDataSource(String path, Map<String, String> headers) {
         defaultSubtitleTrackSelected = false;
         defaultSubtitleTrackSelectionClosed = false;
+        for (xyz.doikki.videoplayer.exo.AudioGainProcessor processor : audioGainProcessors) processor.beginSource();
         super.setDataSource(path, headers);
+    }
+
+    public synchronized String getSourceLevelStatus() {
+        for (int i = audioGainProcessors.size() - 1; i >= 0; i--) {
+            xyz.doikki.videoplayer.exo.AudioGainProcessor processor = audioGainProcessors.get(i);
+            if (processor.queueCount() > 0) return processor.sourceLevelStatus();
+        }
+        return sourceLevelMatchEnabled ? "等待声音" : "已关闭";
     }
 
     private RenderersFactory buildRenderersFactory(Context context, ExoPlayer owner) {

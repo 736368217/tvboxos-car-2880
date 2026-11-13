@@ -159,7 +159,14 @@ public class DetailActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
+        Intent launch = getIntent();
+        if (launch != null && launch.hasExtra("restore_fullscreen")) {
+            fullWindows = launch.getBooleanExtra("restore_fullscreen", false);
+        } else if (PlaybackSession.needsRestore(this) && launch != null
+                && TextUtils.equals(launch.getStringExtra("id"), PlaybackSession.vodId(this))
+                && TextUtils.equals(launch.getStringExtra("sourceKey"), PlaybackSession.sourceKey(this))) {
+            fullWindows = PlaybackSession.fullscreen(this);
+        } else if (savedInstanceState != null) {
             fullWindows = savedInstanceState.getBoolean(STATE_FULL_WINDOWS, false);
         }
         super.onCreate(savedInstanceState);
@@ -964,9 +971,7 @@ public class DetailActivity extends BaseActivity {
                         refreshList();
                         if (showPreview) {
                             jumpToPlay();
-                            llPlayerFragmentContainer.setVisibility(View.VISIBLE);
-                            llPlayerFragmentContainerBlock.setVisibility(View.VISIBLE);
-                            toggleSubtitleTextSize();
+                            setFullPreview(fullWindows);
                         }
                         // startQuickSearch();
                     } else {
@@ -1932,39 +1937,34 @@ public class DetailActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (fullWindows) {
-            if (playFragment.onBackPressed())
-                return;
+            // Back from playback always leaves fullscreen, including buffering/error/locked states.
             exitFullPreview();
+            com.github.tvbox.osc.diag.DiagLog.event("playback_back action=collapse_fullscreen");
             return;
         }
-        if (mGridView != null && mGridView.hasFocus()
-                && mGridViewFlag != null && mGridViewFlag.getVisibility() == View.VISIBLE) {
-            try {
-                if (seriesFlagFocus != null && seriesFlagFocus.isShown()
-                        && seriesFlagFocus.requestFocus()) {
-                    return;
-                }
-                if (mGridViewFlag.requestFocus()) {
-                    return;
-                }
-            } catch (Throwable th) {
-                th.printStackTrace();
-            }
-        }
-        if(showPreview && playFragment!=null){
-            try {
-                playFragment.setPlayTitle(false);
-                playFragment.setExitingPreview(true);
-            } catch (Throwable th) {
-                th.printStackTrace();
-            }
-        }
-        PlaybackSession.clear(this);
-        super.onBackPressed();
+        finish();
     }
 
     @Override
+    public void finish() {
+        // Set the exit intent before Fragment.onPause; pause is forbidden to re-arm this session.
+        if (playFragment != null) {
+            playFragment.setExitingPreview(true);
+            playFragment.setPlayTitle(false);
+        }
+        PlaybackSession.clear(this);
+        com.github.tvbox.osc.diag.DiagLog.event("playback_back action=leave_detail session_active=false");
+        super.finish();
+    }
+
+    public boolean isFullPreview() { return fullWindows; }
+
+    @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event != null && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()) onBackPressed();
+            return true;
+        }
         if (event != null && !fullWindows && event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0 && event.getKeyCode() == KeyEvent.KEYCODE_MENU) {
             startDetailFallbackFromMenu();
             return true;

@@ -67,28 +67,26 @@ public class App extends MultiDexApplication {
         registerForegroundCallbacks();
     }
 
-    /** r78：App 级前后台标记；即使播放页被系统回收，也知道「上次是在后台播放」。 */
+    /** An Activity transition is not an app-background event. Count started pages, not resumed pages. */
     private void registerForegroundCallbacks() {
+        // A new process may restore an interrupted session; explicit Back has already cleared active.
+        com.github.tvbox.osc.cache.PlaybackSession.background(this);
         registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-            private int resumed;
-            @Override public void onActivityResumed(Activity activity) {
-                if (resumed == 0) {
-                    // 不调用 foreground()：只有真正回到播放页才清除待恢复标记。
-                    com.github.tvbox.osc.diag.DiagLog.event("app_foreground");
-                }
-                resumed++;
+            private int started;
+            @Override public void onActivityStarted(Activity activity) {
+                if (started++ == 0) com.github.tvbox.osc.diag.DiagLog.event("app_foreground");
             }
-            @Override public void onActivityPaused(Activity activity) {
-                resumed = Math.max(0, resumed - 1);
-                if (resumed == 0) {
+            @Override public void onActivityStopped(Activity activity) {
+                started = Math.max(0, started - 1);
+                if (started == 0 && !activity.isChangingConfigurations()) {
                     com.github.tvbox.osc.cache.PlaybackSession.background(activity);
                     com.github.tvbox.osc.diag.DiagLog.event("app_background");
                 }
             }
-            @Override public void onActivityCreated(Activity activity, Bundle savedInstanceState) { }
-            @Override public void onActivityStarted(Activity activity) { }
-            @Override public void onActivityStopped(Activity activity) { }
-            @Override public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
+            @Override public void onActivityResumed(Activity activity) { }
+            @Override public void onActivityPaused(Activity activity) { }
+            @Override public void onActivityCreated(Activity activity, Bundle state) { }
+            @Override public void onActivitySaveInstanceState(Activity activity, Bundle state) { }
             @Override public void onActivityDestroyed(Activity activity) { }
         });
     }

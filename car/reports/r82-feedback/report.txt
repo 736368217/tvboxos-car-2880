@@ -1,0 +1,132 @@
+OK home_resumed
+OK subscription_sources
+sources=93
+OK screen_01-home
+site=py_douban
+site=py_yangshipin
+site=py_shortfilm
+site=py_apples
+site=py_maple
+site=py_juzong
+site=py_hongguo
+site=py_guazi
+site=py_pianku4k
+site=py_huavod
+site=py_Asyouwish
+site=py_8kvod
+site=py_pufferfish
+site=py_ppnix
+site=py_libvio
+site=py_wbbb
+site=py_kkys
+site=py_bubuzhuiju
+site=py_dsystv
+site=py_ysttv
+site=py_xlys
+site=py_shanzha
+site=py_qiyoudy
+site=py_dantatv
+site=py_yangguang
+site=py_saohuo
+site=py_duoduo
+site=py_oule
+site=py_juok3
+site=荐片
+site=金牌影院
+site=apple
+site=聚合短剧
+site=py_fqdm
+site=py_高清电影
+site=py_金牌影院
+site=py_奇优动漫
+site=py_粤漫动漫
+site=py_jieyingshi
+site=py_aigua
+site=py_guowaiju
+site=py_偷乐
+site=py_嗨皮
+site=py_云端
+site=py_云速
+site=py_农牧
+site=py_文才
+site=py_4KAV
+site=飞快影视
+site=人人影视
+site=农民影视
+site=熊猫影视
+site=秀儿影院
+site=毒舌影视
+site=星辰影院
+site=全网看
+site=喝茶影视
+site=策弛影视
+site=茶杯狐影视
+site=瓜籽影院
+site=来看点播
+site=布卡影视
+site=一帆影视
+site=欧乐影视
+site=奇迹
+site=360
+site=豆瓣
+site=创享
+site=索尼
+site=量子
+site=非凡
+site=无尽
+site=金鹰
+site=新浪
+site=速播
+site=优质
+site=樱花
+site=黑木耳
+site=电影天堂
+site=ikun
+site=暴風
+site=旺旺
+site=艾旦
+site=四个圈
+site=茅台
+site=py_YYMP3
+site=js_KTV歌厅
+site=直播转点播
+site=py_mifun
+site=py_yinhuaone
+site=小镇
+site=狐狸君
+site=大白鲨
+OK real_categories
+OK real_videos
+source=py_douban categories=10 title=后会友期
+playback_fixture=local_generated_pcm
+OK detail_loaded
+OK video_initialized
+runtime_compensation=高级设置 完成 播放与声音 返回操作 其他 声音 仅调整本应用，系统音量保持不变 视频音量补偿 有效声音测量后锁定；已锁定 ×4.00 已开启 应用内音量 播放时在右侧上下滑动，每档 5% 100%
+OK runtime_pcm_locked
+OK screen_02a-sound-runtime
+OK actual_playing
+OK position_advances
+position=60010->62509
+OK entered_fullscreen
+OK screen_02-fullscreen
+OK background_session_active
+OK foreground_detail
+OK screen_03-background-return
+first_back_collapsed=true
+OK screen_04-back-detail
+second_back_home=true session_inactive=true
+OK screen_05-back-home
+OK back_one_collapses
+OK back_two_home
+OK explicit_exit_clears_session
+OK no_delayed_resurrection
+NATIVE_SUITE_PASS checks=22
+OK screen_06-settings-sound
+OK screen_07-settings-back
+OK screen_08-settings-other
+OK history_for_edge
+OK screen_09-edge-pull
+OK edge_returns_home
+OK history_for_bar
+OK screen_10-back-bar
+OK bar_returns_home
