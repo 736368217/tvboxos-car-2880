@@ -115,7 +115,7 @@ public final class AppUpdate {
         public final String remoteVersion;
         public final String notes;
         /** 首选下载地址（已套上查询成功那个通道的前缀）。 */
-        public final String apkUrl;
+        public String apkUrl;
         /** 原始资产地址（不带前缀），下载失败换通道时以它为基准。 */
         public final String apkUrlRaw;
         public final String apkName;
@@ -228,9 +228,12 @@ public final class AppUpdate {
                     Log.w(TAG, "official check failed: " + reason);
                 }
             }
-            UpdateVersion.Channel[] channels = UpdateVersion.channels(OWNER, REPO, mirror);
-            // 两轮：先用系统 DNS 直连（最快、最常见），全挂了再用 App 自己的网络栈
-            // （带用户的 DoH / 代理规则）兜底 —— 有些网络只有后者能出去。
+            UpdateVersion.Channel[] channels = UpdateVersion.preferMirrors(
+                    UpdateVersion.channels(OWNER, REPO, mirror));
+            // 两轮：先用「系统 DNS + DoH 兜底」直连（最快、最常见），全挂了再用 App 自己的
+            // 网络栈（带用户的 DoH / 代理规则）兜底 —— 有些网络只有后者能出去。
+            // r83：车机实测系统 DNS 对 github.com 与镜像全返回 UnknownHostException，
+            // 所以第一轮客户端必须带 DoH 兜底，否则两轮都在解析阶段就失败。
             boolean githubLatest = false;
             for (int round = 0; round < 2 && !githubLatest; round++) {
                 boolean plain = round == 0;
@@ -312,7 +315,7 @@ public final class AppUpdate {
         Exception last = null;
         for (int round = 0; round < 2; round++) {
             boolean plain = round == 0;
-            OkHttpClient client = plain ? PlainHttp.systemDns()
+            OkHttpClient client = plain ? PlainHttp.systemDnsWithDohFallback()
                     : PlainHttp.withDnsTimeout(OkHttp.client(TIMEOUT_MS));
             try {
                 return queryOfficialOnce(client, local, plain);
@@ -416,7 +419,7 @@ public final class AppUpdate {
      * 推测的文件名不对只会 404 换通道，不会装错包。</p>
      */
     private static Info queryWeb(UpdateVersion.Channel channel, String local) throws Exception {
-        OkHttpClient client = PlainHttp.systemDnsNoRedirect();
+        OkHttpClient client = PlainHttp.systemDnsNoRedirectWithDohFallback();
         Request request = new Request.Builder()
                 .url(channel.apiUrl)
                 .header("User-Agent", "TVBox-Car/" + local)
@@ -474,6 +477,14 @@ public final class AppUpdate {
             String[] candidates = isOfficialUrl(raw)
                     ? new String[]{info.apkUrl != null ? info.apkUrl : raw}
                     : UpdateVersion.downloadCandidates(raw, preferred, mirror);
+            if (task.isCancelled()) {
+                post(() -> callback.onError("已取消下载（已下载部分保留，可继续）"));
+                return;
+            }
+            // 先探测再下载：车机上裸 GitHub 资产常常「连得上但不回字节」，
+            // 直接下会卡在 0% 直到 75 秒读超时；镜像通常 1–2 秒就能回 206。
+            candidates = orderByProbe(candidates);
+            if (candidates.length > 0) info.apkUrl = candidates[0];
             Log.i(TAG, "download start size=" + info.apkSize + " -> " + target
                     + " candidates=" + candidates.length + " first=" + (candidates.length > 0 ? candidates[0] : "-"));
             delete(target);
@@ -577,6 +588,120 @@ public final class AppUpdate {
         return prefix;
     }
 
+    /**
+     * 候选地址探测：GitHub 资产域名在部分车机网络下能解析却拿不到首字节，
+     * 而同一资产的 gh 镜像 1–2 秒就能回 206。下载前先短超时并发探测，
+     * 把「确实能拿到 APK 字节」的地址排到前面，避免用户长时间停在 0%。
+     */
+    private static final int PROBE_CONNECT_TIMEOUT_MS = 6000;
+    private static final int PROBE_READ_TIMEOUT_MS = 7000;
+    private static final int PROBE_CALL_TIMEOUT_MS = 9000;
+    private static final int PROBE_PARALLEL = 4;
+    private static final int PROBE_MAX_CANDIDATES = 8;
+
+    private static final OkHttpClient PROBE_CLIENT = PlainHttp.systemDnsWithDohFallback().newBuilder()
+            .connectTimeout(PROBE_CONNECT_TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+            .readTimeout(PROBE_READ_TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+            .callTimeout(PROBE_CALL_TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+            .followRedirects(true)
+            .followSslRedirects(true)
+            .retryOnConnectionFailure(true)
+            .build();
+
+    /** 探测一个地址是否能返回 APK 字节；成功返回耗时毫秒，失败返回 -1。 */
+    private static long probe(String url) {
+        Request request = new Request.Builder()
+                .url(url)
+                .header("User-Agent", "TVBox-Car/probe")
+                .header("Range", "bytes=0-1023")
+                .build();
+        long started = System.currentTimeMillis();
+        try (Response response = PROBE_CLIENT.newCall(request).execute()) {
+            ResponseBody body = response.body();
+            if (!response.isSuccessful() || body == null) return -1L;
+            byte[] head = new byte[2];
+            int read = body.byteStream().read(head);
+            if (read < 2 || head[0] != 'P' || head[1] != 'K') return -1L;
+            return System.currentTimeMillis() - started;
+        } catch (Exception error) {
+            return -1L;
+        }
+    }
+
+    /**
+     * 并发探测候选地址，按「可用且更快」排序；探测失败的保留在末尾作为兜底，
+     * 这样镜像全挂时仍会尝试直连，不会因为一次探测失败就放弃更新。
+     */
+    static String[] orderByProbe(String[] candidates) {
+        if (candidates == null || candidates.length <= 1) return candidates;
+        int limit = Math.min(candidates.length, PROBE_MAX_CANDIDATES);
+        ExecutorService pool = Executors.newFixedThreadPool(Math.min(PROBE_PARALLEL, limit));
+        List<java.util.concurrent.Future<long[]>> futures = new ArrayList<>();
+        try {
+            for (int i = 0; i < limit; i++) {
+                final int index = i;
+                futures.add(pool.submit(() -> new long[]{index, probe(candidates[index])}));
+            }
+            List<int[]> healthy = new ArrayList<>();
+            for (java.util.concurrent.Future<long[]> future : futures) {
+                try {
+                    long[] result = future.get(PROBE_CALL_TIMEOUT_MS + 2000L,
+                            java.util.concurrent.TimeUnit.MILLISECONDS);
+                    if (result[1] >= 0) healthy.add(new int[]{(int) result[0], (int) result[1]});
+                } catch (Exception ignored) {
+                    // 探测超时按不可用处理，候选仍会进入兜底顺序
+                }
+            }
+            healthy.sort((left, right) -> left[1] - right[1]);
+            List<String> ordered = new ArrayList<>();
+            boolean[] used = new boolean[candidates.length];
+            for (int[] item : healthy) {
+                ordered.add(candidates[item[0]]);
+                used[item[0]] = true;
+            }
+            for (int i = 0; i < candidates.length; i++) {
+                if (!used[i]) ordered.add(candidates[i]);
+            }
+            if (!healthy.isEmpty()) {
+                Log.i(TAG, "probe ok first=" + ordered.get(0) + " healthy=" + healthy.size()
+                        + "/" + limit);
+            } else {
+                Log.w(TAG, "probe found no reachable candidate, keeping original order");
+            }
+            return ordered.toArray(new String[0]);
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    /** 更新弹窗复制链接前调用：返回当前网络下确实可下载的地址。 */
+    public interface UrlCallback {
+        void onUrl(String url);
+    }
+
+    public static void resolveDownloadUrl(final Info info, final UrlCallback callback) {
+        if (info == null) {
+            post(() -> callback.onUrl(null));
+            return;
+        }
+        POOL.execute(() -> {
+            String raw = info.apkUrlRaw != null ? info.apkUrlRaw : info.apkUrl;
+            String best = null;
+            if (raw != null) {
+                String preferred = prefixOf(info.apkUrl, info.apkUrlRaw);
+                String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
+                String[] candidates = isOfficialUrl(raw)
+                        ? new String[]{info.apkUrl != null ? info.apkUrl : raw}
+                        : UpdateVersion.downloadCandidates(raw, preferred, mirror);
+                String[] ordered = orderByProbe(candidates);
+                if (ordered.length > 0 && probe(ordered[0]) >= 0) best = ordered[0];
+                if (best == null) best = ordered.length > 0 ? ordered[0] : raw;
+            }
+            final String result = best != null ? best : info.releasePage;
+            post(() -> callback.onUrl(result));
+        });
+    }
+
     /** 整份清单最多跑几轮（第二轮靠 Range 续传补齐断流的部分）。 */
     private static final int DOWNLOAD_PASSES = 2;
 
@@ -595,10 +720,17 @@ public final class AppUpdate {
     }
 
     private static final class DownloadClient {
-        static final OkHttpClient HOLDER = PlainHttp.systemDns().newBuilder()
-                .readTimeout(75, java.util.concurrent.TimeUnit.SECONDS)
-                .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+        static final OkHttpClient HOLDER = PlainHttp.systemDnsWithDohFallback().newBuilder()
+                // 首字节超时：直连 GitHub 资产常见「连上但永远不回数据」，
+                // 75 秒读超时会让进度条长时间停在 0%。15 秒拿不到首字节就换镜像。
+                .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+                .connectTimeout(8, java.util.concurrent.TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
+                .build();
+
+        /** 镜像可用但很慢时，下载本体用长读超时，避免 15 秒首字节限制误杀大文件传输。 */
+        static final OkHttpClient STREAMING = HOLDER.newBuilder()
+                .readTimeout(75, java.util.concurrent.TimeUnit.SECONDS)
                 .build();
     }
 
@@ -789,8 +921,9 @@ public final class AppUpdate {
             // 某些网络下 netd 会卡满 20 秒才报 UnknownHostException。
             return AppStackClient.HOLDER;
         }
-        // 系统 DNS 直连：绕开 App 栈在部分车机上 DNS 全挂的问题，实现统一收在 PlainHttp。
-        return PlainHttp.systemDns();
+        // 系统 DNS + DoH 兜底：绕开 App 栈在部分车机上 DNS 全挂的问题，
+        // 同时在「系统 DNS 整体不可用」的车机上靠 IP 直连的 DoH 解析出来。
+        return PlainHttp.systemDnsWithDohFallback();
     }
 
     private static final class AppStackClient {

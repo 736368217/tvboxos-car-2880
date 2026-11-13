@@ -236,6 +236,23 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
         return out.toArray(new Channel[0]);
     }
 
+    /**
+     * 车机网络下直连 GitHub 常「能解析但不回字节」，而 gh 镜像 1–2 秒可用。
+     * 把带前缀的通道排到直连之前，下载端再配合短超时探测，避免长时间停在 0%。
+     */
+    public static Channel[] preferMirrors(Channel[] channels) {
+        if (channels == null || channels.length <= 1) return channels;
+        List<Channel> mirrored = new ArrayList<>();
+        List<Channel> direct = new ArrayList<>();
+        for (Channel channel : channels) {
+            if (channel.prefix == null || channel.prefix.length() == 0) direct.add(channel);
+            else mirrored.add(channel);
+        }
+        List<Channel> ordered = new ArrayList<>(mirrored);
+        ordered.addAll(direct);
+        return ordered.toArray(new Channel[0]);
+    }
+
     /** Web 通道地址：releases/latest 页面，服务端 302 到 /releases/tag/&lt;tag&gt;。 */
     public static String webLatestUrl(String owner, String repo) {
         return "https://github.com/" + owner + "/" + repo + "/releases/latest";

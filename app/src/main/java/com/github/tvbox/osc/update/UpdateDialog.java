@@ -226,25 +226,31 @@ public class UpdateDialog extends BaseDialog {
      */
     private void copyDownloadLink() {
         if (info == null) return;
-        // 优先复制已经套好当前可用通道的地址；它同时被用作应用内下载的首选，
-        // 可用性比裸 GitHub 地址高。都没有就退到 Release 页。
-        String link = info.apkUrl != null && info.apkUrl.length() > 0 ? info.apkUrl
-                : (info.apkUrlRaw != null && info.apkUrlRaw.length() > 0 ? info.apkUrlRaw : info.releasePage);
-        if (link == null || link.length() == 0) {
-            Toast.makeText(getContext(), "没有可复制的地址", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        try {
-            android.content.ClipboardManager manager = (android.content.ClipboardManager)
-                    getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-            if (manager == null) throw new IllegalStateException("no clipboard service");
-            manager.setPrimaryClip(android.content.ClipData.newPlainText("TVBox 更新地址", link));
-            Toast.makeText(getContext(), "下载地址已复制，可粘贴到浏览器", Toast.LENGTH_LONG).show();
-            tvHint.setText("已复制下载地址：" + link);
-        } catch (Exception error) {
-            Log.w(TAG, "copy link failed: " + error);
-            tvHint.setText("复制失败：" + link);
-        }
+        // 复制前先探测：车机上裸 GitHub 资产地址经常打不开，直接复制等于给用户一条坏链接。
+        // 探测在后台线程完成，这里只负责把结果放进剪贴板。
+        tvHint.setText("正在检测可用下载地址…");
+        AppUpdate.resolveDownloadUrl(info, url -> {
+            if (dismissed) return;
+            String link = url;
+            if (link == null || link.length() == 0) {
+                link = info.releasePage;
+            }
+            if (link == null || link.length() == 0) {
+                Toast.makeText(getContext(), "没有可复制的地址", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                android.content.ClipboardManager manager = (android.content.ClipboardManager)
+                        getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                if (manager == null) throw new IllegalStateException("no clipboard service");
+                manager.setPrimaryClip(android.content.ClipData.newPlainText("TVBox 更新地址", link));
+                Toast.makeText(getContext(), "下载地址已复制，可粘贴到浏览器", Toast.LENGTH_LONG).show();
+                tvHint.setText("已复制下载地址：" + link);
+            } catch (Exception error) {
+                Log.w(TAG, "copy link failed: " + error);
+                tvHint.setText("复制失败：" + link);
+            }
+        });
     }
 
     private void onSkipClick() {

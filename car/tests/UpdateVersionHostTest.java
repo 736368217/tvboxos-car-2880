@@ -233,6 +233,19 @@ public final class UpdateVersionHostTest {
             }
         }
         check(sawWeb, "at least one web channel");
+        // 车机实测直连资产 21 秒失败、三个 gh 镜像 1–2 秒返回 206：
+        // 镜像必须排在直连之前，否则用户会长时间停在 0%。
+        UpdateVersion.Channel[] preferred = UpdateVersion.preferMirrors(chans);
+        eqInt(preferred.length, chans.length, "preferMirrors keeps every channel");
+        check(preferred[0].prefix.length() > 0, "mirror channel first, got " + preferred[0].prefix);
+        int firstDirect = -1;
+        int lastMirror = -1;
+        for (int i = 0; i < preferred.length; i++) {
+            if (preferred[i].prefix.length() > 0) lastMirror = i;
+            else if (firstDirect < 0) firstDirect = i;
+        }
+        check(firstDirect > lastMirror, "direct channel only after every mirror");
+        check(UpdateVersion.preferMirrors(null) == null, "null channel list tolerated");
         check(apiFirst, "web channels come after all api channels");
         eq(UpdateVersion.webLatestUrl("o", "r"),
                 "https://github.com/o/r/releases/latest", "web url shape");

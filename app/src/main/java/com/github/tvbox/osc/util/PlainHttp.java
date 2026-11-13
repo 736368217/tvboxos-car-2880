@@ -41,9 +41,25 @@ public final class PlainHttp {
         return Holder.SYSTEM;
     }
 
+    /** 系统 DNS + 不跟随重定向 + DoH 兜底：读 302 的通道同样需要能解析域名。 */
+    public static OkHttpClient systemDnsNoRedirectWithDohFallback() {
+        return Holder.SYSTEM_NO_REDIRECT_DOH;
+    }
+
     /** 系统 DNS + 不跟随重定向：调用方自己读 302 的 Location。 */
     public static OkHttpClient systemDnsNoRedirect() {
         return Holder.SYSTEM_NO_REDIRECT;
+    }
+
+    /**
+     * 带公网 DoH 兜底的 DNS：系统 DNS 解析失败时改用阿里/腾讯公共 DNS 的 HTTPS 解析。
+     *
+     * <p>车机实测：网络已连接且 ping 通，但 system DNS 对 github.com / gh 镜像全部返回
+     * UnknownHostException，导致更新检查与下载在解析阶段就失败（进度永远 0%）。这里只在
+     * 系统解析失败时兜底，不改变能正常解析的网络。</p>
+     */
+    public static OkHttpClient systemDnsWithDohFallback() {
+        return Holder.SYSTEM_DOH;
     }
 
     /** 对任意现成 client（例如 App 网络栈）只包一层 DNS 硬超时，其余配置不动。 */
@@ -73,6 +89,8 @@ public final class PlainHttp {
     private static final class Holder {
         static final OkHttpClient SYSTEM = build(true);
         static final OkHttpClient SYSTEM_NO_REDIRECT = build(false);
+        static final OkHttpClient SYSTEM_DOH = buildWithDohFallback(true);
+        static final OkHttpClient SYSTEM_NO_REDIRECT_DOH = buildWithDohFallback(false);
     }
 
     private static OkHttpClient build(boolean followRedirects) {
@@ -84,6 +102,152 @@ public final class PlainHttp {
                 .followRedirects(followRedirects)
                 .followSslRedirects(followRedirects)
                 .build();
+    }
+
+    private static OkHttpClient buildWithDohFallback(boolean followRedirects) {
+        return new OkHttpClient.Builder()
+                .dns(new DohFallbackDns(Dns.SYSTEM, DNS_TIMEOUT_MS))
+                .connectTimeout(8, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
+                .followRedirects(followRedirects)
+                .followSslRedirects(followRedirects)
+                .build();
+    }
+
+    /**
+     * 系统 DNS 失败时改用公共 DNS 的 HTTPS JSON 解析。
+     *
+     * <p>端点必须写 IP：{@code doh.pub} 这类域名端点自己也要系统 DNS 才能解析，
+     * 在「系统 DNS 全挂」的车机上等于没有兜底。这里只用证书带 IP SAN 的
+     * {@code 223.5.5.5} / {@code 1.12.12.12} / {@code 223.6.6.6}，
+     * 解析过程完全不依赖系统 DNS。</p>
+     *
+     * <p>系统 DNS 与 DoH 并发发起：正常网络下系统 DNS 通常 200ms 内返回并立即采信，
+     * 行为与旧版一致；系统 DNS 挂掉时不必等满 6 秒才想起 DoH。</p>
+     */
+    private static final class DohFallbackDns implements Dns {
+        /** 系统 DNS 的优先窗口：这段时间内返回就用它，超过就接受先到的 DoH 结果。 */
+        private static final long SYSTEM_PREFERENCE_MS = 800L;
+        /** 解析结果缓存：一次更新检查 + 下载会对同一批主机反复解析。 */
+        private static final long CACHE_TTL_MS = 300000L;
+        private static final String[] ENDPOINTS = {
+                "https://223.5.5.5/resolve?name=",
+                "https://1.12.12.12/dns-query?name=",
+                "https://223.6.6.6/resolve?name="
+        };
+        private final Dns system;
+        private final long timeoutMs;
+        private final OkHttpClient doh;
+        /** hostname -> {List<InetAddress>, 写入时刻} */
+        private final java.util.Map<String, Object[]> cache =
+                new java.util.concurrent.ConcurrentHashMap<>();
+        private final ExecutorService pool = Executors.newCachedThreadPool(runnable -> {
+            Thread thread = new Thread(runnable, "plain-doh");
+            thread.setDaemon(true);
+            return thread;
+        });
+
+        DohFallbackDns(Dns system, long timeoutMs) {
+            this.system = system == null ? Dns.SYSTEM : system;
+            this.timeoutMs = timeoutMs;
+            // 端点全是 IP 字面量，这里不会被调用到；DoH 请求本身仍然带硬超时。
+            this.doh = new OkHttpClient.Builder()
+                    .dns(Dns.SYSTEM)
+                    .connectTimeout(4, java.util.concurrent.TimeUnit.SECONDS)
+                    .readTimeout(4, java.util.concurrent.TimeUnit.SECONDS)
+                    .callTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+                    .build();
+        }
+
+        @Override
+        public List<java.net.InetAddress> lookup(String hostname) throws java.net.UnknownHostException {
+            Object[] cached = cache.get(hostname);
+            if (cached != null
+                    && System.currentTimeMillis() - ((Long) cached[1]) < CACHE_TTL_MS) {
+                @SuppressWarnings("unchecked")
+                List<java.net.InetAddress> hit = (List<java.net.InetAddress>) cached[0];
+                return hit;
+            }
+            java.util.concurrent.CompletionService<List<java.net.InetAddress>> dohService =
+                    new java.util.concurrent.ExecutorCompletionService<>(pool);
+            for (String endpoint : ENDPOINTS) {
+                dohService.submit(() -> resolveDoh(endpoint, hostname));
+            }
+            java.util.concurrent.Future<List<java.net.InetAddress>> systemFuture =
+                    pool.submit(() -> system.lookup(hostname));
+            long deadline = System.currentTimeMillis() + timeoutMs;
+            // ① 正常网络：系统 DNS 通常 <200ms 返回，优先采信，与旧行为一致。
+            try {
+                List<java.net.InetAddress> direct = systemFuture.get(
+                        Math.min(SYSTEM_PREFERENCE_MS, timeoutMs),
+                        java.util.concurrent.TimeUnit.MILLISECONDS);
+                if (direct != null && !direct.isEmpty()) return remember(hostname, direct);
+            } catch (Exception systemSlowOrFailed) {
+                Log.w(TAG, "system dns unavailable, waiting for doh: " + hostname);
+            }
+            // ② 系统 DNS 慢或失败：用最先返回的 DoH 结果。
+            while (System.currentTimeMillis() < deadline) {
+                java.util.concurrent.Future<List<java.net.InetAddress>> done;
+                try {
+                    done = dohService.poll(
+                            Math.max(1L, deadline - System.currentTimeMillis()),
+                            java.util.concurrent.TimeUnit.MILLISECONDS);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+                if (done == null) break;
+                try {
+                    List<java.net.InetAddress> addresses = done.get();
+                    if (addresses != null && !addresses.isEmpty()) {
+                        Log.i(TAG, "doh resolved " + hostname + " (" + addresses.size() + " addr)");
+                        return remember(hostname, addresses);
+                    }
+                } catch (Exception error) {
+                    Log.w(TAG, "doh failed " + hostname + " : "
+                            + error.getClass().getSimpleName());
+                }
+            }
+            // ③ 兜底：DoH 全挂，但系统 DNS 在优先窗口之后其实解析成功了。
+            try {
+                List<java.net.InetAddress> late =
+                        systemFuture.get(1, java.util.concurrent.TimeUnit.MILLISECONDS);
+                if (late != null && !late.isEmpty()) return remember(hostname, late);
+            } catch (Exception ignored) {
+                // 系统 DNS 已确定失败
+            }
+            throw new java.net.UnknownHostException(hostname + "（系统 DNS 与 DoH 均失败）");
+        }
+
+        private List<java.net.InetAddress> remember(String hostname,
+                                                   List<java.net.InetAddress> addresses) {
+            cache.put(hostname, new Object[]{addresses, System.currentTimeMillis()});
+            return addresses;
+        }
+
+        private List<java.net.InetAddress> resolveDoh(String endpoint, String hostname) throws Exception {
+            okhttp3.Request request = new okhttp3.Request.Builder()
+                    .url(endpoint + java.net.URLEncoder.encode(hostname, "UTF-8") + "&type=A")
+                    .header("Accept", "application/dns-json")
+                    .build();
+            try (okhttp3.Response response = doh.newCall(request).execute()) {
+                okhttp3.ResponseBody body = response.body();
+                if (!response.isSuccessful() || body == null) return java.util.Collections.emptyList();
+                org.json.JSONObject json = new org.json.JSONObject(body.string());
+                org.json.JSONArray answers = json.optJSONArray("Answer");
+                List<java.net.InetAddress> out = new java.util.ArrayList<>();
+                if (answers == null) return out;
+                for (int i = 0; i < answers.length(); i++) {
+                    String data = answers.optJSONObject(i) == null ? ""
+                            : answers.optJSONObject(i).optString("data", "");
+                    if (data.matches("^\\d+\\.\\d+\\.\\d+\\.\\d+$")) {
+                        out.add(java.net.InetAddress.getByName(data));
+                    }
+                }
+                return out;
+            }
+        }
     }
 
     /** 给任意 {@link Dns} 加硬超时：connectTimeout 管不到 DNS，OkHttp 会阻塞在 lookup 上。 */
