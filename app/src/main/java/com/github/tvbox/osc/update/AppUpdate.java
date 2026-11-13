@@ -598,6 +598,8 @@ public final class AppUpdate {
     private static final int PROBE_CALL_TIMEOUT_MS = 9000;
     private static final int PROBE_PARALLEL = 4;
     private static final int PROBE_MAX_CANDIDATES = 8;
+    /** 探测读多少字节来算吞吐：64 KB 在 200 KB/s 上约 0.3 秒，在 20 KB/s 上约 3 秒。 */
+    private static final int PROBE_BYTES = 64 * 1024;
 
     private static final OkHttpClient PROBE_CLIENT = PlainHttp.systemDnsWithDohFallback().newBuilder()
             .connectTimeout(PROBE_CONNECT_TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
@@ -608,63 +610,126 @@ public final class AppUpdate {
             .retryOnConnectionFailure(true)
             .build();
 
-    /** 探测一个地址是否能返回 APK 字节；成功返回耗时毫秒，失败返回 -1。 */
-    private static long probe(String url) {
+    /**
+     * 探测一个地址：既确认能返回 APK 字节，也测量真实吞吐。
+     *
+     * <p>只看首字节延迟会做出错误判断：车机上直连 GitHub 往往 1 秒内就回 200/206，
+     * 但正文只有 18–44 KB/s，排到第一位就是又回到「进度条几乎不动」。所以这里读满
+     * {@link #PROBE_BYTES} 字节并计算 KB/s。</p>
+     *
+     * @return {@code {latencyMs, kbps}}；不可用返回 {@code null}
+     */
+    private static int[] probe(String url) {
         Request request = new Request.Builder()
                 .url(url)
                 .header("User-Agent", "TVBox-Car/probe")
-                .header("Range", "bytes=0-1023")
+                .header("Range", "bytes=0-" + (PROBE_BYTES - 1))
                 .build();
         long started = System.currentTimeMillis();
         try (Response response = PROBE_CLIENT.newCall(request).execute()) {
             ResponseBody body = response.body();
-            if (!response.isSuccessful() || body == null) return -1L;
-            byte[] head = new byte[2];
-            int read = body.byteStream().read(head);
-            if (read < 2 || head[0] != 'P' || head[1] != 'K') return -1L;
-            return System.currentTimeMillis() - started;
+            if (!response.isSuccessful() || body == null) return null;
+            byte[] buffer = new byte[8 * 1024];
+            int total = 0;
+            int first = -1;
+            int read;
+            while (total < PROBE_BYTES && (read = body.byteStream().read(buffer)) > 0) {
+                if (total == 0) {
+                    first = buffer[0] & 0xFF;
+                    int second = read > 1 ? buffer[1] & 0xFF : -1;
+                    if (first != 'P' || second != 'K') return null;
+                }
+                total += read;
+            }
+            if (total <= 0) return null;
+            long elapsed = Math.max(1L, System.currentTimeMillis() - started);
+            int kbps = (int) (total * 1000L / elapsed / 1024L);
+            return new int[]{(int) elapsed, kbps};
         } catch (Exception error) {
-            return -1L;
+            return null;
         }
     }
 
     /**
-     * 并发探测候选地址，按「可用且更快」排序；探测失败的保留在末尾作为兜底，
-     * 这样镜像全挂时仍会尝试直连，不会因为一次探测失败就放弃更新。
+     * 直连 GitHub 要「快出镜像这么多倍」才允许排第一。
+     *
+     * <p>实测依据：车机直连 GitHub 常出现「首包很快、随后掉到 18–44 KB/s」，而镜像能
+     * 稳定跑完 50 MB。短探测窗口下直连偶尔测得比镜像快，直接采信就会反复落回慢速线路，
+     * 所以给它设一个明显更高的门槛。</p>
+     */
+    private static final int DIRECT_OVERRIDE_FACTOR = 3;
+
+    /**
+     * 并发探测候选地址并排序：先按「可用且够快」，再按延迟。
+     *
+     * <p>排序键依次是：探测失败 &lt; 慢速可用 &lt; 快速可用；同类内按延迟升序。
+     * 慢速候选不会被丢弃，只是排在快速候选后面——镜像全挂时仍然能靠它下完。
+     * 探测失败的同样保留在最后兜底，不会因为一次探测失败就放弃更新。</p>
      */
     static String[] orderByProbe(String[] candidates) {
         if (candidates == null || candidates.length <= 1) return candidates;
         int limit = Math.min(candidates.length, PROBE_MAX_CANDIDATES);
         ExecutorService pool = Executors.newFixedThreadPool(Math.min(PROBE_PARALLEL, limit));
-        List<java.util.concurrent.Future<long[]>> futures = new ArrayList<>();
+        List<java.util.concurrent.Future<int[]>> futures = new ArrayList<>();
         try {
             for (int i = 0; i < limit; i++) {
                 final int index = i;
-                futures.add(pool.submit(() -> new long[]{index, probe(candidates[index])}));
+                futures.add(pool.submit(() -> {
+                    int[] measured = probe(candidates[index]);
+                    return measured == null ? null : new int[]{index, measured[0], measured[1]};
+                }));
             }
-            List<int[]> healthy = new ArrayList<>();
-            for (java.util.concurrent.Future<long[]> future : futures) {
+            // 每项测量结果：{候选下标, 延迟ms, KB/s}
+            List<int[]> measured = new ArrayList<>();
+            for (java.util.concurrent.Future<int[]> future : futures) {
                 try {
-                    long[] result = future.get(PROBE_CALL_TIMEOUT_MS + 2000L,
+                    int[] result = future.get(PROBE_CALL_TIMEOUT_MS + 2000L,
                             java.util.concurrent.TimeUnit.MILLISECONDS);
-                    if (result[1] >= 0) healthy.add(new int[]{(int) result[0], (int) result[1]});
+                    if (result != null) measured.add(result);
                 } catch (Exception ignored) {
                     // 探测超时按不可用处理，候选仍会进入兜底顺序
                 }
             }
-            healthy.sort((left, right) -> left[1] - right[1]);
+            // 直连 GitHub 在车机上典型表现是「偶发快、随后掉到十几 KB/s」，短探测容易把它
+            // 测成最快；镜像稳定但 64 KB 短窗口常偏低。所以默认镜像优先，直连必须快出
+            // DIRECT_OVERRIDE_FACTOR 倍才允许排到镜像前面。
+            int bestMirrorKbps = 0;
+            for (int[] item : measured) {
+                if (!isDirectGithubUrl(candidates[item[0]])) {
+                    bestMirrorKbps = Math.max(bestMirrorKbps, item[2]);
+                }
+            }
+            List<int[]> rankable = new ArrayList<>();
+            List<String> fallback = new ArrayList<>();
+            for (int[] item : measured) {
+                boolean direct = isDirectGithubUrl(candidates[item[0]]);
+                if (direct && bestMirrorKbps > 0
+                        && item[2] < bestMirrorKbps * DIRECT_OVERRIDE_FACTOR) {
+                    // 直连没明显更快：保留为兜底，排在所有可用镜像之后
+                    fallback.add(candidates[item[0]]);
+                } else {
+                    rankable.add(item);
+                }
+            }
+            rankable.sort((left, right) -> {
+                if (left[2] != right[2]) return right[2] - left[2];
+                return left[1] - right[1];
+            });
             List<String> ordered = new ArrayList<>();
             boolean[] used = new boolean[candidates.length];
-            for (int[] item : healthy) {
+            for (int[] item : rankable) {
                 ordered.add(candidates[item[0]]);
                 used[item[0]] = true;
             }
+            ordered.addAll(fallback);
             for (int i = 0; i < candidates.length; i++) {
-                if (!used[i]) ordered.add(candidates[i]);
+                if (!used[i] && !ordered.contains(candidates[i])) ordered.add(candidates[i]);
             }
-            if (!healthy.isEmpty()) {
-                Log.i(TAG, "probe ok first=" + ordered.get(0) + " healthy=" + healthy.size()
-                        + "/" + limit);
+            if (!ordered.isEmpty()) {
+                int first = rankable.isEmpty() ? -1 : rankable.get(0)[2];
+                Log.i(TAG, "probe ok first=" + ordered.get(0) + " measured=" + measured.size()
+                        + " best_kbps=" + first + " best_mirror_kbps=" + bestMirrorKbps
+                        + " fallback=" + fallback.size() + "/" + limit);
             } else {
                 Log.w(TAG, "probe found no reachable candidate, keeping original order");
             }
@@ -672,6 +737,12 @@ public final class AppUpdate {
         } finally {
             pool.shutdownNow();
         }
+    }
+
+    /** 直连 GitHub 资产地址（未套镜像前缀）。 */
+    private static boolean isDirectGithubUrl(String url) {
+        return url != null && (url.startsWith("https://github.com/")
+                || url.startsWith("http://github.com/"));
     }
 
     /** 更新弹窗复制链接前调用：返回当前网络下确实可下载的地址。 */
@@ -694,8 +765,10 @@ public final class AppUpdate {
                         ? new String[]{info.apkUrl != null ? info.apkUrl : raw}
                         : UpdateVersion.downloadCandidates(raw, preferred, mirror);
                 String[] ordered = orderByProbe(candidates);
-                if (ordered.length > 0 && probe(ordered[0]) >= 0) best = ordered[0];
-                if (best == null) best = ordered.length > 0 ? ordered[0] : raw;
+                // orderByProbe 已经把「可用且够快」的排在最前，直接用第一个；
+                // 这里不再二次探测——重复探测只会把弹窗再多卡一个探测周期。
+                if (ordered.length > 0) best = ordered[0];
+                if (best == null) best = raw;
             }
             final String result = best != null ? best : info.releasePage;
             post(() -> callback.onUrl(result));

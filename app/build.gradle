@@ -7,8 +7,10 @@ android {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
         // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 55
-        versionName '3.1.0-car.7-r83'
+        versionCode 56
+        versionName '3.1.0-car.7-r84'
+        // r84: probe measures throughput, not just first byte, so a slow direct GitHub
+        // asset can no longer outrank a fast mirror
         // r83: probe mirror candidates before download and copy a reachable update link
         // r82: explicit exit invalidates recovery; safe media focus and per-source PCM compensation
         // r82: grouped native settings and compact back affordances
