@@ -1,0 +1,9 @@
+﻿
+11-14 12:58:13.507  2038  2038 I CarFeedback: playback_pause_saved position=444330 full=true
+11-14 12:58:13.519  2038  2038 I CarFeedback: playback_lifecycle_pause audio_only=false was_playing=false
+11-14 12:58:14.013  2038  2038 I CarFeedback: app_background
+11-14 12:58:20.290  2038  2038 I CarFeedback: app_foreground
+11-14 12:58:22.160  2038  2038 I CarFeedback: playback_restore_reuse_live_page id=594981
+11-14 12:58:22.196  2038  2038 I CarFeedback: playback_foreground
+
+

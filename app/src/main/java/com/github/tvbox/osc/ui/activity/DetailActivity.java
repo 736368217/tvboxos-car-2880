@@ -650,10 +650,13 @@ public class DetailActivity extends BaseActivity {
             //更新播放地址
             setTvPlayUrl(vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex).url);
             Bundle bundle = new Bundle();
-            //保存历史
-            insertVod(firstsourceKey, vodInfo);
-        //   insertVod(sourceKey, vodInfo);
-            bundle.putString("sourceKey", sourceKey);
+            // r85：历史记录与播放器必须用同一个 sourceKey。
+            // 旧版历史写 firstsourceKey、播放器传 sourceKey；站点 fallback 改写 sourceKey 后
+            // 两者不一致，于是历史里的 key 在当前订阅中找不到 → 来源显示「搜」，
+            // 播放进度 key（含 sourceKey）也随之改变 → 已看过的片从头开始。
+            String playKey = TextUtils.isEmpty(sourceKey) ? firstsourceKey : sourceKey;
+            insertVod(playKey, vodInfo);
+            bundle.putString("sourceKey", playKey);
 //            bundle.putSerializable("VodInfo", vodInfo);
             App.getInstance().setVodInfo(vodInfo);
             if (showPreview) {
@@ -1890,6 +1893,14 @@ public class DetailActivity extends BaseActivity {
             vodInfo.playNote = vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex).name;
         } catch (Throwable th) {
             vodInfo.playNote = "";
+        }
+        // r85：把站点显示名一起写进历史，站点从订阅里消失时历史仍能显示来源而不是占位文字。
+        try {
+            SourceBean recordSource = ApiConfig.get().getSource(sourceKey);
+            if (recordSource != null && !TextUtils.isEmpty(recordSource.getName())) {
+                vodInfo.sourceName = recordSource.getName();
+            }
+        } catch (Throwable ignored) {
         }
         // 历史记录必须带上封面地址：为空时从前面的详情对象补，否则这条记录永远只剩色块
         // （老版本留下的空 pic 记录现在只能靠内容键兜底，补一次以后就有真实地址了）。

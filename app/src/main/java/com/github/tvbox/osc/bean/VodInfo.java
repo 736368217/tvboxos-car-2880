@@ -48,6 +48,13 @@ public class VodInfo implements Serializable {
     public int playIndex = 0;
     public String playNote = "";
     public String sourceKey;
+    /**
+     * 写入历史时的站点显示名。
+     *
+     * <p>只用于「站点已不在当前订阅里」时仍能显示来源，避免历史整屏退化成占位文字；
+     * 它不参与任何播放或查询 key。</p>
+     */
+    public String sourceName;
     public String playerCfg = "";
     public boolean reverseSort = false;
 

@@ -728,6 +728,18 @@ public class HomeActivity extends BaseActivity {
         bundle.putString("title", PlaybackSession.name(this));
         bundle.putString("picture", PlaybackSession.pic(this));
         bundle.putBoolean("restore_fullscreen", PlaybackSession.fullscreen(this));
+        // r85：详情页还活着就只是「回到那个页面」，绝不重建播放。
+        // 旧版无条件 startActivity，即便页面仍存活也会重走详情加载 + 起播，
+        // 用户看到的就是「切回来先黑一下，然后视频突然又开播」。
+        android.app.Activity alive = AppManager.getInstance().getActivity(DetailActivity.class);
+        if (alive != null && !alive.isFinishing() && !alive.isDestroyed()) {
+            PlaybackSession.foreground(this);
+            com.github.tvbox.osc.diag.DiagLog.event("playback_restore_reuse_live_page id=" + id);
+            Intent reuse = new Intent(this, DetailActivity.class);
+            reuse.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(reuse);
+            return;
+        }
         if (!PlaybackSession.claimRestore(this)) return;
         com.github.tvbox.osc.diag.DiagLog.event("playback_restore id=" + id
                 + " position=" + PlaybackSession.position(this)
@@ -735,12 +747,6 @@ public class HomeActivity extends BaseActivity {
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtras(bundle);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        android.app.Activity existing = AppManager.getInstance().getActivity(DetailActivity.class);
-        if (existing != null && !existing.isFinishing() && !existing.isDestroyed()
-                && android.text.TextUtils.equals(id, existing.getIntent().getStringExtra("id"))
-                && android.text.TextUtils.equals(source, existing.getIntent().getStringExtra("sourceKey"))) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        }
         startActivity(intent);
     }
 

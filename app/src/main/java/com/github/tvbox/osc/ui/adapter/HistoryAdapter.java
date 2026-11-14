@@ -29,8 +29,15 @@ public class HistoryAdapter extends BaseQuickAdapter<VodInfo, BaseViewHolder> {
         tvDel.setVisibility(HawkConfig.hotVodDelete ? View.VISIBLE : View.GONE);
 
         TextView tvYear = helper.getView(R.id.tvYear);
+        // r85：找不到站点时不再写「搜」。
+        // 「搜」原本是「该站点已不在当前订阅里、点击会跳搜索」的提示，但用户看到的是
+        // 「历史记录突然变成搜」——真正的原因是历史里存的 sourceKey 与当前订阅对不上。
+        // 这里改成：站点存在就显示站点名；不存在时显示这条记录原本的来源标签（若有），
+        // 再没有就留空，避免整屏历史像被清空了一样。
         SourceBean bean = ApiConfig.get().getSource(item.sourceKey);
-        tvYear.setText(bean != null ? bean.getName() : "搜");
+        String siteName = bean != null ? bean.getName() : "";
+        if (siteName.isEmpty()) siteName = item.sourceName == null ? "" : item.sourceName;
+        tvYear.setText(siteName);
         helper.setVisible(R.id.tvLang, false);
         helper.setVisible(R.id.tvArea, false);
         if (item.note == null || item.note.isEmpty()) {

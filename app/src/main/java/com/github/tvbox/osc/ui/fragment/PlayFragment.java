@@ -152,6 +152,8 @@ public class PlayFragment extends BaseLazyFragment {
     private Handler mHandler;
     private boolean exitingPreview = false;
     private boolean audioPlayback;
+    /** 本次暂停是页面切走造成的：回来才续播，用户手动暂停不续播。 */
+    private boolean pausedByLifecycle;
     private boolean switchingPlayback;
     private boolean reusePlayerOnSwitch;
     private boolean releasePlayerOnSwitch;
@@ -1381,10 +1383,21 @@ public class PlayFragment extends BaseLazyFragment {
         ApiConfig.get().setCurrentPlaySourceKey(sourceKey);
         initPlayerCfg();
         triedLineFlags.clear();
-        boolean matchingSnapshot = com.github.tvbox.osc.cache.PlaybackSnapshot.has(getContext())
-                && TextUtils.equals(sourceKey, com.github.tvbox.osc.cache.PlaybackSnapshot.sourceKey(getContext()))
-                && mVodInfo != null && TextUtils.equals(mVodInfo.id, com.github.tvbox.osc.cache.PlaybackSnapshot.vodId(getContext()));
-        final long resumePosition = matchingSnapshot ? com.github.tvbox.osc.cache.PlaybackSnapshot.position(getContext()) : 0L;
+        // r85：恢复进度的匹配放宽到「同一部片子」。
+        // 旧版要求 sourceKey 完全一致；站点 fallback 或历史 key 变化后匹配失败，
+        // 已看过的片就会从头开始。现在同 vodId 即视为同一条播放记录，
+        // sourceKey 只作为「优先命中」的依据。
+        boolean snapshotForSameVod = com.github.tvbox.osc.cache.PlaybackSnapshot.has(getContext())
+                && mVodInfo != null
+                && TextUtils.equals(mVodInfo.id, com.github.tvbox.osc.cache.PlaybackSnapshot.vodId(getContext()));
+        boolean sameSource = snapshotForSameVod
+                && TextUtils.equals(sourceKey, com.github.tvbox.osc.cache.PlaybackSnapshot.sourceKey(getContext()));
+        long resumePosition = snapshotForSameVod
+                ? com.github.tvbox.osc.cache.PlaybackSnapshot.position(getContext()) : 0L;
+        if (snapshotForSameVod) {
+            com.github.tvbox.osc.diag.DiagLog.event("playback_resume_snapshot same_source=" + sameSource
+                    + " position=" + resumePosition);
+        }
         boolean full = getActivity() instanceof com.github.tvbox.osc.ui.activity.DetailActivity
                 ? ((com.github.tvbox.osc.ui.activity.DetailActivity) getActivity()).isFullPreview()
                 : mVideoView != null && mVideoView.isFullScreen();
@@ -1571,8 +1584,14 @@ public class PlayFragment extends BaseLazyFragment {
                     position, duration, full);
             com.github.tvbox.osc.diag.DiagLog.event("playback_pause_saved position=" + position + " full=" + full);
         }
-        if (mVideoView != null && !exitingPreview && !hasAudioOnlyPlayback()) {
+        // r85：页面切走必须真正停住播放（含纯音频片源）。
+        // 旧版对「只有音轨」的内容故意不暂停，结果切到别的页面后声音还在放，
+        // 用户听到的就是「切屏了还在播」。暂停后保留进度，回来时接着放。
+        if (mVideoView != null && !exitingPreview) {
+            pausedByLifecycle = mVideoView.isPlaying();
             mVideoView.pause();
+            com.github.tvbox.osc.diag.DiagLog.event("playback_lifecycle_pause audio_only="
+                    + hasAudioOnlyPlayback() + " was_playing=" + pausedByLifecycle);
         }
     }
 
@@ -1582,21 +1601,30 @@ public class PlayFragment extends BaseLazyFragment {
         exitingPreview = false;
         com.github.tvbox.osc.cache.PlaybackSession.foreground(getContext());
         com.github.tvbox.osc.diag.DiagLog.event("playback_foreground");
-        if (mVideoView != null) {
+        if (mVideoView == null) return;
+        // r85：只有「本次是生命周期暂停」才续播。
+        // 旧版无条件 resume()，用户手动暂停后切屏回来会被自动续上；
+        // 而 pause 之后立刻 resume 还会让播放器重新走一次起播（表现为「延迟一下再突然出声」）。
+        if (pausedByLifecycle) {
+            pausedByLifecycle = false;
             mVideoView.resume();
+            com.github.tvbox.osc.diag.DiagLog.event("playback_lifecycle_resume position="
+                    + mVideoView.getCurrentPosition());
         }
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         if (hidden) {
+            // r85：隐藏同样要真正停住，并记住「这次是我暂停的」，回来才续播。
             if (mVideoView != null) {
+                pausedByLifecycle = mVideoView.isPlaying();
                 mVideoView.pause();
             }
-        } else {
-            if (mVideoView != null) {
-                mVideoView.resume();
-            }
+        } else if (pausedByLifecycle) {
+            // 只有因隐藏而暂停的才续播；用户自己暂停的、或从未播放的都不动。
+            pausedByLifecycle = false;
+            if (mVideoView != null) mVideoView.resume();
         }
         super.onHiddenChanged(hidden);
     }
