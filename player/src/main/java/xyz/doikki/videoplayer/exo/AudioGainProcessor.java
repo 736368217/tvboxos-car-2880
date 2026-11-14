@@ -15,6 +15,10 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
     private boolean configured;
     private volatile long queueCalls;
     private volatile float lastAppliedGain = -1f;
+    /** 日志限频：最多每秒一条，避免音频线程被 logcat 拖到欠载。 */
+    private static final long REPORT_MIN_INTERVAL_MS = 1000L;
+    private volatile float lastReportedGain = -1f;
+    private volatile long lastReportAtMs;
     private final SourceLevelLock sourceLevel = new SourceLevelLock();
     public AudioGainProcessor() { this(null); }
     public AudioGainProcessor(GainProvider provider) { gainProvider = provider; }
@@ -64,7 +68,18 @@ public final class AudioGainProcessor extends BaseAudioProcessor {
         float makeup = sourceLevel.apply(peak, samples);
         float combined = user * makeup;
         boolean muted = combined < .0001f, boosted = combined > 1.0001f;
-        boolean report = queueCalls < 3 || queueCalls % 500 == 0 || Math.abs(combined-lastAppliedGain) > .04f;
+        // 日志限频：前几个缓冲 + 每 500 个缓冲 + 增益变化后最多每秒一条。
+        // 不能按「增益变了就打」：音量手势每 5% 一档，一行 logcat 就是一次跨进程写，
+        // 在音频渲染线程上会把缓冲拖到欠载 —— 用户听到/看到的就是调音量时卡顿。
+        boolean report = queueCalls < 3 || queueCalls % 500 == 0;
+        if (!report && Math.abs(combined - lastReportedGain) > .04f) {
+            long now = System.currentTimeMillis();
+            if (now - lastReportAtMs >= REPORT_MIN_INTERVAL_MS) report = true;
+        }
+        if (report) {
+            lastReportedGain = combined;
+            lastReportAtMs = System.currentTimeMillis();
+        }
         long levelIn=0, levelOut=0;
         for(int i=0; i<samples; i++) {
             if(floats) {

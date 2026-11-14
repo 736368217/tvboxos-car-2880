@@ -39,6 +39,11 @@ public abstract class BaseController extends BaseVideoController implements Gest
     private float mAppVolume = 1f;
     /** 一次音量手势起手时的增益；滑动过程中用它做基准，避免把累计位移重复叠加。 */
     private float mVolumeStart = -1f;
+    /** 手势期间改过音量、尚未落盘；手势结束时统一写一次。 */
+    private boolean volumeDirty;
+    private long lastVolumeDiagMs;
+    /** 诊断打点最小间隔：长滑一秒几十档，没必要每档都记。 */
+    private static final long VOLUME_DIAG_INTERVAL_MS = 400L;
     private float mBrightness;
     private int mSeekPosition = -1;
     private boolean mFirstTouch;
@@ -507,16 +512,20 @@ public abstract class BaseController extends BaseVideoController implements Gest
             return;
         }
         mAppVolume = volume;
-        // 应用内增益：只作用于当前播放器，不改系统音量（车机往往没有音频权限）
+        // 应用内增益：只作用于当前播放器，不改系统音量（车机往往没有音频权限）。
         mControlWrapper.setVolume(mAppVolume);
-        Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
         int percent = Math.round(mAppVolume * 100);
-        LOG.i("volume_gesture start=" + Math.round(mVolumeStart * 100) + "% dy="
-                + Math.round(deltaY) + " h=" + height + " -> " + percent + "%"
-                + " max=" + Math.round(VolumeBoostMath.MAX_GAIN * 100) + "%"
-                + " pcm_capable=" + canBoostVolume());
-        com.github.tvbox.osc.diag.DiagLog.event("user_volume=" + percent + "%"
-                + " pcm_capable=" + canBoostVolume());
+        // r87：滑动过程中只做「实时生效 + 刷新数字」。
+        // 旧版每一档都 Hawk.put + 打点 + 写诊断文件，一次长滑几十档就是几十次磁盘操作，
+        // 主线程被拖住、音频线程也被日志阻塞，表现就是「调音量时视频卡顿」。
+        // 持久化与诊断改为手势结束（onTouch ACTION_UP）统一提交一次。
+        volumeDirty = true;
+        long now = System.currentTimeMillis();
+        if (now - lastVolumeDiagMs >= VOLUME_DIAG_INTERVAL_MS) {
+            lastVolumeDiagMs = now;
+            com.github.tvbox.osc.diag.DiagLog.event("user_volume=" + percent + "%"
+                    + " pcm_capable=" + canBoostVolume());
+        }
         for (Map.Entry<IControlComponent, Boolean> next : mControlComponents.entrySet()) {
             IControlComponent component = next.getKey();
             if (component instanceof IGestureComponent) {
@@ -531,6 +540,15 @@ public abstract class BaseController extends BaseVideoController implements Gest
         mHandler.sendEmptyMessageDelayed(101, 1000);
     }
 
+    /** 手势结束时提交一次用户音量偏好；滑动过程中不再每档写盘。 */
+    private void commitVolumePreference() {
+        if (!volumeDirty) return;
+        volumeDirty = false;
+        Hawk.put(HawkConfig.VOLUME_GAIN, Math.round(mAppVolume * 100));
+        LOG.i("volume_committed=" + Math.round(mAppVolume * 100) + "%"
+                + " pcm_capable=" + canBoostVolume());
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         int action = event.getActionMasked();
@@ -542,6 +560,7 @@ public abstract class BaseController extends BaseVideoController implements Gest
             mSeekPosition = -1;
             mGestureAxis = AXIS_NONE;
             mChangePosition = mChangeBrightness = mChangeVolume = false;
+            commitVolumePreference();
             stopSlide();
         }
         return mGestureDetector.onTouchEvent(event);

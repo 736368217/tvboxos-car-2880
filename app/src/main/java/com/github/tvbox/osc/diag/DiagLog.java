@@ -95,6 +95,12 @@ public final class DiagLog {
                 return thread;
             });
     private static final AtomicBoolean STARTED = new AtomicBoolean(false);
+    /** 待写盘的标记（事件）队列；只在 DiagLog 内部使用。 */
+    private static final java.util.concurrent.ConcurrentLinkedQueue<String> pendingMarkers =
+            new java.util.concurrent.ConcurrentLinkedQueue<>();
+    private static final AtomicBoolean writerScheduled = new AtomicBoolean(false);
+    /** 队列上限：宁可丢诊断标记，也不能让主线程等待磁盘。 */
+    private static final int MAX_PENDING_MARKERS = 512;
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private static Context app;
@@ -146,11 +152,42 @@ public final class DiagLog {
                 deviceId, totalBytes() / 1024.0 / 1024.0, last);
     }
 
-    /** 立即写一行标记（关键操作用）：本地环形日志 + logcat 双写，便于服务端和用户反馈对齐。 */
+    /**
+     * 立即记一条标记：logcat 同步输出，本地环形日志交给后台线程写。
+     *
+     * <p>为什么写盘必须异步：音量手势每 5% 一档，`append()` 是打开文件 → 写入 → 关闭
+     * 再加两次目录扫描的同步 IO。放在主线程上（手势回调）就等于每一档都做一次磁盘操作，
+     * 车机 eMMC 慢的时候直接把绘帧线程拖住，表现为「调音量时视频卡顿」。这里只入队，
+     * 由单线程写盘；队列满时丢弃而不是阻塞调用方。</p>
+     */
     public static void event(String message) {
         if (app == null) return;
-        writeMarker("EVENT " + message);
         Log.i("CarFeedback", message);
+        if (pendingMarkers.size() >= MAX_PENDING_MARKERS) return;
+        pendingMarkers.offer(message);
+        scheduleMarkerWrite();
+    }
+
+    /** 后台线程排空一批标记；失败不影响调用方。 */
+    private static void scheduleMarkerWrite() {
+        if (!writerScheduled.compareAndSet(false, true)) return;
+        try {
+            PUMP.execute(() -> {
+                try {
+                    for (int i = 0; i < 64; i++) {
+                        String message = pendingMarkers.poll();
+                        if (message == null) break;
+                        writeMarker("EVENT " + message);
+                    }
+                } catch (Throwable ignored) {
+                } finally {
+                    writerScheduled.set(false);
+                    if (!pendingMarkers.isEmpty()) scheduleMarkerWrite();
+                }
+            });
+        } catch (Throwable error) {
+            writerScheduled.set(false);
+        }
     }
 
     /** 持久随机设备 ID：应用数据被清除前不变，重启/版本升级都不变。 */

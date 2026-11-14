@@ -1,0 +1,71 @@
+﻿
+11-15 03:31:01.873  2007  2007 I CarFeedback: user_volume=365% pcm_capable=true
+11-15 03:31:01.888  2007  2138 I CarAudioGain: queue n=9232 user_gain=3.65 makeup=4.0 makeup_locked=true locked_value=4
+.0 source_dbfs=-18.95436 combined=14.6 peak=0.007873535 samples=2048 frames=1024 level_in=119909 level_out=1750688 meas
+ured_ratio=14.600139
+11-15 03:31:02.106  2007  2007 I CarAudio: runtime_apply mode=0 session=25 gain=3.8 factor=1.0 applied=3.8 max_gain=5.0
+ auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=151339522 engine=androidx.base.oj pcmStored=3.8 pcm
+Queued=9240
+11-15 03:31:02.189  2007  2007 I CarAudio: app_gain request=385% pcmCapable=true
+11-15 03:31:02.355  2007  2007 I CarFeedback: user_volume=395% pcm_capable=true
+11-15 03:31:02.422  2007  2007 I CarAudio: runtime_apply mode=0 session=25 gain=4.0 factor=1.0 applied=4.0 max_gain=5.0
+ auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=151339522 engine=androidx.base.oj pcmStored=4.0 pcm
+Queued=9255
+11-15 03:31:02.631  2007  2007 I TVBox-runtime: volume_committed=410% pcm_capable=true
+11-15 03:31:02.773  2007  2007 I CarAudio: app_gain request=415% pcmCapable=true
+11-15 03:31:02.773  2007  2007 I CarFeedback: user_volume=415% pcm_capable=true
+11-15 03:31:02.856  2007  2007 I CarAudio: runtime_apply mode=0 session=25 gain=4.2000003 factor=1.0 applied=4.2000003 
+max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=151339522 engine=androidx.base.oj pcmSt
+ored=4.2000003 pcmQueued=9273
+11-15 03:31:02.918  2007  2138 I CarAudioGain: queue n=9276 user_gain=4.2000003 makeup=4.0 makeup_locked=true locked_va
+lue=4.0 source_dbfs=-18.95436 combined=16.800001 peak=0.0041503906 samples=2048 frames=1024 level_in=86750 level_out=14
+57408 measured_ratio=16.800093
+11-15 03:31:03.172  2007  2007 I CarAudio: app_gain request=440% pcmCapable=true
+11-15 03:31:03.173  2007  2007 I CarFeedback: user_volume=440% pcm_capable=true
+11-15 03:31:03.255  2007  2007 I CarAudio: runtime_apply mode=0 session=25 gain=4.4500003 factor=1.0 applied=4.4500003 
+max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=151339522 engine=androidx.base.oj pcmSt
+ored=4.4500003 pcmQueued=9290
+11-15 03:31:03.508  2007  2007 I TVBox-runtime: volume_committed=460% pcm_capable=true
+11-15 03:31:03.639  2007  2007 I CarAudio: app_gain request=465% pcmCapable=true
+11-15 03:31:03.639  2007  2007 I CarFeedback: user_volume=465% pcm_capable=true
+11-15 03:31:03.706  2007  2007 I CarAudio: runtime_apply mode=0 session=25 gain=4.7000003 factor=1.0 applied=4.7000003 
+max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=151339522 engine=androidx.base.oj pcmSt
+ored=4.7000003 pcmQueued=9310
+11-15 03:31:03.932  2007  2138 I CarAudioGain: queue n=9320 user_gain=4.8 makeup=4.0 makeup_locked=true locked_value=4.
+0 source_dbfs=-18.95436 combined=19.2 peak=0.09085083 samples=2048 frames=1024 level_in=1432794 level_out=25191133 meas
+ured_ratio=17.581823
+11-15 03:31:04.039  2007  2007 I CarAudio: app_gain request=490% pcmCapable=true
+11-15 03:31:04.039  2007  2007 I CarFeedback: user_volume=490% pcm_capable=true
+11-15 03:31:04.106  2007  2007 I CarAudio: runtime_apply mode=0 session=25 gain=4.9500003 factor=1.0 applied=4.9500003 
+max_gain=5.0 auto_level=removed path=pcm boostMb=0 enabled=false state=3 player=151339522 engine=androidx.base.oj pcmSt
+ored=4.9500003 pcmQueued=9328
+11-15 03:31:04.375  2007  2007 I TVBox-runtime: volume_committed=500% pcm_capable=true
+11-15 03:31:04.947  2007  2138 I CarAudioGain: queue n=9364 user_gain=5.0 makeup=4.0 makeup_locked=true locked_value=4.
+0 source_dbfs=-18.95436 combined=20.0 peak=0.0022583008 samples=2048 frames=1024 level_in=62754 level_out=1255080 measu
+red_ratio=20.0
+11-15 03:31:08.145  2007  2138 I CarAudioGain: queue n=9501 user_gain=5.0 makeup=4.0 makeup_locked=true locked_value=4.
+0 source_dbfs=-18.95436 combined=20.0 peak=0.2001648 samples=2048 frames=1024 level_in=4791154 level_out=53877800 measu
+red_ratio=11.245266
+11-15 03:31:19.776  2007  2138 I CarAudioGain: queue n=10001 user_gain=5.0 makeup=4.0 makeup_locked=true locked_value=4
+.0 source_dbfs=-18.95436 combined=20.0 peak=0.004638672 samples=2048 frames=1024 level_in=91965 level_out=1839300 measu
+red_ratio=20.0
+11-15 03:31:31.406  2007  2138 I CarAudioGain: queue n=10501 user_gain=5.0 makeup=4.0 makeup_locked=true locked_value=4
+.0 source_dbfs=-18.95436 combined=20.0 peak=0.0059814453 samples=2048 frames=1024 level_in=135843 level_out=2716860 mea
+sured_ratio=20.0
+11-15 03:31:43.029  2007  2138 I CarAudioGain: queue n=11001 user_gain=5.0 makeup=4.0 makeup_locked=true locked_value=4
+.0 source_dbfs=-18.95436 combined=20.0 peak=0.0038452148 samples=2048 frames=1024 level_in=97172 level_out=1943440 meas
+ured_ratio=20.0
+11-15 03:31:54.665  2007  2138 I CarAudioGain: queue n=11501 user_gain=5.0 makeup=4.0 makeup_locked=true locked_value=4
+.0 source_dbfs=-18.95436 combined=20.0 peak=0.018676758 samples=2048 frames=1024 level_in=276559 level_out=5531180 meas
+ured_ratio=20.0
+11-15 03:32:06.318  2007  2138 I CarAudioGain: queue n=12001 user_gain=5.0 makeup=4.0 makeup_locked=true locked_value=4
+.0 source_dbfs=-18.95436 combined=20.0 peak=0.010375977 samples=2048 frames=1024 level_in=254016 level_out=5080320 meas
+ured_ratio=20.0
+11-15 03:32:17.942  2007  2138 I CarAudioGain: queue n=12501 user_gain=5.0 makeup=4.0 makeup_locked=true locked_value=4
+.0 source_dbfs=-18.95436 combined=20.0 peak=0.048797607 samples=2048 frames=1024 level_in=1304367 level_out=25750041 me
+asured_ratio=19.741407
+11-15 03:32:29.568  2007  2138 I CarAudioGain: queue n=13001 user_gain=5.0 makeup=4.0 makeup_locked=true locked_value=4
+.0 source_dbfs=-18.95436 combined=20.0 peak=0.02041626 samples=2048 frames=1024 level_in=449251 level_out=8985020 measu
+red_ratio=20.0
+
+

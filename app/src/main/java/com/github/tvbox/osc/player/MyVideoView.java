@@ -349,7 +349,8 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
         // Keep the base view's saved channels in sync, but route output through applyVolume().
         float base = com.github.tvbox.osc.car.VolumeBoostMath.playerVolume(mAppAudioGain);
         super.setVolume(base, base);
-        if (Math.abs(mAppAudioGain - mLastLoggedGain) >= 0.01f) {
+        // 手势每 5% 一档，日志只在跨过 10% 时打，避免滑动时每档拼字符串。
+        if (Math.abs(mAppAudioGain - mLastLoggedGain) >= 0.25f) {
             mLastLoggedGain = mAppAudioGain;
             Log.i("CarAudio", "app_gain request=" + Math.round(mAppAudioGain * 100)
                     + "% pcmCapable=" + usesPcmGain());

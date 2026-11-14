@@ -34,6 +34,13 @@ public final class CarEnhance {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static java.lang.ref.WeakReference<MyVideoView> activeVideo = new java.lang.ref.WeakReference<>(null);
 
+    /** 上一次真正下发到引擎的音频参数；用于跳过手势期间的重复下发。 */
+    private static float lastAppliedGain = Float.NaN;
+    private static float lastAppliedFactor = Float.NaN;
+    private static int lastAppliedMode = Integer.MIN_VALUE;
+    private static int lastAppliedSession = Integer.MIN_VALUE;
+    private static boolean lastAppliedPcm;
+    private static float lastLoggedGain = Float.NaN;
     private CarEnhance() {
     }
 
@@ -67,8 +74,22 @@ public final class CarEnhance {
         int session = view.getAudioSessionId();
         boolean pcm = view.usesPcmGain();
         int boost = pcm ? 0 : VolumeBoostMath.millibel(gain, factor);
+        // 幂等短路：音量手势每次移动都会走到这里，值没变就别重复下发/建字符串。
+        if (Math.abs(gain - lastAppliedGain) < 1e-4f && Math.abs(factor - lastAppliedFactor) < 1e-4f
+                && mode == lastAppliedMode && session == lastAppliedSession
+                && pcm == lastAppliedPcm) {
+            return;
+        }
+        lastAppliedGain = gain;
+        lastAppliedFactor = factor;
+        lastAppliedMode = mode;
+        lastAppliedSession = session;
+        lastAppliedPcm = pcm;
         view.syncAudioVolume();
         AudioEffectController.apply(mode, session, boost);
+        // 只在增益真正跨过一个可听台阶时打完整快照，避免滑动时每 5% 都拼一次大字符串。
+        if (Math.abs(gain - lastLoggedGain) < 0.20f) return;
+        lastLoggedGain = gain;
         Log.i("CarAudio", "runtime_apply mode=" + mode + " session=" + session + " gain=" + gain
                 + " factor=" + factor + " applied=" + (gain * factor)
                 + " max_gain=" + VolumeBoostMath.MAX_GAIN
