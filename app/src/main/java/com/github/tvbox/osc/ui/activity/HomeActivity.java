@@ -373,7 +373,6 @@ public class HomeActivity extends BaseActivity {
 
     private boolean dataInitOk = false;
     private boolean jarInitOk = false;
-    private boolean searchSpiderWarmStarted = false;
     private TipDialog mConfigErrorDialog;
 
     private void initData() {
@@ -388,8 +387,6 @@ public class HomeActivity extends BaseActivity {
             if (!useCacheConfig && Hawk.get(HawkConfig.DEFAULT_LOAD_LIVE, false)) {
                 jumpActivity(LivePlayActivity.class);
             }
-            //爬虫预热 仅首次加载
-            if(!useCacheConfig)warmSearchSpidersOnce();
             return;
         }
         tvNameAnimation();
@@ -526,12 +523,6 @@ public class HomeActivity extends BaseActivity {
                 });
             }
         }, this);
-    }
-
-    private void warmSearchSpidersOnce() {
-        if (searchSpiderWarmStarted) return;
-        searchSpiderWarmStarted = true;
-        ApiConfig.get().warmSearchSpiders();
     }
 
     private void loadHomeSort(boolean keepCurrentContent) {
