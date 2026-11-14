@@ -1,0 +1,36 @@
+﻿
+11-14 16:36:41.092  2186  2186 I CarFeedback: playback_foreground
+11-14 16:36:44.565  2186 14869 I CarAudioGain: configure enc=2 sampleRate=44100 channels=2 accepted=true gain=1.0
+11-14 16:36:44.571  2186 14869 I CarAudioGain: queue n=1 user_gain=1.0 makeup=1.0 makeup_locked=false locked_value=1.0 
+source_dbfs=-8.986955 combined=1.0 peak=0.35534668 samples=2048 frames=1024 level_in=5470470 level_out=5470470 measured
+_ratio=1.0
+11-14 16:36:44.572  2186 14869 I CarAudioGain: queue n=2 user_gain=1.0 makeup=1.0 makeup_locked=false locked_value=1.0 
+source_dbfs=-8.986955 combined=1.0 peak=0.32617188 samples=2048 frames=1024 level_in=5263791 level_out=5263791 measured
+_ratio=1.0
+11-14 16:36:44.572  2186 14869 I CarAudioGain: queue n=3 user_gain=1.0 makeup=1.0 makeup_locked=false locked_value=1.0 
+source_dbfs=-6.9014173 combined=1.0 peak=0.45178223 samples=2048 frames=1024 level_in=5363646 level_out=5363646 measure
+d_ratio=1.0
+11-14 16:36:48.662  2186 14869 I CarAudioGain: makeup_locked peak=0.83306885 makeup=1.0 frames=177152 channels=2
+11-14 16:36:56.314  2186 14869 I CarAudioGain: queue n=501 user_gain=1.0 makeup=1.0 makeup_locked=true locked_value=1.0
+ source_dbfs=-1.5863822 combined=1.0 peak=0.04812622 samples=2048 frames=1024 level_in=966916 level_out=966916 measured
+_ratio=1.0
+11-14 16:37:07.937  2186 14869 I CarAudioGain: queue n=1001 user_gain=1.0 makeup=1.0 makeup_locked=true locked_value=1.
+0 source_dbfs=-1.5863822 combined=1.0 peak=0.2970581 samples=2048 frames=1024 level_in=5929619 level_out=5929619 measur
+ed_ratio=1.0
+11-14 16:37:19.557  2186 14869 I CarAudioGain: queue n=1501 user_gain=1.0 makeup=1.0 makeup_locked=true locked_value=1.
+0 source_dbfs=-1.5863822 combined=1.0 peak=0.09341431 samples=2048 frames=1024 level_in=2021708 level_out=2021708 measu
+red_ratio=1.0
+11-14 16:37:31.196  2186 14869 I CarAudioGain: queue n=2001 user_gain=1.0 makeup=1.0 makeup_locked=true locked_value=1.
+0 source_dbfs=-1.5863822 combined=1.0 peak=0.09970093 samples=2048 frames=1024 level_in=2265648 level_out=2265648 measu
+red_ratio=1.0
+11-14 16:37:42.848  2186 14869 I CarAudioGain: queue n=2501 user_gain=1.0 makeup=1.0 makeup_locked=true locked_value=1.
+0 source_dbfs=-1.5863822 combined=1.0 peak=0.09906006 samples=2048 frames=1024 level_in=1853137 level_out=1853137 measu
+red_ratio=1.0
+11-14 16:37:54.470  2186 14869 I CarAudioGain: queue n=3001 user_gain=1.0 makeup=1.0 makeup_locked=true locked_value=1.
+0 source_dbfs=-1.5863822 combined=1.0 peak=0.41256714 samples=2048 frames=1024 level_in=8761758 level_out=8761758 measu
+red_ratio=1.0
+11-14 16:38:06.110  2186 14869 I CarAudioGain: queue n=3501 user_gain=1.0 makeup=1.0 makeup_locked=true locked_value=1.
+0 source_dbfs=-1.5863822 combined=1.0 peak=0.09451294 samples=2048 frames=1024 level_in=1843855 level_out=1843855 measu
+red_ratio=1.0
+
+

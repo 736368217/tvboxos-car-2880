@@ -1,0 +1,128 @@
+name: Upstream TVBoxOS watch
+
+# 上游跟进：定时检测 q215613905/TVBoxOS 是否有新提交，并预演能否与我们合并。
+# 只读：不自动合并、不自动改代码、不自动发版。有新提交时开/更新一个 Issue 提醒人工处理。
+#
+# 为什么不做「全自动合并 + 自动发版」：本仓库对 ExoPlayer / PlayFragment /
+# DetailActivity / pyLoader 等文件有大量自有改动（车机返回、音量补偿、保活、
+# 更新通道），合并冲突需要按语义取舍，自动合会静默破坏这些功能。
+
+on:
+  schedule:
+    # 每天 03:17 UTC（北京时间 11:17），避开整点高峰
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      create_issue:
+        description: '发现上游更新时创建/更新 Issue'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/q215613905/TVBoxOS.git
+          git fetch upstream main --tags --quiet
+          echo "upstream=$(git rev-parse upstream/main)"
+
+      - name: Upstream check
+        id: check
+        run: |
+          set +e
+          python car/ci/upstream-check.py --json --no-fetch > upstream-report.json
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          cat upstream-report.json
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          with open('upstream-report.json', encoding='utf-8') as fh:
+              report = json.load(fh)
+          print('status=' + report.get('status', 'unknown'))
+          print('behind_count=' + str(report.get('behind_count', 0)))
+          print('conflicts=' + ','.join(report.get('conflict_files') or []))
+          print('hot=' + ','.join(report.get('hot_paths_touched') or []))
+          PY
+
+      - name: Build issue body
+        if: steps.check.outputs.status != 'up-to-date'
+        run: |
+          python - <<'PY'
+          import json
+          with open('upstream-report.json', encoding='utf-8') as fh:
+              report = json.load(fh)
+          lines = []
+          lines.append('## 上游有新提交')
+          lines.append('')
+          lines.append(f"- 本地 HEAD：`{report['head'][:12]}`")
+          lines.append(f"- 上游 HEAD：`{report['upstream'][:12]}`")
+          lines.append(f"- 落后提交数：**{report['behind_count']}**")
+          lines.append(f"- 预演结果：**{report['status']}**（上游改动 {report.get('upstream_changed_files', '?')} 个文件）")
+          lines.append('')
+          if report.get('conflict_files'):
+              lines.append('### 需要人工解决的冲突')
+              for path in report['conflict_files']:
+                  lines.append(f'- `{path}`')
+              lines.append('')
+          if report.get('hot_paths_touched'):
+              lines.append('### 触及我们改动密集的文件（合并后必须重点回归）')
+              for path in report['hot_paths_touched']:
+                  lines.append(f'- `{path}`')
+              lines.append('')
+          lines.append('### 新提交')
+          for line in (report.get('behind_commits') or [])[:40]:
+              lines.append(f'- {line}')
+          lines.append('')
+          lines.append('### 处理方式')
+          lines.append('```')
+          lines.append('git fetch upstream main')
+          lines.append('git merge upstream/main        # 冲突按语义取舍，别用 -X theirs')
+          lines.append('python "$env:PI_SCRATCH_DIR\\run_all_host_tests.py"')
+          lines.append('```')
+          lines.append('合并后必须在车机模拟器上回归：播放/切屏保活/返回、音量补偿、历史封面与进度、应用内更新。')
+          with open('issue-body.md', 'w', encoding='utf-8') as fh:
+              fh.write('\n'.join(lines))
+          PY
+
+      - name: Create or update issue
+        if: steps.check.outputs.status != 'up-to-date' && (github.event_name == 'schedule' || inputs.create_issue)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE='上游 TVBoxOS 有新提交，待合并'
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file issue-body.md
+            echo "updated issue #$EXISTING"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file issue-body.md
+          fi
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upstream-report
+          path: |
+            upstream-report.json
+            issue-body.md
+          retention-days: 30
+          if-no-files-found: ignore

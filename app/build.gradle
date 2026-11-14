@@ -7,8 +7,8 @@ android {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
         // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 57
-        versionName '3.1.0-car.7-r85'
+        versionCode 58
+        versionName '3.1.0-car.7-r86'
         // r85: page switch really pauses (incl. audio-only), resume only after a lifecycle
         // pause, live detail page is reused instead of replaying, history and player share
         // one sourceKey, resume accepts the same title after a sourceKey change
