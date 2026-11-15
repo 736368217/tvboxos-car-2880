@@ -1,0 +1,12 @@
+﻿
+11-16 01:18:22.820  2208  2425 I AppUpdate: download start size=52771531 -> /storage/emulated/0/Android/data/com.github
+.tvbox.osc.jun/files/apk/TVBox-Original-Feature-3.1.0-car.7-r89.apk candidates=1 first=https://dl.736.de5.net/tvboxos-c
+ar-2880/TVBox-Original-Feature-3.1.0-car.7-r89.apk
+11-16 01:18:54.466  2208  2425 I AppUpdate: sha256 ok D3E70499569C60A8FDBF36E6C72F9D25EC83E8C8D5D295E2BE6B7539541C5285
+11-16 01:18:54.584  2208  2425 I AppUpdate: verify ok package=com.github.tvbox.osc.jun versionCode=61 sig=2FEB63C511CD7
+257…
+11-16 01:18:54.625  2208  2208 I AppUpdate: install launched file=TVBox-Original-Feature-3.1.0-car.7-r89.apk uri=conten
+t://com.github.tvbox.osc.jun.fileprovider/beta_external_files_path/com.github.tvbox.osc.jun/files/apk/TVBox-Original-Fe
+ature-3.1.0-car.7-r89.apk
+
+

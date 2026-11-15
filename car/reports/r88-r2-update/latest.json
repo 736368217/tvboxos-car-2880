@@ -1,0 +1,9 @@
+{
+    "version":  "3.1.0-car.7-r89",
+    "versionCode":  61,
+    "apk":  "tvboxos-car-2880/TVBox-Original-Feature-3.1.0-car.7-r89.apk",
+    "size":  52771531,
+    "sha256":  "d3e70499569c60a8fdbf36e6c72f9d25ec83e8c8d5d295e2be6b7539541c5285",
+    "publishedAt":  "2026-11-15T17:14:19Z",
+    "notes":  "更新改为优先从 dl.736.de5.net 检查\nGitHub 仍作兜底，网络不同也能升级\n修复调音量卡顿与音量增强稳定性"
+}

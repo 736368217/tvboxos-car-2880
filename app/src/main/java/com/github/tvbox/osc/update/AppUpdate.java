@@ -79,6 +79,18 @@ public final class AppUpdate {
     /** r81: 官方通道已下线；置 true 可恢复旧顺序。 */
     private static final boolean OFFICIAL_CHANNEL_ENABLED = false;
 
+    /**
+     * 主通道：Cloudflare R2（分发域名 {@code dl.736.de5.net}）。
+     *
+     * <p>2026-11-15 起车机/TVBox 项目的 APK 分发从 GitHub Release 迁到 R2：
+     * 先读 {@code <project>/latest.json}，读不到才回落到 GitHub 的多通道。
+     * 上传一律走 Worker 的 PUT（{@code tools/publish_r2.ps1}）——本机到
+     * {@code *.r2.cloudflarestorage.com} 的 TLS 会被中间层打断，不要用 S3 直传。</p>
+     */
+    private static final String R2_BASE = "https://dl.736.de5.net/";
+    private static final String R2_PROJECT = "tvboxos-car-2880";
+    private static final String R2_HOST = R2Manifest.ALLOWED_HOST;
+    private static final String R2_MANIFEST = R2_BASE + R2_PROJECT + "/latest.json";
     /** 自动检查的最小间隔；启动检查受它节流。 */
     private static final long AUTO_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
     private static final int TIMEOUT_MS = 15000;
@@ -205,8 +217,32 @@ public final class AppUpdate {
             String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
             List<String> failures = new ArrayList<>();
 
+            // ⓪ 主通道：Cloudflare R2 的 latest.json（2026-11-15 起的唯一发布源）。
+            //    读得到就以它为准：有更新直接返回；「已是最新」也要记住，
+            //    这样后面 GitHub 全挂时不至于把「已最新」报成「检查失败」。
+            Info r2Info = null;
+            try {
+                final Info r2 = queryR2(local);
+                r2Info = r2;
+                Log.i(TAG, "r2 manifest ok local=" + local + " remote=" + r2.remoteVersion
+                        + " hasUpdate=" + r2.hasUpdate + " size=" + r2.apkSize
+                        + " sha256=" + shortSha(r2.sha256));
+                if (r2.hasUpdate) {
+                    remember(r2);
+                    Log.i(TAG, "check ok channel=" + r2.channelLabel + " force=" + force
+                            + " local=" + local + " remote=" + r2.remoteVersion
+                            + " hasUpdate=true sha256=" + shortSha(r2.sha256));
+                    post(() -> callback.onResult(r2, null));
+                    return;
+                }
+            } catch (Exception error) {
+                String reason = describe(error);
+                failures.add("R2=" + reason);
+                Log.w(TAG, "r2 check failed, falling back to github: " + reason);
+            }
+
             // ① 官方通道（r81 起默认关闭，见 OFFICIAL_CHANNEL_ENABLED）。
-            //    服务器已下线，检查更新直接走 GitHub Release 多通道。
+            //    服务器已下线，检查更新走 R2 主通道 + GitHub 兜底。
             Info official = null;
             if (OFFICIAL_CHANNEL_ENABLED) {
                 try {
@@ -240,8 +276,8 @@ public final class AppUpdate {
                 for (UpdateVersion.Channel channel : channels) {
                     try {
                         Info info = query(channel, local, plain);
-                        if (!info.hasUpdate && official != null) {
-                            // 官方清单可达且说自己是最新：它带 sha256、与发布源一致，优先采信。
+                        if (!info.hasUpdate && (official != null || r2Info != null)) {
+                            // 主通道/官方清单可达且说自己是最新：它带 sha256、与发布源一致，优先采信。
                             githubLatest = true;
                             break;
                         }
@@ -292,6 +328,17 @@ public final class AppUpdate {
                     return;
                 }
             }
+            // R2 读到了「已是最新」但 GitHub 全挂：用它收口，
+            // 不能把「已最新」报成「N 次尝试都不可达」。
+            final Info r2Final = r2Info;
+            if (r2Final != null) {
+                remember(r2Final);
+                Log.i(TAG, "check ok channel=" + r2Final.channelLabel + " local=" + local
+                        + " remote=" + r2Final.remoteVersion
+                        + " hasUpdate=false (github unreachable) sha256=" + shortSha(r2Final.sha256));
+                post(() -> callback.onResult(r2Final, null));
+                return;
+            }
             Log.w(TAG, "check failed on every channel: " + failures);
             String message = failures.isEmpty()
                     ? "没有可用的更新通道"
@@ -303,6 +350,58 @@ public final class AppUpdate {
     /** 官方清单地址（发布脚本生成，更新器轮询它）。 */
     public static String officialManifestUrl() {
         return OFFICIAL_BASE + OFFICIAL_SOFTWARE + "/latest.json";
+    }
+
+    /** R2 主通道清单地址（发布脚本 {@code tools/publish_r2.ps1} 生成）。 */
+    public static String r2ManifestUrl() {
+        return R2_MANIFEST;
+    }
+
+    /**
+     * 读 R2 的 {@code <project>/latest.json}（主通道）。
+     *
+     * <p>用带 DoH 兜底的客户端：车机上系统 DNS 对公网域名整体失败过（实测
+     * {@code UnknownHostException}），R2 域名同样会中招，这里不能只靠系统解析。
+     * 读到的 APK 地址必须是 https + {@link R2Manifest#ALLOWED_HOST}，否则整份清单按
+     * 不可用处理 —— 发布清单被篡改也进不了任意下载源。</p>
+     */
+    private static Info queryR2(String local) throws Exception {
+        Request request = new Request.Builder()
+                .url(R2_MANIFEST)
+                .header("Accept", "application/json")
+                .header("Cache-Control", "no-cache")
+                .header("User-Agent", "TVBox-Car/" + local)
+                .build();
+        String body;
+        try (Response response = PlainHttp.systemDnsWithDohFallback().newCall(request).execute()) {
+            ResponseBody responseBody = response.body();
+            body = responseBody == null ? "" : responseBody.string();
+            if (!response.isSuccessful()) throw new IOException("HTTP " + response.code());
+        }
+        R2Manifest manifest = R2Manifest.parse(body, R2_BASE);
+        boolean hasUpdate = UpdateVersion.hasUpdate(local, manifest.version);
+        if (hasUpdate && (manifest.apkUrl == null || manifest.apkUrl.length() == 0)) {
+            throw new IOException("R2 清单 " + manifest.version + " 没有下载地址");
+        }
+        return new Info(manifest.version, hasUpdate, local, manifest.version, manifest.notes,
+                manifest.apkUrl, manifest.apkUrl, lastPathSegment(manifest.apkUrl),
+                manifest.size, "R2", R2_MANIFEST, manifest.sha256);
+    }
+
+    /** APK 文件名（用于下载落盘命名）；取不到时返回 null，由调用方兜底。 */
+    private static String lastPathSegment(String url) {
+        if (url == null) return null;
+        int cut = url.lastIndexOf('/');
+        String name = cut >= 0 ? url.substring(cut + 1) : url;
+        int query = name.indexOf('?');
+        if (query >= 0) name = name.substring(0, query);
+        return name.length() == 0 ? null : name;
+    }
+
+    /** 日志用的短 sha（前 12 位）。 */
+    private static String shortSha(String sha) {
+        if (sha == null || sha.length() == 0) return "-";
+        return sha.length() <= 12 ? sha : sha.substring(0, 12) + "…";
     }
 
     /**
@@ -556,11 +655,18 @@ public final class AppUpdate {
         return task;
     }
 
-    /** 官方地址（dl.z736.vip）不能套 gh 镜像前缀：镜像只代理 github，套上去必然 404。 */
+    /**
+     * 是否属于「可信直连发布源」：官方旧域名，或 R2 分发域名。
+     *
+     * <p>这类地址不能套 gh 镜像前缀（镜像只代理 github.com，套上去必然 404），
+     * 也不能被替换成任何第三方主机 —— R2 侧还会再校验一次 https + 主机名白名单。</p>
+     */
     private static boolean isOfficialUrl(String url) {
-        return url != null && url.toLowerCase(Locale.ROOT).contains("://" + OFFICIAL_HOST + "/");
+        if (url == null) return false;
+        String lower = url.toLowerCase(Locale.ROOT);
+        return lower.contains("://" + OFFICIAL_HOST + "/")
+                || lower.contains("://" + R2_HOST + "/");
     }
-
     /** 流式计算文件 SHA-256（大写十六进制），用于比对官方清单。 */
     private static String sha256(File file) throws IOException {
         MessageDigest digest;
