@@ -34,6 +34,7 @@ import com.github.tvbox.osc.util.HistoryHelper;
 import com.github.tvbox.osc.util.LOG;
 import com.github.tvbox.osc.util.M3u8;
 import com.github.tvbox.osc.util.MD5;
+import com.github.tvbox.osc.util.MirrorFetch;
 import com.github.tvbox.osc.util.OkGoHelper;
 import com.github.tvbox.osc.util.Proxy;
 import com.github.tvbox.osc.util.VideoParseRuler;
@@ -100,6 +101,15 @@ public class ApiConfig {
     private final ExecutorService danmuSearchExecutor = Executors.newSingleThreadExecutor();
 
     private final String userAgent = "okhttp/3.15";
+
+    /**
+     * TV 版内置默认订阅（纯文本，国内直连 jsDelivr 可用）。
+     *
+     * <p>首次安装 {@code API_URL} 为空时自动写入它，避免首页永久空白；
+     * 用户自己填过订阅则以用户为准，不再覆盖。</p>
+     */
+    public static final String DEFAULT_API_URL =
+            "https://cdn.jsdelivr.net/gh/736368217/tvbox@xiaosa-unlimited/api.json";
 
     private ApiConfig() {
         clearLoader();
@@ -188,7 +198,17 @@ public class ApiConfig {
         return configUrl;
     }
     public void loadConfig(boolean useCache, LoadConfigCallback callback, Activity activity) {
-        String apiUrl = Hawk.get(HawkConfig.API_URL, "");
+        String storedApi = Hawk.get(HawkConfig.API_URL, "");
+        // 匿名内部类要求 effectively final：只在两个分支里各赋一次。
+        final String apiUrl;
+        if (storedApi.isEmpty() && DEFAULT_API_URL.length() > 0) {
+            // 首次安装没有订阅：用内置默认源，而不是直接报 -1 让首页空白。
+            apiUrl = DEFAULT_API_URL;
+            Hawk.put(HawkConfig.API_URL, apiUrl);
+            LOG.i("echo---use default api url:" + apiUrl);
+        } else {
+            apiUrl = storedApi;
+        }
         if (apiUrl.isEmpty()) {
             callback.error("-1");
             return;
@@ -438,61 +458,28 @@ public class ApiConfig {
             @Override
             public void run() {
                 File result = null;
-                String error = "";
-                okhttp3.Response response = null;
-                InputStream inputStream = null;
-                FileOutputStream outputStream = null;
+                String error = "no candidate";
                 File temp = new File(cache.getAbsolutePath() + ".tmp");
-                try {
-                    File cacheDir = cache.getParentFile();
-                    if (cacheDir != null && !cacheDir.exists()) cacheDir.mkdirs();
-                    if (temp.exists()) temp.delete();
-                    okhttp3.Request request = new okhttp3.Request.Builder()
-                            .url(url)
-                            .header("User-Agent", userAgent)
-                            .build();
-                    okhttp3.OkHttpClient client = OkGoHelper.getDefaultClient();
-                    if (client == null) client = com.github.catvod.net.OkHttp.client();
-                    response = client.newCall(request).execute();
-                    if (!response.isSuccessful()) {
-                        error = "HTTP " + response.code();
-                    } else if (response.body() == null) {
-                        error = "empty body";
-                    } else if (isJarInImg) {
-                        String respData = response.body().string();
-                        LOG.i("echo---jar Response: " + respData);
-                        byte[] imgJar = getImgJar(respData);
-                        if (imgJar == null || imgJar.length == 0) {
-                            error = "empty img jar";
-                        } else {
-                            outputStream = new FileOutputStream(temp);
-                            outputStream.write(imgJar);
-                            outputStream.flush();
-                            closeQuietly(outputStream);
-                            outputStream = null;
+                File cacheDir = cache.getParentFile();
+                if (cacheDir != null && !cacheDir.exists()) cacheDir.mkdirs();
+                // raw.githubusercontent.com 在国内常超时或半截，按镜像顺序逐个试。
+                String[] candidates = MirrorFetch.jarCandidates(url);
+                for (String candidate : candidates) {
+                    LOG.i("echo---jar try:" + candidate);
+                    String attemptError = downloadJarOnce(candidate, isJarInImg, temp);
+                    if (attemptError == null) {
+                        try {
                             result = replaceCache(temp, cache);
+                            error = "";
+                        } catch (Throwable th) {
+                            error = String.valueOf(th.getMessage());
                         }
-                    } else {
-                        inputStream = response.body().byteStream();
-                        outputStream = new FileOutputStream(temp);
-                        byte[] buffer = new byte[16384];
-                        int bytesRead;
-                        while ((bytesRead = inputStream.read(buffer)) != -1) {
-                            outputStream.write(buffer, 0, bytesRead);
-                        }
-                        outputStream.flush();
-                        closeQuietly(outputStream);
-                        outputStream = null;
-                        result = replaceCache(temp, cache);
+                        break;
                     }
-                } catch (Throwable th) {
-                    error = th.getMessage();
-                } finally {
-                    closeQuietly(inputStream);
-                    closeQuietly(outputStream);
-                    if (response != null) closeQuietly(response.body());
-                    if (result == null && temp.exists()) temp.delete();
+                    error = attemptError;
+                    LOG.i("echo---jar candidate failed:" + candidate + " reason:" + attemptError);
                 }
+                if (result == null && temp.exists()) temp.delete();
                 final File finalResult = result;
                 final String finalError = error;
                 mainHandler.post(new Runnable() {
@@ -503,6 +490,56 @@ public class ApiConfig {
                 });
             }
         });
+    }
+
+    /** 单个候选地址下载到 temp：成功返回 null，失败返回原因。 */
+    private String downloadJarOnce(String url, boolean isJarInImg, File temp) {
+        okhttp3.Response response = null;
+        InputStream inputStream = null;
+        FileOutputStream outputStream = null;
+        try {
+            if (temp.exists() && !temp.delete()) {
+                LOG.i("echo---delete temp jar failed:" + temp.getAbsolutePath());
+            }
+            okhttp3.Request request = new okhttp3.Request.Builder()
+                    .url(url)
+                    .header("User-Agent", userAgent)
+                    .build();
+            okhttp3.OkHttpClient client = OkGoHelper.getDefaultClient();
+            if (client == null) client = com.github.catvod.net.OkHttp.client();
+            response = client.newCall(request).execute();
+            if (!response.isSuccessful()) return "HTTP " + response.code();
+            if (response.body() == null) return "empty body";
+            if (isJarInImg) {
+                String respData = response.body().string();
+                LOG.i("echo---jar Response: " + respData);
+                byte[] imgJar = getImgJar(respData);
+                if (imgJar == null || imgJar.length == 0) return "empty img jar";
+                outputStream = new FileOutputStream(temp);
+                outputStream.write(imgJar);
+                outputStream.flush();
+                closeQuietly(outputStream);
+                outputStream = null;
+                return null;
+            }
+            inputStream = response.body().byteStream();
+            outputStream = new FileOutputStream(temp);
+            byte[] buffer = new byte[16384];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.flush();
+            closeQuietly(outputStream);
+            outputStream = null;
+            return null;
+        } catch (Throwable th) {
+            return String.valueOf(th.getMessage());
+        } finally {
+            closeQuietly(inputStream);
+            closeQuietly(outputStream);
+            if (response != null) closeQuietly(response.body());
+        }
     }
 
     private File replaceCache(File temp, File cache) throws IOException {
@@ -577,6 +614,14 @@ public class ApiConfig {
         boolean isJarInImg = jarUrl.startsWith("img+");
         jarUrl = jarUrl.replace("img+", "");
         LOG.i("echo-load jar start:"+jarUrl);
+        // jsDelivr 只放行文本，spider.jar 会被 403；先还原成 raw 地址，再由镜像级联下载。
+        if (jarUrl.contains("cdn.jsdelivr.net/gh/") || jarUrl.contains("fastly.jsdelivr.net/gh/")) {
+            String raw = MirrorFetch.rawFromJsDelivr(jarUrl);
+            if (raw != null && raw.length() > 0) {
+                LOG.i("echo---jar raw from cdn:" + raw);
+                jarUrl = raw;
+            }
+        }
         final String requestUrl = jarUrl;
         downloadJarAsync(requestUrl, isJarInImg, cache, new JarDownloadCallback() {
             private boolean retryLoad(String reason) {

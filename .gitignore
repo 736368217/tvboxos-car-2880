@@ -101,3 +101,5 @@ lint/tmp/
 .temp/
 output-metadata.json
 .py/
+# apksigner v4 signature sidecar
+*.idsig

@@ -84,6 +84,10 @@ public class PlayerHelper {
                 renderViewFactory = SurfaceRenderViewFactory.create();
                 break;
         }
+        // 画面增强开启时改用 GL 增强渲染器；全默认时保持上面的系统渲染方式不变。
+        if (VideoEnhanceHelper.enabled()) {
+            renderViewFactory = VideoEnhanceHelper.renderViewFactory();
+        }
         if(videoView!=null){
             videoView.setPlayerFactory(playerFactory);
             videoView.setRenderViewFactory(renderViewFactory);
@@ -132,6 +136,10 @@ public class PlayerHelper {
                 break;
         }
         videoView.setPlayerFactory(playerFactory);
+        // 画面增强开启时改用 GL 增强渲染器；全默认时保持上面的系统渲染方式不变。
+        if (VideoEnhanceHelper.enabled()) {
+            renderViewFactory = VideoEnhanceHelper.renderViewFactory();
+        }
         videoView.setRenderViewFactory(renderViewFactory);
     }
 

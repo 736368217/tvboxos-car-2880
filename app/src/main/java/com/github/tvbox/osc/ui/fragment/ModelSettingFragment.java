@@ -25,6 +25,7 @@ import com.github.tvbox.osc.base.BaseLazyFragment;
 import com.github.tvbox.osc.bean.IJKCode;
 import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.event.RefreshEvent;
+import com.github.tvbox.osc.update.TvUpdate;
 import com.github.tvbox.osc.ui.activity.LocalFileActivity;
 import com.github.tvbox.osc.ui.activity.SettingActivity;
 import com.github.tvbox.osc.ui.adapter.ApiHistoryDialogAdapter;
@@ -36,6 +37,7 @@ import com.github.tvbox.osc.ui.dialog.BackupDialog;
 import com.github.tvbox.osc.ui.dialog.DanmuApiDialog;
 import com.github.tvbox.osc.ui.dialog.SearchRemoteTvDialog;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
+import com.github.tvbox.osc.ui.dialog.TvUpdateDialog;
 import com.github.tvbox.osc.ui.dialog.XWalkInitDialog;
 import com.github.tvbox.osc.util.DanmuHelper;
 import com.github.tvbox.osc.util.FastClickCheckUtil;
@@ -45,6 +47,7 @@ import com.github.tvbox.osc.util.HistoryHelper;
 import com.github.tvbox.osc.util.LOG;
 import com.github.tvbox.osc.util.OkGoHelper;
 import com.github.tvbox.osc.util.PlayerHelper;
+import com.github.tvbox.osc.util.VideoEnhanceHelper;
 import com.github.tvbox.osc.viewmodel.SourceViewModel;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.FileCallback;
@@ -102,6 +105,10 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private boolean selectLocalLive;
     private TextView tvDanmuOpenText;
     private TextView tvDanmuApiText;
+    private TextView tvVideoFilter;
+    private TextView tvVideoSr;
+    private TextView tvVideoMemc;
+    private TextView tvCheckUpdate;
 
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
@@ -165,6 +172,14 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvScale.setText(PlayerHelper.getScaleName(Hawk.get(HawkConfig.PLAY_SCALE, 0)));
         tvPlay.setText(PlayerHelper.getPlayerName(Hawk.get(HawkConfig.PLAY_TYPE, 2)));
         tvRender.setText(PlayerHelper.getRenderName(Hawk.get(HawkConfig.PLAY_RENDER, 0)));
+        tvVideoFilter = findViewById(R.id.tvVideoFilter);
+        tvVideoSr = findViewById(R.id.tvVideoSr);
+        tvVideoMemc = findViewById(R.id.tvVideoMemc);
+        tvCheckUpdate = findViewById(R.id.tvCheckUpdate);
+        tvVideoFilter.setText(VideoEnhanceHelper.filterName());
+        tvVideoSr.setText(VideoEnhanceHelper.srName());
+        tvVideoMemc.setText(VideoEnhanceHelper.memcName());
+        tvCheckUpdate.setText("v" + TvUpdate.localVersionName(mActivity));
         tvIjkCachePlay.setText(Hawk.get(HawkConfig.IJK_CACHE_PLAY, false) ? "开启" : "关闭");
         tvHomeDefaultShow = findViewById(R.id.tvHomeText);
         tvHomeDefaultShow.setText(Hawk.get(HawkConfig.DEFAULT_LOAD_LIVE, false) ? "直播" : "点播");
@@ -605,6 +620,124 @@ public class ModelSettingFragment extends BaseLazyFragment {
                     }
                 }, renders, defaultPos);
                 dialog.show();
+            }
+        });
+        findViewById(R.id.llVideoFilter).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int defaultPos = VideoEnhanceHelper.filterMode();
+                ArrayList<Integer> modes = new ArrayList<>();
+                for (int i = 0; i < VideoEnhanceHelper.filterCount(); i++) modes.add(i);
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("请选择画面滤镜（下次起播生效）");
+                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        VideoEnhanceHelper.setFilterMode(value);
+                        tvVideoFilter.setText(VideoEnhanceHelper.filterName());
+                        dialog.dismiss();
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return VideoEnhanceHelper.filterNameOf(val);
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, modes, defaultPos);
+                dialog.show();
+            }
+        });
+        findViewById(R.id.llVideoSr).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int defaultPos = VideoEnhanceHelper.srTier();
+                ArrayList<Integer> tiers = new ArrayList<>();
+                tiers.add(0);
+                tiers.add(1);
+                tiers.add(2);
+                tiers.add(3);
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("请选择超分档位（下次起播生效）");
+                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        VideoEnhanceHelper.setSrTier(value);
+                        tvVideoSr.setText(VideoEnhanceHelper.srName());
+                        dialog.dismiss();
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return VideoEnhanceHelper.srNameOf(val);
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, tiers, defaultPos);
+                dialog.show();
+            }
+        });
+        findViewById(R.id.llVideoMemc).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int defaultPos = VideoEnhanceHelper.memcTier();
+                ArrayList<Integer> tiers = new ArrayList<>();
+                tiers.add(0);
+                tiers.add(1);
+                tiers.add(2);
+                tiers.add(3);
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("请选择补帧档位（下次起播生效）");
+                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        VideoEnhanceHelper.setMemcTier(value);
+                        tvVideoMemc.setText(VideoEnhanceHelper.memcName());
+                        dialog.dismiss();
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return VideoEnhanceHelper.memcNameOf(val);
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, tiers, defaultPos);
+                dialog.show();
+            }
+        });
+        findViewById(R.id.llCheckUpdate).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                TvUpdateDialog.checkAndShow(mActivity, tvCheckUpdate);
             }
         });
         findViewById(R.id.llHomeRec).setOnClickListener(new View.OnClickListener() {

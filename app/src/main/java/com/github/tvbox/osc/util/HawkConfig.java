@@ -66,5 +66,9 @@ public class HawkConfig {
     public static final String DANMU_SIZE_SCALE = "danmu_size_scale";
     public static final String DANMU_RANDOM_COLOR = "danmu_random_color";
     public static final String DANMU_API = "danmu_api";
+    // ---- 画面增强（滤镜 / 超分 / 补帧）：本项目新增 ----
+    public static final String VIDEO_ENHANCE = "video_enhance";
+    public static final String VIDEO_SR_TIER = "video_sr_tier";
+    public static final String VIDEO_MEMC_TIER = "video_memc_tier";
     public static boolean hotVodDelete;
 }
