@@ -316,13 +316,14 @@ public class VodController extends BaseController {
             mPlayLoadNetSpeedRightTop.setText(speedText);
             mPlayLoadNetSpeed.setText(speedText);
             net_play_speed.setText(speedText);
-            mVideoSize.setText(buildVideoSizeText(mControlWrapper.getVideoSize()));
+            // 小窗预览不刷新诊断文本：宽度不够，会互相压字并盖住字幕。
+            if (!previewMode) mVideoSize.setText(buildVideoSizeText(mControlWrapper.getVideoSize()));
             int[] usage = SystemUsage.sample(getContext());
             mLastCpu = usage != null && usage.length > 0 ? usage[0] : -1;
             mLastMem = usage != null && usage.length > 1 ? usage[1] : -1;
             mLastAppCpu = SystemUsage.appCpuPercent();
             if (mSysUsageRightTop != null) {
-                String usageText = buildUsageText();
+                String usageText = previewMode ? null : buildUsageText();
                 if (usageText == null) {
                     mSysUsageRightTop.setVisibility(GONE);
                 } else {
@@ -353,10 +354,26 @@ public class VodController extends BaseController {
     }
 
     public void setPreviewMode(boolean previewMode) {
-        this.previewMode = previewMode;        mHandler.removeCallbacks(lockRunnable);
+        this.previewMode = previewMode;
+        mHandler.removeCallbacks(lockRunnable);
         if (mLockView != null) {
             mLockView.setVisibility(INVISIBLE);
         }
+        applyDiagnosticsVisibility();
+    }
+
+    /**
+     * 分辨率 / 帧率 / 占用率三块诊断徽标只在「大画面」显示。
+     *
+     * <p>详情页小窗只有几百像素宽，而徽标是按 2880 宽设计的：塞进小窗后互相压字，
+     * 还会盖住画面和字幕（用户实测截图即如此）。小窗里这些信息既看不清也没意义，
+     * 直接隐藏；进入全屏（含详情页全屏预览）后恢复。</p>
+     */
+    private void applyDiagnosticsVisibility() {
+        int visibility = previewMode ? GONE : VISIBLE;
+        if (mVideoSize != null) mVideoSize.setVisibility(visibility);
+        if (mVideoFrameRate != null) mVideoFrameRate.setVisibility(visibility);
+        if (previewMode && mSysUsageRightTop != null) mSysUsageRightTop.setVisibility(GONE);
     }
 
     @Override
@@ -395,7 +412,7 @@ public class VodController extends BaseController {
         // Output submissions are a renderer diagnostic. Never copy source FPS into it.
         mVideoFrameRate.setText("片源 " + formatFrameRate(source) + " fps · 输出 "
                 + formatFrameRate(output) + " fps");
-        mVideoFrameRate.setVisibility(VISIBLE);
+        mVideoFrameRate.setVisibility(previewMode ? GONE : VISIBLE);
     }
 
     /**
@@ -405,9 +422,9 @@ public class VodController extends BaseController {
     private String buildVideoSizeText(int[] size) {
         if (size == null || size.length < 2 || size[0] <= 0 || size[1] <= 0) return "--";
         String text = size[0] + " X " + size[1];
+        if (previewMode) return text;
         if (mCarVideoView != null && mCarVideoView.hasEnhancedRenderer()
                 && mCarVideoView.isSuperResolutionRuntimeActive()) {
-            // 优先用渲染器的超分目标尺寸：窗口重排时 renderView 尺寸会短暂为 0，
             // 直接读它会让左上角「超分 WxH」时有时无。
             String srSize = mCarVideoView.getSrTargetSizeText();
             if (srSize == null) {

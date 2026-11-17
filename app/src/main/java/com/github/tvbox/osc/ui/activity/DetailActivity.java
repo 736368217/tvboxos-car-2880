@@ -1893,7 +1893,21 @@ public class DetailActivity extends BaseActivity {
         EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_HISTORY_REFRESH));
     }
 
+    /**
+     * 窗口焦点变化：别的窗口（系统权限框、安装器、其它应用弹窗）抢走焦点时暂停播放。
+     *
+     * <p>只判焦点、不判生命周期：这类弹窗不会让 Activity 走 onPause，所以之前视频会
+     * 在「弹窗已经盖住画面」时继续出声。自家弹窗由 BaseDialog 计数放行。</p>
+     */
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+
+        super.onWindowFocusChanged(hasFocus);
+        if (playFragment == null) return;
+        if (hasFocus) playFragment.onWindowFocusGained();
+        else playFragment.onWindowFocusLost();
+    }
+
     protected void onDestroy() {
         // 系统回收/配置重建不 clear()，保留 r78 保活会话；用户主动退出由 clearAfterUserExit() 调用。
         resetDetailFallback();

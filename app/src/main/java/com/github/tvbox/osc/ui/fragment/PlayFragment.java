@@ -154,6 +154,8 @@ public class PlayFragment extends BaseLazyFragment {
     private boolean audioPlayback;
     /** 本次暂停是页面切走造成的：回来才续播，用户手动暂停不续播。 */
     private boolean pausedByLifecycle;
+    /** 因「别的窗口抢焦点」暂停；只有这种暂停在焦点回来时续播。 */
+    private boolean pausedByFocusLoss;
     private boolean switchingPlayback;
     private boolean reusePlayerOnSwitch;
     private boolean releasePlayerOnSwitch;
@@ -1627,6 +1629,31 @@ public class PlayFragment extends BaseLazyFragment {
             if (mVideoView != null) mVideoView.resume();
         }
         super.onHiddenChanged(hidden);
+    }
+
+    /**
+     * 别的窗口抢走焦点（系统权限框、安装器、其它应用的弹窗）时暂停。
+     *
+     * <p>自家弹窗（{@link com.github.tvbox.osc.ui.dialog.BaseDialog} 及其子类）不算：
+     * 选集、设置这类弹窗打开时用户还在看这一页，暂停会变成打扰。只有「不是我们的窗口」
+     * 拿到焦点，才让视频停下来，避免在后台继续出声。</p>
+     */
+    public void onWindowFocusLost() {
+        if (mVideoView == null || com.github.tvbox.osc.ui.dialog.BaseDialog.isAnyVisible()) return;
+        if (!mVideoView.isPlaying()) return;
+        pausedByFocusLoss = true;
+        mVideoView.pause();
+        com.github.tvbox.osc.diag.DiagLog.event("playback_focus_pause");
+    }
+
+    /** 焦点回来时只续播「因失焦而暂停」的那次，用户手动暂停不续播。 */
+    public void onWindowFocusGained() {
+        if (!pausedByFocusLoss) return;
+        pausedByFocusLoss = false;
+        if (mVideoView != null) {
+            mVideoView.resume();
+            com.github.tvbox.osc.diag.DiagLog.event("playback_focus_resume");
+        }
     }
 
     @Override

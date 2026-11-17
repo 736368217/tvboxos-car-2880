@@ -122,6 +122,18 @@ public class ExoPlayer extends ExoMediaPlayer {
         return fallback;
     }
 
+    /** 读取用户音量档位（百分数，默认 100）；Hawk 未初始化或类型异常时退回默认。 */
+    private static int readVolumePercent() {
+        try {
+            Object raw = com.orhanobut.hawk.Hawk.get(
+                    com.github.tvbox.osc.util.HawkConfig.VOLUME_GAIN, 100);
+            if (raw instanceof Number) return ((Number) raw).intValue();
+            return Integer.parseInt(String.valueOf(raw).trim());
+        } catch (Throwable ignored) {
+            return 100;
+        }
+    }
+
     /** 运行中切换片源电平补偿。 */
     public synchronized void setSourceLevelMatchEnabled(boolean enabled) {
         sourceLevelMatchEnabled = enabled;
@@ -213,6 +225,9 @@ public class ExoPlayer extends ExoMediaPlayer {
     @Override
     public void initPlayer() {
         clearAudioGainProcessors();
+        // 新引擎实例默认 audioGain=1.0；先用偏好值播种，
+        // 保证第一帧缓冲就是用户设定的音量，而不是等 UI 抖动后才补上。
+        audioGain = com.github.tvbox.osc.car.VolumeBoostMath.clampGain(readVolumePercent() / 100f);
         super.initPlayer();
         bufferingHandler = new Handler(mInternalPlayer.getApplicationLooper());
         mInternalPlayer.addListener(new Player.Listener() {

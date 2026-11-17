@@ -63,9 +63,20 @@ public final class CarEnhance {
      * every playback state change: it is a no-op when the mode and session did not change.
      */
     public static void applyAudio(MyVideoView view) {
+        applyAudio(view, false);
+    }
+
+    /**
+     * @param force true：无视幂等短路，直接把当前增益重新下发给引擎。
+     *
+     * <p>换集或新起播时引擎/AudioTrack 可能是新实例，它的增益字段是默认 1.0，
+     * 而这里的「上次下发值」没变，短路会把这次必要下发吞掉 —— 表现就是
+     * 「刚打开或刚换集声音很小，过一会儿、或动一下音量条才变大」。</p>
+     */
+    public static void applyAudio(MyVideoView view, boolean force) {
         if (view == null) return;
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            MAIN.post(() -> applyAudio(view));
+            MAIN.post(() -> applyAudio(view, force));
             return;
         }
         float gain = view.getAppAudioGain();
@@ -75,7 +86,10 @@ public final class CarEnhance {
         boolean pcm = view.usesPcmGain();
         int boost = pcm ? 0 : VolumeBoostMath.millibel(gain, factor);
         // 幂等短路：音量手势每次移动都会走到这里，值没变就别重复下发/建字符串。
-        if (Math.abs(gain - lastAppliedGain) < 1e-4f && Math.abs(factor - lastAppliedFactor) < 1e-4f
+        // force=true（新起播/换集/换引擎）必须绕过它：新引擎的增益是默认 1.0，
+        // 这里的记录值却还是上次的，短路会让新引擎一直停在 1.0（听感=声音很小）。
+        if (!force && Math.abs(gain - lastAppliedGain) < 1e-4f
+                && Math.abs(factor - lastAppliedFactor) < 1e-4f
                 && mode == lastAppliedMode && session == lastAppliedSession
                 && pcm == lastAppliedPcm) {
             return;

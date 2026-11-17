@@ -360,7 +360,9 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
     @Override
     protected void setOptions() {
         super.setOptions();
-        applyVolume();
+        // 新起播：引擎/AudioTrack 是新的，必须强制下发一次当前增益，
+        // 否则它会以默认 1.0 出声（听感=刚打开声音很小）。
+        CarEnhance.applyAudio(this, true);
     }
 
     @Override
@@ -381,7 +383,9 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
     @Override
     protected void setPlayerState(int state) {
         super.setPlayerState(state);
-        applyVolume();
+        // PREPARED / PLAYING 是换集与新起播的入库点：强制下发，覆盖新引擎的默认 1.0。
+        boolean readyOrPlaying = state == STATE_PREPARED || state == STATE_PLAYING;
+        CarEnhance.applyAudio(this, readyOrPlaying);
     }
 
     /** ExoPlayer 走 PCM 采样增益（不依赖车机系统音效）；其它引擎返回 false。 */

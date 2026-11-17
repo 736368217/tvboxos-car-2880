@@ -15,6 +15,20 @@ import com.github.tvbox.osc.R;
 import xyz.doikki.videoplayer.util.CutoutUtil;
 
 public class BaseDialog extends Dialog {
+
+    /**
+     * 当前显示中的自家弹窗数量（纯计数，不持有引用）。
+     *
+     * <p>用途：播放器要区分「别的窗口抢走焦点」（系统权限框、其它应用的弹窗、安装器等）
+     * 与「我们自己的弹窗」。前者必须暂停播放，后者不该被误判成后台播放。</p>
+     */
+    private static int visibleCount;
+    private boolean countedVisible;
+
+    /** 是否有自家弹窗正在显示。 */
+    public static boolean isAnyVisible() {
+        return visibleCount > 0;
+    }
     public BaseDialog(@NonNull Context context) {
         super(context, R.style.CustomDialogStyle);
     }
@@ -38,6 +52,22 @@ public class BaseDialog extends Dialog {
         super.show();
         hideSysBar();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        if (!countedVisible) {
+            countedVisible = true;
+            visibleCount++;
+        }
+    }
+
+    @Override
+    public void dismiss() {
+        try {
+            super.dismiss();
+        } finally {
+            if (countedVisible) {
+                countedVisible = false;
+                visibleCount = Math.max(0, visibleCount - 1);
+            }
+        }
     }
 
     private boolean isContextInvalid() {
