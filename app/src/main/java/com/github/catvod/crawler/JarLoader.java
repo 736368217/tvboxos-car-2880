@@ -144,7 +144,13 @@ public class JarLoader {
             return new SpiderNull();
         try {
             Spider sp = (Spider) classLoader.loadClass("com.github.catvod.spider." + clsKey).newInstance();
+            // 与上游 main 对齐：先注入 siteKey 与 SpiderApi，再 init。
+            // 新版 jar 里的站点大量依赖这两项（init 里读 siteKey、用 api.getAddress 拼代理地址），
+            // 缺任何一项都会在站点内部抛 Error 被吞，表现为列表全空、进不到播放。
+            sp.siteKey = key;
+            sp.initApi(new SpiderApi());
             sp.init(App.getInstance(), ext);
+            android.util.Log.i("SpiderJar", "loaded " + clsKey + " siteKey=" + key);
 //            if (!jar.isEmpty()) {
 //                sp.homeContent(false); // 增加此行 应该可以解决部分写的有问题源的历史记录问题 但会增加这个源的首次加载时间 不需要可以已删掉
 //            }

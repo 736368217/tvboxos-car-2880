@@ -1,109 +1,148 @@
-# TV 版（老版本 oldTv）+ 超分 / 补帧 / 滤镜 —— 交付说明
+# TV 版（oldTv）+ 超分 / 补帧 / 滤镜 —— 交付说明
 
-## 当前版本：r5（修播放）
+## 当前版本：r6
 
 | 项 | 值 |
 |---|---|
-| 文件 | `TVBox-TV-oldtv-enhance-r5.apk` |
+| 文件 | `TVBox-TV-oldtv-enhance-r6.apk` |
 | 大小 | 16,968,722 bytes |
-| SHA-256 | `B133390DA1438CEA15C1AAAD53B8C9835273204C7C7E24DB7C27E14C38C3E676` |
-| 版本 | `1.0.4-oldtv-enhance` / versionCode 5 |
-| 包名 | `com.github.tvbox.osc`（TV 版原包名） |
-| 目标 | minSdk 18 / targetSdk 26，带 `LEANBACK_LAUNCHER` |
-| ABI | 仅 armeabi-v7a（32 位，与原版一致） |
-| 签名 | `2feb63c5…fa9c`（v1/v2/v3 通过） |
-| Release | `tv-v1.0.4-vc5`（目标 `feature/tv-oldtv-enhance`） |
+| SHA-256 | `FF36CF77477A84C5E2B4B11F2BF835935BE45DB7CB94552CE24AEBA64641D282` |
+| 版本 | `1.0.5-oldtv-enhance` / versionCode 6 |
+| 包名 | `com.github.tvbox.osc` · minSdk 18 / targetSdk 26 · LEANBACK · 仅 armeabi-v7a |
+| 签名 | `2feb63c5…fa9c`（v1/v2/v3） |
+| **更新通道** | **R2**：`https://dl.736.de5.net/tvbox-tv/latest.json`（GitHub Release 兜底） |
 
-**请装 r5**，r1–r4 全部废弃。
+r1–r5 全部废弃。**装 r6 之后，以后在应用内「检查更新」即可，不用再拷包。**
 
-## 这次回答「是不是最开始就找错包了」
+## 这次修的是「列表都显示不出来，进不到播放」
 
-### 调研结论：没找错包，但用错了默认播放器
+### 根因：宿主 `Spider` 契约与当前 jar 不匹配
 
-上游 `q215613905/TVBoxOS` 只有 4 个分支，逐个核对：
+对比上游 `main` 的 `JarLoader.getSpider()`：
 
-| 分支 | applicationId | LEANBACK | ABI | 说明 |
-|---|---|---|---|---|
-| `main` / `dev` / `file_transfer` | `com.github.tvbox.osc.jun` | ❌ 无 | 多 flavor（java/java32/java64/python…） | 不是 TV 版 |
-| **`oldTv`** | `com.github.tvbox.osc` | ✅ 有 | 仅 armeabi-v7a | **唯一带 LEANBACK 的老 TV 版，32 位** |
+```java
+spider.siteKey = key;              // ← oldTv 没有
+spider.initApi(new SpiderApi());   // ← oldTv 连 SpiderApi 类都没有
+spider.init(App.getInstance(), ext);
+```
 
-`main` 的 `java32` flavor 虽然也是纯 32 位，但它没有 LEANBACK/banner，属于手机/通用版。
-所以基线选 `oldTv` 是对的；问题出在 **oldTv 是 2021 年的老快照，播放器配置与能正常播放的新版不同**。
+而 oldTv 的 `Spider` 还是 2021 年的 abstract 版本，缺：
+`siteKey`、`initApi(SpiderApi)`、`empty`、`client()`、`liveContent`、`action`、`proxy()`。
 
-### 播放失败的真正根因（逐项对比上游 main）
+当前 spider.jar 里的站点（按新版宿主编译）在 `init` / `homeContent` 里会读 `siteKey`、
+用 `api.getAddress()` 拼代理地址、或用 `Spider.client()` 发请求。oldTv 缺这些成员时抛的是
+`NoSuchFieldError` / `NoSuchMethodError` / `NoClassDefFoundError` —— 都是 **Error 不是 Exception**，
+被站点自己的 `catch` 漏掉后直接返回空串，界面上就是**订阅加载完、列表一片空白**。
 
-| | 能正常播放的 `main` | 我一直用的 `oldTv` |
-|---|---|---|
-| 默认播放器 | **ExoPlayer (2)** | **IJK (1)** — `App.initParams()` 强制写死 |
-| ExoPlayer | 2.19.1 + jellyfin ffmpeg 扩展 | 2.14.2（纯 Java） |
-| `loadLibrary` 失败 | 不吞异常、直接抛 | **吞掉 `UnsatisfiedLinkError`**，只 `printStackTrace()` |
-| native 依赖 | 不依赖私有 ijk so | 依赖自带 6 个 32 位 ijk so（`libijkffmpeg/libijksdl/libplayer`…） |
+### 修复
 
-`oldTv` 首次启动即把 `PLAY_TYPE` 写成 1(IJK)；`PlayerHelper` 里两处 `updateCfg` 与 `init()`
-都把 `System.loadLibrary` 的 `UnsatisfiedLinkError` 吞在 `catch(Throwable)` 里，
-于是 `loadLibrariesOnce` 误以为加载成功，随后 `new IjkMediaPlayer()` 才失败 ——
-TV 上表现就是**点开视频一片黑 / 空白**，日志里只有一行堆栈，很容易被忽略。
-同设备的其他 TVBox 用的是 Exo，不碰这组老 so，所以正常。
-
-模拟器复现证据（改之前）：启动时日志刷屏
-`java.lang.UnsatisfiedLinkError: dlopen failed: library "libijkffmpeg.so" not found` 等 3 条。
-
-### 修复（对齐上游 main 的做法）
-
-1. `App.initParams()`：默认 `PLAY_TYPE` 从 1 改为 **2(Exo)**；并把已装用户 Hawk 里残留的
-   0/1 值一并迁移为 2（r1–r4 用户升级后不会继续卡在坏 IJK）。
-2. `PlayerHelper` 两处 `updateCfg` 的默认值 `Hawk.get(..., 0)` 改为 `2`。
-3. 新增 `tryIjkOrExo(codec)`：`loadLibrary` **不再吞异常**；任一 so 加载失败即回退
-   `ExoMediaPlayerFactory`，并打 `TvPlayer` 日志。用户手动选 IJK 时也不会再进坏状态。
-4. `PlayerHelper.init()`：默认 Exo 时**不再无条件加载** ijk so；只有用户显式选 IJK 才尝试。
-5. 确认 `ExoMediaPlayer` 是纯 Java（`SimpleExoPlayer` / exoplayer 2.14.2），
-   不含任何 `native` / `System.load` / `FFmpegApi` 调用；`TextureRenderView` 与 Exo 兼容。
-   三项增强默认全关（滤镜/超分/补帧都是 0），默认播放路径完全不经过 GL 渲染器。
+1. `crawler/Spider.java` 升级为上游 main 契约（保留 `safeDns()` 仍返回本工程 DoH 实例，
+   网络栈不换；`client()` 返回 `OkGoHelper` 默认客户端）
+2. 新增 `crawler/SpiderApi.java`（与 main 一致：`getAddress` / `getPort` / `log` /
+   `getScreenOrientation` / `multiReq` / `webParse`）
+3. `JarLoader.getSpider()` 补注入：`sp.siteKey = key; sp.initApi(new SpiderApi());`，
+   并打 `SpiderJar: loaded <cls> siteKey=<key>` 日志
 
 ### 实机验证（MuMu，清空数据、零手输）
 
-- **启动日志中不再有** `UnsatisfiedLinkError` / `libijkffmpeg` / `libplayer.so` 任何 native 错误 ✅
-- 设置页显示 **「播放器 → Exo播放器」**（原来是 IJK播放器）✅
-- 搜索「小城良方」返回真实剧集：热播·APP 全29集 / 布布·APP 26集全 / 剧圈·APP 国产剧… ✅
-  （说明 spider.jar、订阅、详情数据链都正常，之前只卡在播放器）
-- 首页卡片「小城良方 8.0 分」正常渲染 ✅
-
-**诚实边界**：模拟器是 x86_64，无法安装 32 位正式包做「真机听感/画面」验证；
-我用放开 ABI 的测试变体验证了「播放器初始化与数据链」，但**最终画面输出仍需你在 TV 上确认一次**。
-若 r5 装上后仍黑屏，请抓：
-
 ```
-adb logcat -v time -s TvPlayer ExoPlayerImpl AndroidRuntime
-adb logcat -d | findstr /i "MediaCodec ExoPlaybackException"
+SubFetch: api_url empty -> default cdn.jsdelivr.net/.../api.json      (4018ms, 25608B)
+SubFetch: file ok try=2/4 cost=18635ms bytes=1919771                  (spider.jar, 新版本)
+SpiderJar: loaded Douban siteKey=豆瓣                                  ✅
+SpiderJar: loaded AppRJ siteKey=热播影视                               ✅
 ```
 
-## 之前修好的功能（全部保留）
+切到「热播 • APP」站点后，首页分类栏变成 **内地/电影/动漫/综艺/韩剧/泰剧/港剧/日剧/美剧/台剧**
+（该站点 `homeContent` 真实返回），内容区出现多张封面卡片（[39,231][220,467] 等）。
+数据源选择弹窗里 112 个站点全部列出。
 
-- **订阅**：内置默认订阅（jsDelivr）→ 开箱即用；配置/jar 多通道 + md5 校验；
-  `fixContentPath` 还原 raw 基址；`lives:[{}]` 防护。清空数据零手输 → 112 站点 → 完整 jar → 首页卡片。
-- **应用内更新**：设置 → 检查更新；弹窗显式接管遥控器方向键/确认键，不依赖 View 焦点；
-  多通道下载 + size/SHA256 校验 + 签名校验；Release `tv-v1.0.4-vc5` 已发布。
-- **三项增强**：滤镜 11 档 / 超分 3 档 / 补帧 3 档，默认全关，下次起播生效。
+对比修前：只加载首页数据源，切站点后分类栏空、列表空。
+
+### 同时保留的播放修复（r5）
+
+oldTv 原版把默认播放器写死 IJK(1)，且 `PlayerHelper` 三处 `System.loadLibrary` 把
+`UnsatisfiedLinkError` 吞掉 → `new IjkMediaPlayer()` 才失败 → 点开视频黑屏。
+现已改为默认 **ExoPlayer(2)**（对齐上游 main），IJK 加载失败自动回退 Exo，
+设置页显示「播放器 → Exo播放器」。
+
+## 自动更新：已切到 R2
+
+- 客户端：`TvUpdate` 先读 `https://dl.736.de5.net/tvbox-tv/latest.json`（R2），
+  失败才回落 GitHub Release
+- 清单字段：`version / versionCode / apk / size / sha256 / notes`
+- 下载：R2 直连（实测 16.9MB / 25 秒），按声明 size + SHA-256 校验，
+  再校验包名 + versionCode + 签名
+- 发布命令：
+
+```powershell
+cd D:\github\tvboxos-car-2880
+powershell -NoProfile -File tools\publish_r2.ps1 -Project tvbox-tv `
+  -Version 1.0.5-oldtv-enhance -VersionCode 6 `
+  -Apk D:\github\tvbox-tv-oldtv-enhance\delivery\TVBox-TV-oldtv-enhance-r6.apk `
+  -Notes "变更说明"
+```
+
+实机验证（vc5 旧包 → 检查更新）：
+
+```
+SubFetch: text ok url=dl.736.de5.net/tvbox-tv/latest.json              (5536ms, 392B)
+TvUpdate: r2 check ok version=1.0.5-oldtv-enhance vc=6 local=5 hasUpdate=true
+TvUpdate: download start url=.../r6.apk size=16968722
+SubFetch: file ok try=1/4 cost=25277ms bytes=16968722                   ← 一次成功，无镜像跳转
+TvUpdate: verify ok vc=6 sig=2FEB63C511CD7257
+```
+
+## TV 遥控操作（更新弹窗）
+
+**设置 → 检查更新**（最后一行，右侧显示当前版本）。
+
+弹窗显式接管按键，不依赖 Android View 焦点（部分盒子 Dialog 里 `focused` 恒为 false）：
+
+| 按键 | 行为 |
+|---|---|
+| 左右 / 上下 | 在「立即更新 / 暂不更新」间切换 |
+| OK / 回车 | 触发当前项；默认选中「立即更新」 |
+| 返回 | 关闭（下载中不关闭） |
+
+不做静默自动弹窗，不抢遥控焦点；状态与失败原因写在弹窗内和设置行文字上。
+
+## 保留的功能
+
+- **订阅**：内置默认订阅（jsDelivr）+ 多通道下载 + jar md5 校验 + `fixContentPath` 还原 raw 基址
+- **三项增强**：滤镜 11 档 / 超分 3 档 / 补帧 3 档，默认全关，下次起播生效
 
 ## 自查
 
 ```
-adb logcat -s TvPlayer          # IJK 回退提示
-adb logcat -s TvUpdate SubFetch # 更新
-adb logcat -s GlEnhance         # 画面增强
+adb logcat -s SpiderJar          # 站点类是否加载成功（loaded <cls> siteKey=<key>）
+adb logcat -s TvUpdate SubFetch  # 更新检查 / 下载
+adb logcat -s TvPlayer GlEnhance # 播放器回退 / 画面增强
+```
+
+## 诚实边界
+
+- 模拟器 x86_64 无法安装 32 位正式包，我用放开 ABI 的测试变体验证了
+  「站点加载 → 分类栏 → 卡片列表」全链路；**播放画面输出仍需你在 TV 上确认**。
+- 老 TV 版在模拟器上首页卡片按 OK 会跳到搜索页（既有行为，与本轮改动无关，
+  真机遥控通常不受影响）。
+
+若 r6 装上仍有问题，抓这两条给我：
+
+```
+adb logcat -v time -s SpiderJar
+adb logcat -d | findstr /i "NoSuchMethod NoSuchField NoClassDefFound System.err"
 ```
 
 ## 改动清单（vs upstream `oldTv` @ a545c27）
 
 新增：`player/render` 11 个增强文件、`VideoEnhanceHelper`、`MirrorFetch`、
-`TvUpdateInfo` / `TvUpdate` / `TvUpdateDialog`、`dialog_tv_update.xml`、`SpiderProbeActivity`(仅 debug)、
-`TvUpdateInfoHostTest`、`tv-update.json`。
+`TvUpdateInfo` / `TvUpdate` / `TvUpdateDialog` / `dialog_tv_update.xml`、
+**`crawler/SpiderApi.java`**、`SpiderProbeActivity`(仅 debug)、`TvUpdateInfoHostTest`。
 
-修改：`App.java`（默认 Exo + 迁移）、`PlayerHelper.java`（默认 Exo + IJK 失败回退 + init 不再强加载）、
-`HawkConfig` / `ModelSettingFragment` / `fragment_model.xml`（增强三项 + 检查更新入口）、
-`ApiConfig.java`（订阅修复）、`app/build.gradle`（1.0.4/vc5）、`build.gradle`（阿里云仓库）。
-
-未改动：VideoView、播放器实现内部逻辑、首页/详情/播放页、原有设置项、ABI 配置。
+修改：**`crawler/Spider.java`（升级契约）**、**`crawler/JarLoader.java`（siteKey + initApi 注入）**、
+`App.java`（默认 Exo + 迁移）、`PlayerHelper.java`（Exo 默认 / IJK 失败回退）、
+`HawkConfig` / `ModelSettingFragment` / `fragment_model.xml`、`ApiConfig.java`、
+`app/build.gradle`（1.0.5/vc6）、`build.gradle`（阿里云仓库）。
 
 ## 构建
 
@@ -112,5 +151,4 @@ $env:JAVA_HOME="<JDK 11>"; $env:GRADLE_USER_HOME="D:\HermesData\gradle-tiers"
 cd D:\github\tvbox-tv-oldtv-enhance
 .\gradlew.bat clean :app:assembleRelease --console=plain
 # zipalign -f -p 4 → apksigner sign（debug.keystore, v1/v2/v3）
-# 发版 tag 以 tv-v 开头，上传 APK + tv-update.json（Release body 用该 json 内容）
 ```

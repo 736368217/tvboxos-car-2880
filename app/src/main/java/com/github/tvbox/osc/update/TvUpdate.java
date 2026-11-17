@@ -45,6 +45,14 @@ public final class TvUpdate {
     private static final String REPO = "tvboxos-car-2880";
     private static final String API = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/releases";
 
+    /**
+     * 自建 R2 发布通道（Cloudflare Worker + R2 binding）。
+     * 优先於 GitHub Release：国内可直连、不依赖 GitHub 的域名与限速，
+     * 清单里直接给出 apk key / size / sha256，客户端少一次解析。
+     */
+    private static final String R2_BASE = "https://dl.736.de5.net";
+    private static final String R2_PROJECT = "tvbox-tv";
+
     private static final String KEY_SKIP_TAG = "tv_update_skip_tag";
     private static final long MIN_APK_BYTES = 1024L * 1024L;
 
@@ -90,55 +98,95 @@ public final class TvUpdate {
     }
 
     /** 查找最新的 TV 专用 Release（遍历最近若干条，跳过车机版 tag）。 */
+    /** 检查更新：R2 清单优先，失败回落 GitHub Release。只认 TV 专用来源。 */
     public static void check(final Context context, final ProgressHost host, final CheckCallback callback) {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                String r2Error = null;
                 try {
-                    String body = MirrorFetch.fetchText(API, "TVBox-TV/" + localVersionName(context),
-                            "application/vnd.github+json");
-                    org.json.JSONArray releases = new org.json.JSONArray(body);
-                    for (int i = 0; i < releases.length() && i < 30; i++) {
-                        JSONObject rel = releases.getJSONObject(i);
-                        String tag = rel.optString("tag_name", "");
-                        if (!tag.startsWith(TAG_PREFIX)) continue;
-                        TvUpdateInfo info = TvUpdateInfo.fromReleaseJson(rel.toString());
-                        if (info == null) {
-                            Log.w(TAG, "TV release " + tag + " 缺少 APK 资产");
-                            continue;
-                        }
-                        // 优先用 Release 正文里的清单（versionCode / notes / sha256）
-                        String notes = TvUpdateInfo.cleanNotes(rel.optString("body", ""), 800);
-                        TvUpdateInfo full = TvUpdateInfo.parseManifest(
-                                rel.optString("body", ""), info.apkUrl, info.apkName, info.apkSize, tag);
-                        if (full == null || full.versionCode <= 0) {
-                            // 正文不是 JSON 清单时用纯文本说明 + tag 里的版本号
-                            int code = parseCode(tag);
-                            full = new TvUpdateInfo(tag, tag, code, notes,
-                                    info.apkName, info.apkUrl, info.apkSize, "");
-                        }
-                        final TvUpdateInfo result = full;
-                        final boolean hasUpdate = result.isNewerThan(localVersionCode(context), localVersionName(context));
-                        Log.i(TAG, "check ok tag=" + tag + " vc=" + result.versionCode
+                    TvUpdateInfo info = checkViaR2(context);
+                    if (info != null) {
+                        final TvUpdateInfo result = info;
+                        final boolean hasUpdate = result.isNewerThan(
+                                localVersionCode(context), localVersionName(context));
+                        Log.i(TAG, "r2 check ok version=" + result.versionName + " vc=" + result.versionCode
                                 + " local=" + localVersionCode(context) + " hasUpdate=" + hasUpdate);
                         host.post(new Runnable() {
                             @Override public void run() { callback.onResult(hasUpdate ? result : null, null); }
                         });
                         return;
                     }
+                    r2Error = "R2 清单为空";
+                } catch (Throwable error) {
+                    r2Error = error.getMessage() == null ? error.toString() : error.getMessage();
+                    Log.w(TAG, "r2 check failed: " + r2Error);
+                }
+                // R2 不可用时回落 GitHub Release（海外或 R2 故障）
+                try {
+                    TvUpdateInfo info = checkViaGitHub(context);
+                    if (info == null) {
+                        final String msg = "已是最新版本";
+                        host.post(new Runnable() { @Override public void run() { callback.onResult(null, null); } });
+                        Log.i(TAG, msg);
+                        return;
+                    }
+                    final TvUpdateInfo result = info;
+                    final boolean hasUpdate = result.isNewerThan(
+                            localVersionCode(context), localVersionName(context));
+                    Log.i(TAG, "github check ok tag=" + result.tag + " vc=" + result.versionCode
+                            + " hasUpdate=" + hasUpdate);
                     host.post(new Runnable() {
-                        @Override public void run() { callback.onResult(null, "没有找到 TV 版更新"); }
+                        @Override public void run() { callback.onResult(hasUpdate ? result : null, null); }
                     });
                 } catch (Throwable error) {
-                    Log.w(TAG, "check failed: " + error);
-                    final String msg = "检查更新失败：" + (error.getMessage() == null ? error.toString() : error.getMessage());
-                    host.post(new Runnable() {
-                        @Override public void run() { callback.onResult(null, msg); }
-                    });
+                    final String msg = "检查更新失败：" + r2Error;
+                    Log.w(TAG, "github check failed: " + error);
+                    host.post(new Runnable() { @Override public void run() { callback.onResult(null, msg); } });
                 }
             }
         }).start();
     }
+
+    /** R2 清单：{version, versionCode, apk, size, sha256, notes}。 */
+    private static TvUpdateInfo checkViaR2(Context context) throws Exception {
+        String url = R2_BASE + "/" + R2_PROJECT + "/latest.json";
+        String body = MirrorFetch.fetchText(url, "TVBox-TV/" + localVersionName(context), "application/json");
+        org.json.JSONObject json = new org.json.JSONObject(body);
+        String version = json.optString("version", "");
+        int code = json.optInt("versionCode", 0);
+        String apkKey = json.optString("apk", "");
+        if (version.length() == 0 || apkKey.length() == 0) return null;
+        String apkUrl = apkKey.startsWith("http") ? apkKey : R2_BASE + "/" + apkKey;
+        String notes = TvUpdateInfo.cleanNotes(json.optString("notes", ""), 800);
+        return new TvUpdateInfo("tv-r2-" + version, version, code, notes,
+                apkKey.substring(apkKey.lastIndexOf('/') + 1), apkUrl,
+                json.optLong("size", 0L), json.optString("sha256", ""));
+    }
+
+    /** GitHub Release 兜底：遍历最近若干条，只认 tv-v 前缀。 */
+    private static TvUpdateInfo checkViaGitHub(Context context) throws Exception {
+        String body = MirrorFetch.fetchText(API, "TVBox-TV/" + localVersionName(context),
+                "application/vnd.github+json");
+        org.json.JSONArray releases = new org.json.JSONArray(body);
+        for (int i = 0; i < releases.length() && i < 30; i++) {
+            JSONObject rel = releases.getJSONObject(i);
+            String tag = rel.optString("tag_name", "");
+            if (!tag.startsWith(TAG_PREFIX)) continue;
+            TvUpdateInfo info = TvUpdateInfo.fromReleaseJson(rel.toString());
+            if (info == null) continue;
+            String notes = TvUpdateInfo.cleanNotes(rel.optString("body", ""), 800);
+            TvUpdateInfo full = TvUpdateInfo.parseManifest(
+                    rel.optString("body", ""), info.apkUrl, info.apkName, info.apkSize, tag);
+            if (full == null || full.versionCode <= 0) {
+                full = new TvUpdateInfo(tag, tag, parseCode(tag), notes,
+                        info.apkName, info.apkUrl, info.apkSize, "");
+            }
+            return full;
+        }
+        return null;
+    }
+
 
     private static int parseCode(String tag) {
         java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?i)vc(\\d+)").matcher(tag);
