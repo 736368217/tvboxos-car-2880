@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+Date: Fri, 20 Nov 2026 16:29:10 GMT
+Content-Type: application/vnd.android.package-archive
+Content-Length: 64279285
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Cache-Control: public, max-age=31536000, immutable
+ETag: "205bc677420b45b06a6b778e1b453dcb"
+Report-To: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=uEXfSmhbIs2UQ8inJKrffRtgpFn4AzSKllzEfxsZt0jGV1jQqPaJDyx6jxa%2B2%2Bu9XENnK%2BBxFvVRz8%2F%2BbVy7%2FkK99OHdP35LbSG6Sq493nYUpbpXKXAVkYX1C3%2FN%2FYMBgFEtiYtcPqmhyymfqg%3D%3D"}]}
+Nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+Server: cloudflare
+CF-RAY: a5d8d4f9c85b11cb-AMS
+alt-svc: h3=":443"; ma=86400
+

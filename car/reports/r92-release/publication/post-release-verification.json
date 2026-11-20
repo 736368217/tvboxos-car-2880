@@ -1,0 +1,78 @@
+{
+  "verifiedAt": "2026-11-21T00:29:59.646189+08:00",
+  "version": "3.1.0-car.7-r92",
+  "versionCode": 64,
+  "sourceCommit": "c94c23de83abdc48c8a3dd55c3f2e1596303aba7",
+  "publishedArtifact": {
+    "name": "TVBox-Original-Feature-3.1.0-car.7-r92.apk",
+    "sha256": "d6ca0d7220e0c75f9edc1e09d53793e0c6bda509f0ad11222032dc7b9a7b30eb",
+    "bytes": 64279285,
+    "package": "com.github.tvbox.osc.jun",
+    "certificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "mappingSha256": "36fab1bbe6ed0416b342df74c983f953b5df5048fc08c7368341369e74df0f22",
+    "minSdk": 32,
+    "abi": [
+      "arm64-v8a"
+    ]
+  },
+  "r2": {
+    "verified": true,
+    "manifestUrl": "https://dl.736.de5.net/tvboxos-car-2880/latest.json",
+    "apkUrl": "https://dl.736.de5.net/tvboxos-car-2880/TVBox-Original-Feature-3.1.0-car.7-r92.apk",
+    "publishedAt": "2026-11-20T16:22:48Z",
+    "manifestMatches": true,
+    "historyMatches": true,
+    "bomFree": true,
+    "fullApkDownloaded": true,
+    "downloadedBytes": 64279285,
+    "sha256Matches": true,
+    "healthUsable": true,
+    "rangeStatus": 200,
+    "rangeResponseBytesMatch": true,
+    "partialResumeSupported": false,
+    "clientHttp200Behavior": "overwrite from byte zero; confirmed AppUpdate.transfer source"
+  },
+  "github": {
+    "verified": true,
+    "tag": "v3.1.0-car.7-r92",
+    "targetCommit": "c94c23de83abdc48c8a3dd55c3f2e1596303aba7",
+    "releaseUrl": "https://github.com/736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r92",
+    "apkUrl": "https://github.com/736368217/tvboxos-car-2880/releases/download/v3.1.0-car.7-r92/TVBox-Original-Feature-3.1.0-car.7-r92.apk",
+    "publishedAt": "2026-11-20T16:24:10Z",
+    "isDraft": false,
+    "isPrerelease": false,
+    "latest": true,
+    "assetCount": 2,
+    "assetDigestsMatch": true,
+    "sidecarReadbackMatches": true,
+    "notesMatch": true
+  },
+  "signature": {
+    "verificationMinSdk": 32,
+    "v2Verified": false,
+    "v3Verified": true,
+    "certificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "matchesEstablishedCertificate": true,
+    "matchesPrePublicationVerificationOutput": true
+  },
+  "productCodeChangedSinceVerified": false,
+  "sourceInputsMatched": 18,
+  "previousRelease": {
+    "tag": "v3.1.0-car.7-r91",
+    "githubAssetsUnchanged": true,
+    "r2HistoryUnchanged": true,
+    "r2ArtifactDigestUnchanged": true
+  },
+  "verificationScope": {
+    "readOnlyRemoteChecks": true,
+    "touchedProductCode": false,
+    "reinstalledDevice": false,
+    "killedHost": false
+  },
+  "limitations": [
+    "MuMu API 35 with ARM translation is not B01 API 32 OEM or subjective audio validation.",
+    "The local generated fixture does not prove remote source availability.",
+    "Native screenshots and pixel checks are preserved; manual visual review was not performed.",
+    "R2 returned HTTP 200/full content to a Range request; the client restarts download on 200. Partial resume was not demonstrated."
+  ]
+}

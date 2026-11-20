@@ -1,0 +1,9 @@
+{
+    "version":  "3.1.0-car.7-r91",
+    "versionCode":  63,
+    "apk":  "tvboxos-car-2880/TVBox-Original-Feature-3.1.0-car.7-r91.apk",
+    "size":  64279285,
+    "sha256":  "fd776f6532d3c33fc0426dac323ce4914699a7a2f2e7f7cf1720bf987c12dd5d",
+    "publishedAt":  "2026-11-20T03:11:35Z",
+    "notes":  "r91 更新说明\n- 仅维护零跑 B01 的 ARM64 车机版本，保留 Python 片源能力。\n- R2 更新检查成功后直接返回，GitHub 备用查询和下载接入 CDN 加速。\n- 保留原包名与签名，可覆盖安装；真车 OEM 行为及现场网络仍需实机验证。\n"
+}

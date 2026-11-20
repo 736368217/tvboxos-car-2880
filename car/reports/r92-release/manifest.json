@@ -11,26 +11,6 @@
     "bytes": 33627,
     "sha256": "369512f768f34850ab76a6c0c9f56ee0a34c0a856e35bba1b80aeaed7030ca00"
   },
-  "index.html": {
-    "bytes": 2493,
-    "sha256": "ff3edc2587712675225c3048f504684b0b9aa4ddb686cf457e10aea93c1bd25f"
-  },
-  "native-build.err": {
-    "bytes": 443,
-    "sha256": "ba27dd2910f91543298aed3d0f1154cf4f5716a4d27b6e12fc29e5f19138cea3"
-  },
-  "native-build.log": {
-    "bytes": 423,
-    "sha256": "c27f91044060c2b186dd72baa9d5947f0465cd22d1f97e4718aecac78177fda3"
-  },
-  "signature.txt": {
-    "bytes": 909,
-    "sha256": "cdcb4cb8387428495e83057cbcc7ca8112202312bde16f58b77c63fd5f4dc383"
-  },
-  "source-manifest.json": {
-    "bytes": 2328,
-    "sha256": "a8af78fe2af7761c6803127af6562b918bcda62a1bd91822dc8086f5919d6e3b"
-  },
   "device/assertions.json": {
     "bytes": 3085,
     "sha256": "47bcd251a01f00ee540234463a3d7c6e9757f41c53a0da92811d8de13ed5b7c6"
@@ -67,6 +47,34 @@
     "bytes": 258,
     "sha256": "509aa2913b507afd7fe3c45ae795f3a94d28246d9bf18d6bf2ec71437f05dab6"
   },
+  "device/r92-audio/01-home.png": {
+    "bytes": 710390,
+    "sha256": "9c4af331a062dc98c64eaa1bb27338beeaff3697077d930ad66f4163945091f6"
+  },
+  "device/r92-audio/13-audio-enhanced.png": {
+    "bytes": 24392,
+    "sha256": "9261bdb62f1d231d0e52dd3a78f57e1eb28d3e1cb6c858a86abdc8a06935516a"
+  },
+  "device/r92-audio/14-audio-original.png": {
+    "bytes": 112950,
+    "sha256": "1797cd6cfa3a29c4ed010d84a17f2cf46d0a94ad1445dd133a8f4614fffb04a4"
+  },
+  "device/r92-audio/15-audio-reenabled.png": {
+    "bytes": 124625,
+    "sha256": "d71df211cef42810ccb2cecc9efc583420cff0b2c2e4cc849085a8c1704481db"
+  },
+  "device/r92-audio/16-episode-2-original.png": {
+    "bytes": 123695,
+    "sha256": "4b9145754948745306e49a5985e79b38ac8f9563d7906eab18c87e0c63dbb2a3"
+  },
+  "device/r92-audio/17-cold-arm-original.png": {
+    "bytes": 124895,
+    "sha256": "e9502812209b5d34050a4c6b31489ec0ad640a4e69baa2ef91dc36d84d059698"
+  },
+  "device/r92-audio/report.txt": {
+    "bytes": 2094,
+    "sha256": "72a1c85ae200200a3667fc1021d5edd0b0336fe96780bce356c89007e04cd1ae"
+  },
   "device/r92-audio-crash.log": {
     "bytes": 0,
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -79,6 +87,14 @@
     "bytes": 10381,
     "sha256": "b9be678f8d02bb0c676ad977e4712cf7d8733dc3ebad6598ee82846462259404"
   },
+  "device/r92-cold/11-cold-restored.png": {
+    "bytes": 24630,
+    "sha256": "5f2f93ecf858f1ae5fc81c56628e8bf81aaa9163ded6a37a052833559074842f"
+  },
+  "device/r92-cold/report.txt": {
+    "bytes": 359,
+    "sha256": "f7edb3d48ccf6ed40eda74b29d15ab88b442edfb08c42f1aa82aec1d8fca20fb"
+  },
   "device/r92-cold-crash.log": {
     "bytes": 0,
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -90,6 +106,14 @@
   "device/r92-cold-runtime.log": {
     "bytes": 2458,
     "sha256": "3db072025b9c66a757f8fb0e77a2425abed33aaba82e7c0358db28dbba829c47"
+  },
+  "device/r92-exit/12-cold-no-restore.png": {
+    "bytes": 660849,
+    "sha256": "ec91d96fa0ba15c70aa5aab3056567d74ec873be8e8cc9a93c90ddf4a4b872ff"
+  },
+  "device/r92-exit/report.txt": {
+    "bytes": 96,
+    "sha256": "48246069cd920f69ec563256a58582f8048f835e5f4d713d16918c85b4bdf679"
   },
   "device/r92-exit-crash.log": {
     "bytes": 0,
@@ -219,48 +243,80 @@
     "bytes": 91,
     "sha256": "74f3fa399e4f22121c8df2f175192a3246ca12efa50a8d649f3f64a749569e83"
   },
-  "device/r92-audio/01-home.png": {
-    "bytes": 710390,
-    "sha256": "9c4af331a062dc98c64eaa1bb27338beeaff3697077d930ad66f4163945091f6"
+  "index.html": {
+    "bytes": 2888,
+    "sha256": "1c26c1f2c70c1f7c112289bb861c60949a37be9f2d054c500cf008ca9f20182d"
   },
-  "device/r92-audio/13-audio-enhanced.png": {
-    "bytes": 24392,
-    "sha256": "9261bdb62f1d231d0e52dd3a78f57e1eb28d3e1cb6c858a86abdc8a06935516a"
+  "native-build.err": {
+    "bytes": 443,
+    "sha256": "ba27dd2910f91543298aed3d0f1154cf4f5716a4d27b6e12fc29e5f19138cea3"
   },
-  "device/r92-audio/14-audio-original.png": {
-    "bytes": 112950,
-    "sha256": "1797cd6cfa3a29c4ed010d84a17f2cf46d0a94ad1445dd133a8f4614fffb04a4"
+  "native-build.log": {
+    "bytes": 423,
+    "sha256": "c27f91044060c2b186dd72baa9d5947f0465cd22d1f97e4718aecac78177fda3"
   },
-  "device/r92-audio/15-audio-reenabled.png": {
-    "bytes": 124625,
-    "sha256": "d71df211cef42810ccb2cecc9efc583420cff0b2c2e4cc849085a8c1704481db"
+  "publication/ci-verification.json": {
+    "bytes": 3132,
+    "sha256": "d82375975e81fcde96ae72e76d9e85af922c1a83642c95848459c5b061483147"
   },
-  "device/r92-audio/16-episode-2-original.png": {
-    "bytes": 123695,
-    "sha256": "4b9145754948745306e49a5985e79b38ac8f9563d7906eab18c87e0c63dbb2a3"
+  "publication/github-apk.sha256": {
+    "bytes": 109,
+    "sha256": "95b394ccd0f4cdd7d9533d885f140a6cb44233df492cbdc9813612ea4ec2566b"
   },
-  "device/r92-audio/17-cold-arm-original.png": {
-    "bytes": 124895,
-    "sha256": "e9502812209b5d34050a4c6b31489ec0ad640a4e69baa2ef91dc36d84d059698"
+  "publication/github-r91-before.json": {
+    "bytes": 5313,
+    "sha256": "506532311bf71d56102939e12ec36b114d152847cd35b50762671fa7fc26c0ce"
   },
-  "device/r92-audio/report.txt": {
-    "bytes": 2094,
-    "sha256": "72a1c85ae200200a3667fc1021d5edd0b0336fe96780bce356c89007e04cd1ae"
+  "publication/github-release.json": {
+    "bytes": 6613,
+    "sha256": "5656e5263b5e3ffa8f0bc6ed736910726cda719d5ecad2f6cb25b94cc295c65f"
   },
-  "device/r92-cold/11-cold-restored.png": {
-    "bytes": 24630,
-    "sha256": "5f2f93ecf858f1ae5fc81c56628e8bf81aaa9163ded6a37a052833559074842f"
+  "publication/post-release-verification.json": {
+    "bytes": 3065,
+    "sha256": "4f9dd64b3be3c6cc1fef682768b4c526b583f20a4bf9ccd3d619b7e41e0e4033"
   },
-  "device/r92-cold/report.txt": {
-    "bytes": 359,
-    "sha256": "f7edb3d48ccf6ed40eda74b29d15ab88b442edfb08c42f1aa82aec1d8fca20fb"
+  "publication/r2-health.json": {
+    "bytes": 71,
+    "sha256": "b802c5af29e477712449b61c6a8d81876a239282d557b26910b8bc1d48a7edd2"
   },
-  "device/r92-exit/12-cold-no-restore.png": {
-    "bytes": 660849,
-    "sha256": "ec91d96fa0ba15c70aa5aab3056567d74ec873be8e8cc9a93c90ddf4a4b872ff"
+  "publication/r2-latest.json": {
+    "bytes": 939,
+    "sha256": "06f27c12e9d8a8979e2678e831181b9b700a0ade1318ed64fde5f0f5907f1682"
   },
-  "device/r92-exit/report.txt": {
-    "bytes": 96,
-    "sha256": "48246069cd920f69ec563256a58582f8048f835e5f4d713d16918c85b4bdf679"
+  "publication/r2-r91-history.json": {
+    "bytes": 601,
+    "sha256": "3be1bfa5300e2306456f0ff34fd91aa8cee7ba63972dd2489db596cb18b994b1"
+  },
+  "publication/r2-r91-range.headers": {
+    "bytes": 718,
+    "sha256": "49bb52b8ed7eb5ee5b0f76a2dc61a0a445adab37ca0971cd16df2195d45e27d6"
+  },
+  "publication/r2-r92-history.json": {
+    "bytes": 939,
+    "sha256": "06f27c12e9d8a8979e2678e831181b9b700a0ade1318ed64fde5f0f5907f1682"
+  },
+  "publication/r2-range.headers": {
+    "bytes": 747,
+    "sha256": "01f153adeeba7ba98d2d6e629d1a2a67690a0961f34c179ecab7d77dcb7d68eb"
+  },
+  "publication/remote-apk-signature.txt": {
+    "bytes": 909,
+    "sha256": "cdcb4cb8387428495e83057cbcc7ca8112202312bde16f58b77c63fd5f4dc383"
+  },
+  "publication/shared-cleanup.json": {
+    "bytes": 316,
+    "sha256": "ac6cd119f6c2578e802052475eba76a2a82cb6ec757a51a34f50201809d29c8d"
+  },
+  "publication/shared-final-manifest.json": {
+    "bytes": 6352,
+    "sha256": "852d8b9f012c862447785ab6333830982bf7e79df251378c2cef88646ab0305f"
+  },
+  "signature.txt": {
+    "bytes": 909,
+    "sha256": "cdcb4cb8387428495e83057cbcc7ca8112202312bde16f58b77c63fd5f4dc383"
+  },
+  "source-manifest.json": {
+    "bytes": 2328,
+    "sha256": "a8af78fe2af7761c6803127af6562b918bcda62a1bd91822dc8086f5919d6e3b"
   }
 }

@@ -3,8 +3,8 @@
   "createdAt": "2026-11-21T00:05:57.167044+08:00",
   "version": "3.1.0-car.7-r92",
   "versionCode": 64,
-  "status": "VERIFIED_READY_TO_PUBLISH",
-  "published": false,
+  "status": "PUBLISHED_VERIFIED",
+  "published": true,
   "artifact": {
     "name": "TVBox-Original-Feature-3.1.0-car.7-r92.apk",
     "sha256": "d6ca0d7220e0c75f9edc1e09d53793e0c6bda509f0ad11222032dc7b9a7b30eb",
@@ -65,24 +65,50 @@
   "audioImplementationChangedSincePreReleaseVerification": false,
   "versionMetadataChanged": true,
   "publication": {
-    "sourceCommit": null,
+    "sourceCommit": "c94c23de83abdc48c8a3dd55c3f2e1596303aba7",
+    "verifiedAt": "2026-11-21T00:29:59.646189+08:00",
+    "evidence": "r92-release/publication/post-release-verification.json",
     "r2": {
-      "verified": false
+      "verified": true,
+      "manifestUrl": "https://dl.736.de5.net/tvboxos-car-2880/latest.json",
+      "apkUrl": "https://dl.736.de5.net/tvboxos-car-2880/TVBox-Original-Feature-3.1.0-car.7-r92.apk",
+      "fullApkDownloaded": true,
+      "sha256Matches": true,
+      "rangeStatus": 200,
+      "partialResumeSupported": false
     },
     "github": {
-      "verified": false
-    }
+      "verified": true,
+      "tag": "v3.1.0-car.7-r92",
+      "releaseUrl": "https://github.com/736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r92",
+      "latest": true,
+      "assetCount": 2,
+      "assetDigestsMatch": true,
+      "sidecarReadbackMatches": true
+    },
+    "ci": {
+      "result": "PASS",
+      "runId": 44772602221,
+      "sourceCommit": "c94c23de83abdc48c8a3dd55c3f2e1596303aba7",
+      "evidence": "r92-release/publication/ci-verification.json"
+    },
+    "signatureMatchesEstablishedCertificate": true,
+    "previousR91Unchanged": true
   },
   "cleanup": {
     "pending": false,
     "testPackagesRemoved": true,
     "leaseReleased": true,
     "temporaryInstanceDeleted": true,
-    "existingInstallationsNeverReplaced": true
+    "existingInstallationsNeverReplaced": true,
+    "sharedCopiesArchivedAndMatched": 47,
+    "sharedCopiesRemoved": true,
+    "evidence": "r92-release/publication/shared-cleanup.json"
   },
   "limitations": [
     "MuMu API 35 with ARM translation is not B01 API 32 OEM or subjective audio validation.",
     "The local generated fixture does not prove remote source availability.",
-    "Native screenshots and pixel checks are preserved; manual visual review was not performed."
+    "Native screenshots and pixel checks are preserved; manual visual review was not performed.",
+    "R2 returned HTTP 200/full content to a Range request; the client restarts download on 200. Partial resume was not demonstrated."
   ]
 }

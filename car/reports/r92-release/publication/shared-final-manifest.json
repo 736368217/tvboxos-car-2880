@@ -1,0 +1,190 @@
+{
+  "00-launcher.png": {
+    "bytes": 3655120,
+    "sha256": "eb05d76eb58d5a1bf382b36fb918306fa843ba61f92393f2ace86eb4e9bed16f"
+  },
+  "acceptance.apk": {
+    "bytes": 98707,
+    "sha256": "30c0ce2bab72b43c8ff6442ac0b4f55974c8985ffb270a403ced624568ba6fcb"
+  },
+  "batch-invoke.log": {
+    "bytes": 20,
+    "sha256": "c73d522059693ce807d64540e354d027273f7511efd0c0484f18c5300a84f687"
+  },
+  "batch.rc": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "batch.sh": {
+    "bytes": 489,
+    "sha256": "f01cef16ba9be0e5eeb88f8fb8d9e9454577e0e09797845861e8e63cff5d4dce"
+  },
+  "cleanup.log": {
+    "bytes": 42,
+    "sha256": "c4aa72e67ad0d99f81446d32bbd5e5b082f8e22926afbc1cc1791d536a7f40f7"
+  },
+  "cleanup.sh": {
+    "bytes": 466,
+    "sha256": "64b19f62c60ef713d10789acfcf47337fd2419d8b8c21883c637412b90d4a450"
+  },
+  "device-identity.txt": {
+    "bytes": 188,
+    "sha256": "a019dd5952abfa2e94f26c8f9fba451459a63b082a32d7fb93ff5d1c5838b5c2"
+  },
+  "display-launcher.txt": {
+    "bytes": 811,
+    "sha256": "40a119568d4fa9b74665424f90e91d21de8c81bc93b7ccbca9149b85e147d210"
+  },
+  "display-r92-audio.txt": {
+    "bytes": 811,
+    "sha256": "40a119568d4fa9b74665424f90e91d21de8c81bc93b7ccbca9149b85e147d210"
+  },
+  "display-r92-cold.txt": {
+    "bytes": 811,
+    "sha256": "40a119568d4fa9b74665424f90e91d21de8c81bc93b7ccbca9149b85e147d210"
+  },
+  "display-r92-exit.txt": {
+    "bytes": 811,
+    "sha256": "40a119568d4fa9b74665424f90e91d21de8c81bc93b7ccbca9149b85e147d210"
+  },
+  "env.sh": {
+    "bytes": 323,
+    "sha256": "2970f3d8ef9bac23dd5aef245c4835f0a88ea9859d74f0486a0d9fb55b9cfe6b"
+  },
+  "episode-1.mp4": {
+    "bytes": 1602685,
+    "sha256": "989a6a329cd70b4b391f9fae52dc7840d6032df76049034f09c8649ecabbb5b6"
+  },
+  "episode-2.mp4": {
+    "bytes": 1602528,
+    "sha256": "7c27a1266a4dc5fa80887b76445696345f2affccf9bffb29d8de36c755ef1119"
+  },
+  "invoke-r92-audio.log": {
+    "bytes": 103,
+    "sha256": "e7d7a9970ec8b6f93046d7ebcc07bec6185c505c96da9d47badc7267bbd7c1d0"
+  },
+  "invoke-r92-cold.log": {
+    "bytes": 92,
+    "sha256": "859668fbf18ef1faadbbaeafd9a8e0d43fc5d2d7c4682b6655af657cd7ee65fd"
+  },
+  "invoke-r92-exit.log": {
+    "bytes": 90,
+    "sha256": "c3ca8625b1e4d016716418c88cfa18de9a6c6c528b1642a466eab510e901020c"
+  },
+  "product-sha.txt": {
+    "bytes": 65,
+    "sha256": "0acc71a46a5f456bdf7f477c1d770f653f56108520def7b89671abe880bbbee8"
+  },
+  "product.apk": {
+    "bytes": 64279285,
+    "sha256": "d6ca0d7220e0c75f9edc1e09d53793e0c6bda509f0ad11222032dc7b9a7b30eb"
+  },
+  "r92-audio/01-home.png": {
+    "bytes": 710390,
+    "sha256": "9c4af331a062dc98c64eaa1bb27338beeaff3697077d930ad66f4163945091f6"
+  },
+  "r92-audio/13-audio-enhanced.png": {
+    "bytes": 24392,
+    "sha256": "9261bdb62f1d231d0e52dd3a78f57e1eb28d3e1cb6c858a86abdc8a06935516a"
+  },
+  "r92-audio/14-audio-original.png": {
+    "bytes": 112950,
+    "sha256": "1797cd6cfa3a29c4ed010d84a17f2cf46d0a94ad1445dd133a8f4614fffb04a4"
+  },
+  "r92-audio/15-audio-reenabled.png": {
+    "bytes": 124625,
+    "sha256": "d71df211cef42810ccb2cecc9efc583420cff0b2c2e4cc849085a8c1704481db"
+  },
+  "r92-audio/16-episode-2-original.png": {
+    "bytes": 123695,
+    "sha256": "4b9145754948745306e49a5985e79b38ac8f9563d7906eab18c87e0c63dbb2a3"
+  },
+  "r92-audio/17-cold-arm-original.png": {
+    "bytes": 124895,
+    "sha256": "e9502812209b5d34050a4c6b31489ec0ad640a4e69baa2ef91dc36d84d059698"
+  },
+  "r92-audio/report.txt": {
+    "bytes": 2094,
+    "sha256": "72a1c85ae200200a3667fc1021d5edd0b0336fe96780bce356c89007e04cd1ae"
+  },
+  "r92-audio-crash.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "r92-audio-instrument.log": {
+    "bytes": 6463,
+    "sha256": "e57594ead55940b153fc871ea1df4d5c51855107b2d2f784ea62bab5ab74d427"
+  },
+  "r92-audio-runtime.log": {
+    "bytes": 10381,
+    "sha256": "b9be678f8d02bb0c676ad977e4712cf7d8733dc3ebad6598ee82846462259404"
+  },
+  "r92-audio.rc": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "r92-cold/11-cold-restored.png": {
+    "bytes": 24630,
+    "sha256": "5f2f93ecf858f1ae5fc81c56628e8bf81aaa9163ded6a37a052833559074842f"
+  },
+  "r92-cold/report.txt": {
+    "bytes": 359,
+    "sha256": "f7edb3d48ccf6ed40eda74b29d15ab88b442edfb08c42f1aa82aec1d8fca20fb"
+  },
+  "r92-cold-crash.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "r92-cold-instrument.log": {
+    "bytes": 1189,
+    "sha256": "c960cc9a82bb60a08d747c405ec70070477c77687a975afca1a37c9fa7eb3a74"
+  },
+  "r92-cold-runtime.log": {
+    "bytes": 2458,
+    "sha256": "3db072025b9c66a757f8fb0e77a2425abed33aaba82e7c0358db28dbba829c47"
+  },
+  "r92-cold.rc": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "r92-exit/12-cold-no-restore.png": {
+    "bytes": 660849,
+    "sha256": "ec91d96fa0ba15c70aa5aab3056567d74ec873be8e8cc9a93c90ddf4a4b872ff"
+  },
+  "r92-exit/report.txt": {
+    "bytes": 96,
+    "sha256": "48246069cd920f69ec563256a58582f8048f835e5f4d713d16918c85b4bdf679"
+  },
+  "r92-exit-crash.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "r92-exit-instrument.log": {
+    "bytes": 420,
+    "sha256": "cd873794534a4be816f4f0fca98d43f1dc7686eaadf1e2b885359547e87dc7b9"
+  },
+  "r92-exit-runtime.log": {
+    "bytes": 377,
+    "sha256": "9862b82d44ad5cf6e7ad1fc27bd21f9d287ba2c2359bdea0be1d78e37e448179"
+  },
+  "r92-exit.rc": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "run.sh": {
+    "bytes": 1211,
+    "sha256": "9f73f6592e8d3a020801094a1f88bc30f11abc9af97cee320100645d7a4271be"
+  },
+  "setup.log": {
+    "bytes": 1205,
+    "sha256": "e92afc9b302e924dd928b343fc1159035c605cf2dec8d965fed4c6703384c2b7"
+  },
+  "setup.sh": {
+    "bytes": 1818,
+    "sha256": "486358fa9ebfeaae1c9393bdc51dc0004212e5554833938298527eafa8fd4776"
+  },
+  "verify_car_display.sh": {
+    "bytes": 1018,
+    "sha256": "1e937e2ba99271258298578bdd45aa2a11e793d65a27ab3c4ae3de7e4a31c4ee"
+  }
+}

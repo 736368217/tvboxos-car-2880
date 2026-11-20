@@ -54,4 +54,4 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 - [原始交付档案](DELIVERY-ORIGINAL-APP.md)及旧版本交接、报告只证明其对应版本，不作为当前构建/发布手册；现役行为按本 README 指向的说明和证据核对。
 - `car/reports/main-72e38f61-full-test.html` 是 r90 / `72e38f61` 的历史测试报告；其中 12 变体和低 API 风险是收敛前的结果，不是当前验收要求。
 
-2026-11-20：已核验发布基线为 r91 / versionCode 63，发布源码提交 `3136cad0`；[回归记录](car/reports/r91-b01-cdn-validation.json)与[主备发布回读](car/reports/r91-release-verification.json)保留原产物身份。当前音量 A/B 正按 r92 / versionCode 64 做最终验收与发布；最终状态以版本回读记录为准，真车 OEM 行为与听感仍待实测。
+2026-11-21：当前已发布 **3.1.0-car.7-r92 / versionCode 64**，发布源码提交 `c94c23de`。同一签名 APK 已发布到 R2 主通道和 GitHub 备用 Release，完整下载 SHA、资产摘要及原证书均匹配；本地主机 26 项、MuMu 原生 75 项和 GitHub B01 CI 通过。详见[版本与发布回读](car/reports/r92-release-verification.json)和[最终包报告](car/reports/r92-release/index.html)。旧 [r91 发布记录](car/reports/r91-release-verification.json)保留原身份。R2 本次对 Range 返回 200 完整内容，客户端会从头下载，未证明分段续传；真车 OEM 行为与听感仍待实测。
