@@ -11,6 +11,7 @@ import com.github.tvbox.osc.util.HawkConfig;
 import com.orhanobut.hawk.Hawk;
 
 import xyz.doikki.videoplayer.player.VideoView;
+import xyz.doikki.videoplayer.exo.CarAudioDynamicsEngine.Mode;
 import xyz.doikki.videoplayer.render.VideoEnhancePreset;
 import xyz.doikki.videoplayer.render.VideoEnhanceTiers;
 import xyz.doikki.videoplayer.render.VideoPostProcessPolicy;
@@ -34,128 +35,126 @@ public final class CarEnhance {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static java.lang.ref.WeakReference<MyVideoView> activeVideo = new java.lang.ref.WeakReference<>(null);
 
-    /** 上一次真正下发到引擎的音频参数；用于跳过手势期间的重复下发。 */
+    /** 上一次真正下发到引擎的参数；音量手势只更新变化的值。 */
+    private static java.lang.ref.WeakReference<MyVideoView> audioOwner = new java.lang.ref.WeakReference<>(null);
     private static float lastAppliedGain = Float.NaN;
     private static float lastAppliedFactor = Float.NaN;
     private static int lastAppliedMode = Integer.MIN_VALUE;
     private static int lastAppliedSession = Integer.MIN_VALUE;
+    private static Mode lastAppliedProcessing;
     private static boolean lastAppliedPcm;
     private static float lastLoggedGain = Float.NaN;
+    private static Integer audioPreset;
+    private static Boolean audioEnhancement;
+    private static Mode drcPreset;
+
     private CarEnhance() {
     }
 
     // ------------------------------------------------------------------ audio
 
     public static int audioMode() {
-        return AudioEffectController.modeFromPrefValue(
+        if (audioPreset == null) audioPreset = AudioEffectController.modeFromPrefValue(
                 Hawk.get(HawkConfig.HIFI_AUDIO, AudioEffectController.MODE_OFF));
+        return audioPreset;
     }
 
-    /** Persist the preset; call applyAudio(view) to update an active session. */
     public static void setAudioMode(int mode) {
         Hawk.put(HawkConfig.HIFI_AUDIO, mode);
-        MyVideoView view = activeVideo.get();
-        if (view != null) applyAudio(view);
-
+        audioPreset = mode;
+        applyAudio(activeVideo.get());
     }
-    /**
-     * Attach (or refresh) the effect chain for the engine's current audio session. Safe to call on
-     * every playback state change: it is a no-op when the mode and session did not change.
-     */
+
+    public static boolean audioEnhancementEnabled() {
+        if (audioEnhancement == null) {
+            Object saved = Hawk.get(HawkConfig.AUDIO_ENHANCEMENT, true);
+            audioEnhancement = !"false".equalsIgnoreCase(String.valueOf(saved));
+        }
+        return audioEnhancement;
+    }
+
+    /** A/B changes the processing path, never the saved gain or the two presets. */
+    public static void toggleAudioEnhancement(MyVideoView view) {
+        audioEnhancement = !audioEnhancementEnabled();
+        applyAudio(view, true);
+        Hawk.put(HawkConfig.AUDIO_ENHANCEMENT, audioEnhancement);
+    }
+
+    public static Mode audioDrcMode() {
+        if (drcPreset == null) drcPreset = Mode.fromPreference(Hawk.get(HawkConfig.AUDIO_DRC_MODE, null),
+                Hawk.get(HawkConfig.SOURCE_LEVEL_MATCH, true));
+        return drcPreset;
+    }
+
+    public static void cycleAudioDrcMode() {
+        drcPreset = audioDrcMode().nextPreset();
+        Hawk.put(HawkConfig.AUDIO_DRC_MODE, drcPreset.id);
+        applyAudio(activeVideo.get());
+    }
+
+    public static Mode audioProcessingMode() {
+        return audioEnhancementEnabled() ? audioDrcMode() : Mode.ORIGINAL;
+    }
+
     public static void applyAudio(MyVideoView view) {
         applyAudio(view, false);
     }
 
-    /**
-     * @param force true：无视幂等短路，直接把当前增益重新下发给引擎。
-     *
-     * <p>换集或新起播时引擎/AudioTrack 可能是新实例，它的增益字段是默认 1.0，
-     * 而这里的「上次下发值」没变，短路会把这次必要下发吞掉 —— 表现就是
-     * 「刚打开或刚换集声音很小，过一会儿、或动一下音量条才变大」。</p>
-     */
+    /** New players and AudioTracks need a forced update even with the same saved settings. */
     public static void applyAudio(MyVideoView view, boolean force) {
         if (view == null) return;
         if (Looper.myLooper() != Looper.getMainLooper()) {
             MAIN.post(() -> applyAudio(view, force));
             return;
         }
+        if (view.getMediaPlayer() == null) return;
         float gain = view.getAppAudioGain();
         float factor = view.getAudioVolumeFactor();
-        int mode = audioMode();
+        Mode processing = audioProcessingMode();
+        boolean enhanced = processing != Mode.ORIGINAL;
+        int mode = enhanced ? audioMode() : AudioEffectController.MODE_OFF;
         int session = view.getAudioSessionId();
         boolean pcm = view.usesPcmGain();
-        int boost = pcm ? 0 : VolumeBoostMath.millibel(gain, factor);
-        // 幂等短路：音量手势每次移动都会走到这里，值没变就别重复下发/建字符串。
-        // force=true（新起播/换集/换引擎）必须绕过它：新引擎的增益是默认 1.0，
-        // 这里的记录值却还是上次的，短路会让新引擎一直停在 1.0（听感=声音很小）。
+        int boost = !enhanced || pcm ? 0 : VolumeBoostMath.millibel(gain, factor);
+        boolean sameView = audioOwner.get() == view;
+        boolean policyChanged = processing != lastAppliedProcessing || mode != lastAppliedMode;
         if (!force && Math.abs(gain - lastAppliedGain) < 1e-4f
                 && Math.abs(factor - lastAppliedFactor) < 1e-4f
-                && mode == lastAppliedMode && session == lastAppliedSession
-                && pcm == lastAppliedPcm) {
+                && !policyChanged && session == lastAppliedSession && pcm == lastAppliedPcm && sameView) {
             return;
         }
         lastAppliedGain = gain;
         lastAppliedFactor = factor;
         lastAppliedMode = mode;
+        lastAppliedProcessing = processing;
         lastAppliedSession = session;
         lastAppliedPcm = pcm;
-        view.syncAudioVolume();
+        if (!sameView) audioOwner = new java.lang.ref.WeakReference<>(view);
+        view.syncAudioVolume(processing);
+        // Mode OFF + boost 0 releases all four effects and also cancels their pending fade.
         AudioEffectController.apply(mode, session, boost);
-        // 只在增益真正跨过一个可听台阶时打完整快照，避免滑动时每 5% 都拼一次大字符串。
-        if (Math.abs(gain - lastLoggedGain) < 0.20f) return;
+        if (!policyChanged && Math.abs(gain - lastLoggedGain) < 0.20f) return;
         lastLoggedGain = gain;
-        Log.i("CarAudio", "runtime_apply mode=" + mode + " session=" + session + " gain=" + gain
-                + " factor=" + factor + " applied=" + (gain * factor)
-                + " max_gain=" + VolumeBoostMath.MAX_GAIN
-                + " auto_level=removed"
-                + " path=" + (pcm ? "pcm" : "loudness") + " boostMb=" + boost
+        Log.i("CarAudio", "runtime_apply processing=" + processing + " mode=" + mode
+                + " session=" + session + " gain=" + gain + " factor=" + factor
+                + " path=" + (pcm ? "pcm" : "native") + " boostMb=" + boost
                 + " enabled=" + AudioEffectController.isActive()
                 + " state=" + view.getCurrentPlayState()
                 + " player=" + System.identityHashCode(view.getMediaPlayer())
-                + " engine=" + (view.getMediaPlayer() == null ? "null"
-                        : view.getMediaPlayer().getClass().getName())
                 + " pcmStored=" + view.getPcmGain()
                 + " pcmQueued=" + view.getPcmGainQueueCount());
     }
 
-    /** 应用内增益状态归属对应的播放 View，避免预览/主播放器之间互相覆盖。 */
-    public static void setAppGain(MyVideoView view, float gain) {
-        if (view == null) return;
-        view.setAppAudioGain(gain);
-        applyAudio(view);
-    }
-
-    /** 仅供兼容旧 UI 查询当前视频 View 的增益值。 */
+    /** 仅供设置页查询当前视频 View 的增益值。 */
     public static float appGain() {
         MyVideoView view = activeVideo.get();
-        return view == null ? 1f : view.getAppAudioGain();
+        return view == null ? Hawk.get(HawkConfig.VOLUME_GAIN, 100) / 100f : view.getAppAudioGain();
     }
 
-    public static void releaseAudio() {
+    public static void releaseAudio(MyVideoView view) {
+        if (audioOwner.get() != view) return;
+        audioOwner.clear();
         AudioEffectController.release();
-    }
-
-    // ------------------------------------------------- 音量两开关（对当前播放器即时生效）
-
-    /** 读取「视频音量自动对齐」偏好；默认开启。 */
-    public static boolean sourceLevelMatchEnabled() {
-        Object raw = Hawk.get(HawkConfig.SOURCE_LEVEL_MATCH, true);
-        return !(raw instanceof Boolean) || (Boolean) raw;
-    }
-
-    public static void setSourceLevelMatchEnabled(boolean enabled) {
-        Hawk.put(HawkConfig.SOURCE_LEVEL_MATCH, enabled);
-        MyVideoView view = activeVideo.get();
-        if (view != null) view.setSourceLevelMatchEnabled(enabled);
-        Log.i("CarAudio", "pref source_level_match=" + enabled);
-    }
-
-    public static String audioCompensationStatus() {
-        if (!sourceLevelMatchEnabled()) return "已关闭";
-        MyVideoView view = activeVideo.get();
-        if (view == null || view.getMediaPlayer() == null) return "下次 EXO 播放时测量";
-        if (!(view.getMediaPlayer() instanceof com.github.tvbox.osc.player.ExoPlayer)) return "当前播放器不支持；仅 EXO 生效";
-        return ((com.github.tvbox.osc.player.ExoPlayer) view.getMediaPlayer()).getSourceLevelStatus();
     }
 
     /** 读取「音频通道对齐音乐」偏好；默认开启。 */

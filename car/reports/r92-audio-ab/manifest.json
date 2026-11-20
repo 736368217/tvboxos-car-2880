@@ -1,0 +1,258 @@
+{
+  "final-apk-gate.json": {
+    "bytes": 161,
+    "sha256": "e622a90c79d98f415adf7785371da8acc70a7b7134d391075e47f18388a65b1f"
+  },
+  "final-build.err": {
+    "bytes": 623,
+    "sha256": "f4566d8e247f340f84b3c9bddf52b8bb7bcd4b1ea7be845cd8ed0c7d1e112b08"
+  },
+  "final-build.log": {
+    "bytes": 33059,
+    "sha256": "e3c744c659ffd86756e46e5d3f524afb3827692e138d405db584251815f55f45"
+  },
+  "final-signature.txt": {
+    "bytes": 909,
+    "sha256": "cdcb4cb8387428495e83057cbcc7ca8112202312bde16f58b77c63fd5f4dc383"
+  },
+  "index.html": {
+    "bytes": 4102,
+    "sha256": "0cdd499fffe0745048f95cb647b568c7e3b53e11a3ebe3075529c0abe640ae05"
+  },
+  "source-manifest.json": {
+    "bytes": 2020,
+    "sha256": "998fe5f57abf8c393b6d8b9fcd07720e254a4d072b2d644ee1e36a49a313aa46"
+  },
+  "device/assertions.json": {
+    "bytes": 3103,
+    "sha256": "1199482b7e0de97b33ac4b999443e10c4eccfbf01628b63c2083a31692fcb697"
+  },
+  "device/audio-ab-pass-crash.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "device/audio-ab-pass-instrument.log": {
+    "bytes": 6463,
+    "sha256": "2094b60e82f6a87108c36fa47d83637bb8b285b3014526172b6c3a774e949f19"
+  },
+  "device/audio-ab-pass-runtime.log": {
+    "bytes": 10382,
+    "sha256": "ba542a622b1850564cd739a3adca3d7758d5867d8b3fda4f5ad3529b6aaefb06"
+  },
+  "device/audio-cold-pass-crash.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "device/audio-cold-pass-instrument.log": {
+    "bytes": 1189,
+    "sha256": "37b182a4c02f71ab7e7318b7df2dbe1bd23999383c6937508586521cfc91e3a7"
+  },
+  "device/audio-cold-pass-runtime.log": {
+    "bytes": 2458,
+    "sha256": "e3d05da5285c4953d42b806f61d1c478c2ec5530a3d866e7218958e543ee59f3"
+  },
+  "device/audio-exit-pass-crash.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "device/audio-exit-pass-instrument.log": {
+    "bytes": 420,
+    "sha256": "cd873794534a4be816f4f0fca98d43f1dc7686eaadf1e2b885359547e87dc7b9"
+  },
+  "device/audio-exit-pass-runtime.log": {
+    "bytes": 377,
+    "sha256": "b82a68bc95f69b8e19d63453092d0d6cc19e51b63ff692743ce4e72003701498"
+  },
+  "device/cleanup.log": {
+    "bytes": 84,
+    "sha256": "d5f8f22dc252ce932d3ff8ab51127f0db0e8b99f432ae31811bca1c681b3a3eb"
+  },
+  "device/device-identity.txt": {
+    "bytes": 188,
+    "sha256": "4c697733d2d033efed190bc04a24e4deb444ee424995d43935e3dfd20f03b1da"
+  },
+  "device/display-after-restart.txt": {
+    "bytes": 822,
+    "sha256": "aafd48abf35bc5d20b23177223d6ca8e6bd8e9ac35ec5daba19d1b3c275da0c4"
+  },
+  "device/display-audio-ab-pass.txt": {
+    "bytes": 811,
+    "sha256": "40a119568d4fa9b74665424f90e91d21de8c81bc93b7ccbca9149b85e147d210"
+  },
+  "device/display-audio-cold-pass.txt": {
+    "bytes": 811,
+    "sha256": "40a119568d4fa9b74665424f90e91d21de8c81bc93b7ccbca9149b85e147d210"
+  },
+  "device/display-audio-exit-pass.txt": {
+    "bytes": 811,
+    "sha256": "40a119568d4fa9b74665424f90e91d21de8c81bc93b7ccbca9149b85e147d210"
+  },
+  "device/display-launcher.txt": {
+    "bytes": 811,
+    "sha256": "40a119568d4fa9b74665424f90e91d21de8c81bc93b7ccbca9149b85e147d210"
+  },
+  "device/lease-release.json": {
+    "bytes": 258,
+    "sha256": "509aa2913b507afd7fe3c45ae795f3a94d28246d9bf18d6bf2ec71437f05dab6"
+  },
+  "device/screenshots.json": {
+    "bytes": 2083,
+    "sha256": "d44172d85f9837ed45a1aea1329b08c1b53549043a1cb257d0715b1ba62b0841"
+  },
+  "device/setup.log": {
+    "bytes": 1205,
+    "sha256": "29a5998feed353324a7e6f9152fbbeebaa2aa4757ce6563b3112e5765a20e162"
+  },
+  "host/AudioDynamicsHostTest.log": {
+    "bytes": 630,
+    "sha256": "24cf9025b6ba9bf6231cfafeaf03ceb24a09dfe3cbc087aefc35e65ddc0e6285"
+  },
+  "host/AudioGainProcessorHostTest.log": {
+    "bytes": 86,
+    "sha256": "e07b84cdc68484d45c11d99ff6739313111df542ad8b40fe265d1dfd67e83c3f"
+  },
+  "host/AudioOriginalHostTest.log": {
+    "bytes": 91,
+    "sha256": "17b340c1cee7da51a6258bf3eff1240181288c3496a83bc660fc1af1e1ac369e"
+  },
+  "host/AudioVolumeRoutingHostTest.log": {
+    "bytes": 100,
+    "sha256": "0abe8ab7fcc1b632c1200577acbd3ed62f617a1a231e68f27ee0fbaf6fd4b825"
+  },
+  "host/BackBarPolicyHostTest.log": {
+    "bytes": 93,
+    "sha256": "6920725364d004ee7abd53f1f12316bd5881f2061d5eb6551a652443972ddf30"
+  },
+  "host/BackDisplayMetricsHostTest.log": {
+    "bytes": 98,
+    "sha256": "d0db44d8603a63587fb87640379ebeda04d4b3d2930295305103afd519453cf8"
+  },
+  "host/BackNavPolicyHostTest.log": {
+    "bytes": 94,
+    "sha256": "3235bfd4978ccfeb4f003fc83ab9489382cff0b5465e51cb401bb7e4414cfe95"
+  },
+  "host/Car6PostProcessTest.log": {
+    "bytes": 185,
+    "sha256": "38c10df70df29fbac0e4dda38b81f0bc435b48e4dc93f5863f01863c00ee4fac"
+  },
+  "host/Car7RuntimeConfigTest.log": {
+    "bytes": 181,
+    "sha256": "a52f134c9ca62661ff3a7bfcf2343204ef8f4420b35f4375420d7417c867598d"
+  },
+  "host/CoverFormatHostTest.log": {
+    "bytes": 89,
+    "sha256": "e2cbdad273cae80ed31569a3a4f8b4ab59c6dccfa09f57ff40383525fbcab396"
+  },
+  "host/CoverKeyHostTest.log": {
+    "bytes": 88,
+    "sha256": "c5bddb028f4c4e0aad39a44922259722513757b7805bbac889098a92ff6f7c2b"
+  },
+  "host/EdgeBackPolicyHostTest.log": {
+    "bytes": 94,
+    "sha256": "0c054c2d23e957a655955948ecb740fd8afd04b3a537549cafc113574e40de86"
+  },
+  "host/FixedGainHostTest.log": {
+    "bytes": 87,
+    "sha256": "75a60b5041a45a8417d37111bc35583584c902f0114f1ef18a87449c307c3ebc"
+  },
+  "host/GestureAxisHostTest.log": {
+    "bytes": 91,
+    "sha256": "70856994cc17c8a8d8d638fb14a8f41149b009e4a84e36dc6ab82af353e3c380"
+  },
+  "host/javac.log": {
+    "bytes": 878,
+    "sha256": "40e6717045493ad0f4e02c4bfa72e2e286c66d4ccf1635ce6d8bafbc1bd20999"
+  },
+  "host/OfficialManifestHostTest.log": {
+    "bytes": 96,
+    "sha256": "b7f8f86b8d653504c1edd3acf7e31e6af9f9b9fbd0efd04dd66aa778f9822c03"
+  },
+  "host/PlaybackRegressionHostTest.log": {
+    "bytes": 98,
+    "sha256": "6a71c7b6c91ffb0bb80573f3fc59cc3e4dbb5a43fc6e3512a3bb79de6be5f0f2"
+  },
+  "host/PlaybackSessionPolicyHostTest.log": {
+    "bytes": 98,
+    "sha256": "e8cf069ac305a14deeab9edf8540437c2adee38cd0afe524737e53ff2cee7876"
+  },
+  "host/R2ManifestHostTest.log": {
+    "bytes": 90,
+    "sha256": "a2aba78a2c968fbfda8dce95d3cfb615f8dcb29425ee564178ee8882dced0ed9"
+  },
+  "host/result.json": {
+    "bytes": 4000,
+    "sha256": "56f6a690edd2b679ac551a6dfffcb5bc5f345123e16f03ad967fe970e1df6462"
+  },
+  "host/run_audio_focus_host_test.log": {
+    "bytes": 148,
+    "sha256": "ac19f02bfeaf08dca24968cf35b43c68113d590c766394188333d185ac4ed849"
+  },
+  "host/run_playback_session_host_test.log": {
+    "bytes": 154,
+    "sha256": "35358b9bff9a6a29b7dc3453a20a10eba64e631077585bc5be35695430cf9143"
+  },
+  "host/UpdateVersionHostTest.log": {
+    "bytes": 94,
+    "sha256": "5da6b94b69e27e079f485fb2cdaabf91b5b009644a40dabe7eef38b0f85551c3"
+  },
+  "host/VideoEnhancePresetTest.log": {
+    "bytes": 157,
+    "sha256": "70c6c8a8c6d7d6dcaa7bd896f8c69932ad1be25cc14a484e4230c899ee2788be"
+  },
+  "host/VolumeBoostMathHostTest.log": {
+    "bytes": 95,
+    "sha256": "dd7b2432f836bb342576b281559ae68951f3b198dfb11ed5e25634e551b4bae0"
+  },
+  "host/VolumeFocusRegressionHostTest.log": {
+    "bytes": 101,
+    "sha256": "7e1c42a969f4cc44b050eeaf9266093367eef174bceac978fcf773aec6286774"
+  },
+  "host/VolumeLimitHostTest.log": {
+    "bytes": 91,
+    "sha256": "74f3fa399e4f22121c8df2f175192a3246ca12efa50a8d649f3f64a749569e83"
+  },
+  "device/audio-ab-pass/01-home.png": {
+    "bytes": 710412,
+    "sha256": "cc778a526f8a2c950f6a95e051ec69306c0f87681efc7595e1b7644e0411178a"
+  },
+  "device/audio-ab-pass/13-audio-enhanced.png": {
+    "bytes": 24392,
+    "sha256": "9261bdb62f1d231d0e52dd3a78f57e1eb28d3e1cb6c858a86abdc8a06935516a"
+  },
+  "device/audio-ab-pass/14-audio-original.png": {
+    "bytes": 122747,
+    "sha256": "c01c8628e858dbf7a0e7fe9f3b289cfd414cc07ae5563c597e1b92855eae438e"
+  },
+  "device/audio-ab-pass/15-audio-reenabled.png": {
+    "bytes": 123272,
+    "sha256": "24bc08127e46e0d1b8ca403ba72a275cacb143d5a686b1cf13606ad88c1c8409"
+  },
+  "device/audio-ab-pass/16-episode-2-original.png": {
+    "bytes": 124570,
+    "sha256": "4b3109b41a630c0636185893625bbf38a2aa8c92b702b8cffb576c94f74cc217"
+  },
+  "device/audio-ab-pass/17-cold-arm-original.png": {
+    "bytes": 124719,
+    "sha256": "476e42d6e6b4231609fcb7f96c3abd869b675b085551a836714ef802f3722380"
+  },
+  "device/audio-ab-pass/report.txt": {
+    "bytes": 2094,
+    "sha256": "3a21750ae15082cf3e694745f2e6754873d8aafe2a07ed6df5731a18b866fa25"
+  },
+  "device/audio-cold-pass/11-cold-restored.png": {
+    "bytes": 24630,
+    "sha256": "5f2f93ecf858f1ae5fc81c56628e8bf81aaa9163ded6a37a052833559074842f"
+  },
+  "device/audio-cold-pass/report.txt": {
+    "bytes": 359,
+    "sha256": "2ea8737c9bd3fdab3cc3440b06569f05f45e0b9db13104f9dcecaaff9c4f6d8c"
+  },
+  "device/audio-exit-pass/12-cold-no-restore.png": {
+    "bytes": 660611,
+    "sha256": "d64803bf7cb893c1157d6cf217573a16ae54534a9b4e1b37c5fe517270cc3612"
+  },
+  "device/audio-exit-pass/report.txt": {
+    "bytes": 96,
+    "sha256": "48246069cd920f69ec563256a58582f8048f835e5f4d713d16918c85b4bdf679"
+  }
+}

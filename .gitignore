@@ -105,3 +105,6 @@ output-metadata.json
 # Project scope must remain discoverable to the next agent.
 !/AGENTS.md
 !/car/tests/device/cdn/README.md
+!/car/handover/R92-AUDIO-AB.md
+!/car/reports/r92-audio-ab/**/*.log
+!/car/reports/r92-release/**/*.log

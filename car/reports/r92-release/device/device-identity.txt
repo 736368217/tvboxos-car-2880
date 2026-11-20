@@ -1,0 +1,4 @@
+installed_sha256=d6ca0d7220e0c75f9edc1e09d53793e0c6bda509f0ad11222032dc7b9a7b30eb
+sdk=35 abi=x86_64,arm64-v8a,x86
+    versionCode=64 minSdk=32 targetSdk=28
+    versionName=3.1.0-car.7-r92

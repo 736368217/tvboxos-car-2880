@@ -5,13 +5,7 @@ import xyz.doikki.videoplayer.exo.AudioGainProcessor;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-/**
- * r77：自动电平对齐删除后，固定用户增益必须长期稳定。
- *
- * 旧 AutoLevel 每约 1 秒按峰值改变 makeup，安静片段与响片段交替时会听成忽大忽小。
- * 这里用同一个 300% 设定连续处理多个 1 秒观察窗，要求 getGain() 恒等于 3.0，
- * 且相同小信号样本输出不随时间漂移。
- */
+/** Turning DRC off retains stable manual gain through alternating quiet and loud passages. */
 public final class FixedGainHostTest {
 
     private static int checks;
@@ -40,15 +34,9 @@ public final class FixedGainHostTest {
         processor.configure(new AudioProcessor.AudioFormat(48000, 2, C.ENCODING_PCM_16BIT));
         processor.flush();
 
-        // 前 4 秒是 SourceLevelLock 的测量期，输出会随淡入变化；
-        // 先走完测量期，再验证锁定后的长期稳定性（这正是 r73 动态补偿失败的地方）。
-        for (int i = 0; i < 4; i++) {
-            run(processor, 96000, 720);
-        }
-
         int[] reference = null;
         for (int window = 0; window < 8; window++) {
-            // 每个窗口 96000 帧 = 1 秒；锁定后同一输入输出必须逐样本一致。
+            // 96000 samples = 48000 stereo frames. Manual-only mode stays stable from the first buffer.
             int[] quiet = run(processor, 96000, 720);
             int[] loud = run(processor, 96000, 6000);
             check(Math.abs(processor.getGain() - 3f) < 0.0001f,
@@ -58,7 +46,7 @@ public final class FixedGainHostTest {
             } else {
                 check(reference[0] == quiet[0] && reference[100] == quiet[100]
                                 && reference[1000] == quiet[1000],
-                        "window " + window + " quiet output must not drift after lock");
+                        "window " + window + " fixed gain output must not drift");
             }
             check(Math.abs(loud[0]) >= Math.abs(quiet[0]), "loud input remains louder");
         }

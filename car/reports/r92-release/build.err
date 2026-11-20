@@ -1,0 +1,9 @@
+gradle.bat : ע: [1] Wrote GeneratedAppGlideModule with: []
+所在位置 行:1 字符: 523
++ ... ython.exe'; & 'D:\gradle-7.5\gradle-7.5\bin\gradle.bat' :app:assemble ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ע: [1] Wrote Ge...Module with: []:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ע: ĳЩ�����ļ�ʹ�û򸲸����ѹ�ʱ�� API��
+ע: �й���ϸ��Ϣ, ��ʹ�� -Xlint:deprecation ���±��롣

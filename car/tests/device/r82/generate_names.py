@@ -6,7 +6,7 @@ from collections import defaultdict
 def generate(mapping, output):
     classes = {}
     members = defaultdict(set)
-    wanted = {'get', 'getSourceBeanList', 'getHomeSourceBean', 'getCSP', 'getKey', 'homeContent', 'homeVideoContent', 'isPlaying', 'getCurrentPosition', 'enterFullPreview', 'playFragment', 'mVodInfo', 'mVideoView', 'fullWindows', 'setSourceLevelMatchEnabled', 'getSourceLevelStatus', 'getMediaPlayer', 'getPcmGainQueueCount'}
+    wanted = {'get', 'getSourceBeanList', 'getHomeSourceBean', 'getCSP', 'getKey', 'homeContent', 'homeVideoContent', 'isPlaying', 'getCurrentPosition', 'getMediaPlayer', 'getAppAudioGain', 'getAudioGain', 'getAudioProcessingMode', 'getAudioGainProcessors', 'getAppliedPcmGain', 'enterFullPreview', 'playFragment', 'mVodInfo', 'mVideoView', 'mController', 'playIndex', 'mAppAudioGain', 'fullWindows', 'audioProcessingMode', 'audioGainProcessors', 'requested', 'mode', 'lastAppliedGain', 'getPcmGain', 'getPcmGainQueueCount', 'showBottom', 'playNext', 'playPre', 'id', 'isActive', 'active'}
     owner = ''
     for line in mapping.read_text(encoding='utf-8').splitlines():
         if not line or line.lstrip().startswith('#'): continue
@@ -23,7 +23,7 @@ def generate(mapping, output):
     for old, new in classes.items():
         if old.startswith(('com.github.tvbox.osc.', 'com.github.catvod.', 'com.orhanobut.hawk.', 'xyz.doikki.videoplayer.')):
             # Only queried classes need a forward mapping; member keys already use the runtime class name.
-            if old in ('com.github.tvbox.osc.api.ApiConfig', 'com.github.tvbox.osc.ui.dialog.AdvancedSettingsDialog', 'com.orhanobut.hawk.Hawk'):
+            if old in ('com.github.tvbox.osc.api.ApiConfig', 'com.github.tvbox.osc.car.AudioEffectController', 'com.github.tvbox.osc.ui.dialog.AdvancedSettingsDialog', 'com.orhanobut.hawk.Hawk'):
                 lines.append('C.put(%s,%s);' % (json.dumps(old), json.dumps(new)))
     for key, values in members.items():
         values.add(key.split('#', 1)[1])

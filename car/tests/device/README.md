@@ -1,14 +1,14 @@
-# 车机 UI 设备自检（geometry-gated）
+# 车机设备验收入口
 
-本目录的现行目标只有零跑 B01（API 32 / ARM64 / 2880×1620 / d160）。优先按 [统一设备规范](../../handover/MUMU-VERIFICATION-SPEC.md) 验本轮 `pythonRelease`；下面的 PowerShell/OCR 脚本是已有专项入口，不代表旧电视、手机或其他设备支持。
+当前仅验零跑 B01（API 32 / ARM64 / 2880×1620 / d160）。按 [统一设备规范](../../handover/MUMU-VERIFICATION-SPEC.md) 准备实例，使用 [独立原生套件](r82/README.md) 验本轮 `pythonRelease`。
 
-这个目录解决一个具体的测试质量问题：**测试环境会把应用布局成竖屏，导致 UI 用例测出假结果。**
+以下各节记录旧 PowerShell/OCR 专项脚本，其断言依赖对应 UI；复用前须核对前提，不代替现行原生验收或统一设备规范。
 
 ## 背景：为什么需要门禁
 
-MuMu 实例每次被池子分配时，`wm user-rotation` 会被重置成 `free`。此时应用虽然声明了
-`sensorLandscape`，实测仍会被布局成 **1620×2880（竖屏坐标）**，而 `screencap` 出的图是
-2880×1620。后果：
+MuMu 重启或旧脚本运行后，旋转锁可能变成 `free`，必须重新实测。曾出现应用按
+`1620×2880` 布局、PNG 却为 `2880×1620` 的情况，不能只凭截图尺寸判定坐标正确。
+典型后果：
 
 - 返回杠（左侧竖向小棍）落到 y≈1400/1500 的位置，按横屏直觉点/拉必然落空
 - 看起来像"返回杠失效/拉不动"，其实是**布局坐标系与屏幕坐标系不一致**
@@ -45,7 +45,7 @@ powershell -ExecutionPolicy Bypass -File car/tests/device/run_car_ui_checks.ps1 
 ```
 
 - 自动通过 `mumu-pool.py` 租实例（owner 自动生成），结束一定 `release`
-- 传输/截图用 MuMu 自带 adb（SDK adb 对 MuMu 会卡在 push）
+- 旧脚本通过其内置 ADB 调用传输和截图；现行设备操作以统一规范的插件通道为准。
 - 输出：截图、`*.raw`、`adb.out/err`、`normalize.xml` 都在 `%PI_SCRATCH_DIR%\car-ui-check-*`
 
 ## 退出码
@@ -61,15 +61,15 @@ powershell -ExecutionPolicy Bypass -File car/tests/device/run_car_ui_checks.ps1 
 
 - **定制验收镜像**（首页是"本地合成素材"网格）没有「设置」入口，前置归一化会告警，
   此时 case1/case2 的结论不可用，需要换普通配置的实例。
-- Android 15 镜像的 `uiautomator` 缺 `libnativeloader.so`，`uiautomator dump` 直接报
-  `CANNOT LINK EXECUTABLE`；脚本已改为 OCR 定位，不再依赖它。
+- 旧 shell 通道曾因 `libnativeloader.so`/classpath 报 `CANNOT LINK EXECUTABLE`。现行原生套件使用
+  system_server namespace/classpath wrapper；不要把通道问题写成 Android 15 一概不支持 UI 检查。
 
-## 定位方式（2026-10-23 更新）
+## 定位方式（旧脚本记录，2026-10-23）
 
 - 截图 → `tools/ocr.ps1`（Windows.Media.Ocr）→ 按文字坐标点击；
  - 需要**精确点击坐标**时用 `tools/ocr_words.ps1`：逐词输出 `x<TAB>y<TAB>w<TAB>h<TAB>中心x<TAB>中心y<TAB>文字`，中心点可直接喂 `input tap`；
  - 需要**证明控件真的画出来了**时用 `tools/px_probe.ps1`：`-Point "x,y;x,y"` 取样颜色；不带 `-Point` 则按列统计贴边彩色像素，命中列打印 `avg=#RRGGBB`（返回杠实测 `#1F698D`）；
- - 连续两帧截图若哈希相同 = 画面静止（视频没在播），别把它当成"控件没画"。
+ - 两帧哈希相同只证明这两次捕获像素相同，不能据此判定停播；合成静态画面视频也能正常播放，须另查递增进度与 PCM 运行状态。
 - 设置页用 `input keyevent 82`（MENU）打开，不再依赖首页「设置」按钮；
 - 租到实例后先等 `sys.boot_completed=1`，adb 掉线自动重连一次。
 

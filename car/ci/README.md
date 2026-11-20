@@ -33,4 +33,4 @@ JDK/SDK/Gradle 缓存位置从 `JAVA_HOME`、`ANDROID_HOME`、`GRADLE_USER_HOME`
 - `.github/workflows/test.yml`：本仓库 main 代码变化时复用上述检查，不再克隆上游和批量打包。
 - `.github/workflows/upstream-watch.yml`：上游变化提醒和只读预演；接收哪些改动由 B01 需求决定。
 
-R2 是主分发通道，发布入口为 `tools/publish_r2.ps1`，需要用户明确指令。CI 运行和 artifact 上传不代表 R2 或车机已更新。
+R2 是主分发通道，入口为 `tools/publish_r2.ps1`。按项目既定授权，更新验收通过后默认提交、推送并完成 R2/GitHub 同包发布与摘要回读；不再逐次等待指令。CI artifact 上传本身不代表 R2 或车机已更新。

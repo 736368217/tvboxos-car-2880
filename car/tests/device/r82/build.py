@@ -25,7 +25,7 @@ names = out / 'Names.java'
 generate(Path(a.mapping), names)
 def run(cmd):
     subprocess.run([str(x) for x in cmd], check=True)
-run([java/'javac.exe', '-encoding', 'UTF-8', '-source', '8', '-target', '8', '-Xlint:-options', '-cp', android, '-d', classes, Path(__file__).with_name('Acceptance.java'), names])
+run([java/'javac.exe', '-encoding', 'UTF-8', '-source', '8', '-target', '8', '-Xlint:-options', '-cp', android, '-d', classes, Path(__file__).with_name('Acceptance.java'), Path(__file__).with_name('AudioFixtureServer.java'), names])
 jar = out / 'test.jar'
 run([java/'jar.exe', 'cf', jar, '-C', classes, '.'])
 run([java/'java.exe', '-cp', bt/'lib'/'d8.jar', 'com.android.tools.r8.D8', '--lib', android, '--min-api', '26', '--output', dex, jar])

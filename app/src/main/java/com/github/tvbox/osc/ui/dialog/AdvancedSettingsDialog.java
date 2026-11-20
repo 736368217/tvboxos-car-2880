@@ -155,12 +155,14 @@ public class AdvancedSettingsDialog extends BaseDialog {
         }
         content.removeAllViews();
         if (category == 0) {
-            heading("声音", "仅调整本应用，系统音量保持不变");
-            row("视频音量补偿", "有效声音测量后锁定；" + CarEnhance.audioCompensationStatus(), CarEnhance.sourceLevelMatchEnabled() ? "已开启" : "已关闭", () -> {
-                CarEnhance.setSourceLevelMatchEnabled(!CarEnhance.sourceLevelMatchEnabled());
+            boolean enhanced = CarEnhance.audioEnhancementEnabled();
+            heading("声音", enhanced ? "当前：增强音量" : "当前：原始声音 · 播放栏可切换");
+            row("动态音量", "仅 EXO；点击切换关闭、车载均衡、高速压缩", CarEnhance.audioDrcMode().label, () -> {
+                CarEnhance.cycleAudioDrcMode();
                 changed();
             });
-            row("应用内音量", "播放时在右侧上下滑动，每档 5%", Math.round(CarEnhance.appGain() * 100) + "%", null);
+            row("应用内音量", enhanced ? "播放时在右侧上下滑动，每档 5%" : "切回增强音量后使用保存值",
+                    Math.round(CarEnhance.appGain() * 100) + "%", null);
         } else if (category == 1) {
             heading("返回方式", "边缘手势与返回杠二选一");
             LinearLayout modes = new LinearLayout(getContext());
@@ -207,7 +209,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 if (clipboard != null) clipboard.setPrimaryClip(ClipData.newPlainText("TVBox 诊断",
                         "TVBox " + com.github.tvbox.osc.BuildConfig.VERSION_NAME
                         + "\nvolume=" + Math.round(CarEnhance.appGain() * 100)
-                        + "% compensation=" + CarEnhance.sourceLevelMatchEnabled()
+                        + "% processing=" + CarEnhance.audioProcessingMode().id
                         + " back=" + InAppBackButton.getMode()));
                 Toast.makeText(getContext(), "诊断信息已复制", Toast.LENGTH_SHORT).show();
             });

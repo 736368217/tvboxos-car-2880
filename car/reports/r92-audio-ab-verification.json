@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "task": "B01 playback audio A/B",
+  "created": "2026-11-20",
+  "base": {
+    "head": "de0f3e5b028f85e9fd176de9492b13431a41419d",
+    "workingTreeModified": true,
+    "published": false
+  },
+  "artifact": {
+    "file": "audio-ab-verification/TVBox-3.1.0-car.7-r91-audio-ab-final.apk (session scratch)",
+    "versionName": "3.1.0-car.7-r91",
+    "versionCode": 63,
+    "package": "com.github.tvbox.osc.jun",
+    "sha256": "6aaccfe177d15bd2a6af87ab068a18dff08b54eed5214e83d5bc15cc608c61ed",
+    "sizeBytes": 64279285,
+    "certificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "b01ApkGate": "PASS",
+    "minSdk": 32,
+    "abis": [
+      "arm64-v8a"
+    ],
+    "mappingSha256": "36fab1bbe6ed0416b342df74c983f953b5df5048fc08c7368341369e74df0f22"
+  },
+  "build": {
+    "assemblePythonRelease": "PASS",
+    "lintPythonRelease": "PASS_WITH_FINDINGS",
+    "lint": {
+      "fatal": 1,
+      "errors": 3,
+      "warnings": 1229,
+      "newApi": 0
+    },
+    "lintFindings": [
+      "ExpiredTargetSdkVersion: existing targetSdk 28 policy finding",
+      "Two existing AGP 7.2.2 androidx lint detector failures",
+      "One existing DiffUtilEquals finding"
+    ]
+  },
+  "hostTests": {
+    "runner": "car/ci/run-host-tests.py",
+    "result": "PASS",
+    "stepsPassed": 26,
+    "dynamics": {
+      "balancedQuietRmsDbfs": [
+        -30.0,
+        -19.0
+      ],
+      "balancedLoudRmsDbfs": [
+        -14.0,
+        -18.0
+      ],
+      "balancedSteadyGapDb": 1.0,
+      "balancedLoudOnsetDbfs": -14.0,
+      "highwayQuietRmsDbfs": [
+        -30.0,
+        -16.68
+      ],
+      "highwayLoudRmsDbfs": [
+        -14.0,
+        -16.0
+      ],
+      "highwaySteadyGapDb": 0.68,
+      "samplePeakCeilingLinear": 0.8414
+    },
+    "originalPcmByteExact": "PASS",
+    "focusMuteAndGainRouting": "PASS",
+    "evidence": "r92-audio-ab/host/result.json"
+  },
+  "deviceAcceptance": {
+    "result": "PASS",
+    "vmIndex": 7,
+    "dedicatedTemporaryInstance": true,
+    "sdk": 35,
+    "productionPackageInstalled": true,
+    "testPackageInstalled": true,
+    "installedSha256": "6aaccfe177d15bd2a6af87ab068a18dff08b54eed5214e83d5bc15cc608c61ed",
+    "ephemeralUserCreated": false,
+    "displayGate": "CAR_DISPLAY_PASS",
+    "assertionsPassed": 75,
+    "phases": [
+      {
+        "label": "audio-ab-pass",
+        "assertions": 63,
+        "result": "PASS"
+      },
+      {
+        "label": "audio-cold-pass",
+        "assertions": 9,
+        "result": "PASS"
+      },
+      {
+        "label": "audio-exit-pass",
+        "assertions": 3,
+        "result": "PASS"
+      }
+    ],
+    "screenshots": 8,
+    "fixturePixelSanity": "PASS",
+    "coldPositionExpectedMs": 5426,
+    "coldPositionActualMs": 5506,
+    "limitations": [
+      "MuMu API 35 with ARM translation; not a B01 API 32 OEM or subjective-hearing test.",
+      "Native screenshots are preserved; browser capture channel was unavailable."
+    ],
+    "evidence": "r92-audio-ab/device/assertions.json",
+    "currentInstallation": "REMOVED_WITH_TEMPORARY_INSTANCE"
+  },
+  "lease": {
+    "released": true,
+    "testPackagesUninstalled": true,
+    "temporaryInstanceDeleted": true,
+    "temporaryInstanceIndex": 7,
+    "existingInstallationsNeverReplaced": true,
+    "mainAppLeftRunning": true,
+    "evidence": "r92-audio-ab/device/cleanup.log"
+  },
+  "inputZipSha256": "80100a73bc624f01d199489102b589fbdc1dde145dd7a583c1bba43f11d1986a",
+  "codeReview": "No concrete production defects found in one independent read-only review.",
+  "localAcceptanceComplete": true,
+  "published": false
+}

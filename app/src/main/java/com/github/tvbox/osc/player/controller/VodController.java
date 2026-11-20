@@ -120,6 +120,7 @@ public class VodController extends BaseController {
                     }
                     case 1002: { // 显示底部菜单
                         updateDanmuSearchUiBtn();
+                        updateAudioButtons();
                         hidePauseRoot();
                         mPlayTitle.setVisibility(GONE);
                         mBottomRoot.setVisibility(VISIBLE);
@@ -271,6 +272,7 @@ public class VodController extends BaseController {
     TextView net_play_speed;
     private MyVideoView mCarVideoView;
     private TextView mCarVideoBtn, mCarSrBtn, mCarInterpBtn, mCarAudioBtn;
+    private TextView mAudioCompareBtn;
     private TextView mVideoFrameRate;
     private boolean mFpsTickerRunning;
     private boolean hasDanmu = false;
@@ -383,7 +385,7 @@ public class VodController extends BaseController {
         updateCarEnhanceButtons();
     }
 
-    /** 播放增强四按钮：两字名称 + 档位/开关状态。 */
+    /** 播放增强按钮显示当前档位。 */
     private void updateCarEnhanceButtons() {
         if (mCarVideoBtn != null) {
             mCarVideoBtn.setText("滤镜" + (CarEnhance.videoEnhanceEnabled() ? "开" : "关"));
@@ -396,10 +398,19 @@ public class VodController extends BaseController {
             int tier = CarEnhance.memcTier();
             mCarInterpBtn.setText(tier == VideoEnhanceTiers.MEMC_OFF ? "补帧关" : "补帧" + tier);
         }
-        if (mCarAudioBtn != null) {
-            mCarAudioBtn.setText("音效" + (CarEnhance.audioMode() != AudioEffectController.MODE_OFF ? "开" : "关"));
-        }
+        updateAudioButtons();
         updateFrameRateDisplay();
+    }
+
+    private void updateAudioButtons() {
+        boolean enhanced = CarEnhance.audioEnhancementEnabled();
+        if (mAudioCompareBtn != null) {
+            mAudioCompareBtn.setText(enhanced ? R.string.play_audio_enhanced : R.string.play_audio_original);
+        }
+        if (mCarAudioBtn != null) {
+            boolean effects = enhanced && CarEnhance.audioMode() != AudioEffectController.MODE_OFF;
+            mCarAudioBtn.setText(effects ? "音效开" : "音效关");
+        }
     }
 
     private void updateFrameRateDisplay() {
@@ -540,6 +551,7 @@ public class VodController extends BaseController {
                 updateCarEnhanceButtons();
                 String state = pos == 0 ? "音效已关闭"
                         : mCarVideoView == null ? "已保存 · 下次播放生效"
+                        : !CarEnhance.audioEnhancementEnabled() ? "已保存 · 切回增强音量后生效"
                         : AudioEffectController.isActive() ? "音效已应用" : "设备未接受该音效 · 已跳过";
                 CarEnhance.toast(getContext(), state);
                 dialog.dismiss();
@@ -675,6 +687,11 @@ public class VodController extends BaseController {
         mCarSrBtn = findViewById(R.id.play_car_sr);
         mCarInterpBtn = findViewById(R.id.play_car_interp);
         mCarAudioBtn = findViewById(R.id.play_car_audio);
+        mAudioCompareBtn = findViewById(R.id.play_audio_compare);
+        mAudioCompareBtn.setOnClickListener(v -> {
+            CarEnhance.toggleAudioEnhancement(mCarVideoView);
+            updateAudioButtons();
+        });
         mCarVideoBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

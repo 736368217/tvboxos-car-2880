@@ -19,6 +19,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.car.VolumeBoostMath;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.LOG;
@@ -386,6 +387,14 @@ public abstract class BaseController extends BaseVideoController implements Gest
             if (mGestureAxis == AXIS_Y) {
                 int halfScreen = PlayerUtils.getScreenWidth(getContext(), true) / 2;
                 if (mDownX > halfScreen) {
+                    if (!CarEnhance.audioEnhancementEnabled()) {
+                        mGestureAxis = AXIS_IGNORE;
+                        mHandler.obtainMessage(100, mAppVolume == 0f
+                                ? "应用内已静音 · 切回增强音量调整" : "原始声音 · 请用车机音量调节").sendToTarget();
+                        mHandler.removeMessages(101);
+                        mHandler.sendEmptyMessageDelayed(101, 1000);
+                        return true;
+                    }
                     mChangeVolume = true;
                 } else {
                     mChangeBrightness = isBrightnessGestureEnabled();

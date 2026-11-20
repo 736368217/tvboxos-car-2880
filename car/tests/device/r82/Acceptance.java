@@ -19,11 +19,15 @@ public final class Acceptance extends Instrumentation {
     private int checks;
     private Dialog settings;
     private final StringBuilder report = new StringBuilder();
+    private AudioFixtureServer audioServer;
     interface Check { boolean get() throws Exception; }
     interface Work { void run() throws Exception; }
     @Override public void onCreate(Bundle args) { options = args == null ? new Bundle() : args; start(); }
     @Override public void onStart() {
         Bundle result = new Bundle();
+        final boolean audioFixture = "audio_fixture".equals(options.getString("scenario", ""))
+                || "audio_restore".equals(options.getString("scenario", ""));
+        final boolean audioRestore = "audio_restore".equals(options.getString("scenario", ""));
         try {
             out = new File(getTargetContext().getExternalFilesDir(null), "r82-" + options.getString("label", "test"));
             out.mkdirs();
@@ -38,13 +42,24 @@ public final class Acceptance extends Instrumentation {
                 public void onActivityDestroyed(Activity a) { }
             });
             main(() -> {
-                if (!options.getString("scenario", "").equals("restore") && !options.getString("scenario", "").equals("no_restore")) {
+                if (!options.getString("scenario", "").equals("restore")
+                        && !options.getString("scenario", "").equals("audio_restore")
+                        && !options.getString("scenario", "").equals("no_restore")) {
                     getTargetContext().getSharedPreferences("car_playback_session",0).edit().putBoolean("active",false).putBoolean("user_exit",true).commit();
                     getTargetContext().getSharedPreferences("car_playback_snapshot",0).edit().putBoolean("valid",false).commit();
                 }
-                pref("api_url", "https://clun.top/box.json");
+                if (audioFixture) audioServer = new AudioFixtureServer(
+                        new File(getTargetContext().getExternalFilesDir(null), "audio-fixture"), 18765);
+                pref("api_url", audioFixture ? audioServer.configUrl() : "https://clun.top/box.json");
                 pref("play_type", 2);
                 pref("show_preview", true);
+                if (audioFixture && !audioRestore) {
+                    pref("audio_enhancement", true);
+                    pref("audio_drc_mode", 1);
+                    pref("hifi_audio", 1);
+                    pref("app_volume_gain", 300);
+                    pref("source_level_match", true);
+                }
                 pref("audio_usage_media", options.getBoolean("usage", true));
                 pref("inapp_back_mode", "edge");
                 pref("inapp_back_mode_explicit", true);
@@ -52,9 +67,9 @@ public final class Acceptance extends Instrumentation {
                 pref("hide_seconds", 0);
             });
             final long expectedPosition = getTargetContext().getSharedPreferences("car_playback_session",0).getLong("position",0);
-            Activity home = startActivitySync(new Intent().setClassName(getTargetContext(),
+            getTargetContext().startActivity(new Intent().setClassName(getTargetContext(),
                     "com.github.tvbox.osc.ui.activity.HomeActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            if (options.getString("scenario", "").equals("restore")) {
+            if (options.getString("scenario", "").equals("restore") || audioRestore) {
                 await("cold_restored_detail", () -> current != null && current.getClass().getSimpleName().equals("DetailActivity") && field(current,"playFragment")!=null,90000);
                 final Activity restored=current;
                 note("cold_intent_full="+restored.getIntent().getBooleanExtra("restore_fullscreen",false)+" has_extra="+restored.getIntent().hasExtra("restore_fullscreen")+" actual="+field(restored,"fullWindows"));
@@ -62,6 +77,14 @@ public final class Acceptance extends Instrumentation {
                 await("cold_position_restored", () -> videoView(restored)!=null
                         && ((Number)call(videoView(restored),"getCurrentPosition")).longValue()>=Math.max(3000,expectedPosition-1500),30000);
                 note("cold_position expected="+expectedPosition+" actual="+call(videoView(restored),"getCurrentPosition"));
+                if (audioRestore) {
+                    await("cold_original_mode_retained", () -> "ORIGINAL".equals(processorMode(restored)), 15000);
+                    assertTrue("cold_master_preference_retained", Boolean.FALSE.equals(prefValue("audio_enhancement", Boolean.TRUE)));
+                    assertTrue("cold_saved_gain_retained", Math.abs(appGain(restored) - 3f) < .001f);
+                    long restoredPosition = currentPosition(restored);
+                    SystemClock.sleep(1000);
+                    assertTrue("cold_restored_playback_advances", currentPosition(restored) > restoredPosition + 500);
+                }
                 shot("11-cold-restored");
                 sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);SystemClock.sleep(600);sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
                 await("cold_exit_home", () -> current!=null && current.getClass().getSimpleName().equals("HomeActivity") && !active(),10000);
@@ -74,11 +97,16 @@ public final class Acceptance extends Instrumentation {
                 shot("12-cold-no-restore");note("COLD_NO_RESTORE_PASS");result.putString("result","PASS no_restore");writeReport();finish(Activity.RESULT_OK,result);return;
             }
             await("home_resumed", () -> current != null && current.getClass().getSimpleName().equals("HomeActivity"), 10000);
+            Activity home = current;
             Object config = call(type("com.github.tvbox.osc.api.ApiConfig"), "get");
-            await("subscription_sources", () -> ((List<?>)call(config, "getSourceBeanList")).size() > 2, 90000);
+            await("subscription_sources", () -> ((List<?>)call(config, "getSourceBeanList")).size() >= (audioFixture ? 1 : 3), 90000);
             note("sources=" + ((List<?>)call(config, "getSourceBeanList")).size());
             SystemClock.sleep(5000);
             shot("01-home");
+            if (audioFixture) {
+                runAudioFixture(home, config, result);
+                return;
+            }
             String scenario = options.getString("scenario", "suite");
             if (scenario.equals("setup")) {
                 note("SETUP_PASS");
@@ -128,8 +156,8 @@ public final class Acceptance extends Instrumentation {
                     });
                     SystemClock.sleep(500);
                     String status = allText(settings.getWindow().getDecorView());
-                    note("runtime_compensation=" + status);
-                    assertTrue("runtime_pcm_locked", status.contains("已锁定"));
+                    note("runtime_audio_settings=" + status);
+                    assertTrue("runtime_dynamic_audio_settings", status.contains("动态音量"));
                     shot("02a-sound-runtime");
                     main(() -> settings.dismiss());
                 }
@@ -276,7 +304,7 @@ public final class Acceptance extends Instrumentation {
     private void writeReport() throws IOException { try(FileOutputStream f=new FileOutputStream(new File(out,"report.txt"))) { f.write(report.toString().getBytes("UTF-8")); } }
     private void shot(String name) throws Exception {
         if(settings!=null && settings.isShowing())main(() -> checkTextLayout(settings.getWindow().getDecorView()));
-        waitForIdleSync(); Bitmap bitmap=getUiAutomation().takeScreenshot();
+        main(() -> { }); Bitmap bitmap=getUiAutomation().takeScreenshot();
         if(bitmap==null) throw new AssertionError("screenshot unavailable");
         assertTrue("screen_"+name,bitmap.getWidth()==2880 && bitmap.getHeight()==1620);
         try(FileOutputStream f=new FileOutputStream(new File(out,name+".png"))) { bitmap.compress(Bitmap.CompressFormat.PNG,100,f); }
@@ -312,5 +340,204 @@ public final class Acceptance extends Instrumentation {
             m.setAccessible(true); return m.invoke(o instanceof Class?null:o,args);
         }
         throw new NoSuchMethodException(cls.getName()+"."+n);
+    }
+    private void runAudioFixture(Activity home, Object config, Bundle result) throws Exception {
+        try {
+            Object source = null;
+            for (Object candidate : (List<?>)call(config, "getSourceBeanList")) {
+                if ("audio_qa".equals(call(candidate, "getKey"))) source = candidate;
+            }
+            assertTrue("local_audio_source_loaded", source != null);
+            java.net.HttpURLConnection request = (java.net.HttpURLConnection)
+                    new java.net.URL("http://127.0.0.1:18765/api").openConnection();
+            request.setConnectTimeout(5000);
+            request.setReadTimeout(5000);
+            JSONObject homeJson;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream(), "UTF-8"))) {
+                homeJson = new JSONObject(reader.readLine());
+            } finally { request.disconnect(); }
+            JSONArray categories = homeJson.optJSONArray("class");
+            JSONArray videos = homeJson.optJSONArray("list");
+            assertTrue("local_audio_fixture_has_episodes", categories != null && categories.length() == 1
+                    && videos != null && videos.length() == 1);
+            JSONObject series = videos.getJSONObject(0);
+            note("fixture_site=audio_qa category=" + categories.getJSONObject(0).optString("type_name")
+                    + " episodes=" + series.optString("vod_play_url").split("#", -1).length);
+            Intent intent = new Intent().setClassName(getTargetContext(), "com.github.tvbox.osc.ui.activity.DetailActivity")
+                    .putExtra("id", series.getString("vod_id")).putExtra("sourceKey", "audio_qa")
+                    .putExtra("title", series.optString("vod_name")).putExtra("picture", "")
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getTargetContext().startActivity(intent);
+            await("audio_detail_loaded", () -> current != null && current.getClass().getSimpleName().equals("DetailActivity")
+                    && field(field(current, "playFragment"), "mVodInfo") != null, 60000);
+            final Activity detail = current;
+            Object video = videoView(detail);
+            await("audio_exoplayer_running", () -> Boolean.TRUE.equals(call(videoView(detail), "isPlaying")), 60000);
+            await("audio_video_dimensions", () -> {
+                int[] size = (int[])call(videoView(detail), "getVideoSize");
+                return size != null && size[0] == 960 && size[1] == 540 && currentPosition(detail) > 1000;
+            }, 20000);
+            note("video=960x540 audio=48kHz_stereo position=" + currentPosition(detail));
+            assertTrue("episode_1_selected", currentIndex(detail) == 0);
+            assertAudioPipeline(detail, video, "CAR_BALANCED", "episode_1_enhanced");
+            final int[] previewPoint = new int[2];
+            main(() -> {
+                int id = getTargetContext().getResources().getIdentifier("previewPlayer", "id", getTargetContext().getPackageName());
+                View preview = detail.findViewById(id);
+                if (preview == null) throw new AssertionError("previewPlayer not found");
+                preview.getLocationOnScreen(previewPoint);
+                previewPoint[0] += preview.getWidth() / 2;
+                previewPoint[1] += preview.getHeight() / 2;
+            });
+            tapPoint(previewPoint);
+            await("audio_fullscreen", () -> Boolean.TRUE.equals(field(detail, "fullWindows")), 15000);
+            Object controller = field(field(detail, "playFragment"), "mController");
+            main(() -> call(controller, "showBottom"));
+            int compareId = getTargetContext().getResources().getIdentifier("play_audio_compare", "id", getTargetContext().getPackageName());
+            final View[] compareBox = new View[1];
+            main(() -> compareBox[0] = detail.findViewById(compareId));
+            View compare = compareBox[0];
+            await("audio_compare_visible", () -> shown(compare), 10000);
+            await("audio_enhanced_label", () -> "增强音量".equals(textOf(compare)), 10000);
+            shot("13-audio-enhanced");
+            int playerBefore = playerIdentity(detail);
+            long positionBefore = currentPosition(detail);
+            tapView(compare);
+            await("audio_original_label", () -> "原始声音".equals(textOf(compare)), 10000);
+            await("audio_original_processor_bypass", () -> "ORIGINAL".equals(processorMode(detail)), 10000);
+            assertTrue("original_preference_saved", Boolean.FALSE.equals(prefValue("audio_enhancement", Boolean.TRUE)));
+            assertTrue("original_keeps_saved_volume", Math.abs(appGain(detail) - 3f) < .001f);
+            assertTrue("original_retains_drc_preset", ((Number)prefValue("audio_drc_mode", Integer.valueOf(-1))).intValue() == 1);
+            assertTrue("original_retains_effect_preset", ((Number)prefValue("hifi_audio", Integer.valueOf(-1))).intValue() == 1);
+            assertTrue("original_releases_android_effects", Boolean.FALSE.equals(
+                    call(type("com.github.tvbox.osc.car.AudioEffectController"), "isActive")));
+            assertTrue("original_pcm_processor_still_running", pcmQueueCount(detail) > 0);
+            shot("14-audio-original");
+            tapView(compare);
+            await("audio_enhanced_restored", () -> "增强音量".equals(textOf(compare))
+                    && "CAR_BALANCED".equals(processorMode(detail)), 10000);
+            assertTrue("enhancement_preference_restored", Boolean.TRUE.equals(prefValue("audio_enhancement", Boolean.FALSE)));
+            assertAudioPipeline(detail, videoView(detail), "CAR_BALANCED", "episode_1_reenabled");
+            SystemClock.sleep(900);
+            assertTrue("A_B_A_keeps_same_exoplayer", playerIdentity(detail) == playerBefore);
+            assertTrue("A_B_A_play_position_continues", currentPosition(detail) >= positionBefore + 500);
+            shot("15-audio-reenabled");
+
+            int nextId = getTargetContext().getResources().getIdentifier("play_next", "id", getTargetContext().getPackageName());
+            final View[] nextBox = new View[1];
+            main(() -> { call(controller, "showBottom"); nextBox[0] = detail.findViewById(nextId); });
+            View next = nextBox[0];
+            await("episode_navigation_visible", () -> shown(next), 10000);
+            tapView(next);
+            await("episode_2_selected", () -> currentIndex(detail) == 1, 30000);
+            await("episode_2_running", () -> Boolean.TRUE.equals(call(videoView(detail), "isPlaying"))
+                    && currentPosition(detail) > 1000, 30000);
+            assertAudioPipeline(detail, videoView(detail), "CAR_BALANCED", "episode_2_reapplied");
+            note("episode_2_position=" + currentPosition(detail));
+            main(() -> call(controller, "showBottom"));
+            await("episode_2_audio_button", () -> shown(compare) && "增强音量".equals(textOf(compare)), 10000);
+            tapView(compare);
+            await("episode_2_original", () -> "原始声音".equals(textOf(compare)), 10000);
+            assertTrue("episode_2_original_mode_is_bypass", "ORIGINAL".equals(processorMode(detail)));
+            shot("16-episode-2-original");
+            tapView(compare);
+            await("episode_2_enhanced", () -> "增强音量".equals(textOf(compare))
+                    && "CAR_BALANCED".equals(processorMode(detail)), 10000);
+            assertTrue("episode_2_drc_preference_retained", ((Number)prefValue("audio_drc_mode", Integer.valueOf(-1))).intValue() == 1);
+            assertTrue("episode_2_app_gain_retained", Math.abs(appGain(detail) - 3f) < .001f);
+            await("episode_2_progress_before_background", () -> currentPosition(detail) > 5000, 15000);
+            main(() -> call(controller, "showBottom"));
+            await("cold_original_button_visible", () -> shown(compare), 5000);
+            tapView(compare);
+            await("cold_arm_original", () -> "ORIGINAL".equals(processorMode(detail)), 5000);
+            shot("17-cold-arm-original");
+            getTargetContext().startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            SystemClock.sleep(1800);
+            assertTrue("background_playback_pauses", !Boolean.TRUE.equals(call(videoView(detail), "isPlaying")));
+            long pausedAt = currentPosition(detail);
+            SystemClock.sleep(750);
+            assertTrue("background_position_stable", Math.abs(currentPosition(detail) - pausedAt) < 200);
+            long saved = getTargetContext().getSharedPreferences("car_playback_session", 0).getLong("position", 0);
+            assertTrue("audio_cold_saved_position", saved > 3000);
+            assertTrue("audio_background_session_active", active());
+            note("AUDIO_AB_ARMED savedPosition=" + saved + " screens=13..16");
+            result.putString("result", "PASS audio_fixture checks=" + checks);
+            writeReport();
+            finish(Activity.RESULT_OK, result);
+        } finally {
+            if (audioServer != null) { audioServer.close(); audioServer = null; }
+        }
+    }
+
+    private void assertAudioPipeline(Activity detail, Object view, String expectedMode, String label) throws Exception {
+        Object player = call(view, "getMediaPlayer");
+        assertTrue(label + "_real_exoplayer", player != null && player.getClass().getName().contains("base."));
+        assertTrue(label + "_processor_mode", expectedMode.equals(field(player, "audioProcessingMode").toString()));
+        assertTrue(label + "_app_gain", Math.abs(appGain(detail) - 3f) < .001f);
+        assertTrue(label + "_pcm_queues", pcmQueueCount(detail) > 0);
+        Object processors = field(player, "audioGainProcessors");
+        assertTrue(label + "_audio_sinks", processors instanceof List && !((List<?>)processors).isEmpty());
+        Object processor = ((List<?>)processors).get(((List<?>)processors).size() - 1);
+        assertTrue(label + "_sink_mode", expectedMode.equals(field(field(processor, "requested"), "mode").toString()));
+    }
+
+    private int currentIndex(Activity detail) throws Exception {
+        final int[] index = {-1};
+        main(() -> index[0] = ((Number)field(field(field(detail, "playFragment"), "mVodInfo"), "playIndex")).intValue());
+        return index[0];
+    }
+
+    private long currentPosition(Activity detail) throws Exception {
+        return ((Number)call(videoView(detail), "getCurrentPosition")).longValue();
+    }
+
+    private int playerIdentity(Activity detail) throws Exception {
+        return System.identityHashCode(call(videoView(detail), "getMediaPlayer"));
+    }
+
+    private float appGain(Activity detail) throws Exception {
+        return ((Number)call(videoView(detail), "getAppAudioGain")).floatValue();
+    }
+
+    private long pcmQueueCount(Activity detail) throws Exception {
+        return ((Number)call(videoView(detail), "getPcmGainQueueCount")).longValue();
+    }
+
+    private String processorMode(Activity detail) throws Exception {
+        return String.valueOf(field(call(videoView(detail), "getMediaPlayer"), "audioProcessingMode"));
+    }
+
+    private Object prefValue(String key, Object fallback) throws Exception {
+        return call(type("com.orhanobut.hawk.Hawk"), "get", key, fallback);
+    }
+
+    private String textOf(View view) throws Exception {
+        final String[] value = {""};
+        main(() -> value[0] = view instanceof TextView ? ((TextView)view).getText().toString() : "");
+        return value[0];
+    }
+
+    private boolean shown(View view) throws Exception {
+        final boolean[] visible = {false};
+        main(() -> visible[0] = view != null && view.isShown());
+        return visible[0];
+    }
+
+    private void tapView(View view) throws Exception {
+        final int[] point = new int[2];
+        main(() -> {
+            if (view == null || !view.isShown()) throw new AssertionError("control view not visible");
+            view.getLocationOnScreen(point);
+            point[0] += view.getWidth() / 2;
+            point[1] += view.getHeight() / 2;
+        });
+        tapPoint(point);
+    }
+
+    private void tapPoint(int[] point) {
+        long down = SystemClock.uptimeMillis();
+        pointer(down, MotionEvent.ACTION_DOWN, point[0], point[1]);
+        pointer(down, MotionEvent.ACTION_UP, point[0], point[1]);
     }
 }

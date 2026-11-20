@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-21T00:05:57.167044+08:00",
+  "version": "3.1.0-car.7-r92",
+  "versionCode": 64,
+  "status": "VERIFIED_READY_TO_PUBLISH",
+  "published": false,
+  "artifact": {
+    "name": "TVBox-Original-Feature-3.1.0-car.7-r92.apk",
+    "sha256": "d6ca0d7220e0c75f9edc1e09d53793e0c6bda509f0ad11222032dc7b9a7b30eb",
+    "bytes": 64279285,
+    "package": "com.github.tvbox.osc.jun",
+    "certificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "mappingSha256": "36fab1bbe6ed0416b342df74c983f953b5df5048fc08c7368341369e74df0f22",
+    "minSdk": 32,
+    "abi": [
+      "arm64-v8a"
+    ]
+  },
+  "build": {
+    "assemblePythonRelease": "PASS",
+    "lintPythonRelease": "PASS_WITH_EXISTING_FINDINGS",
+    "lint": {
+      "fatal": 1,
+      "error": 3,
+      "warning": 1229,
+      "newApi": 0
+    }
+  },
+  "host": {
+    "result": "PASS",
+    "steps": 26,
+    "evidence": "r92-release/host/result.json"
+  },
+  "device": {
+    "result": "PASS",
+    "sdk": 35,
+    "instance": 7,
+    "installedSha256": "d6ca0d7220e0c75f9edc1e09d53793e0c6bda509f0ad11222032dc7b9a7b30eb",
+    "assertions": 75,
+    "phases": [
+      {
+        "label": "r92-audio",
+        "assertions": 63,
+        "result": "PASS"
+      },
+      {
+        "label": "r92-cold",
+        "assertions": 9,
+        "result": "PASS"
+      },
+      {
+        "label": "r92-exit",
+        "assertions": 3,
+        "result": "PASS"
+      }
+    ],
+    "screenshots": 8,
+    "pixelSanity": "PASS",
+    "crashBuffersEmpty": true,
+    "coldPositionExpectedMs": 5447,
+    "coldPositionActualMs": 5614,
+    "evidence": "r92-release/device/assertions.json"
+  },
+  "audioImplementationChangedSincePreReleaseVerification": false,
+  "versionMetadataChanged": true,
+  "publication": {
+    "sourceCommit": null,
+    "r2": {
+      "verified": false
+    },
+    "github": {
+      "verified": false
+    }
+  },
+  "cleanup": {
+    "pending": false,
+    "testPackagesRemoved": true,
+    "leaseReleased": true,
+    "temporaryInstanceDeleted": true,
+    "existingInstallationsNeverReplaced": true
+  },
+  "limitations": [
+    "MuMu API 35 with ARM translation is not B01 API 32 OEM or subjective audio validation.",
+    "The local generated fixture does not prove remote source availability.",
+    "Native screenshots and pixel checks are preserved; manual visual review was not performed."
+  ]
+}

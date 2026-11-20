@@ -1,0 +1,4 @@
+OK cold_home
+OK cold_explicit_exit_stays_home
+OK screen_12-cold-no-restore
+COLD_NO_RESTORE_PASS

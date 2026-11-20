@@ -1,0 +1,8 @@
+# Preserve the exact bytes recorded by immutable acceptance manifests.
+/car/reports/r92-audio-ab/** -text whitespace=cr-at-eol
+/car/reports/r92-release/** -text whitespace=cr-at-eol
+# Raw tool output is an evidence artifact, not source formatting.
+/car/reports/r92-audio-ab/**/*.log -diff
+/car/reports/r92-audio-ab/**/*.err -diff
+/car/reports/r92-release/**/*.log -diff
+/car/reports/r92-release/**/*.err -diff

@@ -61,7 +61,7 @@ python car\ci\upstream-check.py --json     # 机器可读
 
 本仓库对上游文件有大量**语义性**自有改动，机器无法判断该留谁：
 
-- `ExoPlayer`：我们加了音轨峰值锁定与 PCM 补偿，上游在加缓冲恢复，两边都动同一个类
+- `ExoPlayer`：保留每 sink 的 PCM 处理器、增益播种与增强/原声模式；动态压缩和旁路不能被上游缓冲恢复改动覆盖
 - `PlayFragment`：我们的切屏暂停语义（`pausedByLifecycle`）、`setData` 的进度匹配放宽
 - `DetailActivity`：我们的 `playKey` 统一（历史与播放器共用 sourceKey）
 - `pyLoader`：我们的 `pendingConfig` 重放解决了「配置早于 loader 就绪」
@@ -85,9 +85,9 @@ python -B car/ci/run-host-tests.py --out "$env:PI_SCRATCH_DIR/b01-host"  # ALL_H
 3. 历史：站点名与封面正常，点进去从上次进度续播（不是 0）
 4. 返回：全屏→详情→首页；主动返回后不复活
 5. 应用内更新：能检查到新版本、下载进度推进、复制链接可达
-6. 音量补偿：设置页档位生效，>100% 实际作用于 PCM
+6. 音频：增强/原声即时切换、DRC 档位与保存增益、音效旁路，以及换集/重建后的状态；按 [音量 A/B 说明](R92-AUDIO-AB.md) 核对，不恢复旧静态峰值锁定。
 
-## 本次回归结果（r86，vc58）
+## r86 历史回归结果（vc58）
 
 | 验收点 | 证据 |
 |---|---|

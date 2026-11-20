@@ -34,6 +34,7 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 主机测试和 B01 Release 构建是日常门禁。不要再运行 12 变体矩阵，也不要为上游未纳入的设备兼容问题扩大本项目范围。Lint 的现存非阻断配置仍需审阅实际结果，命令退出 0 不表示零告警。
 
 设备验收要求见 [MuMu 与真车规范](car/handover/MUMU-VERIFICATION-SPEC.md)。MuMu API 35 只是功能代理环境；真车 API 32 的安装、OEM 窗口/后台策略和主观听感，只有实际车机证据才能确认。
+播放栏可直接切换「增强音量 / 原始声音」；原声绕过 App 音频增强，切回恢复保存设置。用法、处理边界与版本验证入口见 [音量 A/B 说明](car/handover/R92-AUDIO-AB.md)。
 
 ## 应用内更新
 
@@ -43,14 +44,14 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 - CDN 仅用于 GitHub，不给 R2 地址套代理。保留下载测速、断点续传、取消、包名、版本、签名与可用 SHA-256 校验。CDN 仍可能缓存或临时不可用。
 - 发布包文件名保持 `TVBox-Original-Feature-<版本>.apk`，不因收敛设备范围破坏旧版更新契约。
 
-发布需要用户明确指令，代码构建或提交不代表已上线。发版时将同一份已验签名 APK 同步到 R2 主通道和 GitHub 备用 Release，并比对两边摘要；R2 发布入口为 `tools/publish_r2.ps1`。`dl.z736.vip` 已退役，不再探测或恢复。
+本项目按用户约定，每轮更新验收通过后默认提交并推送 main，将同一签名 APK 发布到 R2 主通道与 GitHub 备用 Release，再回读摘要，无需逐次确认；用户明确暂停或验收失败时才停止。发布入口为 `tools/publish_r2.ps1`，须填写 notes；CI artifact 不等于已发布。`dl.z736.vip` 已退役，不再探测或恢复。
 
 ## 文档与上游边界
 
 - 当前项目定位、构建和更新行为以本 README 为入口；Agent 边界见 [AGENTS.md](AGENTS.md)。
 - [签名与 CI](car/ci/README.md)：共享测试证书、B01 单包校验和工作流。
 - [上游跟进](car/handover/UPSTREAM-SYNC.md)：只选择对 B01 有用的改动，不全量继承设备矩阵。
-- [原始交付档案](DELIVERY-ORIGINAL-APP.md)、`car/handover/R*.md` 和版本报告保存当时事实，不能作为当前支持范围或发布状态的依据。
+- [原始交付档案](DELIVERY-ORIGINAL-APP.md)及旧版本交接、报告只证明其对应版本，不作为当前构建/发布手册；现役行为按本 README 指向的说明和证据核对。
 - `car/reports/main-72e38f61-full-test.html` 是 r90 / `72e38f61` 的历史测试报告；其中 12 变体和低 API 风险是收敛前的结果，不是当前验收要求。
 
-2026-11-20：r91 / versionCode 63 已发布到 R2 主通道和 GitHub 备用 Release，发布源码提交为 `3136cad0`。本地回归见 [验证记录](car/reports/r91-b01-cdn-validation.json)，远端整包、签名和主备摘要对账见 [发布回读](car/reports/r91-release-verification.json)。真车 API 32 的 OEM/现场网络表现仍需实际设备验证。
+2026-11-20：已核验发布基线为 r91 / versionCode 63，发布源码提交 `3136cad0`；[回归记录](car/reports/r91-b01-cdn-validation.json)与[主备发布回读](car/reports/r91-release-verification.json)保留原产物身份。当前音量 A/B 正按 r92 / versionCode 64 做最终验收与发布；最终状态以版本回读记录为准，真车 OEM 行为与听感仍待实测。

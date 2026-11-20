@@ -45,10 +45,10 @@ public final class VolumeBoostMathHostTest {
         eq(VolumeBoostMath.playerVolume(0.4f), 0.4f, "player volume passes through below 1");
         eq(VolumeBoostMath.playerVolume(-1f), 0f, "player volume floor is 0");
 
-        eq(VolumeBoostMath.pcmGain(5f, 1f), 5f, "PCM gain reaches 500%");
-        eq(VolumeBoostMath.pcmGain(9f, 1f), 5f, "PCM gain clamps at 500%");
-        eq(VolumeBoostMath.pcmGain(5f, 0.1f), 0.5f, "duck is a temporary factor");
-        eq(VolumeBoostMath.outputVolume(5f, 1f, true), 1f, "PCM AudioTrack stays unity");
+        eq(VolumeBoostMath.clampGain(5f), 5f, "PCM gain reaches 500%");
+        eq(VolumeBoostMath.clampGain(9f), 5f, "PCM gain clamps at 500%");
+        eq(VolumeBoostMath.outputVolume(5f, 0.1f, true, true), 0.1f, "duck is post-PCM");
+        eq(VolumeBoostMath.outputVolume(5f, 1f, true, true), 1f, "PCM AudioTrack stays unity when focused");
         eq(VolumeBoostMath.gestureVolume(4.95f, 1000f, 1000), 5f, "gesture clamps at 500%");
         eq(VolumeBoostMath.gestureVolume(1f, 1000f, 1000), 2f, "one full-screen gesture = +100%");
         eq(VolumeBoostMath.gestureVolume(1f, 30f, 1000), 1.05f, "5% detent");

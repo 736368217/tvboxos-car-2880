@@ -1,0 +1,6 @@
+--------- beginning of main
+11-21 00:02:12.941  4730  4730 I CarFeedback: app_foreground
+11-21 00:02:13.070  4730  4743 I CarAcceptance: OK cold_home
+11-21 00:02:19.073  4730  4743 I CarAcceptance: OK cold_explicit_exit_stays_home
+11-21 00:02:19.165  4730  4743 I CarAcceptance: OK screen_12-cold-no-restore
+11-21 00:02:19.455  4730  4743 I CarAcceptance: COLD_NO_RESTORE_PASS

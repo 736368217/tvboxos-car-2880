@@ -2,127 +2,155 @@ package xyz.doikki.videoplayer.exo;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.audio.BaseAudioProcessor;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-/** App-only PCM gain, with one measured and fixed compensation per source. */
+import xyz.doikki.videoplayer.exo.CarAudioDynamicsEngine.Mode;
+
+/** One PCM processor per Exo sink. Original sound is a byte copy, not a DSP preset. */
 public final class AudioGainProcessor extends BaseAudioProcessor {
     public interface GainProvider { float getGain(); }
+
+    private static final long REPORT_INTERVAL_NS = 1_000_000_000L;
+    private static final float PCM16_SCALE = 32768f;
     private final GainProvider gainProvider;
+    private final CarAudioDynamicsEngine dynamics = new CarAudioDynamicsEngine();
     private volatile float gain = 1f;
-    private int encoding = C.ENCODING_PCM_16BIT;
-    private int sampleRate = 48000, channels = 1;
-    private boolean configured;
     private volatile long queueCalls;
-    private volatile float lastAppliedGain = -1f;
-    /** 日志限频：最多每秒一条，避免音频线程被 logcat 拖到欠载。 */
-    private static final long REPORT_MIN_INTERVAL_MS = 1000L;
-    private volatile float lastReportedGain = -1f;
-    private volatile long lastReportAtMs;
-    private final SourceLevelLock sourceLevel = new SourceLevelLock();
+    private volatile float lastAppliedGain = 1f;
+    private long lastReportNs;
+    private float[] scratch = new float[0];
+
+    // An immutable marker handles both setting changes and same-format source changes. DSP state
+    // itself belongs to the renderer: never lock the render thread against UI or preference I/O.
+    private static final class Signal {
+        final Mode mode;
+        Signal(Mode mode) { this.mode = mode; }
+    }
+    private volatile Signal requested = new Signal(Mode.OFF);
+    private Signal applied;
+
     public AudioGainProcessor() { this(null); }
     public AudioGainProcessor(GainProvider provider) { gainProvider = provider; }
     public static AudioGainProcessor create() { return new AudioGainProcessor(); }
     public static AudioGainProcessor create(GainProvider provider) { return new AudioGainProcessor(provider); }
-    public void setGain(float value) { if(!Float.isNaN(value)) gain = clampGain(value); }
+    public void setGain(float value) { if (!Float.isNaN(value)) gain = clampGain(value); }
     public float getGain() { return gainProvider == null ? gain : clampGain(gainProvider.getGain()); }
-    public void setSourceLevelMatchEnabled(boolean value) { sourceLevel.setEnabled(value); }
-    public boolean isSourceLevelMatchEnabled() { return sourceLevel.isEnabled(); }
-    public float sourceLevelMakeup() { return sourceLevel.currentMakeup(); }
-    public float sourceLevelDbfs() { return sourceLevel.measuredDbfs(); }
-    public boolean sourceLevelLocked() { return sourceLevel.isLocked(); }
-    public void beginSource() { sourceLevel.begin(sampleRate, channels); queueCalls = 0; }
-    public String sourceLevelStatus() {
-        if (!sourceLevel.isEnabled()) return "已关闭";
-        if (queueCalls == 0) return "等待声音";
-        if (!sourceLevel.isLocked()) return "测量中";
-        return String.format(java.util.Locale.US, "已锁定 ×%.2f", sourceLevel.currentMakeup());
+
+    public synchronized void setMode(Mode mode) {
+        if (requested.mode != mode) requested = new Signal(mode);
     }
-    private static float clampGain(float value) { return Float.isNaN(value) ? 1f : Math.max(0f, Math.min(5f, value)); }
+
+    public synchronized void beginSource() { requested = new Signal(requested.mode); }
+    public long queueCount() { return queueCalls; }
+    public float appliedGain() { return lastAppliedGain; }
+
     @Override protected AudioFormat onConfigure(AudioFormat input) throws UnhandledAudioFormatException {
-        if (input.encoding != C.ENCODING_PCM_16BIT && input.encoding != C.ENCODING_PCM_FLOAT)
+        if ((input.encoding != C.ENCODING_PCM_16BIT && input.encoding != C.ENCODING_PCM_FLOAT)
+                || input.sampleRate <= 0 || input.channelCount <= 0) {
             throw new UnhandledAudioFormatException(input);
-        boolean formatChanged = !configured || input.sampleRate != sampleRate || input.channelCount != channels;
-        encoding = input.encoding;
-        sampleRate = input.sampleRate > 0 ? input.sampleRate : 48000;
-        channels = Math.max(1, input.channelCount);
-        if(formatChanged) sourceLevel.begin(sampleRate, channels);
-        configured = true;
-        log("configure enc=" + encoding + " sampleRate=" + sampleRate + " channels=" + channels + " accepted=true gain=" + getGain());
+        }
+        // Keep the processor attached in Original mode too, so changing mode never rebuilds the sink.
         return input;
     }
+
+    @Override protected void onFlush() {
+        applied = null;
+        dynamics.reset();
+        lastAppliedGain = 1f;
+        if (inputAudioFormat != AudioFormat.NOT_SET) {
+            int blockSamples = Math.max(1, inputAudioFormat.sampleRate / 100) * inputAudioFormat.channelCount;
+            if (scratch.length < blockSamples) scratch = new float[blockSamples];
+        }
+    }
+
+    @Override protected void onReset() {
+        queueCalls = 0;
+        lastReportNs = 0;
+    }
+
     @Override public void queueInput(ByteBuffer input) {
-        int remaining = input.remaining();
-        if(remaining <= 0) return;
-        boolean floats = encoding == C.ENCODING_PCM_FLOAT;
-        int samples = remaining / (floats ? 4 : 2);
-        ByteBuffer output = replaceOutputBuffer(remaining).order(ByteOrder.nativeOrder());
-        input.order(ByteOrder.nativeOrder());
-        float peak = 0f;
-        int pos = input.position();
-        for(int i=0; i<samples; i++) {
-            float value = floats ? Math.abs(input.getFloat(pos+i*4)) : Math.abs((int)input.getShort(pos+i*2))/32768f;
-            if(!Float.isNaN(value) && !Float.isInfinite(value)) peak = Math.max(peak, value);
+        int bytes = input.remaining();
+        if (bytes == 0) return;
+        Signal signal = requested;
+        boolean changed = signal != applied;
+        if (changed) {
+            dynamics.reset();
+            applied = signal;
         }
-        float user = getGain();
-        float makeup = sourceLevel.apply(peak, samples);
-        float combined = user * makeup;
-        boolean muted = combined < .0001f, boosted = combined > 1.0001f;
-        // 日志限频：前几个缓冲 + 每 500 个缓冲 + 增益变化后最多每秒一条。
-        // 不能按「增益变了就打」：音量手势每 5% 一档，一行 logcat 就是一次跨进程写，
-        // 在音频渲染线程上会把缓冲拖到欠载 —— 用户听到/看到的就是调音量时卡顿。
-        boolean report = queueCalls < 3 || queueCalls % 500 == 0;
-        if (!report && Math.abs(combined - lastReportedGain) > .04f) {
-            long now = System.currentTimeMillis();
-            if (now - lastReportAtMs >= REPORT_MIN_INTERVAL_MS) report = true;
-        }
-        if (report) {
-            lastReportedGain = combined;
-            lastReportAtMs = System.currentTimeMillis();
-        }
-        long levelIn=0, levelOut=0;
-        for(int i=0; i<samples; i++) {
-            if(floats) {
-                float value = input.getFloat();
-                float amplified = value * combined;
-                float result = muted ? 0f : boosted && Math.abs(amplified) > .72f ? softClip(amplified) : amplified;
-                if(Float.isNaN(result) || Float.isInfinite(result)) result=0f;
-                output.putFloat(result);
-                if(report) { levelIn += Math.round(Math.abs(value)*1000000f); levelOut += Math.round(Math.abs(result)*1000000f); }
-            } else {
-                int value=input.getShort();
-                int result;
-                if(muted) result=0;
-                else if(Math.abs(combined-1f)<.0001f) result=value;
-                else {
-                    float amplified=(value/32768f)*combined;
-                    float clipped=boosted && Math.abs(amplified)>.72f ? softClip(amplified) : amplified;
-                    result=Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, Math.round(clipped*32767f)));
-                }
-                output.putShort((short)result);
-                if(report) { levelIn += Math.abs(value); levelOut += Math.abs(result); }
-            }
-        }
-        input.position(input.limit());
-        output.flip();
+        Mode mode = signal.mode;
+        long now = System.nanoTime();
+        boolean report = changed || queueCalls == 0 || now - lastReportNs >= REPORT_INTERVAL_NS;
+        if (report) lastReportNs = now;
+        ByteBuffer output = replaceOutputBuffer(bytes).order(ByteOrder.nativeOrder());
         queueCalls++;
-        lastAppliedGain=combined;
-        if(report) log("queue n=" + queueCalls + " user_gain=" + user + " makeup=" + makeup
-                + " makeup_locked=" + sourceLevel.isLocked() + " locked_value=" + sourceLevel.lockedValue()
-                + " source_dbfs=" + sourceLevel.measuredDbfs() + " combined=" + combined
-                + " peak=" + peak + " samples=" + samples + " frames=" + samples/channels
-                + " level_in=" + levelIn + " level_out=" + levelOut
-                + " measured_ratio=" + (levelIn==0 ? 0f : (float)levelOut/levelIn));
+        if (mode == Mode.ORIGINAL) {
+            output.put(input);
+            output.flip();
+            lastAppliedGain = 1f;
+            if (report) log("queue n=" + queueCalls + " mode=" + mode + " bypass=true bytes=" + bytes);
+            return;
+        }
+
+        float userGain = getGain();
+        if (mode == Mode.OFF && userGain == 1f) {
+            output.put(input);
+            output.flip();
+            lastAppliedGain = 1f;
+            if (report) log("queue n=" + queueCalls + " mode=" + mode + " user=1.0 bytes=" + bytes);
+            return;
+        }
+        input.order(ByteOrder.nativeOrder());
+        int channels = inputAudioFormat.channelCount, rate = inputAudioFormat.sampleRate;
+        boolean floats = inputAudioFormat.encoding == C.ENCODING_PCM_FLOAT;
+        int frames = bytes / inputAudioFormat.bytesPerFrame;
+        int remaining = frames;
+        float inputPeak = 0f, outputPeak = 0f;
+        double inputPower = 0d, outputPower = 0d;
+        float appliedGain = userGain;
+        while (remaining > 0) {
+            int count = Math.min(remaining, Math.max(1, rate / 100));
+            int samples = count * channels;
+            for (int i = 0; i < samples; i++) {
+                float value = floats ? input.getFloat() : input.getShort() / PCM16_SCALE;
+                scratch[i] = Float.isNaN(value) || Float.isInfinite(value) ? 0f : Math.max(-1f, Math.min(1f, value));
+                if (report) {
+                    inputPeak = Math.max(inputPeak, Math.abs(scratch[i]));
+                    inputPower += (double) scratch[i] * scratch[i];
+                }
+            }
+            appliedGain = dynamics.process(scratch, count, channels, rate, mode, userGain);
+            for (int i = 0; i < samples; i++) {
+                float value = scratch[i];
+                if (floats) {
+                    output.putFloat(value);
+                } else {
+                    int quantized = Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, Math.round(value * PCM16_SCALE)));
+                    output.putShort((short) quantized);
+                    value = quantized / PCM16_SCALE;
+                }
+                if (report) {
+                    outputPeak = Math.max(outputPeak, Math.abs(value));
+                    outputPower += (double) value * value;
+                }
+            }
+            remaining -= count;
+        }
+        output.put(input); // Exo supplies whole frames; do not drop any trailing bytes.
+        output.flip();
+        lastAppliedGain = appliedGain;
+        if (report) log("queue n=" + queueCalls + " mode=" + mode + " user=" + userGain
+                + " gain=" + appliedGain + " frames=" + frames + " channels=" + channels
+                + " inPeak=" + inputPeak + " outPeak=" + outputPeak
+                + " rmsRatio=" + (inputPower > 0d ? Math.sqrt(outputPower / inputPower) : 0d));
     }
-    public float appliedGain() { return lastAppliedGain; }
-    public long queueCount() { return queueCalls; }
-    private static float softClip(float value) {
-        if(Float.isNaN(value)) return 0;
-        float x=Math.abs(value);
-        if(x<=.72f) return value;
-        return Math.signum(value)*(.72f+.28f*(1f-(float)Math.exp(-(x-.72f)/.42f)));
+
+    private static float clampGain(float value) {
+        return Float.isNaN(value) ? 1f : Math.max(0f, Math.min(5f, value));
     }
+
     private static void log(String message) {
-        try { android.util.Log.i("CarAudioGain", message); } catch(Throwable ignored) { }
+        try { android.util.Log.i("CarAudioGain", message); } catch (RuntimeException ignored) { /* host JVM */ }
     }
 }

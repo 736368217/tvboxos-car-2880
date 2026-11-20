@@ -262,7 +262,7 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
         if (haveDanmu()) danmuView.release();
         CarEnhance.releaseVideo(this);
         // Car edition: the audio-effect chain is bound to this engine's session, so it dies with it.
-        CarEnhance.releaseAudio();
+        CarEnhance.releaseAudio(this);
     }
 
     private boolean haveDanmu() {
@@ -371,13 +371,13 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
     }
 
     /** Used on prepare, focus changes, foreground resume and window reattachment. */
-    public void syncAudioVolume() {
+    public void syncAudioVolume(xyz.doikki.videoplayer.exo.CarAudioDynamicsEngine.Mode mode) {
         if (mMediaPlayer == null) return;
-        float factor = getAudioVolumeFactor();
         boolean pcm = usesPcmGain();
-        float base = com.github.tvbox.osc.car.VolumeBoostMath.outputVolume(mAppAudioGain, factor, pcm);
+        float base = com.github.tvbox.osc.car.VolumeBoostMath.outputVolume(mAppAudioGain,
+                getAudioVolumeFactor(), pcm, mode != xyz.doikki.videoplayer.exo.CarAudioDynamicsEngine.Mode.ORIGINAL);
         mMediaPlayer.setVolume(base, base);
-        if (pcm) applyPcmGain(com.github.tvbox.osc.car.VolumeBoostMath.pcmGain(mAppAudioGain, factor));
+        if (pcm) ((ExoPlayer) mMediaPlayer).setAudioProcessing(mode, mAppAudioGain);
     }
 
     @Override
@@ -405,22 +405,6 @@ public class MyVideoView extends VideoView implements DrawHandler.Callback,
         VolumeBoostRequestListener listener = mVolumeBoostRequestListener;
         return listener != null && listener.onRequestVolumeBoost(requestedGain);
     }
-    /** 只对 PCM 增益引擎生效；IJK 等走 LoudnessEnhancer。 */
-    public void applyPcmGain(float gain) {
-        ((com.github.tvbox.osc.player.ExoPlayer) mMediaPlayer).setAudioGain(gain);
-    }
-
-    /**
-     * 运行中切换"视频音量自动对齐"。默认开启。
-     * 关闭后退回 r77 行为：只应用用户固定增益，不做片源电平补偿。
-     */
-    public void setSourceLevelMatchEnabled(boolean enabled) {
-        if (mMediaPlayer instanceof com.github.tvbox.osc.player.ExoPlayer) {
-            ((com.github.tvbox.osc.player.ExoPlayer) mMediaPlayer)
-                    .setSourceLevelMatchEnabled(enabled);
-        }
-    }
-
     /** 运行中切换"音频通道对齐音乐"（显式 USAGE_MEDIA）。默认开启。 */
     public void setAudioUsageMedia(boolean enabled) {
         if (mMediaPlayer instanceof com.github.tvbox.osc.player.ExoPlayer) {

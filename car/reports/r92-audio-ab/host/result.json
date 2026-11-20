@@ -1,0 +1,158 @@
+[
+  {
+    "name": "javac",
+    "exit": 0,
+    "seconds": 1.83,
+    "summary": "9 个警告"
+  },
+  {
+    "name": "AudioDynamicsHostTest",
+    "exit": 0,
+    "seconds": 0.36,
+    "summary": "AudioDynamicsHostTest PASS checks=42"
+  },
+  {
+    "name": "AudioGainProcessorHostTest",
+    "exit": 0,
+    "seconds": 0.19,
+    "summary": "AudioGainProcessorHostTest PASS"
+  },
+  {
+    "name": "AudioOriginalHostTest",
+    "exit": 0,
+    "seconds": 0.2,
+    "summary": "AudioOriginalHostTest PASS checks=13"
+  },
+  {
+    "name": "AudioVolumeRoutingHostTest",
+    "exit": 0,
+    "seconds": 0.19,
+    "summary": "AudioVolumeRoutingHostTest PASS (5048 checks)"
+  },
+  {
+    "name": "BackBarPolicyHostTest",
+    "exit": 0,
+    "seconds": 0.09,
+    "summary": "BackBarPolicyHostTest PASS (13 checks)"
+  },
+  {
+    "name": "BackDisplayMetricsHostTest",
+    "exit": 0,
+    "seconds": 0.11,
+    "summary": "BackDisplayMetricsHostTest PASS (81 checks)"
+  },
+  {
+    "name": "BackNavPolicyHostTest",
+    "exit": 0,
+    "seconds": 0.12,
+    "summary": "PASS: 740 Back navigation policy checks"
+  },
+  {
+    "name": "Car6PostProcessTest",
+    "exit": 0,
+    "seconds": 0.12,
+    "summary": "PASS: exact old/new audio and video curves, immutable data, linked SGSR sharpness, temporal cut/pause/seek, 4K policy and switches"
+  },
+  {
+    "name": "Car7RuntimeConfigTest",
+    "exit": 0,
+    "seconds": 0.11,
+    "summary": "PASS: 44 runtime configurations, 88 SDR/HDR cases, 1936 transition comparisons, independent switches and immutable publication"
+  },
+  {
+    "name": "CoverFormatHostTest",
+    "exit": 0,
+    "seconds": 0.11,
+    "summary": "CoverFormatHostTest PASS checks=27"
+  },
+  {
+    "name": "CoverKeyHostTest",
+    "exit": 0,
+    "seconds": 0.16,
+    "summary": "CoverKeyHostTest PASS (49 checks)"
+  },
+  {
+    "name": "EdgeBackPolicyHostTest",
+    "exit": 0,
+    "seconds": 0.16,
+    "summary": "EdgeBackPolicyHostTest PASS (57 checks)"
+  },
+  {
+    "name": "FixedGainHostTest",
+    "exit": 0,
+    "seconds": 0.34,
+    "summary": "FixedGainHostTest PASS checks=26"
+  },
+  {
+    "name": "GestureAxisHostTest",
+    "exit": 0,
+    "seconds": 0.11,
+    "summary": "GestureAxisHostTest PASS (15 checks)"
+  },
+  {
+    "name": "OfficialManifestHostTest",
+    "exit": 0,
+    "seconds": 0.11,
+    "summary": "OfficialManifestHostTest PASS (24 checks)"
+  },
+  {
+    "name": "PlaybackRegressionHostTest",
+    "exit": 0,
+    "seconds": 0.11,
+    "summary": "PlaybackRegressionHostTest PASS (15 checks)"
+  },
+  {
+    "name": "PlaybackSessionPolicyHostTest",
+    "exit": 0,
+    "seconds": 0.09,
+    "summary": "PlaybackSessionPolicyHostTest PASS checks=6"
+  },
+  {
+    "name": "R2ManifestHostTest",
+    "exit": 0,
+    "seconds": 0.09,
+    "summary": "R2ManifestHostTest PASS (21 checks)"
+  },
+  {
+    "name": "UpdateVersionHostTest",
+    "exit": 0,
+    "seconds": 0.11,
+    "summary": "UpdateVersionHostTest PASS (109 checks)"
+  },
+  {
+    "name": "VideoEnhancePresetTest",
+    "exit": 0,
+    "seconds": 0.11,
+    "summary": "PASS: 11 presets, stable IDs, legacy migration, corrupt preference fallback, distinct immutable curves"
+  },
+  {
+    "name": "VolumeBoostMathHostTest",
+    "exit": 0,
+    "seconds": 0.11,
+    "summary": "VolumeBoostMathHostTest PASS (25 checks)"
+  },
+  {
+    "name": "VolumeFocusRegressionHostTest",
+    "exit": 0,
+    "seconds": 0.14,
+    "summary": "VolumeFocusRegressionHostTest PASS (21 checks)"
+  },
+  {
+    "name": "VolumeLimitHostTest",
+    "exit": 0,
+    "seconds": 0.12,
+    "summary": "VolumeLimitHostTest PASS (18 checks)"
+  },
+  {
+    "name": "run_audio_focus_host_test",
+    "exit": 0,
+    "seconds": 0.74,
+    "summary": "AudioFocusHelperHostTest PASS (77 checks)"
+  },
+  {
+    "name": "run_playback_session_host_test",
+    "exit": 0,
+    "seconds": 0.81,
+    "summary": "PlaybackSessionLifecycleHostTest PASS checks=26"
+  }
+]

@@ -1,0 +1,7 @@
+py : aapt2.exe W 11-20 23:58:07 33912 34904 LoadedArsc.cpp:657] Unknown chunk type '200'.
+所在位置 行:1 字符: 1979
++ ... ONUTF8='1'; py -3.8 -B car/tests/device/r82/build.py --sdk $env:ANDRO ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (aapt2.exe W 11-...unk type '200'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

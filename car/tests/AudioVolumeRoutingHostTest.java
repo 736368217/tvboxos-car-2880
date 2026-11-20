@@ -19,28 +19,25 @@ public final class AudioVolumeRoutingHostTest {
     public static void main(String[] args) throws Exception {
         for (float gain : new float[]{0f, .05f, .5f, 1f, 1.5f, 2f, 2.5f, 3f, 4f, 5f}) {
             for (float factor : new float[]{0f, .1f, 1f}) {
-                final float effective = VolumeBoostMath.pcmGain(gain, factor);
-                AudioGainProcessor pcm = AudioGainProcessor.create(() -> effective);
-                // Rebuild or reset the sink with unchanged user gain: no squaring below 100%.
+                AudioGainProcessor pcm = AudioGainProcessor.create(() -> gain);
+                // Focus attenuation belongs to AudioTrack, not the nonlinear PCM limiter.
                 for (int episode = 0; episode < 4; episode++) {
                     pcm.reset();
-                    pcm.configure(new AudioProcessor.AudioFormat(48000, 2, C.ENCODING_PCM_16BIT));
+                    pcm.configure(new AudioProcessor.AudioFormat(48000, 1, C.ENCODING_PCM_16BIT));
                     pcm.flush();
                     ByteBuffer input = ByteBuffer.allocateDirect(2).order(ByteOrder.nativeOrder());
                     input.putShort((short) 4000).flip();
                     pcm.queueInput(input);
-                    float output = pcm.getOutput().getShort() * VolumeBoostMath.outputVolume(gain, factor, true);
-                    float expected = Math.round(4000 * gain * factor);
-                    if (gain * factor <= 3f) {
-                        eq(output, expected, "PCM linear episode " + episode + " gain=" + gain + " factor=" + factor);
-                    } else {
-                        // r76：500% 时软限幅会压缩接近满量程的样本，只能要求单调且不超过 16bit 上限。
-                        check(output > 4000 * factor && output <= 32767f,
-                                "PCM high-gain episode " + episode + " gain=" + gain + " factor=" + factor);
-                    }
+                    float output = pcm.getOutput().getShort() * VolumeBoostMath.outputVolume(gain, factor, true, true);
+                    eq(output, Math.round(4000 * gain) * factor, "PCM gain exactly once episode " + episode);
                 }
-                float nativeOutput = VolumeBoostMath.outputVolume(gain, factor, false);
-                eq(nativeOutput, Math.min(1f, gain) * factor, "non-PCM gain once");
+                eq(VolumeBoostMath.outputVolume(gain, factor, false, true), Math.min(1f, gain) * factor,
+                        "non-PCM enhanced gain exactly once");
+                eq(VolumeBoostMath.outputVolume(gain, factor, true, false), gain == 0f ? 0f : factor,
+                        "original PCM ignores nonzero app gain, keeps mute/focus");
+                eq(VolumeBoostMath.outputVolume(gain, factor, false, false), gain == 0f ? 0f : factor,
+                        "original native ignores nonzero app gain, keeps mute/focus");
+                check(VolumeBoostMath.outputVolume(gain, 0f, true, false) == 0f, "original honors explicit mute");
             }
         }
         eq(VolumeBoostMath.gestureVolume(1f, 0f, 1000), 1f, "no movement");

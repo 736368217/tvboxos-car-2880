@@ -1,0 +1,68 @@
+[
+  {
+    "file": "device/audio-ab-pass/01-home.png",
+    "sha256": "cc778a526f8a2c950f6a95e051ec69306c0f87681efc7595e1b7644e0411178a",
+    "width": 2880,
+    "height": 1620
+  },
+  {
+    "file": "device/audio-ab-pass/13-audio-enhanced.png",
+    "sha256": "9261bdb62f1d231d0e52dd3a78f57e1eb28d3e1cb6c858a86abdc8a06935516a",
+    "width": 2880,
+    "height": 1620,
+    "greenFraction": 0.15,
+    "coarseColors": 16,
+    "fixturePixelSanity": "PASS"
+  },
+  {
+    "file": "device/audio-ab-pass/14-audio-original.png",
+    "sha256": "c01c8628e858dbf7a0e7fe9f3b289cfd414cc07ae5563c597e1b92855eae438e",
+    "width": 2880,
+    "height": 1620,
+    "greenFraction": 0.15,
+    "coarseColors": 19,
+    "fixturePixelSanity": "PASS"
+  },
+  {
+    "file": "device/audio-ab-pass/15-audio-reenabled.png",
+    "sha256": "24bc08127e46e0d1b8ca403ba72a275cacb143d5a686b1cf13606ad88c1c8409",
+    "width": 2880,
+    "height": 1620,
+    "greenFraction": 0.15,
+    "coarseColors": 19,
+    "fixturePixelSanity": "PASS"
+  },
+  {
+    "file": "device/audio-ab-pass/16-episode-2-original.png",
+    "sha256": "4b3109b41a630c0636185893625bbf38a2aa8c92b702b8cffb576c94f74cc217",
+    "width": 2880,
+    "height": 1620,
+    "greenFraction": 0.1417,
+    "coarseColors": 18,
+    "fixturePixelSanity": "PASS"
+  },
+  {
+    "file": "device/audio-ab-pass/17-cold-arm-original.png",
+    "sha256": "476e42d6e6b4231609fcb7f96c3abd869b675b085551a836714ef802f3722380",
+    "width": 2880,
+    "height": 1620,
+    "greenFraction": 0.1417,
+    "coarseColors": 18,
+    "fixturePixelSanity": "PASS"
+  },
+  {
+    "file": "device/audio-cold-pass/11-cold-restored.png",
+    "sha256": "5f2f93ecf858f1ae5fc81c56628e8bf81aaa9163ded6a37a052833559074842f",
+    "width": 2880,
+    "height": 1620,
+    "greenFraction": 0.1417,
+    "coarseColors": 14,
+    "fixturePixelSanity": "PASS"
+  },
+  {
+    "file": "device/audio-exit-pass/12-cold-no-restore.png",
+    "sha256": "d64803bf7cb893c1157d6cf217573a16ae54534a9b4e1b37c5fe517270cc3612",
+    "width": 2880,
+    "height": 1620
+  }
+]

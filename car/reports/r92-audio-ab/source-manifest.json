@@ -1,0 +1,17 @@
+{
+  "player/src/main/java/xyz/doikki/videoplayer/exo/AudioGainProcessor.java": "38259bce5b8493e0c13a3c90dace67ee42d40001a5a7f90441636076bf44bcfe",
+  "player/src/main/java/xyz/doikki/videoplayer/exo/CarAudioDynamicsEngine.java": "92b4cdb21ad3ecb869f34110da541563eb14e788431e14d68f065a9c8ebd6fdd",
+  "app/src/main/java/com/github/tvbox/osc/car/CarEnhance.java": "b3c6f515fce80077dfb40e3e38185e170578c4128b627bd2d442bdd4f3e93e9a",
+  "app/src/main/java/com/github/tvbox/osc/car/VolumeBoostMath.java": "0f839228c69ac5b3e1e138e5f8e02dbccec816b2fb4f0f4707e3e48e31a0029a",
+  "app/src/main/java/com/github/tvbox/osc/player/ExoPlayer.java": "a8d80bb5026460c01d95d6520a29c13059241f6195bd71f38429251d70cb2ab5",
+  "app/src/main/java/com/github/tvbox/osc/player/MyVideoView.java": "2eb0be2c23a05963f7b918d9cd29e0e4dbeec2f2622e48e0e5c62d6e8a2d4e96",
+  "app/src/main/java/com/github/tvbox/osc/player/controller/BaseController.java": "2b72683d72ce986c61dfc8efcad69b248550ca61c69034729e0a26f6273da8ff",
+  "app/src/main/java/com/github/tvbox/osc/player/controller/VodController.java": "32f6a39e715ed8aa43862cbdfbc11559e245ea5d32173f1ce51fd6fb11b03dbd",
+  "app/src/main/java/com/github/tvbox/osc/ui/dialog/AdvancedSettingsDialog.java": "f60cf524c3462a67f8018951ae23a48d4ffb76fee3473cade96dbf0818807c4b",
+  "app/src/main/java/com/github/tvbox/osc/util/HawkConfig.java": "f3cc9b6fc09041c334461a21fcb7b96ef098eca29d0d8f6478d649dffa3bc162",
+  "app/src/main/res/layout/player_vod_control_view.xml": "91a0c484e3ab923e6cf6160997e19cc1d57b84b3abf4386f539fcde3dcae099e",
+  "app/src/main/res/values/strings.xml": "b9fe7508c42d99429999d9980850ca837b4684a4bfd9b2c32a3864bb061507ff",
+  "app/build/outputs/mapping/pythonRelease/mapping.txt": "36fab1bbe6ed0416b342df74c983f953b5df5048fc08c7368341369e74df0f22",
+  "car/tests/device/r82/Acceptance.java": "6a1b87f629af102f782183dc55dde895ec76591cf2989613bfff63d0cd17f596",
+  "car/tests/device/r82/AudioFixtureServer.java": "aa4bde45d919bb2050beca7d95eec68bce99205b6235020d9facb8541f506734"
+}

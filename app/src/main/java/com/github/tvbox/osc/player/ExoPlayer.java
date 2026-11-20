@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import xyz.doikki.videoplayer.exo.CarAudioDynamicsEngine.Mode;
 import xyz.doikki.videoplayer.exo.ExoMediaPlayer;
 
 public class ExoPlayer extends ExoMediaPlayer {
@@ -48,6 +49,7 @@ public class ExoPlayer extends ExoMediaPlayer {
     private static AudioTrackMemory memory;
     private volatile long internalSubtitleDelayUs;
     private volatile float audioGain = 1f;
+    private volatile Mode audioProcessingMode = Mode.CAR_BALANCED;
     private final ArrayList<xyz.doikki.videoplayer.exo.AudioGainProcessor> audioGainProcessors = new ArrayList<>();
     private OnCuesListener onCuesListener;
     private boolean defaultSubtitleTrackSelected;
@@ -100,14 +102,9 @@ public class ExoPlayer extends ExoMediaPlayer {
                 .build());
         setRenderersFactory(buildRenderersFactory(context, this));
         memory = AudioTrackMemory.getInstance(context);
-        // 两个音量相关开关：在 initPlayer() 之前读入偏好。
         setAudioUsageMedia(readBool(com.github.tvbox.osc.util.HawkConfig.AUDIO_USAGE_MEDIA, true));
-        sourceLevelMatchEnabled = readBool(com.github.tvbox.osc.util.HawkConfig.SOURCE_LEVEL_MATCH, true);
         LOG.i("echo-exo-low-memory-load-control");
     }
-
-    /** 片源电平补偿偏好；processor 建好时套用。 */
-    private volatile boolean sourceLevelMatchEnabled = true;
 
     private static boolean readBool(String key, boolean fallback) {
         try {
@@ -134,18 +131,6 @@ public class ExoPlayer extends ExoMediaPlayer {
         }
     }
 
-    /** 运行中切换片源电平补偿。 */
-    public synchronized void setSourceLevelMatchEnabled(boolean enabled) {
-        sourceLevelMatchEnabled = enabled;
-        for (xyz.doikki.videoplayer.exo.AudioGainProcessor processor : audioGainProcessors) {
-            processor.setSourceLevelMatchEnabled(enabled);
-        }
-    }
-
-    public boolean isSourceLevelMatchEnabled() {
-        return sourceLevelMatchEnabled;
-    }
-
     /**
      * Car edition: real audio session id of the running EXO engine, or 0 before it exists.
      * Used by the audio-effect chain (Equalizer/BassBoost/Virtualizer/LoudnessEnhancer).
@@ -158,11 +143,13 @@ public class ExoPlayer extends ExoMediaPlayer {
         }
     }
 
-    public synchronized void setAudioGain(float gain) {
-        if (Float.isNaN(gain)) return;
+    public synchronized void setAudioProcessing(Mode mode, float gain) {
         audioGain = com.github.tvbox.osc.car.VolumeBoostMath.clampGain(gain);
-        for (xyz.doikki.videoplayer.exo.AudioGainProcessor processor : audioGainProcessors) {
-            processor.setGain(audioGain);
+        if (audioProcessingMode != mode) {
+            audioProcessingMode = mode;
+            for (xyz.doikki.videoplayer.exo.AudioGainProcessor processor : audioGainProcessors) {
+                processor.setMode(mode);
+            }
         }
     }
 
@@ -172,8 +159,7 @@ public class ExoPlayer extends ExoMediaPlayer {
 
     private synchronized void registerAudioGainProcessor(
             xyz.doikki.videoplayer.exo.AudioGainProcessor processor) {
-        processor.setGain(audioGain);
-        processor.setSourceLevelMatchEnabled(sourceLevelMatchEnabled);
+        processor.setMode(audioProcessingMode);
         audioGainProcessors.add(processor);
     }
 
@@ -228,6 +214,7 @@ public class ExoPlayer extends ExoMediaPlayer {
         // 新引擎实例默认 audioGain=1.0；先用偏好值播种，
         // 保证第一帧缓冲就是用户设定的音量，而不是等 UI 抖动后才补上。
         audioGain = com.github.tvbox.osc.car.VolumeBoostMath.clampGain(readVolumePercent() / 100f);
+        audioProcessingMode = com.github.tvbox.osc.car.CarEnhance.audioProcessingMode();
         super.initPlayer();
         bufferingHandler = new Handler(mInternalPlayer.getApplicationLooper());
         mInternalPlayer.addListener(new Player.Listener() {
@@ -281,12 +268,12 @@ public class ExoPlayer extends ExoMediaPlayer {
         super.setDataSource(path, headers);
     }
 
-    public synchronized String getSourceLevelStatus() {
-        for (int i = audioGainProcessors.size() - 1; i >= 0; i--) {
-            xyz.doikki.videoplayer.exo.AudioGainProcessor processor = audioGainProcessors.get(i);
-            if (processor.queueCount() > 0) return processor.sourceLevelStatus();
-        }
-        return sourceLevelMatchEnabled ? "等待声音" : "已关闭";
+    public Mode getAudioProcessingMode() {
+        return audioProcessingMode;
+    }
+    public synchronized float getAppliedPcmGain() {
+        return audioGainProcessors.isEmpty() ? 1f
+                : audioGainProcessors.get(audioGainProcessors.size() - 1).appliedGain();
     }
 
     private boolean shouldCheckBuffering() {

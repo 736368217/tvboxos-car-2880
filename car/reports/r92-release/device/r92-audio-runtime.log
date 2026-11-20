@@ -1,0 +1,104 @@
+--------- beginning of main
+11-21 00:01:50.201  3105  3105 I CarFeedback: app_foreground
+11-21 00:01:50.290  3105  3120 I CarAcceptance: OK home_resumed
+11-21 00:01:50.293  3105  3120 I CarAcceptance: OK subscription_sources
+11-21 00:01:50.295  3105  3120 I CarAcceptance: sources=1
+11-21 00:01:55.452  3105  3120 I CarAcceptance: OK screen_01-home
+11-21 00:01:55.711  3105  3120 I CarAcceptance: OK local_audio_source_loaded
+11-21 00:01:55.714  3105  3120 I CarAcceptance: OK local_audio_fixture_has_episodes
+11-21 00:01:55.714  3105  3120 I CarAcceptance: fixture_site=audio_qa category=Audio QA episodes=2
+11-21 00:01:55.770  3105  3105 I CarAudio: app_gain request=300% pcmCapable=false
+11-21 00:01:55.773  3105  3105 I CarFeedback: playback_foreground
+11-21 00:01:55.841  3105  3105 I CarAudio: renderers_factory=androidx.base.ji$f decoderFallback=true extMode=PREFER
+11-21 00:01:55.859  3105  3105 I CarAudio: sink_built floatOut=false atParams=false offloadArg=false processors=1 gain=3.0
+11-21 00:01:55.872  3105  3105 I CarAudio: audio_attrs=MEDIA/MOVIE focus_owner=VideoView handleFocus=false
+11-21 00:01:55.907  3105  3105 I CarAudio: applied mode=1 name=影院 session=33 bass=900 virtualizer=850 loudness=900 boostMb=0 loudnessNow=0 enabled=true
+11-21 00:01:55.907  3105  3105 I CarAudio: runtime_apply processing=CAR_BALANCED mode=1 session=33 gain=3.0 factor=1.0 path=pcm boostMb=0 enabled=true state=0 player=245953459 pcmStored=3.0 pcmQueued=0
+11-21 00:01:55.970  3105  3120 I CarAcceptance: OK audio_detail_loaded
+11-21 00:01:56.025  3105  3235 I CarAudioGain: queue n=1 mode=CAR_BALANCED user=3.0 gain=4.8603487 frames=1024 channels=2 inPeak=0.03387451 outPeak=0.15890503 rmsRatio=4.082739527614882
+11-21 00:01:56.222  3105  3120 I CarAcceptance: OK audio_exoplayer_running
+11-21 00:01:56.431  3105  3105 I CarAudio: fade_done loudness=900 now=900 boostMb=0
+11-21 00:01:57.041  3105  3235 I CarAudioGain: queue n=57 mode=CAR_BALANCED user=3.0 gain=10.6444025 frames=1024 channels=2 inPeak=0.03173828 outPeak=0.33642578 rmsRatio=10.611044112052221
+11-21 00:01:57.227  3105  3120 I CarAcceptance: OK audio_video_dimensions
+11-21 00:01:57.228  3105  3120 I CarAcceptance: video=960x540 audio=48kHz_stereo position=1132
+11-21 00:01:57.229  3105  3120 I CarAcceptance: OK episode_1_selected
+11-21 00:01:57.229  3105  3120 I CarAcceptance: OK episode_1_enhanced_real_exoplayer
+11-21 00:01:57.230  3105  3120 I CarAcceptance: OK episode_1_enhanced_processor_mode
+11-21 00:01:57.230  3105  3120 I CarAcceptance: OK episode_1_enhanced_app_gain
+11-21 00:01:57.231  3105  3120 I CarAcceptance: OK episode_1_enhanced_pcm_queues
+11-21 00:01:57.231  3105  3120 I CarAcceptance: OK episode_1_enhanced_audio_sinks
+11-21 00:01:57.232  3105  3120 I CarAcceptance: OK episode_1_enhanced_sink_mode
+11-21 00:01:57.264  3105  3120 I CarAcceptance: OK audio_fullscreen
+11-21 00:01:57.327  3105  3120 I CarAcceptance: OK audio_compare_visible
+11-21 00:01:57.327  3105  3120 I CarAcceptance: OK audio_enhanced_label
+11-21 00:01:57.423  3105  3120 I CarAcceptance: OK screen_13-audio-enhanced
+11-21 00:01:57.535  3105  3105 I CarAudio: runtime_apply processing=ORIGINAL mode=0 session=33 gain=3.0 factor=1.0 path=pcm boostMb=0 enabled=false state=3 player=245953459 pcmStored=3.0 pcmQueued=79
+11-21 00:01:57.536  3105  3235 I CarAudioGain: queue n=80 mode=ORIGINAL bypass=true bytes=4096
+11-21 00:01:57.549  3105  3120 I CarAcceptance: OK audio_original_label
+11-21 00:01:57.550  3105  3120 I CarAcceptance: OK audio_original_processor_bypass
+11-21 00:01:57.551  3105  3120 I CarAcceptance: OK original_preference_saved
+11-21 00:01:57.551  3105  3120 I CarAcceptance: OK original_keeps_saved_volume
+11-21 00:01:57.552  3105  3120 I CarAcceptance: OK original_retains_drc_preset
+11-21 00:01:57.552  3105  3120 I CarAcceptance: OK original_retains_effect_preset
+11-21 00:01:57.553  3105  3120 I CarAcceptance: OK original_releases_android_effects
+11-21 00:01:57.553  3105  3120 I CarAcceptance: OK original_pcm_processor_still_running
+11-21 00:01:57.590  3105  3120 I CarAcceptance: OK screen_14-audio-original
+11-21 00:01:57.706  3105  3105 I CarAudio: applied mode=1 name=影院 session=33 bass=900 virtualizer=850 loudness=900 boostMb=0 loudnessNow=0 enabled=true
+11-21 00:01:57.706  3105  3105 I CarAudio: runtime_apply processing=CAR_BALANCED mode=1 session=33 gain=3.0 factor=1.0 path=pcm boostMb=0 enabled=true state=3 player=245953459 pcmStored=3.0 pcmQueued=87
+11-21 00:01:57.710  3105  3235 I CarAudioGain: queue n=88 mode=CAR_BALANCED user=3.0 gain=4.862393 frames=1024 channels=2 inPeak=0.03173828 outPeak=0.1541748 rmsRatio=4.113789092013319
+11-21 00:01:57.714  3105  3120 I CarAcceptance: OK audio_enhanced_restored
+11-21 00:01:57.716  3105  3120 I CarAcceptance: OK enhancement_preference_restored
+11-21 00:01:57.717  3105  3120 I CarAcceptance: OK episode_1_reenabled_real_exoplayer
+11-21 00:01:57.718  3105  3120 I CarAcceptance: OK episode_1_reenabled_processor_mode
+11-21 00:01:57.718  3105  3120 I CarAcceptance: OK episode_1_reenabled_app_gain
+11-21 00:01:57.718  3105  3120 I CarAcceptance: OK episode_1_reenabled_pcm_queues
+11-21 00:01:57.719  3105  3120 I CarAcceptance: OK episode_1_reenabled_audio_sinks
+11-21 00:01:57.719  3105  3120 I CarAcceptance: OK episode_1_reenabled_sink_mode
+11-21 00:01:58.217  3105  3105 I CarAudio: fade_done loudness=900 now=900 boostMb=0
+11-21 00:01:58.620  3105  3120 I CarAcceptance: OK A_B_A_keeps_same_exoplayer
+11-21 00:01:58.621  3105  3120 I CarAcceptance: OK A_B_A_play_position_continues
+11-21 00:01:58.675  3105  3120 I CarAcceptance: OK screen_15-audio-reenabled
+11-21 00:01:58.735  3105  3235 I CarAudioGain: queue n=136 mode=CAR_BALANCED user=3.0 gain=9.935943 frames=1024 channels=2 inPeak=0.03173828 outPeak=0.31521606 rmsRatio=9.88827545588844
+11-21 00:01:58.780  3105  3120 I CarAcceptance: OK episode_navigation_visible
+11-21 00:01:58.820  3105  3120 I CarAcceptance: OK episode_2_selected
+11-21 00:01:58.885  3105  3235 I CarAudioGain: queue n=1 mode=CAR_BALANCED user=3.0 gain=4.8603487 frames=1024 channels=2 inPeak=0.03387451 outPeak=0.15890503 rmsRatio=4.082739527614882
+11-21 00:01:59.905  3105  3235 I CarAudioGain: queue n=61 mode=CAR_BALANCED user=3.0 gain=10.6444025 frames=1024 channels=2 inPeak=0.03173828 outPeak=0.3378296 rmsRatio=10.644407207979967
+11-21 00:02:00.098  3105  3120 I CarAcceptance: OK episode_2_running
+11-21 00:02:00.099  3105  3120 I CarAcceptance: OK episode_2_reapplied_real_exoplayer
+11-21 00:02:00.099  3105  3120 I CarAcceptance: OK episode_2_reapplied_processor_mode
+11-21 00:02:00.100  3105  3120 I CarAcceptance: OK episode_2_reapplied_app_gain
+11-21 00:02:00.100  3105  3120 I CarAcceptance: OK episode_2_reapplied_pcm_queues
+11-21 00:02:00.100  3105  3120 I CarAcceptance: OK episode_2_reapplied_audio_sinks
+11-21 00:02:00.101  3105  3120 I CarAcceptance: OK episode_2_reapplied_sink_mode
+11-21 00:02:00.101  3105  3120 I CarAcceptance: episode_2_position=1165
+11-21 00:02:00.115  3105  3120 I CarAcceptance: OK episode_2_audio_button
+11-21 00:02:00.171  3105  3105 I CarAudio: runtime_apply processing=ORIGINAL mode=0 session=33 gain=3.0 factor=1.0 path=pcm boostMb=0 enabled=false state=3 player=245953459 pcmStored=3.0 pcmQueued=73
+11-21 00:02:00.175  3105  3120 I CarAcceptance: OK episode_2_original
+11-21 00:02:00.178  3105  3235 I CarAudioGain: queue n=74 mode=ORIGINAL bypass=true bytes=4096
+11-21 00:02:00.181  3105  3120 I CarAcceptance: OK episode_2_original_mode_is_bypass
+11-21 00:02:00.240  3105  3120 I CarAcceptance: OK screen_16-episode-2-original
+11-21 00:02:00.373  3105  3105 I CarAudio: applied mode=1 name=影院 session=33 bass=900 virtualizer=850 loudness=900 boostMb=0 loudnessNow=0 enabled=true
+11-21 00:02:00.373  3105  3105 I CarAudio: runtime_apply processing=CAR_BALANCED mode=1 session=33 gain=3.0 factor=1.0 path=pcm boostMb=0 enabled=true state=3 player=245953459 pcmStored=3.0 pcmQueued=82
+11-21 00:02:00.376  3105  3235 I CarAudioGain: queue n=83 mode=CAR_BALANCED user=3.0 gain=4.8615017 frames=1024 channels=2 inPeak=0.03173828 outPeak=0.15426636 rmsRatio=4.106296877146564
+11-21 00:02:00.382  3105  3120 I CarAcceptance: OK episode_2_enhanced
+11-21 00:02:00.383  3105  3120 I CarAcceptance: OK episode_2_drc_preference_retained
+11-21 00:02:00.385  3105  3120 I CarAcceptance: OK episode_2_app_gain_retained
+11-21 00:02:00.884  3105  3105 I CarAudio: fade_done loudness=900 now=900 boostMb=0
+11-21 00:02:01.403  3105  3235 I CarAudioGain: queue n=131 mode=CAR_BALANCED user=3.0 gain=9.9345255 frames=1024 channels=2 inPeak=0.03173828 outPeak=0.3152771 rmsRatio=9.888665924865435
+11-21 00:02:02.408  3105  3235 I CarAudioGain: queue n=178 mode=CAR_BALANCED user=3.0 gain=10.6444025 frames=1024 channels=2 inPeak=0.03173828 outPeak=0.3378296 rmsRatio=10.644407207979967
+11-21 00:02:03.428  3105  3235 I CarAudioGain: queue n=226 mode=CAR_BALANCED user=3.0 gain=10.6444025 frames=1024 channels=2 inPeak=0.03173828 outPeak=0.3378296 rmsRatio=10.644407207979967
+11-21 00:02:04.145  3105  3120 I CarAcceptance: OK episode_2_progress_before_background
+11-21 00:02:04.151  3105  3120 I CarAcceptance: OK cold_original_button_visible
+11-21 00:02:04.203  3105  3105 I CarAudio: runtime_apply processing=ORIGINAL mode=0 session=33 gain=3.0 factor=1.0 path=pcm boostMb=0 enabled=false state=3 player=245953459 pcmStored=3.0 pcmQueued=262
+11-21 00:02:04.215  3105  3235 I CarAudioGain: queue n=263 mode=ORIGINAL bypass=true bytes=4096
+11-21 00:02:04.215  3105  3120 I CarAcceptance: OK cold_arm_original
+11-21 00:02:04.269  3105  3120 I CarAcceptance: OK screen_17-cold-arm-original
+11-21 00:02:04.388  3105  3105 I CarFeedback: playback_pause_saved position=5447 full=true
+11-21 00:02:04.395  3105  3105 I CarFeedback: playback_lifecycle_pause audio_only=false was_playing=true
+11-21 00:02:04.475  3105  3105 I CarFeedback: app_background
+11-21 00:02:05.402  3105  3235 I CarAudioGain: queue n=272 mode=ORIGINAL bypass=true bytes=4096
+11-21 00:02:06.179  3105  3120 I CarAcceptance: OK background_playback_pauses
+11-21 00:02:06.931  3105  3120 I CarAcceptance: OK background_position_stable
+11-21 00:02:06.933  3105  3120 I CarAcceptance: OK audio_cold_saved_position
+11-21 00:02:06.936  3105  3120 I CarAcceptance: OK audio_background_session_active
+11-21 00:02:06.936  3105  3120 I CarAcceptance: AUDIO_AB_ARMED savedPosition=5447 screens=13..16

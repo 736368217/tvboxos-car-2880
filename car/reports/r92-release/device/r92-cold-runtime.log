@@ -1,0 +1,28 @@
+--------- beginning of main
+11-21 00:02:08.544  3846  3846 I CarFeedback: app_foreground
+11-21 00:02:08.667  3846  3846 I CarFeedback: playback_restore id=ab-series position=5447 full=true
+11-21 00:02:08.751  3846  3846 I CarAudio: app_gain request=300% pcmCapable=false
+11-21 00:02:08.754  3846  3846 I CarFeedback: playback_foreground
+11-21 00:02:08.817  3846  3846 I CarFeedback: playback_resume_snapshot same_source=true position=5447
+11-21 00:02:08.838  3846  3860 I CarAcceptance: OK cold_restored_detail
+11-21 00:02:08.841  3846  3860 I CarAcceptance: cold_intent_full=true has_extra=true actual=true
+11-21 00:02:08.842  3846  3860 I CarAcceptance: OK cold_restored_fullscreen
+11-21 00:02:08.853  3846  3846 I CarAudio: renderers_factory=androidx.base.ji$f decoderFallback=true extMode=PREFER
+11-21 00:02:08.872  3846  3846 I CarAudio: sink_built floatOut=false atParams=false offloadArg=false processors=1 gain=3.0
+11-21 00:02:08.876  3846  3846 I CarAudio: audio_attrs=MEDIA/MOVIE focus_owner=VideoView handleFocus=false
+11-21 00:02:08.877  3846  3846 I CarAudio: runtime_apply processing=ORIGINAL mode=0 session=41 gain=3.0 factor=1.0 path=pcm boostMb=0 enabled=false state=0 player=144806051 pcmStored=3.0 pcmQueued=0
+11-21 00:02:08.975  3846  3939 I CarAudioGain: queue n=1 mode=ORIGINAL bypass=true bytes=4096
+11-21 00:02:09.390  3846  3860 I CarAcceptance: OK cold_position_restored
+11-21 00:02:09.391  3846  3860 I CarAcceptance: cold_position expected=5447 actual=5614
+11-21 00:02:09.392  3846  3860 I CarAcceptance: OK cold_original_mode_retained
+11-21 00:02:09.393  3846  3860 I CarAcceptance: OK cold_master_preference_retained
+11-21 00:02:09.393  3846  3860 I CarAcceptance: OK cold_saved_gain_retained
+11-21 00:02:09.989  3846  3939 I CarAudioGain: queue n=48 mode=ORIGINAL bypass=true bytes=4096
+11-21 00:02:10.394  3846  3860 I CarAcceptance: OK cold_restored_playback_advances
+11-21 00:02:10.475  3846  3860 I CarAcceptance: OK screen_11-cold-restored
+11-21 00:02:10.579  3846  3846 I CarFeedback: playback_back action=collapse_fullscreen
+11-21 00:02:10.645  3846  3939 I CarAudioGain: queue n=78 mode=ORIGINAL bypass=true bytes=4096
+11-21 00:02:11.182  3846  3846 I CarFeedback: playback_back action=leave_detail session_active=false
+11-21 00:02:11.235  3846  3846 I CarFeedback: playback_focus_pause
+11-21 00:02:11.434  3846  3860 I CarAcceptance: OK cold_exit_home
+11-21 00:02:11.434  3846  3860 I CarAcceptance: COLD_RESTORE_PASS

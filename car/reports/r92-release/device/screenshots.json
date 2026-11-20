@@ -1,0 +1,68 @@
+[
+  {
+    "file": "device/r92-audio/01-home.png",
+    "sha256": "9c4af331a062dc98c64eaa1bb27338beeaff3697077d930ad66f4163945091f6",
+    "width": 2880,
+    "height": 1620
+  },
+  {
+    "file": "device/r92-audio/13-audio-enhanced.png",
+    "sha256": "9261bdb62f1d231d0e52dd3a78f57e1eb28d3e1cb6c858a86abdc8a06935516a",
+    "width": 2880,
+    "height": 1620,
+    "pixelSanity": "PASS",
+    "greenFraction": 0.15,
+    "coarseColors": 16
+  },
+  {
+    "file": "device/r92-audio/14-audio-original.png",
+    "sha256": "1797cd6cfa3a29c4ed010d84a17f2cf46d0a94ad1445dd133a8f4614fffb04a4",
+    "width": 2880,
+    "height": 1620,
+    "pixelSanity": "PASS",
+    "greenFraction": 0.15,
+    "coarseColors": 19
+  },
+  {
+    "file": "device/r92-audio/15-audio-reenabled.png",
+    "sha256": "d71df211cef42810ccb2cecc9efc583420cff0b2c2e4cc849085a8c1704481db",
+    "width": 2880,
+    "height": 1620,
+    "pixelSanity": "PASS",
+    "greenFraction": 0.15,
+    "coarseColors": 19
+  },
+  {
+    "file": "device/r92-audio/16-episode-2-original.png",
+    "sha256": "4b9145754948745306e49a5985e79b38ac8f9563d7906eab18c87e0c63dbb2a3",
+    "width": 2880,
+    "height": 1620,
+    "pixelSanity": "PASS",
+    "greenFraction": 0.1417,
+    "coarseColors": 18
+  },
+  {
+    "file": "device/r92-audio/17-cold-arm-original.png",
+    "sha256": "e9502812209b5d34050a4c6b31489ec0ad640a4e69baa2ef91dc36d84d059698",
+    "width": 2880,
+    "height": 1620,
+    "pixelSanity": "PASS",
+    "greenFraction": 0.1417,
+    "coarseColors": 18
+  },
+  {
+    "file": "device/r92-cold/11-cold-restored.png",
+    "sha256": "5f2f93ecf858f1ae5fc81c56628e8bf81aaa9163ded6a37a052833559074842f",
+    "width": 2880,
+    "height": 1620,
+    "pixelSanity": "PASS",
+    "greenFraction": 0.1417,
+    "coarseColors": 14
+  },
+  {
+    "file": "device/r92-exit/12-cold-no-restore.png",
+    "sha256": "ec91d96fa0ba15c70aa5aab3056567d74ec873be8e8cc9a93c90ddf4a4b872ff",
+    "width": 2880,
+    "height": 1620
+  }
+]

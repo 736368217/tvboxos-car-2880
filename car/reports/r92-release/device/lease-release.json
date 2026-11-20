@@ -1,0 +1,13 @@
+{
+  "index": 7,
+  "released": true,
+  "applied": {
+    "mute": {
+      "host_setting": "ok",
+      "guest_streams": "ok"
+    }
+  },
+  "shutdown": "{\n  \"errcode\": 0,\n  \"errmsg\": \"\"\n}",
+  "keep_running": false,
+  "main_app_running": true
+}

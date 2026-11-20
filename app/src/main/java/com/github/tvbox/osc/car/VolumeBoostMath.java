@@ -35,13 +35,11 @@ public final class VolumeBoostMath {
         return clamp(gain, 0f, 1f);
     }
 
-    /** PCM owns user gain, while AudioTrack is unity; non-PCM owns attenuation itself. */
-    public static float outputVolume(float gain, float factor, boolean pcm) {
-        return pcm ? 1f : playerVolume(gain) * clamp(factor, 0f, 1f);
-    }
-
-    public static float pcmGain(float gain, float factor) {
-        return clamp(gain, 0f, MAX_GAIN) * clamp(factor, 0f, 1f);
+    /** Focus/mute sit after PCM DSP in both modes. Original ignores saved nonzero app gain. */
+    public static float outputVolume(float gain, float factor, boolean pcm, boolean enhanced) {
+        if (gain <= 0f) return 0f; // A saved 0% is intentional mute; A/B must not unmute.
+        float volume = pcm || !enhanced ? 1f : playerVolume(gain);
+        return volume * clamp(factor, 0f, 1f);
     }
 
     /** Nearest 5-percent detent, computed from the entire gesture rather than move count. */

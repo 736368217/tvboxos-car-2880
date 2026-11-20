@@ -1,0 +1,5 @@
+Signer #1 certificate DN: C=US, O=Android, CN=Android Debug
+Signer #1 certificate SHA-256 digest: 2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c
+Signer #1 certificate SHA-1 digest: 554b1caceea5a49de0811f096296f36892caa037
+Signer #1 certificate MD5 digest: 03c75f06f35d3a21aa0b735138c86252
+NATIVE_TEST_APK D:\pi-data\data\scratch\1576f2bb-35db-49ca-8787-e3ef84109e72\r92-release\native\acceptance.apk
