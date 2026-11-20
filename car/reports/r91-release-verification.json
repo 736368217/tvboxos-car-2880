@@ -1,0 +1,82 @@
+{
+  "verifiedAt": "2026-11-20T11:16:58.551780+08:00",
+  "version": "3.1.0-car.7-r91",
+  "versionCode": 63,
+  "sourceCommit": "3136cad0895d6bd59eeb485cd1685dc04f30ba90",
+  "publishedArtifact": {
+    "filename": "TVBox-Original-Feature-3.1.0-car.7-r91.apk",
+    "bytes": 64279285,
+    "sha256": "fd776f6532d3c33fc0426dac323ce4914699a7a2f2e7f7cf1720bf987c12dd5d",
+    "packageName": "com.github.tvbox.osc.jun",
+    "minSdk": 32,
+    "abi": [
+      "arm64-v8a"
+    ]
+  },
+  "r2": {
+    "manifestUrl": "https://dl.736.de5.net/tvboxos-car-2880/latest.json",
+    "apkUrl": "https://dl.736.de5.net/tvboxos-car-2880/TVBox-Original-Feature-3.1.0-car.7-r91.apk",
+    "publishedAt": "2026-11-20T03:11:35Z",
+    "manifestMatches": true,
+    "historyMatches": true,
+    "bomFree": true,
+    "fullApkDownloaded": true,
+    "downloadedBytes": 64279285,
+    "sha256Matches": true
+  },
+  "github": {
+    "tag": "v3.1.0-car.7-r91",
+    "targetCommit": "3136cad0895d6bd59eeb485cd1685dc04f30ba90",
+    "releaseUrl": "https://github.com/736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r91",
+    "publishedAt": "2026-11-20T03:13:26Z",
+    "isDraft": false,
+    "isPrerelease": false,
+    "latest": true,
+    "assetCount": 2,
+    "assetDigestsMatch": true,
+    "sidecarReadbackMatches": true,
+    "notesMatch": true
+  },
+  "signature": {
+    "v2Verified": true,
+    "v3Verified": true,
+    "certificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "matchesEstablishedCertificate": true
+  },
+  "verificationReuse": {
+    "hostSuites": 25,
+    "productCodeChangedSinceVerified": false,
+    "productInputsChecked": 635,
+    "mismatchedInputs": [],
+    "deviceScope": "Prior MuMu API35 tests used the .cdnqa package with matching production source; actual B01 hardware not re-tested."
+  },
+  "previousRelease": {
+    "tag": "v3.1.0-car.7-r90",
+    "githubArtifactDigestUnchanged": true
+  },
+  "readOnlyVerification": {
+    "publishedDuringThisVerification": false,
+    "touchedProductCode": false,
+    "reinstalledDevice": false,
+    "killedHost": false
+  },
+  "remaining": [
+    "Actual B01 API32 OEM behavior and field network remain unverified",
+    "Existing Lint detector/DiffUtil findings remain documented; Play distribution is outside project scope"
+  ],
+  "cloudCi": {
+    "runId": 44665924852,
+    "status": "completed",
+    "conclusion": "success",
+    "headSha": "3136cad0895d6bd59eeb485cd1685dc04f30ba90",
+    "workflow": ".github/workflows/test.yml",
+    "url": "https://github.com/736368217/tvboxos-car-2880/actions/runs/44665924852"
+  },
+  "neatFreak": {
+    "globalSkill": "neat-freak v4.0.0",
+    "checksPassed": true,
+    "localLinksChecked": 15,
+    "problems": []
+  },
+  "scopeNote": "Source release commit is immutable; later documentation-only commits do not rebuild or replace the verified APK."
+}

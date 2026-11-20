@@ -53,4 +53,4 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 - [原始交付档案](DELIVERY-ORIGINAL-APP.md)、`car/handover/R*.md` 和版本报告保存当时事实，不能作为当前支持范围或发布状态的依据。
 - `car/reports/main-72e38f61-full-test.html` 是 r90 / `72e38f61` 的历史测试报告；其中 12 变体和低 API 风险是收敛前的结果，不是当前验收要求。
 
-2026-11-20：工作树为 r91 / versionCode 63，B01 Release、主机回归、CDN 完整续传和隔离包的 MuMu 更新验证已完成，详见 [验证记录](car/reports/r91-b01-cdn-validation.json)。本轮尚未提交或发布，真车 API 32 的 OEM/网络表现仍需实际设备验证。
+2026-11-20：r91 / versionCode 63 已发布到 R2 主通道和 GitHub 备用 Release，发布源码提交为 `3136cad0`。本地回归见 [验证记录](car/reports/r91-b01-cdn-validation.json)，远端整包、签名和主备摘要对账见 [发布回读](car/reports/r91-release-verification.json)。真车 API 32 的 OEM/现场网络表现仍需实际设备验证。
