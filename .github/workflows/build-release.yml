@@ -1,9 +1,17 @@
-name: Build TVBox car APK
+name: Build private Leapmotor B01 APK
 
 # 云端打包：用共享 debug.keystore 签名，产物与原打包机证书一致，可直接覆盖安装。
 # 手动触发；默认只构建并上传 artifact，不会自动发版。
-# 发布通道只有 GitHub Release（dl.z736.vip 官方通道已于 2026-11-12 废弃）。
+# R2 is the primary distribution channel; an explicitly requested GitHub Release is the fallback.
 on:
+  workflow_call:
+    inputs:
+      create_release:
+        type: boolean
+        default: false
+      notes:
+        type: string
+        default: ''
   workflow_dispatch:
     inputs:
       create_release:
@@ -94,6 +102,9 @@ jobs:
           chmod +x ./gradlew
           ./gradlew :app:assemblePythonRelease --no-daemon --console=plain
 
+      - name: Run host regressions for B01
+        run: python car/ci/run-host-tests.py --out build-ci/host-tests
+
       - name: Sign and verify APK
         run: |
           set -euo pipefail
@@ -118,6 +129,7 @@ jobs:
             exit 1
           fi
           "$BT/aapt2" dump badging "$OUT" | grep -E 'package:|versionCode|versionName' | head -2
+          python car/ci/verify-b01-apk.py "$OUT" --aapt2 "$BT/aapt2"
           sha256sum "$OUT"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "OUT_APK=$OUT" >> "$GITHUB_ENV"

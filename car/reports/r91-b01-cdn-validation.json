@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-11-20T10:52:40.169122+08:00",
+  "baseCommit": "72e38f61212d97d95644a0fe5f15189031fcdbf9",
+  "stateAtValidation": "local working-tree change; not committed or published",
+  "productScope": {
+    "privateUse": true,
+    "device": "Leapmotor B01 SA8295P",
+    "platformApi": 32,
+    "abi": [
+      "arm64-v8a"
+    ],
+    "display": "2880x1620/d160",
+    "releaseTask": ":app:assemblePythonRelease",
+    "version": "3.1.0-car.7-r91",
+    "versionCode": 63
+  },
+  "build": {
+    "pass": true,
+    "releaseArtifact": {
+      "result": "B01_APK_PASS",
+      "minSdk": 32,
+      "abi": [
+        "arm64-v8a"
+      ],
+      "bytes": 64279285,
+      "sha256": "fd776f6532d3c33fc0426dac323ce4914699a7a2f2e7f7cf1720bf987c12dd5d"
+    },
+    "signingCertificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "v2v3Verified": true
+  },
+  "host": {
+    "pass": true,
+    "suites": 25,
+    "updatedChannelTest": "UpdateVersionHostTest PASS (109 checks)"
+  },
+  "lint": {
+    "taskCompleted": true,
+    "rawSeverityCounts": {
+      "Error": 3,
+      "Warning": 1230,
+      "Fatal": 1
+    },
+    "newApiErrors": 0,
+    "scope": "Play targetSdk warning is outside B01 side-loading scope; detector errors and DiffUtil warning remain recorded."
+  },
+  "cdnHostResume": {
+    "range": "206 1048576 4.362082",
+    "resume_from": 1048576,
+    "resumed": "206 51722955 13.762185",
+    "exit": 0,
+    "bytes": 52771531,
+    "sha256": "927d1441354454dd0bff87562da17a9b96d2aaef5c2f7b99f6d273e9c4c445df",
+    "matches": true
+  },
+  "device": {
+    "emulator": "MuMu API35; not actual B01 hardware",
+    "diagnosticPackage": "com.github.tvbox.osc.jun.cdnqa",
+    "diagnosticApkSha256": "17b5e3d8930393bd8ebc59d2e87ea6c50d4eb55ef4801c62a4cefbd19186c5fa",
+    "sourceMatch": {
+      "productionSourceMatch": true,
+      "checkedFiles": 615,
+      "differences": [],
+      "lineEndingsOnly": [
+        "app/src/main/java/com/github/tvbox/osc/update/R2Manifest.java"
+      ],
+      "diagnosticIdentity": "com.github.tvbox.osc.jun.cdnqa",
+      "identityInjection": "b01-cdn-diagnostic.init.gradle only"
+    },
+    "native": {
+      "pass": true,
+      "events": [
+        {
+          "name": "target_version",
+          "pass": true,
+          "detail": "3.1.0-car.7-r91"
+        },
+        {
+          "name": "manual_check_clicked",
+          "pass": true,
+          "detail": "native settings view"
+        },
+        {
+          "name": "r2_current_version_completes",
+          "pass": true,
+          "detail": "latest-version dialog visible"
+        },
+        {
+          "name": "metadata_gh-proxy.org",
+          "pass": true,
+          "detail": "v3.1.0-car.7-r90"
+        },
+        {
+          "name": "asset_route_gh-proxy.org",
+          "pass": true,
+          "detail": "https://gh-proxy.org/github.com/736368217/tvboxos-car-2880/releases/download/v3.1.0-car.7-r90/TVBox-Original-Feature-3.1.0-car.7-r90.apk"
+        },
+        {
+          "name": "apk_range_gh-proxy.org",
+          "pass": true,
+          "detail": "http=206 contentRange=bytes 0-31/52771531 zip=true"
+        },
+        {
+          "name": "metadata_cdn.gh-proxy.org",
+          "pass": true,
+          "detail": "v3.1.0-car.7-r90"
+        },
+        {
+          "name": "asset_route_cdn.gh-proxy.org",
+          "pass": true,
+          "detail": "https://cdn.gh-proxy.org/github.com/736368217/tvboxos-car-2880/releases/download/v3.1.0-car.7-r90/TVBox-Original-Feature-3.1.0-car.7-r90.apk"
+        },
+        {
+          "name": "apk_range_cdn.gh-proxy.org",
+          "pass": true,
+          "detail": "http=206 contentRange=bytes 0-31/52771531 zip=true"
+        },
+        {
+          "name": "cdn_metadata_available",
+          "pass": true,
+          "detail": "queries=2"
+        }
+      ]
+    },
+    "crashBufferBytes": 0,
+    "scope": "R2 UI and explicit production query method on two CDN channels; no simulated total R2 outage."
+  },
+  "cleanup": {
+    "index": 1,
+    "released": true,
+    "running": false,
+    "lease": null,
+    "main_app_running": true,
+    "original_apk_unchanged": true,
+    "test_packages_removed": true
+  },
+  "neat": {
+    "globalSkill": "neat-freak v4.0.0",
+    "loadedSuccessfully": true,
+    "inventoryExecuted": true,
+    "activeDocuments": [
+      "README.md",
+      "AGENTS.md",
+      "car/ci/README.md",
+      "car/handover/MUMU-VERIFICATION-SPEC.md",
+      "car/handover/UPSTREAM-SYNC.md",
+      "car/tests/device/README.md",
+      "car/tests/device/cdn/README.md"
+    ],
+    "localLinksChecked": 14,
+    "pythonSyntax": "3.8-compatible",
+    "problems": [],
+    "priorUntrackedWorkPreserved": true
+  },
+  "remainingAtValidation": [
+    "Actual B01 API32 OEM/network acceptance not performed",
+    "Cloud workflow syntax was checked locally; remote workflow not run",
+    "No R2 or GitHub release published"
+  ]
+}

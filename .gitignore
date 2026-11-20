@@ -101,3 +101,7 @@ lint/tmp/
 .temp/
 output-metadata.json
 .py/
+
+# Project scope must remain discoverable to the next agent.
+!/AGENTS.md
+!/car/tests/device/cdn/README.md

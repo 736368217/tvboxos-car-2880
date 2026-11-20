@@ -99,46 +99,45 @@ public final class UpdateVersionHostTest {
         eqInt(UpdateVersion.pickApk(new String[]{"TVBOX-R49.APK"}, new long[]{1L}), 0,
                 "upper-case .APK is recognised");
 
-        // ---------- 通道 ----------
+        // ---------- Catalogue-backed update routes ----------
         UpdateVersion.Channel[] direct = UpdateVersion.channels("736368217", "tvboxos-car-2880", "");
-        check(direct.length >= 3, "direct + built-in mirrors, got " + direct.length);
-        eq(direct[0].prefix, "", "no user mirror -> direct first");
-        check(direct[0].apiUrl.endsWith("/repos/736368217/tvboxos-car-2880/releases/latest"),
-                "api url shape");
-        boolean hasGhfast = false, hasGhproxy = false;
+        eq(direct[0].prefix, "", "source list retains the direct API");
+        eq(direct[0].apiUrl, "https://api.github.com/repos/736368217/tvboxos-car-2880/releases/latest", "direct API shape");
+        boolean hasCdn = false;
         for (UpdateVersion.Channel channel : direct) {
-            if (channel.prefix.contains("ghfast.top")) hasGhfast = true;
-            if (channel.prefix.contains("ghproxy.net")) hasGhproxy = true;
+            if (channel.prefix.equals("https://cdn.gh-proxy.org/")) {
+                hasCdn = true;
+                eq(channel.apiUrl, "https://cdn.gh-proxy.org/api.github.com/repos/736368217/tvboxos-car-2880/releases/latest", "metadata route strips nested scheme");
+            }
+            check(!channel.prefix.contains("ghfast.top") && !channel.prefix.contains("ghproxy.net"), "retired API routes are not built-ins");
         }
-        check(hasGhfast, "ghfast fallback present");
-        check(hasGhproxy, "ghproxy fallback present");
-
-        UpdateVersion.Channel[] custom =
-                UpdateVersion.channels("o", "r", "https://my-mirror.example/");
-        eq(custom[0].label, "自定义", "user mirror goes first");
-        check(custom[0].apiUrl.startsWith("https://my-mirror.example/https://api.github.com/"),
-                "user mirror prefixes the api url, got " + custom[0].apiUrl);
-        // 用户把镜像设成内置值时不能重复添加（API 与 Web 通道各自去重：
-        // 同一前缀会有「API + Web」两条，这是设计内，不算重复）
-        UpdateVersion.Channel[] dedup = UpdateVersion.channels("o", "r", "https://ghfast.top/");
-        int ghfastApiCount = 0;
-        int ghfastWebCount = 0;
-        for (UpdateVersion.Channel channel : dedup) {
-            if (!channel.apiUrl.contains("ghfast.top")) continue;
-            if (channel.web) ghfastWebCount++;
-            else ghfastApiCount++;
-        }
-        eqInt(ghfastApiCount, 1, "duplicate mirror is not added twice (api)");
-        eqInt(ghfastWebCount, 1, "duplicate mirror is not added twice (web)");
+        check(hasCdn, "catalogue CDN fallback present");
+        UpdateVersion.Channel[] custom = UpdateVersion.channels("o", "r", "https://my-mirror.example/");
+        eq(custom[0].label, "自定义", "custom route remains supported");
+        check(custom[0].apiUrl.startsWith("https://my-mirror.example/https://api.github.com/"), "custom prefixes retain their semantics");
+        UpdateVersion.Channel[] dedup = UpdateVersion.channels("o", "r", "https://gh-proxy.org");
+        int orgCount = 0;
+        for (UpdateVersion.Channel channel : dedup) if (channel.prefix.equals("https://gh-proxy.org/")) orgCount++;
+        eqInt(orgCount, 1, "catalogue mirror deduplicated and unsupported Web route omitted");
+        eq(UpdateVersion.applyPrefix(" https://gh-proxy.org ", "https://github.com/o/r.apk"), "https://gh-proxy.org/github.com/o/r.apk", "trim prefix and normalize slash");
+        eq(UpdateVersion.applyPrefix("https://gh-proxy.org/", "https://gh-proxy.org/github.com/o/r.apk"), "https://gh-proxy.org/github.com/o/r.apk", "do not double wrap");
+        eq(UpdateVersion.applyPrefix("https://gh-proxy.org.evil.example/", "https://github.com/o/r.apk"), "https://gh-proxy.org.evil.example/https://github.com/o/r.apk", "host-path rule requires an exact host");
+        eq(UpdateVersion.applyPrefix("https://gh-proxy.org/", "file:///local.apk"), "file:///local.apk", "non-HTTP URL is unchanged");
+        String r2 = "https://dl.736.de5.net/tvboxos-car-2880/app.apk";
+        String[] r2Routes = UpdateVersion.downloadCandidates(r2, "https://gh-proxy.org/", "");
+        eqInt(r2Routes.length, 1, "R2 never inherits GitHub acceleration");
+        eq(r2Routes[0], r2, "R2 URL unchanged");
+        eqInt(UpdateVersion.downloadCandidates("https://bad host/app.apk", "", "").length, 0, "malformed origin rejected");
 
         // ---------- 下载候选（查询通 ≠ 下载通，必须能换通道重试） ----------
         String rawAsset = "https://github.com/o/r/releases/download/v1/app.apk";
         String[] fromDirect = UpdateVersion.downloadCandidates(rawAsset, "", "");
         check(fromDirect.length >= 3, "direct + mirrors, got " + fromDirect.length);
         eq(fromDirect[0], rawAsset, "direct channel tries the raw url first");
-        check(fromDirect[1].contains("ghfast.top"), "ghfast next, got " + fromDirect[1]);
-        check(fromDirect[2].contains("gh-proxy.com"), "gh-proxy third, got " + fromDirect[2]);
-        check(fromDirect[3].contains("ghproxy.net"), "ghproxy fourth, got " + fromDirect[3]);
+        eq(fromDirect[1], "https://gh-proxy.org/github.com/o/r/releases/download/v1/app.apk", "catalogue host-path format");
+        eq(fromDirect[2], "https://cdn.gh-proxy.org/github.com/o/r/releases/download/v1/app.apk", "CDN host-path format");
+        eq(fromDirect[3], "https://v4.gh-proxy.org/github.com/o/r/releases/download/v1/app.apk", "IPv4 host-path format");
+        eq(fromDirect[4], "https://gh-proxy.com/https://github.com/o/r/releases/download/v1/app.apk", "legacy service keeps URL format");
         // 同一地址不重复出现
         boolean dup = false;
         for (int i = 0; i < fromDirect.length; i++) {
@@ -218,21 +217,22 @@ public final class UpdateVersionHostTest {
         eqInt(UpdateVersion.assetNamesForTag(null).length, 0, "null tag -> no candidates");
         eqInt(UpdateVersion.assetNamesForTag("").length, 0, "empty tag -> no candidates");
 
-        // 通道表：API 通道在前，Web 通道在后，镜像前缀两边对齐
+        // Built-in CDN API routes precede the final direct GitHub HTML fallback.
         UpdateVersion.Channel[] chans = UpdateVersion.channels("o", "r", "");
-        check(chans.length > 4, "api + web channels present, got " + chans.length);
+        eqInt(chans.length, 6, "four verified CDN APIs + direct API + direct Web");
         boolean apiFirst = true;
         boolean sawWeb = false;
         for (UpdateVersion.Channel channel : chans) {
             if (channel.web) {
                 sawWeb = true;
+                eq(channel.prefix, "", "built-ins never probe unsupported releases/latest HTML");
                 check(channel.apiUrl.contains("github.com/") && !channel.apiUrl.contains("api.github.com"),
-                        "web channel targets github.com pages, got " + channel.apiUrl);
+                        "Web channel targets GitHub HTML");
             } else if (sawWeb) {
                 apiFirst = false;
             }
         }
-        check(sawWeb, "at least one web channel");
+        check(sawWeb, "direct Web channel retained");
         // 车机实测直连资产 21 秒失败、三个 gh 镜像 1–2 秒返回 206：
         // 镜像必须排在直连之前，否则用户会长时间停在 0%。
         UpdateVersion.Channel[] preferred = UpdateVersion.preferMirrors(chans);

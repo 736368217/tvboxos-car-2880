@@ -1,7 +1,4 @@
-> **本文档对应的代码树**：`D:\github\tvboxos-upstream-feature-pack`（git 分支 `main`，r56 提交）。
-> 与本文档所在工作区同远端（`736368217/tvboxos-car-2880`），但**不是同一个分支**：
-> 若你手上是 `feature/car-ux-redesign-3k-fps`（`versionName 1.0.0-car.7`）等分支，
-> 文中行号、以及 `AudioGainProcessor.java` / `CarEnhance.java` 这些文件都对不上，请先切到 `main`。
+> 历史音量问题交接（r56–r58），对应当时工作树和证据。当前只维护零跑 B01；构建、更新和验收入口见 [项目 README](../../../README.md)。文中旧路径、旧版安装建议和当时未验证项不能当作本轮现状。
 
 # 音量 >100% 失效 —— 专注交付包
 

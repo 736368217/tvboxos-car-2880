@@ -1,5 +1,7 @@
 # r88/r89：更新检查改为 R2 主通道，GitHub 兜底
 
+> 本文保留 r88/r89 当时的实现和验收。r91 起 R2 查询成功即完成（包括无更新），只有失败才进入 GitHub CDN；现行规则见 [README](../../README.md)。
+
 ## 背景
 
 用户决定：车机/TVBox 的 APK 分发从 GitHub Release 迁到 **Cloudflare R2**，分发域名

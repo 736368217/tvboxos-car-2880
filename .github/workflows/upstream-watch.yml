@@ -1,6 +1,6 @@
 name: Upstream TVBoxOS watch
 
-# 上游跟进：定时检测 q215613905/TVBoxOS 是否有新提交，并预演能否与我们合并。
+# Selective B01 upstream watch. Changes are candidates, not an obligation to inherit every device.
 # 只读：不自动合并、不自动改代码、不自动发版。有新提交时开/更新一个 Issue 提醒人工处理。
 #
 # 为什么不做「全自动合并 + 自动发版」：本仓库对 ExoPlayer / PlayFragment /
@@ -95,9 +95,9 @@ jobs:
           lines.append('```')
           lines.append('git fetch upstream main')
           lines.append('git merge upstream/main        # 冲突按语义取舍，别用 -X theirs')
-          lines.append('python "$env:PI_SCRATCH_DIR\\run_all_host_tests.py"')
+          lines.append('python -B car/ci/run-host-tests.py --out build-ci/host-tests')
           lines.append('```')
-          lines.append('合并后必须在车机模拟器上回归：播放/切屏保活/返回、音量补偿、历史封面与进度、应用内更新。')
+          lines.append('只接收对私人零跑 B01 有用的改动；仅构建 :app:assemblePythonRelease，回归播放/切屏/返回、PCM 增益、历史和 R2/CDN 更新，不恢复上游多设备矩阵。')
           with open('issue-body.md', 'w', encoding='utf-8') as fh:
               fh.write('\n'.join(lines))
           PY

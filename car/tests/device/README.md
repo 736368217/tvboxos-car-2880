@@ -1,5 +1,7 @@
 # 车机 UI 设备自检（geometry-gated）
 
+本目录的现行目标只有零跑 B01（API 32 / ARM64 / 2880×1620 / d160）。优先按 [统一设备规范](../../handover/MUMU-VERIFICATION-SPEC.md) 验本轮 `pythonRelease`；下面的 PowerShell/OCR 脚本是已有专项入口，不代表旧电视、手机或其他设备支持。
+
 这个目录解决一个具体的测试质量问题：**测试环境会把应用布局成竖屏，导致 UI 用例测出假结果。**
 
 ## 背景：为什么需要门禁

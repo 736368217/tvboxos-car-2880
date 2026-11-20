@@ -41,15 +41,14 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
- * 应用内更新：查 GitHub Release → 下载 APK → 校验 → 唤起安装器。
+ * 应用内更新：R2 主通道 / GitHub CDN 备用 → 下载 APK → 校验 → 唤起安装器。
  *
  * <p>设计要点：</p>
  * <ul>
  *   <li><b>版本判断走 {@link UpdateVersion}</b>：本项目迭代号 {@code rNN} 与 versionCode 不同步，
  *       必须按迭代号比，否则 r44→r48 会被判成「已是最新」。</li>
- *   <li><b>多通道</b>：自定义镜像 → 直连 → ghfast → ghproxy。壳里常见 GitHub 不可达，
- *       逐个试，第一个成功的通道同时决定下载地址的前缀（保证下载走同一条路）。
- *       r81 起这是唯一主通道；官方 dl.z736.vip 已下线，见 {@code OFFICIAL_CHANNEL_ENABLED}。</li>
+ *   <li><b>主备通道</b>：R2 成功即返回；失败后使用经验证的 GitHub CDN 查询，
+ *       资产下载按对应服务的 URL 格式生成候选并测速。</li>
  *   <li><b>安装前校验</b>：包名、versionCode、签名摘要三项都对得上才交给安装器。
  *       签名不一致会直接 `INSTALL_FAILED_UPDATE_INCOMPATIBLE`，提前拦掉比装到一半失败好。</li>
  *   <li><b>全部后台线程</b>，结果回主线程；进度做了节流，避免刷爆 UI。</li>
@@ -68,10 +67,8 @@ public final class AppUpdate {
     /**
      * 官方发布通道：阿里云发布根（SMB 上传，公网由 dl.z736.vip 提供）。
      *
-     * <p>r81 起停用：服务器 121.40.69.97 的 22 / 443 / 4450 全部不可达，
-     * {@code <软件名>/latest.json} 已无人维护。更新检查改为直接走 GitHub Release
-     * 多通道，不再先等一台死服务器超时。解析与下载代码保留，若以后换回自建发布根，
-     * 把 {@link #OFFICIAL_CHANNEL_ENABLED} 打开即可恢复「官方 → GitHub」旧顺序。</p>
+     * <p>r81 起永久停用。当前发布入口为 R2，失败后使用 GitHub CDN。
+     * 保留旧解析代码用于历史数据兼容，不重新启用或探测已退役服务器。</p>
      */
     private static final String OFFICIAL_BASE = "https://dl.z736.vip/";
     private static final String OFFICIAL_HOST = "dl.z736.vip";
@@ -217,24 +214,19 @@ public final class AppUpdate {
             String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
             List<String> failures = new ArrayList<>();
 
-            // ⓪ 主通道：Cloudflare R2 的 latest.json（2026-11-15 起的唯一发布源）。
-            //    读得到就以它为准：有更新直接返回；「已是最新」也要记住，
-            //    这样后面 GitHub 全挂时不至于把「已最新」报成「检查失败」。
-            Info r2Info = null;
+            // R2 is authoritative. A successful current-version response also completes the check.
+            // Only a failed R2 request enters GitHub CDN fallback.
             try {
                 final Info r2 = queryR2(local);
-                r2Info = r2;
                 Log.i(TAG, "r2 manifest ok local=" + local + " remote=" + r2.remoteVersion
                         + " hasUpdate=" + r2.hasUpdate + " size=" + r2.apkSize
                         + " sha256=" + shortSha(r2.sha256));
-                if (r2.hasUpdate) {
-                    remember(r2);
-                    Log.i(TAG, "check ok channel=" + r2.channelLabel + " force=" + force
-                            + " local=" + local + " remote=" + r2.remoteVersion
-                            + " hasUpdate=true sha256=" + shortSha(r2.sha256));
-                    post(() -> callback.onResult(r2, null));
-                    return;
-                }
+                remember(r2);
+                Log.i(TAG, "check ok channel=" + r2.channelLabel + " force=" + force
+                        + " local=" + local + " remote=" + r2.remoteVersion
+                        + " hasUpdate=" + r2.hasUpdate + " sha256=" + shortSha(r2.sha256));
+                post(() -> callback.onResult(r2, null));
+                return;
             } catch (Exception error) {
                 String reason = describe(error);
                 failures.add("R2=" + reason);
@@ -276,8 +268,8 @@ public final class AppUpdate {
                 for (UpdateVersion.Channel channel : channels) {
                     try {
                         Info info = query(channel, local, plain);
-                        if (!info.hasUpdate && (official != null || r2Info != null)) {
-                            // 主通道/官方清单可达且说自己是最新：它带 sha256、与发布源一致，优先采信。
+                        if (!info.hasUpdate && official != null) {
+                            // Legacy official channel remains disabled; R2 already returned above.
                             githubLatest = true;
                             break;
                         }
@@ -327,17 +319,6 @@ public final class AppUpdate {
                     post(() -> callback.onResult(officialFinal, null));
                     return;
                 }
-            }
-            // R2 读到了「已是最新」但 GitHub 全挂：用它收口，
-            // 不能把「已最新」报成「N 次尝试都不可达」。
-            final Info r2Final = r2Info;
-            if (r2Final != null) {
-                remember(r2Final);
-                Log.i(TAG, "check ok channel=" + r2Final.channelLabel + " local=" + local
-                        + " remote=" + r2Final.remoteVersion
-                        + " hasUpdate=false (github unreachable) sha256=" + shortSha(r2Final.sha256));
-                post(() -> callback.onResult(r2Final, null));
-                return;
             }
             Log.w(TAG, "check failed on every channel: " + failures);
             String message = failures.isEmpty()

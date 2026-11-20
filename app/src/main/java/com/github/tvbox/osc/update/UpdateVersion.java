@@ -143,7 +143,6 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
     }
 
     /** 一个可达的更新检查通道：{@code prefix} 为空表示直连。 */
-    /** 一个可达的更新检查通道：{@code prefix} 为空表示直连。 */
     public static final class Channel {
         public final String prefix;
         public final String apiUrl;
@@ -171,8 +170,16 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
             return applyPrefix(prefix, url);
         }
     }
-    /** 内置镜像前缀，按经验顺序：用户自定义 → 直连 → ghfast → gh-proxy → ghproxy。 */
-    public static final String[] BUILT_IN_MIRRORS = {"https://ghfast.top/", "https://gh-proxy.com/", "https://ghproxy.net/"};
+    /** CDN URL catalogue: https://lancelotrar.github.io/cdn-url/ (verified 2026-11-20). */
+    public static final String[] BUILT_IN_MIRRORS = {
+            "https://gh-proxy.org/", "https://cdn.gh-proxy.org/",
+            "https://v4.gh-proxy.org/", "https://gh-proxy.com/"
+    };
+
+    private static boolean isBuiltInMirror(String prefix) {
+        for (String builtIn : BUILT_IN_MIRRORS) if (builtIn.equalsIgnoreCase(prefix)) return true;
+        return false;
+    }
 
     // 下载候选地址：把同一个资产 URL 按通道前缀展开，preferredPrefix 排最前。
     //
@@ -181,6 +188,14 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
     // 所以下载失败要能自动换镜像重试，而不是直接报错。
     public static String[] downloadCandidates(String rawUrl, String preferredPrefix, String userMirror) {
         if (rawUrl == null || rawUrl.length() == 0) return new String[0];
+        // GitHub acceleration must never wrap the R2 primary or unrelated origins.
+        try {
+            if (!"github.com".equalsIgnoreCase(java.net.URI.create(rawUrl).getHost())) {
+                return new String[]{rawUrl};
+            }
+        } catch (IllegalArgumentException invalid) {
+            return new String[0];
+        }
         List<String> ordered = new ArrayList<>();
         String preferred = preferredPrefix == null ? "" : preferredPrefix;
         addCandidate(ordered, applyPrefix(preferred, rawUrl));
@@ -208,31 +223,24 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
         String mirror = userMirror == null ? "" : userMirror.trim();
         if (mirror.length() > 0) {
             if (!mirror.endsWith("/")) mirror = mirror + "/";
-            out.add(new Channel(mirror, mirror + api, "自定义"));
+            out.add(new Channel(mirror, applyPrefix(mirror, api), "自定义"));
         }
         out.add(new Channel("", api, "直连"));
         for (String prefix : BUILT_IN_MIRRORS) {
-            String url = prefix + api;
+            String url = applyPrefix(prefix, api);
             boolean duplicate = false;
             for (Channel existing : out) {
                 if (existing.apiUrl.equals(url)) duplicate = true;
             }
             if (!duplicate) out.add(new Channel(prefix, url, prefix.replace("https://", "").replace("/", "")));
         }
-        // Web 通道排在 API 通道之后：API 能通时优先用（信息全：notes、资产清单、size）；
-        // API 全挂（镜像不支持 api.github.com 前缀、DNS 污染）时靠 302 兜底。
-        // 通道顺序按前缀集合对齐：自定义 → 直连 → ghfast → gh-proxy → ghproxy。
+        // The catalogue's built-ins support assets; our metadata probes also verified these APIs.
+        // Do not advertise their releases/latest HTML pages: observed 301s lead to an unsupported page.
         String web = webLatestUrl(owner, repo);
-        if (mirror.length() > 0) out.add(new Channel(mirror, mirror + web, "自定义web", true));
-        out.add(new Channel("", web, "直连web", true));
-        for (String prefix : BUILT_IN_MIRRORS) {
-            String url = prefix + web;
-            boolean duplicate = false;
-            for (Channel existing : out) {
-                if (existing.apiUrl.equals(url)) duplicate = true;
-            }
-            if (!duplicate) out.add(new Channel(prefix, url, prefix.replace("https://", "").replace("/", "") + "web", true));
+        if (mirror.length() > 0 && !isBuiltInMirror(mirror)) {
+            out.add(new Channel(mirror, applyPrefix(mirror, web), "自定义web", true));
         }
+        out.add(new Channel("", web, "直连web", true));
         return out.toArray(new Channel[0]);
     }
 
@@ -307,9 +315,23 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
 
     public static String applyPrefix(String prefix, String url) {
         if (url == null) return null;
-        if (prefix == null || prefix.length() == 0) return url;
-        if (url.startsWith("http://") || url.startsWith("https://")) return prefix + url;
-        return url;
+        if (prefix == null || prefix.trim().length() == 0) return url;
+        String normalized = prefix.trim();
+        if (!normalized.endsWith("/")) normalized += "/";
+        if (url.startsWith(normalized)) return url;
+        if (!url.startsWith("https://") && !url.startsWith("http://")) return url;
+        // cdn-url's gh-proxy.org family uses /github.com/..., not /https://github.com/....
+        String host;
+        try {
+            host = java.net.URI.create(normalized).getHost();
+        } catch (IllegalArgumentException invalid) {
+            return url;
+        }
+        if ("gh-proxy.org".equalsIgnoreCase(host) || "cdn.gh-proxy.org".equalsIgnoreCase(host)
+                || "v4.gh-proxy.org".equalsIgnoreCase(host)) {
+            return normalized + url.substring(url.indexOf("://") + 3);
+        }
+        return normalized + url;
     }
 
     /**

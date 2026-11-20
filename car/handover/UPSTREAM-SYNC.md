@@ -1,5 +1,9 @@
 # 上游跟进：TVBoxOS 合并与自动化巡检
 
+## 维护范围
+
+本项目只维护车主的零跑 B01，完整约定见 [项目 README](../../README.md)。跟进上游不等于继承全设备矩阵；不恢复 Java-only、32 位、旧电视、手机或 Play 支持。只构建 `:app:assemblePythonRelease`。
+
 ## 上游是什么
 
 - 远端：`upstream` = `https://github.com/q215613905/TVBoxOS.git`，分支 `main`
@@ -64,14 +68,14 @@ python car\ci\upstream-check.py --json     # 机器可读
 - `HomeActivity`：我们的存活详情页复用，上游直接删了站点预加载
 
 用 `-X theirs` 或自动合并会**静默丢功能**，且编译和 host 测试都可能照常通过。
-所以策略是：自动检测 + 自动预演 + 自动提醒，人工按语义解冲突，再跑完整回归。
+所以策略是：自动检测与预演，按 B01 需求选择性接收改动，人工解冲突，再跑 B01 单包与相关回归。
 
 ## 合并后的回归清单
 
 每次合并上游后必须跑：
 
 ```powershell
-python "$env:PI_SCRATCH_DIR\run_all_host_tests.py"     # 期望 ALL_HOST_TESTS_PASS
+python -B car/ci/run-host-tests.py --out "$env:PI_SCRATCH_DIR/b01-host"  # ALL_HOST_TESTS_PASS
 ```
 
 再在车机模拟器（2880×1620 / d160 / r=1）上验：
@@ -101,5 +105,4 @@ python "$env:PI_SCRATCH_DIR\run_all_host_tests.py"     # 期望 ALL_HOST_TESTS_P
 
 - 本次只验证模拟车机与当前网络；真车 OEM 后台策略、真车听感未验证。
 - 上游 `oldTv`/`dev`/`file_transfer` 分支未合，只跟 `main`。
-- 上游删除的 `isPythonSupported()` 守卫不再恢复；Android 16+ 32 位进程的 Python 限制依赖
-  Pyramid/Chaquopy 自身行为，本次未在 Android 16 上实测。
+- Android 16、32 位进程和其他设备不属于当前私人 B01 的支持范围，不从上游自动引入相应兼容任务。

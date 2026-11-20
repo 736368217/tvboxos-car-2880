@@ -1,73 +1,59 @@
-# MuMu 验收环境规范（强制，2026-11-09 补）
+# 零跑 B01 设备验收规范
 
-> 起因：r73 交付时写成「本机 MuMu 无可用点播源，未能起播」，但用户此前明确指定过订阅源，
-> 且 `DELIVERY-ORIGINAL-APP.md` §12 已记录「干净实例 vm2 配 `https://clun.top/box.json`
-> 后真实订阅加载、Python 源解析、详情页小窗、边缘拉动全部通过」。
-> 把某台被清空配置的临时设备状态当成普遍事实，是流程缺失，不是记忆问题。**本文件即规范。**
+本项目仅服务车主的零跑 B01。产品和构建边界以 [README](../../README.md) 为准，不使用上游多机型矩阵。
 
-## 1. 每台用于播放/详情/音量验收的 MuMu，开机后必须先做
+## 1. 验收对象
 
-```bash
-adb -s <SERIAL> shell settings put system accelerometer_rotation 0
-adb -s <SERIAL> shell settings put system user_rotation 1
-adb -s <SERIAL> shell wm user-rotation lock 1
-# 确认横屏：dumpsys display 必须是 Rect(0,0-2880,1620)，宿主日志 w=2880 h=1620
-adb -s <SERIAL> shell dumpsys display | grep -i 'mCurrentDisplayRect\|DisplayDeviceInfo'
+- 真车：SA8295P、Android API 32、`arm64-v8a`、2880×1620 横屏、density 160。
+- 产物：`:app:assemblePythonRelease`。调试也只用同一 B01 的 `pythonDebug`。
+- MuMu：仅做代理功能验证。API 35 的成功不能证明真车的 OEM 安装、后台、窗口和音频行为。
+- 每轮记录源提交/工作树状态、APK SHA-256、包名、版本和签名；设备对 `pm path` 对应文件重新算 SHA。
+
+## 2. 设备所有权与用户数据
+
+先确认会话持有实例池独占租约。只操作自己的实例，结束释放，保留 MuMu 主程序。
+优先用临时 Android 用户隔离测试；否则先备份应用偏好和数据库，结束恢复并比对，不执行 `pm clear` 清掉机主订阅、历史或收藏。
+
+## 3. 显示门禁
+
+通过 MuMu 插件及 system_server namespace/classpath wrapper 设置：
+
+```sh
+wm size reset
+wm density reset
+wm scaling auto
+settings put system accelerometer_rotation 0
+settings put system user_rotation 1
+wm user-rotation lock 1
+wm fixed-to-user-rotation enabled
 ```
 
-**不锁横屏会出现 1620x2880 竖屏坐标，导引小棍落到 y≈1500，按横屏直觉点/拉必然落空**
-（§12.1 已实锤）。真车固定横屏，不会重现，但 MuMu 不锁就会误判成「功能失效」。
+然后运行仓库只读门禁 `car/tests/device/verify_car_display.sh`。必须同时满足：无手动 size/density override，d160，`lock 1`，实际显示与触摸映射完整覆盖 2880×1620，PNG 也是 2880×1620，并出现 `CAR_DISPLAY_PASS`。
+模拟器重启后重新验门禁；不能沿用旧结论。真车分辨率不随意修改。
 
-## 2. 订阅源（用户此前指定，必须写进设备，不得再说「无源」）
+## 4. 内容与播放
 
-- 主源：`https://clun.top/box.json`（97 站 / 44 个 PY 站，已实测加载成功）
-- 备用：`https://ghfast.top/https://raw.githubusercontent.com/736368217/tvbox/refs/heads/123/xiaosa/api.json`
+验收时在隔离用户导入 `https://clun.top/box.json`；备用订阅见实际设置和既有版本记录。远端脚本只在 Android 执行。
 
-配置路径：App 内「设置 → 配置地址 → 点播」填入主源并确认，等首页分类出现
-「热门电影 / 热播剧集 / 热门动漫 / 热播综艺」后再开始验收。
+“订阅加载”须有站点数量、非空分类/影片计数。“实际播放”另需视频尺寸、两次递增位置及对应截图，不用分类成功替代起播。
+本地合成 H.264/AAC 用于复跑播放器、增益和生命周期；真实站源另报，不能把 fixture 通过扩大为所有站点通过。
 
-判据（三项同时满足才算「有可用源」）：
+日常覆盖：
 
-1. 首页不再是「豆瓣热播」占位卡片，而是真实分类；
-2. `PyLoader` 或 `JarLoader` 日志出现站点加载成功；
-3. 点任一影片能进 `DetailActivity`，点预览/播放能出现 `CarAudioGain` 日志。
+1. 首页、设置、搜索、详情和常用触摸操作；缺少可用站源时记录具体阶段。
+2. 小窗和全屏徽标、全屏→详情→首页返回、边缘返回。
+3. HOME/失焦真暂停，重新取得焦点只恢复由系统导致的暂停；自家弹窗不停播，手动暂停不被恢复。
+4. 进度和历史一致，显式退出不复活，冷启动恢复的保存/实际位置对得上。
+5. >100% 应用音量由真实首批 PCM 输入输出比例证明；换集与重新建引擎分别验证。
+6. R2 查询成功即返回；失败后才试 GitHub CDN。备用节点验证版本 JSON、实际 APK、Range 和签名，不以 HTTP 200 单独判通过。
 
-**任何一台设备如果确实无源**，必须在报告里写明「该实例的订阅配置为何为空、是哪一步被清空」，
-并换一台按本节重配，**禁止直接写成「本机无可用点播源」这种全局结论**。
+独立原生套件在 `car/tests/device/r82/`，使用本轮 APK 的 R8 mapping 构建。r82 是测试包名称，不是要求安装旧产品版本。逐条检查断言及最终 result，不能只看 `am instrument` 的进程退出码。
 
-## 3. 验收脚本必须记录的开场状态
+## 5. 构建与交付门禁
 
-```
-设备 index / adb / owner：
-dumpsys display 分辨率与 rotation：
-配置地址（点播 / 直播）：
-首页分类列表：
-是否成功进入 DetailActivity / PlayFragment：
-```
+只跑 B01 Release、相关主机测试和受影响设备场景。命令见 README 和 `car/ci/README.md`。
+旧报告中的 API 19/23、32 位、Java-only 变体和 Play 上架要求不属于当前产品门禁。保留实际影响 B01 的告警和风险，不能降低相关断言阈值凑通过。
 
-## 4. 推送代码 ≠ 发布更新；GitHub Release 是唯一发布通道
+发布以 R2 为主、GitHub Release 为备用。仅在用户明确要求发布时运行发布脚本，要求 notes、摘要和远端回读。旧 `dl.z736.vip`、阿里云发布链永久退役。
 
-> 2026-11-12 起：官方 `dl.z736.vip` / `tvbox-car` / `TVBox` 通道**已废弃**。
-> 服务器 121.40.69.97 的 22 / 443 / 4450 全部不可达，本机与 GitHub Actions 境外 runner
-> 均实测不通；不要再执行 `publish_release.py`、`dl-publish.sh`、SMB 上传或 `latest.json` 校验。
-> r81 起 `AppUpdate.OFFICIAL_CHANNEL_ENABLED=false`，App 直接查 GitHub Release 多通道。
-
-规范：
-
-1. 用户确认实现/报告后，默认流程是 **提交 → 合入 main → 推进 versionCode/versionName → 构建签名 → 发布 → 校验**，不能停在「已推送」。
-2. 每次发布写 **2–5 行短说明**（约 100–250 字）：第一行 `rNN 更新说明`，后续用 `- ` 要点写「改了什么 / 用户要注意什么」；不写内部实现细节，不写空话。
-3. 用 `gh release create v<version> --repo 736368217/tvboxos-car-2880 --target <完整 40 位 SHA> --title ... --notes-file <UTF-8 文件> <APK>` 发布；没有 `--notes-file` 不许发版。
-4. `--target` 必须是完整 40 位 SHA，短 SHA 会报 `HTTP 422`。
-5. 签名统一用 `car/ci/debug.keystore`（证书 `2FEB63C5…FA9C`）；云端打包用 `.github/workflows/build-release.yml` 的 `workflow_dispatch`，签名后有证书硬校验。
-6. 发布后校验：`gh release view` 的 tag / target / asset digest 与本地 APK 一致，notes 非空且为 2–5 行。
-7. **没有 notes 不许发版；没有 Release 校验不许回复用户「已发布」。**
-
-## 5. 发布自检清单
-
-- [ ] `main` 已推送，`versionCode/versionName` 已推进到新 rNN
-- [ ] APK 用 `car/ci/debug.keystore` 签名，`apksigner verify` 证书为 `2FEB63C5…FA9C`
-- [ ] GitHub Release 已创建，notes 2–5 行且非空
-- [ ] Release `--target` 是完整 40 位 SHA，asset digest 与本地 APK SHA-256 一致
-- [ ] 没有向 `dl.z736.vip` / `tvbox-car` / `TVBox` 发布任何东西（旧通道已废弃）
-- [ ] MuMu 租约已释放，未碰 `do_not_touch` 实例
-- [ ] 报告中「未验证」项写明原因，不编造结论
+结束前归档本轮证据，恢复显示、音量和用户，确认机主 APK 未改变、测试用户/包已移除，再归还租约。工作区原有未跟踪文件不作清理对象。
