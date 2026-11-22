@@ -1,0 +1,23 @@
+﻿--------- beginning of main
+11-23 00:56:13.447 11515 11515 I CarAudio: renderers_factory=androidx.base.ji$f decoderFallback=true extMode=PREFER
+11-23 00:56:13.462 11515 11515 I CarAudio: sink_built floatOut=false atParams=false offloadArg=false processors=1 gain=1.0
+11-23 00:56:13.467 11515 11515 I CarAudio: audio_attrs=MEDIA/MOVIE focus_owner=VideoView handleFocus=false
+11-23 00:56:13.468 11515 11515 I CarAudio: runtime_apply processing=CAR_BALANCED mode=0 session=33 gain=1.0 factor=1.0 path=pcm boostMb=0 enabled=false state=0 player=17275077 pcmStored=1.0 pcmQueued=0
+11-23 00:56:13.468 11515 11515 I Tvbox-runtime: echo-setDataSource:file:///data/user/0/com.github.tvbox.osc.jun/cache/audio-diagnostic.mp4
+11-23 00:56:13.543 11515 11675 I CarAudioGain: queue n=1 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.0 outPeak=0.0 rmsRatio=0.0
+11-23 00:56:14.552 11515 11675 I CarAudioGain: queue n=57 mode=CAR_BALANCED user=1.0 gain=1.3411835 frames=1024 channels=2 inPeak=0.06323242 outPeak=0.08480835 rmsRatio=1.337840096049894
+11-23 00:56:15.556 11515 11675 I CarAudioGain: queue n=104 mode=CAR_BALANCED user=1.0 gain=1.5757308 frames=1024 channels=2 inPeak=0.06311035 outPeak=0.09942627 rmsRatio=1.5739095153986857
+11-23 00:56:16.560 11515 11675 I CarAudioGain: queue n=151 mode=CAR_BALANCED user=1.0 gain=1.0295738 frames=1024 channels=2 inPeak=0.12597656 outPeak=0.13232422 rmsRatio=1.0412110233423943
+11-23 00:56:17.559 11515 11675 I CarAudioGain: queue n=198 mode=CAR_BALANCED user=1.0 gain=0.8911731 frames=1024 channels=2 inPeak=0.12594604 outPeak=0.11227417 rmsRatio=0.8913743980197502
+11-23 00:56:18.565 11515 11675 I CarAudioGain: queue n=245 mode=CAR_BALANCED user=1.0 gain=0.5159188 frames=1024 channels=2 inPeak=0.25125122 outPeak=0.13253784 rmsRatio=0.5216017226910065
+11-23 00:56:19.566 11515 11675 I CarAudioGain: queue n=292 mode=CAR_BALANCED user=1.0 gain=0.50103015 frames=1024 channels=2 inPeak=0.25131226 outPeak=0.12591553 rmsRatio=0.5010194353809315
+11-23 00:56:20.566 11515 11675 I CarAudioGain: queue n=339 mode=CAR_BALANCED user=1.0 gain=0.42059508 frames=1024 channels=2 inPeak=0.50131226 outPeak=0.21109009 rmsRatio=0.4210159003728315
+11-23 00:56:21.566 11515 11675 I CarAudioGain: queue n=386 mode=CAR_BALANCED user=1.0 gain=0.42018315 frames=1024 channels=2 inPeak=0.5012512 outPeak=0.21057129 rmsRatio=0.4200249395675488
+11-23 00:56:22.575 11515 11675 I CarAudioGain: queue n=433 mode=CAR_BALANCED user=1.0 gain=0.32465824 frames=1024 channels=2 inPeak=0.8413696 outPeak=0.27331543 rmsRatio=0.32481389104699065
+11-23 00:56:23.600 11515 11675 I CarAudioGain: queue n=481 mode=CAR_BALANCED user=1.0 gain=0.32409424 frames=1024 channels=2 inPeak=0.8413696 outPeak=0.2727661 rmsRatio=0.3241717412340018
+11-23 00:56:24.617 11515 11675 I CarAudioGain: queue n=529 mode=CAR_BALANCED user=1.0 gain=0.47867382 frames=1024 channels=2 inPeak=0.03970337 outPeak=0.018951416 rmsRatio=0.4774997646536455
+11-23 00:56:25.620 11515 11675 I CarAudioGain: queue n=576 mode=CAR_BALANCED user=1.0 gain=1.3690629 frames=1024 channels=2 inPeak=0.039764404 outPeak=0.054351807 rmsRatio=1.355139813215904
+11-23 00:56:26.626 11515 11675 I CarAudioGain: queue n=623 mode=CAR_BALANCED user=1.0 gain=0.3950003 frames=1024 channels=2 inPeak=0.50109863 outPeak=0.19668579 rmsRatio=0.39011291337656034
+11-23 00:56:27.634 11515 11675 I CarAudioGain: queue n=670 mode=CAR_BALANCED user=1.0 gain=0.49485075 frames=1024 channels=2 inPeak=0.50115967 outPeak=0.2477417 rmsRatio=0.4945341075478251
+11-23 00:56:28.638 11515 11675 I CarAudioGain: queue n=717 mode=CAR_BALANCED user=1.0 gain=0.49970898 frames=1024 channels=2 inPeak=0.25115967 outPeak=0.12548828 rmsRatio=0.49963816041830833
+11-23 00:56:29.657 11515 11675 I CarAudioGain: queue n=765 mode=CAR_BALANCED user=1.0 gain=0.50111634 frames=1024 channels=2 inPeak=0.25131226 outPeak=0.12594604 rmsRatio=0.5011174051084477

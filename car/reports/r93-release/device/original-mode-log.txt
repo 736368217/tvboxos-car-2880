@@ -1,0 +1,5 @@
+Verbatim adb logcat output observed after tapping "切换 增强 / 原声" (raw buffer was not persisted before the temporary instance was deleted):
+11-23 00:59:58.567 20272 20415 I CarAudioGain: queue n=1198 mode=ORIGINAL bypass=true bytes=4096
+11-23 00:59:59.570 20272 20415 I CarAudioGain: queue n=1245 mode=ORIGINAL bypass=true bytes=4096
+11-23 01:00:00.593 20272 20415 I CarAudioGain: queue n=1293 mode=ORIGINAL bypass=true bytes=4096
+11-23 01:00:01.593 20272 20415 I CarAudioGain: queue n=1340 mode=ORIGINAL bypass=true bytes=4096

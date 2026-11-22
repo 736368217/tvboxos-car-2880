@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -23,6 +24,7 @@ import androidx.annotation.NonNull;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.car.InAppBackButton;
+import com.github.tvbox.osc.ui.activity.AudioDiagnosticActivity;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.orhanobut.hawk.Hawk;
 
@@ -163,6 +165,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
             });
             row("应用内音量", enhanced ? "播放时在右侧上下滑动，每档 5%" : "切回增强音量后使用保存值",
                     Math.round(CarEnhance.appGain() * 100) + "%", null);
+            row("音量测试片（临时）", "内置 20 秒诊断剪辑，走本机 EXO 音频链路", "播放", () -> {
+                getContext().startActivity(new Intent(getContext(), AudioDiagnosticActivity.class));
+            });
         } else if (category == 1) {
             heading("返回方式", "边缘手势与返回杠二选一");
             LinearLayout modes = new LinearLayout(getContext());

@@ -1,0 +1,6 @@
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
+CAR_BALANCED 48000Hz 2ch quiet -30.00 -> -22.00 dBFS loud -14.00 -> -20.00 dBFS gap 16.00 -> 2.00 dB onset peak 0.457733 limiter peak 0.501190
+CAR_BALANCED 44100Hz 1ch quiet -30.00 -> -22.00 dBFS loud -14.00 -> -20.00 dBFS gap 16.00 -> 2.00 dB onset peak 0.457733 limiter peak 0.501190
+CAR_BALANCED 96000Hz 8ch quiet -30.00 -> -22.00 dBFS loud -14.00 -> -20.00 dBFS gap 16.00 -> 2.00 dB onset peak 0.457825 limiter peak 0.501190
+CAR_HIGHWAY 48000Hz 2ch quiet -30.00 -> -19.50 dBFS loud -14.00 -> -19.50 dBFS gap 16.00 -> -0.00 dB onset peak 0.501190 limiter peak 0.501190
+AudioDynamicsHostTest PASS checks=54

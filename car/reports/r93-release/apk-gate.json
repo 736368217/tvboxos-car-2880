@@ -1,0 +1,9 @@
+{
+  "result": "B01_APK_PASS",
+  "minSdk": 32,
+  "abi": [
+    "arm64-v8a"
+  ],
+  "bytes": 64934774,
+  "sha256": "57174374e823543c2bd5091cf3fbf23bef003f22228c2829ed3fb2522fbb064a"
+}

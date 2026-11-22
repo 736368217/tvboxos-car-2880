@@ -1,0 +1,24 @@
+{
+  "result": "PASS",
+  "sdk": 35,
+  "instance": 7,
+  "installedSha256": "57174374e823543c2bd5091cf3fbf23bef003f22228c2829ed3fb2522fbb064a",
+  "engine": "EXO PCM (PlayerHelper.updateCfg)",
+  "asset": "audio-diagnostic.mp4",
+  "enhancedMode": "CAR_BALANCED",
+  "enhancedGainMin": 0.32409424,
+  "enhancedGainMax": 1.5757308,
+  "enhancedOutputPeakMax": 0.27331543,
+  "ceiling": 0.501187,
+  "originalModeBypass": true,
+  "abToggle": "PASS",
+  "pixel": {
+    "file": "device/diagnostic-original-mode.png",
+    "size": [
+      1600,
+      900
+    ],
+    "meanLuma": 23.4,
+    "coarseColors": 42
+  }
+}

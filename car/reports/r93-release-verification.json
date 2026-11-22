@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "version": "3.1.0-car.7-r93",
+  "versionCode": 65,
+  "published": false,
+  "status": "VERIFIED_READY_TO_PUBLISH",
+  "artifact": {
+    "name": "TVBox-Original-Feature-3.1.0-car.7-r93.apk",
+    "sha256": "57174374e823543c2bd5091cf3fbf23bef003f22228c2829ed3fb2522fbb064a",
+    "bytes": 64934774,
+    "package": "com.github.tvbox.osc.jun",
+    "certificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "mappingSha256": "aa549b20c030923d9efc41f0ef321c8274f0465b130d080a92e16b6f56b8ccb4",
+    "minSdk": 32,
+    "abi": [
+      "arm64-v8a"
+    ]
+  },
+  "build": {
+    "assemblePythonRelease": "PASS",
+    "lintPythonRelease": "PASS_WITH_EXISTING_FINDINGS",
+    "lint": {
+      "fatal": 1,
+      "error": 3,
+      "warning": 1234,
+      "newApi": 0
+    }
+  },
+  "audio": {
+    "samplePeakCeiling": 0.501187,
+    "ceilingDbfs": -6.0,
+    "balanced": {
+      "targetDbfs": -22.0,
+      "maxBoostDb": 9.0,
+      "compThresholdDbfs": -18.0,
+      "ratio": 2.0
+    },
+    "highway": {
+      "targetDbfs": -19.5,
+      "maxBoostDb": 12.0,
+      "compThresholdDbfs": -17.0,
+      "ratio": 3.2
+    },
+    "limiterReleaseMs": 80,
+    "onsetBoundRemoved": true,
+    "manualMode": "state-free block scale above 100% (no limiter memory)"
+  },
+  "host": {
+    "result": "PASS",
+    "steps": 26,
+    "evidence": "r93-release/host/result.json"
+  },
+  "device": {
+    "result": "PASS",
+    "sdk": 35,
+    "instance": 7,
+    "installedSha256": "57174374e823543c2bd5091cf3fbf23bef003f22228c2829ed3fb2522fbb064a",
+    "engine": "EXO PCM (PlayerHelper.updateCfg)",
+    "asset": "audio-diagnostic.mp4",
+    "enhancedMode": "CAR_BALANCED",
+    "enhancedGainMin": 0.32409424,
+    "enhancedGainMax": 1.5757308,
+    "enhancedOutputPeakMax": 0.27331543,
+    "ceiling": 0.501187,
+    "originalModeBypass": true,
+    "abToggle": "PASS",
+    "pixel": {
+      "file": "device/diagnostic-original-mode.png",
+      "size": [
+        1600,
+        900
+      ],
+      "meanLuma": 23.4,
+      "coarseColors": 42
+    }
+  },
+  "testEntry": {
+    "settingsRow": "音量测试片（临时）",
+    "activity": ".ui.activity.AudioDiagnosticActivity",
+    "toggle": "切换 增强 / 原声",
+    "removeAfterCalibration": true
+  },
+  "publication": {
+    "sourceCommit": null,
+    "r2": {
+      "verified": false
+    },
+    "github": {
+      "verified": false
+    }
+  },
+  "limitations": [
+    "MuMu API 35 with ARM translation is not B01 API 32 OEM or subjective audio validation.",
+    "The -6 dBFS ceiling headroom figure is a design margin; actual car DSP behaviour needs a real B01 listen test.",
+    "The diagnostic clip is a local asset; it does not prove remote source availability."
+  ]
+}

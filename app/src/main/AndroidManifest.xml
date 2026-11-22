@@ -79,6 +79,10 @@
         <activity
             android:name=".ui.activity.TransferActivity"
             android:screenOrientation="sensorLandscape" />
+        <activity
+            android:name=".ui.activity.AudioDiagnosticActivity"
+            android:exported="false"
+            android:screenOrientation="sensorLandscape" />
 
         <service
             android:name=".dlna.DLNACastService"

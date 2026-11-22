@@ -108,3 +108,6 @@ output-metadata.json
 !/car/handover/R92-AUDIO-AB.md
 !/car/reports/r92-audio-ab/**/*.log
 !/car/reports/r92-release/**/*.log
+!/car/handover/R93-AUDIO-HEADROOM.md
+!/car/reports/r93-release/**/*.log
+!/car/reports/r93-release/**/*.txt

@@ -1,0 +1,14 @@
+{
+  "player/src/main/java/xyz/doikki/videoplayer/exo/CarAudioDynamicsEngine.java": "5df8650a2d5988d4e36bce6354d632885b92c009a796d10f52786074083e6162",
+  "player/src/main/java/xyz/doikki/videoplayer/exo/AudioGainProcessor.java": "38259bce5b8493e0c13a3c90dace67ee42d40001a5a7f90441636076bf44bcfe",
+  "app/src/main/java/com/github/tvbox/osc/ui/activity/AudioDiagnosticActivity.java": "3d1ef56ea269069a9f789b53752e52c1d18fcc7b10fe7f7622d6ec73270aa5da",
+  "app/src/main/java/com/github/tvbox/osc/ui/dialog/AdvancedSettingsDialog.java": "da8631b65ad61669b6b658f72d1565ee3c608c9c5ab4d421a63cb6b4b42782ec",
+  "app/src/main/res/layout/activity_audio_diagnostic.xml": "c62b499acedbd3b0657aa21bb251c0cba6535b210faefa745ccf160129d2b8a3",
+  "app/src/main/AndroidManifest.xml": "24e6b4a421fe6f8c6452af028737ed27735308af721d44871c7635e8677a628e",
+  "app/src/main/assets/audio-diagnostic.mp4": "27f606f0cad107fc28e33c79bf513e12372b02a4f2a06e0ced651590c8cb6603",
+  "app/build.gradle": "8d08682aafe7abbfc8ba5fc5b29b34561e7345c9a78eb74a20cbcedd44e443be",
+  "car/tests/AudioDynamicsHostTest.java": "0e1be63144382d38678091d06e5da73c1fec8963a9a8f5cbfff09563f15540e5",
+  "car/tests/AudioGainProcessorHostTest.java": "0f47966777faefa8e29dae0a64ffe75f850894f1f9dac4ad54dc809764971619",
+  "car/tests/AudioVolumeRoutingHostTest.java": "35c0894f6ffbd3b8ce9dce9f5e98efc09ddfb7eb8556f37b2238976591dcd957",
+  "app/build/outputs/mapping/pythonRelease/mapping.txt": "aa549b20c030923d9efc41f0ef321c8274f0465b130d080a92e16b6f56b8ccb4"
+}

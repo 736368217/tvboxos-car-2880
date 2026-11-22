@@ -1,0 +1,4 @@
+versionName=3.1.0-car.7-r93
+versionCode=65
+screen=1600x900 rotation=1 density=240
+installedSha256=57174374e823543c2bd5091cf3fbf23bef003f22228c2829ed3fb2522fbb064a

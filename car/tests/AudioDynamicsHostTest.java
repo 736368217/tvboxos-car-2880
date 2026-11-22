@@ -9,7 +9,13 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Locale;
 
-/** Runs the production PCM processor on deterministic quiet/loud/silence transitions. */
+/**
+ * Runs the production PCM processor on deterministic quiet/loud/silence transitions.
+ *
+ * <p>r93 expectations: quiet passages are lifted by about +8 dB instead of +11 dB, loud passages
+ * settle around -20 dBFS, and no sample ever leaves the -6 dBFS ceiling that reserves headroom for
+ * the B01 pre-fader hardware DSP.</p>
+ */
 public final class AudioDynamicsHostTest {
     private static int checks;
     private static void check(boolean condition, String label) {
@@ -44,37 +50,36 @@ public final class AudioDynamicsHostTest {
         for (short v : pcm) max = Math.max(max, Math.abs((int) v));
         return max;
     }
-    private static void exercise(Mode mode, int rate, int channels) throws Exception {
+    /** Settle a mode on the quiet fixture; the 1.2 s AGC release needs more than a few packets. */
+    private static short[] settle(AudioGainProcessor p, short[] pcm, int packets) {
+        short[] out = run(p, pcm);
+        for (int i = 0; i < packets; i++) out = run(p, pcm);
+        return out;
+    }
+    private static void exercise(Mode mode, int rate, int channels, float minLift, float maxLift) throws Exception {
         AudioGainProcessor p = AudioGainProcessor.create();
         p.setMode(mode);
         p.configure(new AudioFormat(rate, channels, C.ENCODING_PCM_16BIT));
         p.flush();
         // Large packets exercise the internal 10 ms subdivision, not just 10 ms queueInput calls.
-        short[] quiet = tone(rate, channels, 100, .04472136);
-        short[] loud = tone(rate, channels, 100, .2821727);
+        short[] quiet = tone(rate, channels, 100, .04472136); // -30 dBFS RMS
+        short[] loud = tone(rate, channels, 100, .2821727); // -14 dBFS RMS
         short[] noise = tone(rate, channels, 100, .0005);
         short[] silence = new short[quiet.length];
+        float ceiling = CarAudioDynamicsEngine.SAMPLE_PEAK_CEILING * 32768;
         check(Arrays.equals(noise, run(p, noise)), "noise below gate stays at unity from cold");
-        short[] initial = run(p, quiet), settledQuiet = initial;
-        for (int i = 0; i < 29; i++) settledQuiet = run(p, quiet);
+        short[] settledQuiet = settle(p, quiet, 120);
         double qi = db(quiet, 0), qo = db(settledQuiet, 0), li = db(loud, 0);
-        check(qo - qi >= 8.0, "quiet passages lifted: " + qi + " -> " + qo);
+        check(qo - qi >= minLift, "quiet passages lifted toward the mode target: " + qi + " -> " + qo);
+        check(qo - qi <= maxLift, "quiet lift stays inside the design window: " + qi + " -> " + qo);
         check(Arrays.equals(noise, run(p, noise)), "quiet boost must not raise following noise floor");
         check(Arrays.equals(silence, run(p, silence)), "digital silence remains silent");
-        short[] settledLoud = run(p, loud);
-        double onset = db(Arrays.copyOf(settledLoud, rate / 100 * channels), 0);
-        check(onset <= li + 0.05, "loud onset must not exceed raw RMS at 100%: " + onset);
-        for (int i = 0; i < 19; i++) settledLoud = run(p, loud);
+        short[] onset = run(p, loud);
+        check(peak(onset) <= ceiling + 1, "loud onset never leaves the -6 dBFS ceiling: " + peak(onset));
+        short[] settledLoud = settle(p, loud, 19);
         double lo = db(settledLoud, 0);
         check(lo < li - 1.5, "steady loud passages attenuated: " + li + " -> " + lo);
         check(Math.abs(lo - qo) < 4, "settled gap < 4 dB: " + (lo - qo));
-        // Large input plus 500% must never wrap or exceed -1.5 dBFS plus 1 PCM16 LSB.
-        p.setGain(5f);
-        short[] transientInput = tone(rate, channels, 100, .97);
-        transientInput[0] = Short.MIN_VALUE;
-        short[] limited = run(p, transientInput);
-        check(limited[0] < 0 && peak(limited) <= CarAudioDynamicsEngine.SAMPLE_PEAK_CEILING * 32768 + 1,
-                "linked limiter ceiling: " + peak(limited));
         if (channels > 1) {
             for (int i = 0; i < quiet.length; i += channels) quiet[i] *= -1;
             short[] linked = run(p, quiet);
@@ -83,18 +88,30 @@ public final class AudioDynamicsHostTest {
             }
             check(true, "one gain per frame preserves polarity across channels");
         }
+        // Large input plus 500% must never wrap or exceed the -6 dBFS ceiling plus 1 PCM16 LSB.
+        p.setGain(5f);
+        short[] transientInput = tone(rate, channels, 100, .97);
+        transientInput[0] = Short.MIN_VALUE;
+        short[] limited = run(p, transientInput);
+        check(limited[0] < 0 && peak(limited) <= ceiling + 1, "linked limiter ceiling: " + peak(limited));
+        check(peak(limited) >= ceiling * 0.85, "limiter reaches its ceiling instead of a hidden gain cut: " + peak(limited));
+        // The limiter must recover per sample, otherwise loud passages stay ducked after a transient.
+        p.setGain(1f);
+        short[] recovered = settle(p, quiet, 120);
+        check(db(recovered, 0) - qi >= 7.0, "limiter releases after the transient: " + db(recovered, 0));
         p.setGain(0f);
         check(peak(run(p, loud)) == 0, "explicit PCM mute");
         System.out.printf(Locale.ROOT,
-                "%s %dHz %dch quiet %.2f -> %.2f dBFS loud %.2f -> %.2f dBFS gap %.2f -> %.2f dB onset %.2f dBFS peak %.6f%n",
-                mode, rate, channels, qi, qo, li, lo, li - qi, lo - qo, onset, peak(limited) / 32768f);
+                "%s %dHz %dch quiet %.2f -> %.2f dBFS loud %.2f -> %.2f dBFS gap %.2f -> %.2f dB onset peak %.6f limiter peak %.6f%n",
+                mode, rate, channels, qi, qo, li, lo, li - qi, lo - qo,
+                peak(onset) / 32768f, peak(limited) / 32768f);
     }
 
     public static void main(String[] args) throws Exception {
-        exercise(Mode.CAR_BALANCED, 48000, 2);
-        exercise(Mode.CAR_BALANCED, 44100, 1);
-        exercise(Mode.CAR_BALANCED, 96000, 8);
-        exercise(Mode.CAR_HIGHWAY, 48000, 2);
+        exercise(Mode.CAR_BALANCED, 48000, 2, 7.5f, 8.6f);
+        exercise(Mode.CAR_BALANCED, 44100, 1, 7.5f, 8.6f);
+        exercise(Mode.CAR_BALANCED, 96000, 8, 7.5f, 8.6f);
+        exercise(Mode.CAR_HIGHWAY, 48000, 2, 9.8f, 11.2f);
         check(Mode.fromPreference(null, false) == Mode.OFF && Mode.fromPreference(null, true) == Mode.CAR_BALANCED,
                 "legacy off/on migration");
         check(Mode.fromPreference(2, false) == Mode.CAR_HIGHWAY && Mode.fromPreference(0, true) == Mode.OFF,

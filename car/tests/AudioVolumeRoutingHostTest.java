@@ -2,6 +2,7 @@ import com.github.tvbox.osc.car.VolumeBoostMath;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.audio.AudioProcessor;
 import xyz.doikki.videoplayer.exo.AudioGainProcessor;
+import xyz.doikki.videoplayer.exo.CarAudioDynamicsEngine;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -29,7 +30,11 @@ public final class AudioVolumeRoutingHostTest {
                     input.putShort((short) 4000).flip();
                     pcm.queueInput(input);
                     float output = pcm.getOutput().getShort() * VolumeBoostMath.outputVolume(gain, factor, true, true);
-                    eq(output, Math.round(4000 * gain) * factor, "PCM gain exactly once episode " + episode);
+                    // Manual gain above 100% is capped by the -6 dBFS sample-peak ceiling.
+                    float ceiling = Math.round(CarAudioDynamicsEngine.SAMPLE_PEAK_CEILING * 32768f);
+                    float expected = Math.min(Math.round(4000 * gain), ceiling) * factor;
+                    check(Math.abs(output - expected) <= 1.5f,
+                            "PCM gain exactly once episode " + episode + ": " + output + " != " + expected);
                 }
                 eq(VolumeBoostMath.outputVolume(gain, factor, false, true), Math.min(1f, gain) * factor,
                         "non-PCM enhanced gain exactly once");

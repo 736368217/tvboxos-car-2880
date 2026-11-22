@@ -8,3 +8,6 @@
 /car/reports/r92-release/**/*.err -diff
 /car/reports/r92-release/publication/r2-range.headers -diff
 /car/reports/r92-release/publication/r2-r91-range.headers -diff
+/car/reports/r93-release/** -text whitespace=cr-at-eol
+/car/reports/r93-release/**/*.log -diff
+/car/reports/r93-release/**/*.err -diff
