@@ -54,4 +54,4 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 - [原始交付档案](DELIVERY-ORIGINAL-APP.md)及旧版本交接、报告只证明其对应版本，不作为当前构建/发布手册；现役行为按本 README 指向的说明和证据核对。
 - `car/reports/main-72e38f61-full-test.html` 是 r90 / `72e38f61` 的历史测试报告；其中 12 变体和低 API 风险是收敛前的结果，不是当前验收要求。
 
-2026-11-21：当前已发布 **3.1.0-car.7-r92 / versionCode 64**（源码 `c94c23de`）；**3.1.0-car.7-r93 / versionCode 65** 已通过主机 26 项、设备实测与 B01 门禁，正在做主备发布。r93 把输出天花板降到 -6 dBFS 并为车机前级预留余量，详见[音频余量说明](car/handover/R93-AUDIO-HEADROOM.md)。设置 → 高级设置 内新增**临时**测试入口「音量测试片（临时）」，播完标定即删。旧 [r92 回读](car/reports/r92-release-verification.json)保留原产物身份。真车 OEM 行为与听感仍待实测。
+2026-11-21：当前已发布 **3.1.0-car.7-r93 / versionCode 65**，源码 `5f826398`。同一签名 APK 已发布到 R2 主通道与 GitHub 备用 Release，整包 SHA、资产摘要、原证书与 notes 回读一致，B01 CI 通过（run 45047186066）。r93 把输出天花板降到 -6 dBFS、DRC 改为逐采样 80 ms 平滑限幅，并在设置内加入**临时**「音量测试片（临时）」入口用于实车标定，详见[音频余量说明](car/handover/R93-AUDIO-HEADROOM.md)与[版本回读](car/reports/r93-release-verification.json)。旧 [r92 回读](car/reports/r92-release-verification.json)保留原产物身份。真车 OEM 行为与听感仍待实测。
