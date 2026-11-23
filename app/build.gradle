@@ -7,9 +7,9 @@ android {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
         // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 65
-        versionName '3.1.0-car.7-r93'
-        // r93: -6 dBFS hardware-DSP headroom, per-sample limiter, temporary audio test clip.
+        versionCode 66
+        versionName '3.1.0-car.7-r94'
+        // r94: built-in GitHub acceleration for subscriptions/resources, retired-node quarantine.
         multiDexEnabled true
         //设置room的Schema的位置
         javaCompileOptions {

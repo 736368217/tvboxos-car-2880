@@ -111,3 +111,6 @@ output-metadata.json
 !/car/handover/R93-AUDIO-HEADROOM.md
 !/car/reports/r93-release/**/*.log
 !/car/reports/r93-release/**/*.txt
+!/car/handover/R94-GITHUB-ACCEL.md
+!/car/reports/r94-github/**/*.log
+!/car/reports/r94-github/**/*.txt

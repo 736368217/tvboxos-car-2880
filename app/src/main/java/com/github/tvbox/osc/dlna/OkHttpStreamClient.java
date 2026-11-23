@@ -27,7 +27,7 @@ public class OkHttpStreamClient extends AbstractStreamClient<OkHttpStreamClient.
     public OkHttpStreamClient(Configuration configuration) {
         this.configuration = configuration;
         int timeout = configuration.getTimeoutSeconds() + 5;
-        this.httpClient = new OkHttpClient.Builder()
+        this.httpClient = com.github.tvbox.osc.util.GitHubCdnInterceptor.install(new OkHttpClient.Builder())
                 .connectTimeout(timeout, TimeUnit.SECONDS)
                 .readTimeout(timeout, TimeUnit.SECONDS)
                 .build();

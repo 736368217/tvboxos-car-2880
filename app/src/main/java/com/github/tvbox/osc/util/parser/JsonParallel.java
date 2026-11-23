@@ -31,7 +31,7 @@ public class JsonParallel {
     public static JSONObject parse(LinkedHashMap<String, String> jx, String url) {
         try {
             if (jx != null && jx.size() > 0) {
-                client = new OkHttpClient();
+                client = com.github.tvbox.osc.util.GitHubCdnInterceptor.install(new OkHttpClient.Builder()).build();
                 // 使用线程池并发处理任务
                 executorService = Executors.newFixedThreadPool(5);
                 CompletionService<JSONObject> completionService = new ExecutorCompletionService<>(executorService);

@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "version": "3.1.0-car.7-r94",
+  "versionCode": 66,
+  "published": false,
+  "status": "VERIFIED_READY_TO_PUBLISH",
+  "artifact": {
+    "name": "TVBox-Original-Feature-3.1.0-car.7-r94.apk",
+    "sha256": "4243288a632bf03ca1bb7d702a2fa47357b2521d6ad1a7da350c3269410f04e4",
+    "bytes": 64947062,
+    "package": "com.github.tvbox.osc.jun",
+    "certificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "mappingSha256": "829fe919eca63a2ecd64a4e6cd5a024dc14256d7f5f76f65a0bfb42876d1bb19",
+    "minSdk": 32,
+    "abi": [
+      "arm64-v8a"
+    ]
+  },
+  "build": {
+    "assemblePythonRelease": "PASS",
+    "lintPythonRelease": "PASS_WITH_EXISTING_FINDINGS",
+    "lint": {
+      "fatal": 1,
+      "error": 3,
+      "warning": 1234,
+      "newApi": 0
+    }
+  },
+  "routing": {
+    "catalogue": "https://lancelotrar.github.io/cdn-url/",
+    "nodes": [
+      "v4.gh-proxy.org",
+      "gh-proxy.com",
+      "gh-proxy.org",
+      "cdn.gh-proxy.org",
+      "ghproxy.net",
+      "ghfast.top"
+    ],
+    "apiCapableNodes": [
+      "v4.gh-proxy.org",
+      "gh-proxy.com",
+      "gh-proxy.org",
+      "cdn.gh-proxy.org"
+    ],
+    "settingsUi": "none",
+    "maxMirrorAttempts": 3,
+    "coverage": [
+      "subscription/config GET",
+      "jar/js GET",
+      "cover/image GET",
+      "update query/download",
+      "python requests GET/HEAD incl. downloadPlugin"
+    ],
+    "exclusions": [
+      "non-GitHub hosts",
+      "R2 primary",
+      "requests with Authorization/Cookie/token",
+      "POST/PUT/PATCH",
+      "IJK native decode",
+      "WebView",
+      "exo segment requests"
+    ],
+    "retirement": "TLS identity failure -> 6h suspension and automatic re-probe; 404/410/416 never penalise a service; HTML parking pages and foreign redirects use the normal cooldown"
+  },
+  "host": {
+    "result": "PASS",
+    "suites": 28,
+    "note": "includes GitHubCdnHostTest and the real-Request/Response transport suite"
+  },
+  "device": {
+    "result": "PASS",
+    "sdk": 35,
+    "instance": 7,
+    "installedSha256": "4243288a632bf03ca1bb7d702a2fa47357b2521d6ad1a7da350c3269410f04e4",
+    "events": [
+      {
+        "name": "target_version",
+        "pass": true,
+        "detail": "3.1.0-car.7-r94"
+      },
+      {
+        "name": "manual_check_clicked",
+        "pass": true,
+        "detail": "native settings view"
+      },
+      {
+        "name": "r2_current_version_completes",
+        "pass": true,
+        "detail": "latest-version dialog visible"
+      },
+      {
+        "name": "app_stack_github_raw",
+        "pass": true,
+        "detail": "bytes=13 first_line=Hello World!"
+      },
+      {
+        "name": "app_stack_release_asset",
+        "pass": true,
+        "detail": "bytes=110"
+      }
+    ],
+    "evidence": "r94-github/device/result.json",
+    "r2Unaffected": true,
+    "isolatedInstance": true,
+    "ownerInstallUntouched": true
+  },
+  "publication": {
+    "sourceCommit": null,
+    "r2": {
+      "verified": false
+    },
+    "github": {
+      "verified": false
+    }
+  },
+  "limitations": [
+    "MuMu API 35 with ARM translation is not B01 API 32 OEM network behaviour.",
+    "Public mirror availability and latency change over time; the runtime catalogue handles that, but no single measurement guarantees future capacity.",
+    "Requests carrying credentials or using non-GET methods intentionally bypass all mirrors."
+  ]
+}

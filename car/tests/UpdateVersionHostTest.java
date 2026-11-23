@@ -99,72 +99,28 @@ public final class UpdateVersionHostTest {
         eqInt(UpdateVersion.pickApk(new String[]{"TVBOX-R49.APK"}, new long[]{1L}), 0,
                 "upper-case .APK is recognised");
 
-        // ---------- Catalogue-backed update routes ----------
+        // ---------- Shared, built-in-only transport routes ----------
         UpdateVersion.Channel[] direct = UpdateVersion.channels("736368217", "tvboxos-car-2880", "");
-        eq(direct[0].prefix, "", "source list retains the direct API");
-        eq(direct[0].apiUrl, "https://api.github.com/repos/736368217/tvboxos-car-2880/releases/latest", "direct API shape");
-        boolean hasCdn = false;
-        for (UpdateVersion.Channel channel : direct) {
-            if (channel.prefix.equals("https://cdn.gh-proxy.org/")) {
-                hasCdn = true;
-                eq(channel.apiUrl, "https://cdn.gh-proxy.org/api.github.com/repos/736368217/tvboxos-car-2880/releases/latest", "metadata route strips nested scheme");
-            }
-            check(!channel.prefix.contains("ghfast.top") && !channel.prefix.contains("ghproxy.net"), "retired API routes are not built-ins");
-        }
-        check(hasCdn, "catalogue CDN fallback present");
-        UpdateVersion.Channel[] custom = UpdateVersion.channels("o", "r", "https://my-mirror.example/");
-        eq(custom[0].label, "自定义", "custom route remains supported");
-        check(custom[0].apiUrl.startsWith("https://my-mirror.example/https://api.github.com/"), "custom prefixes retain their semantics");
-        UpdateVersion.Channel[] dedup = UpdateVersion.channels("o", "r", "https://gh-proxy.org");
-        int orgCount = 0;
-        for (UpdateVersion.Channel channel : dedup) if (channel.prefix.equals("https://gh-proxy.org/")) orgCount++;
-        eqInt(orgCount, 1, "catalogue mirror deduplicated and unsupported Web route omitted");
-        eq(UpdateVersion.applyPrefix(" https://gh-proxy.org ", "https://github.com/o/r.apk"), "https://gh-proxy.org/github.com/o/r.apk", "trim prefix and normalize slash");
-        eq(UpdateVersion.applyPrefix("https://gh-proxy.org/", "https://gh-proxy.org/github.com/o/r.apk"), "https://gh-proxy.org/github.com/o/r.apk", "do not double wrap");
-        eq(UpdateVersion.applyPrefix("https://gh-proxy.org.evil.example/", "https://github.com/o/r.apk"), "https://gh-proxy.org.evil.example/https://github.com/o/r.apk", "host-path rule requires an exact host");
-        eq(UpdateVersion.applyPrefix("https://gh-proxy.org/", "file:///local.apk"), "file:///local.apk", "non-HTTP URL is unchanged");
+        eqInt(direct.length, 2, "public API + HTML fallback; transport owns CDN failover");
+        eq(direct[0].prefix, "", "logical source is never a mirror");
+        eq(direct[0].apiUrl, "https://api.github.com/repos/736368217/tvboxos-car-2880/releases/latest", "API shape retained");
+        UpdateVersion.Channel[] custom = UpdateVersion.channels("o", "r", "https://retired.example/");
+        eq(custom[0].apiUrl, "https://api.github.com/repos/o/r/releases/latest", "old custom preference ignored");
+        String asset = "https://github.com/o/r/releases/download/v1/app.apk";
+        eq(UpdateVersion.applyPrefix("https://gh-proxy.org/", asset), "https://gh-proxy.org/github.com/o/r/releases/download/v1/app.apk", "host-path format");
+        eq(UpdateVersion.applyPrefix("https://gh-proxy.com/", asset), "https://gh-proxy.com/github.com/o/r/releases/download/v1/app.apk", "current catalogue com format");
+        eq(UpdateVersion.applyPrefix("https://ghproxy.net/", asset), "https://ghproxy.net/https://github.com/o/r/releases/download/v1/app.apk", "URL-prefix format");
+        eq(UpdateVersion.applyPrefix("https://gh-proxy.org.evil.example/", asset), asset, "unlisted host ignored");
+        eq(UpdateVersion.applyPrefix("https://gh-proxy.org/", "file:///local.apk"), "file:///local.apk", "non HTTP unchanged");
         String r2 = "https://dl.736.de5.net/tvboxos-car-2880/app.apk";
-        String[] r2Routes = UpdateVersion.downloadCandidates(r2, "https://gh-proxy.org/", "");
-        eqInt(r2Routes.length, 1, "R2 never inherits GitHub acceleration");
-        eq(r2Routes[0], r2, "R2 URL unchanged");
-        eqInt(UpdateVersion.downloadCandidates("https://bad host/app.apk", "", "").length, 0, "malformed origin rejected");
-
-        // ---------- 下载候选（查询通 ≠ 下载通，必须能换通道重试） ----------
-        String rawAsset = "https://github.com/o/r/releases/download/v1/app.apk";
-        String[] fromDirect = UpdateVersion.downloadCandidates(rawAsset, "", "");
-        check(fromDirect.length >= 3, "direct + mirrors, got " + fromDirect.length);
-        eq(fromDirect[0], rawAsset, "direct channel tries the raw url first");
-        eq(fromDirect[1], "https://gh-proxy.org/github.com/o/r/releases/download/v1/app.apk", "catalogue host-path format");
-        eq(fromDirect[2], "https://cdn.gh-proxy.org/github.com/o/r/releases/download/v1/app.apk", "CDN host-path format");
-        eq(fromDirect[3], "https://v4.gh-proxy.org/github.com/o/r/releases/download/v1/app.apk", "IPv4 host-path format");
-        eq(fromDirect[4], "https://gh-proxy.com/https://github.com/o/r/releases/download/v1/app.apk", "legacy service keeps URL format");
-        // 同一地址不重复出现
-        boolean dup = false;
-        for (int i = 0; i < fromDirect.length; i++) {
-            for (int j = i + 1; j < fromDirect.length; j++) {
-                if (fromDirect[i].equals(fromDirect[j])) dup = true;
-            }
-        }
-        check(!dup, "candidates must be unique");
-        // 查询走 ghfast 成功时，下载也先走 ghfast，再回直连，再另一个镜像
-        String[] fromGhfast = UpdateVersion.downloadCandidates(rawAsset, "https://ghfast.top/", "");
-        check(fromGhfast[0].startsWith("https://ghfast.top/https://github.com/"),
-                "preferred mirror first, got " + fromGhfast[0]);
-        eq(fromGhfast[1], rawAsset, "then the raw url");
-        // 用户自定义镜像参与候选
-        String[] withUser =
-                UpdateVersion.downloadCandidates(rawAsset, "", "https://my-mirror.example/");
-        check(withUser[1].startsWith("https://my-mirror.example/"),
-                "user mirror is a candidate, got " + withUser[1]);
-        // 空地址不产生候选
-        eqInt(UpdateVersion.downloadCandidates(null, "", "").length, 0, "null url -> no candidates");
-        eqInt(UpdateVersion.downloadCandidates("", "", "").length, 0, "empty url -> no candidates");
-        // 镜像没有结尾斜杠也要能拼
-        eq(custom[0].apply("https://github.com/x/y.apk"),
-                "https://my-mirror.example/https://github.com/x/y.apk", "asset url follows the channel");
-        eq(UpdateVersion.applyPrefix("", "https://github.com/x/y.apk"),
-                "https://github.com/x/y.apk", "no prefix leaves the url alone");
-        eq(UpdateVersion.applyPrefix("https://m/", null), null, "null url tolerated");
+        eq(UpdateVersion.downloadCandidates(r2, "https://gh-proxy.org/", "")[0], r2, "R2 untouched");
+        eqInt(UpdateVersion.downloadCandidates("https://bad host/app.apk", "", "").length, 0, "malformed rejected");
+        eqInt(UpdateVersion.downloadCandidates(asset, "https://retired.example/", "https://old.example/").length, 1, "no repeated candidate expansion");
+        eq(UpdateVersion.downloadCandidates(asset, "", "")[0], asset, "logical APK identity retained");
+        eqInt(UpdateVersion.downloadCandidates(null, "", "").length, 0, "null candidates");
+        eqInt(UpdateVersion.downloadCandidates("", "", "").length, 0, "empty candidates");
+        eq(UpdateVersion.applyPrefix("", asset), asset, "empty prefix");
+        eq(UpdateVersion.applyPrefix("https://m/", null), null, "null prefix input tolerated");
 
         // ---------- 说明文本 ----------
         String notes = UpdateVersion.cleanNotes(
@@ -219,7 +175,7 @@ public final class UpdateVersionHostTest {
 
         // Built-in CDN API routes precede the final direct GitHub HTML fallback.
         UpdateVersion.Channel[] chans = UpdateVersion.channels("o", "r", "");
-        eqInt(chans.length, 6, "four verified CDN APIs + direct API + direct Web");
+        eqInt(chans.length, 2, "one health-aware public API source plus direct Web fallback");
         boolean apiFirst = true;
         boolean sawWeb = false;
         for (UpdateVersion.Channel channel : chans) {
@@ -237,7 +193,7 @@ public final class UpdateVersionHostTest {
         // 镜像必须排在直连之前，否则用户会长时间停在 0%。
         UpdateVersion.Channel[] preferred = UpdateVersion.preferMirrors(chans);
         eqInt(preferred.length, chans.length, "preferMirrors keeps every channel");
-        check(preferred[0].prefix.length() > 0, "mirror channel first, got " + preferred[0].prefix);
+        eq(preferred[0].prefix, "", "shared interceptor, no nested mirror expansion");
         int firstDirect = -1;
         int lastMirror = -1;
         for (int i = 0; i < preferred.length; i++) {

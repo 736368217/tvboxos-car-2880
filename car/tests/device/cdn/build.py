@@ -1,5 +1,6 @@
 """Build the separate CDN acceptance APK from the exact product R8 mapping."""
 import argparse
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -59,10 +60,29 @@ def run(cmd):
     subprocess.run([str(v) for v in cmd], check=True)
 
 
+# Runtime classes come from the target APK; these jars are only for javac/d8 resolution.
+cache = Path(os.environ.get('GRADLE_USER_HOME', str(Path.home() / '.gradle'))) / 'caches/modules-2/files-2.1'
+libs = []
+for group, name, versions in [('com.squareup.okhttp3', 'okhttp', ['3.12.11']),
+                              ('com.squareup.okio', 'okio', ['2.8.0', '2.10.0', '1.15.0']),
+                              ('org.jetbrains.kotlin', 'kotlin-stdlib', ['1.6.21', '1.5.31', '1.4.31'])]:
+    found = []
+    for version in versions:
+        found = list((cache / group / name / version).glob('*/*.jar'))
+        if found:
+            break
+    if not found:
+        found = list((cache / group / name).glob('*/*/*.jar'))
+    if not found:
+        raise RuntimeError('Missing cached dependency: ' + name)
+    libs.append(found[0])
+
+
 run([bin_dir / ('javac' + exe), '-encoding', 'UTF-8', '-source', '8', '-target', '8', '-Xlint:-options',
-     '-cp', android, '-d', out / 'classes', Path(__file__).with_name('CdnProbe.java'), out / 'Names.java'])
+     '-cp', os.pathsep.join([str(android)] + [str(j) for j in libs]), '-d', out / 'classes', Path(__file__).with_name('CdnProbe.java'), out / 'Names.java'])
 run([bin_dir / ('jar' + exe), 'cf', out / 'test.jar', '-C', out / 'classes', '.'])
 run([bin_dir / ('java' + exe), '-cp', bt / 'lib/d8.jar', 'com.android.tools.r8.D8', '--lib', android,
+     *[item for j in libs for item in ('--lib', str(j))],
      '--min-api', '32', '--output', out / 'dex', out / 'test.jar'])
 (out / 'AndroidManifest.xml').write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.tvbox.car.cdntest"><uses-sdk android:minSdkVersion="32" android:targetSdkVersion="32"/><application android:label="B01 CDN acceptance"/><instrumentation android:name="com.tvbox.car.cdntest.CdnProbe" android:targetPackage="' + a.target_package + '"/></manifest>', encoding='utf-8')
 run([bt / ('aapt2' + exe), 'link', '-I', android, '--manifest', out / 'AndroidManifest.xml', '-o', out / 'base.apk'])

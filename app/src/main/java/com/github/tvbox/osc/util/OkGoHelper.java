@@ -309,6 +309,7 @@ public class OkGoHelper {
     }
 
     public static void init() {
+        GitHubCdnInterceptor.init(App.getInstance());
         initDnsOverHttps();
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -324,6 +325,7 @@ public class OkGoHelper {
 
         //builder.retryOnConnectionFailure(false);
 
+        GitHubCdnInterceptor.install(builder);
         builder.addInterceptor(loggingInterceptor);
 
         builder.readTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);
@@ -368,6 +370,7 @@ public class OkGoHelper {
             loggingInterceptor.setColorLevel(Level.OFF);
         }
 
+        GitHubCdnInterceptor.install(builder);
         builder.addInterceptor(loggingInterceptor);
 
         builder.readTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);

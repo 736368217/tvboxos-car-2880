@@ -36,6 +36,7 @@ public class OkHttp {
         OkHttpClient base = OkGoHelper.getDefaultClient();
         if (base != null) return client = base.newBuilder().dns(dns()).build();
         OkHttpClient.Builder builder = new OkHttpClient.Builder().dns(dns()).proxySelector(OkGoHelper.proxySelector()).proxyAuthenticator(OkGoHelper.proxyAuthenticator()).connectTimeout(TIMEOUT, TimeUnit.MILLISECONDS).readTimeout(TIMEOUT, TimeUnit.MILLISECONDS).writeTimeout(TIMEOUT, TimeUnit.MILLISECONDS);
+        com.github.tvbox.osc.util.GitHubCdnInterceptor.install(builder);
         setOkHttpSsl(builder);
         return client = builder.build();
     }

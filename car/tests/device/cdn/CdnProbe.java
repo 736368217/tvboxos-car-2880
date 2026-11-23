@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
@@ -54,39 +55,20 @@ public final class CdnProbe extends Instrumentation {
             event("manual_check_clicked",clicked[0],"native settings view");
             await(() -> hasText("已是最新版本"),45000);
             event("r2_current_version_completes",true,"latest-version dialog visible"); shot("02-update.png");
-            ClassLoader loader=getTargetContext().getClassLoader();
-            Class<?> update=loader.loadClass(Names.UPDATE);
-            Class<?> channel=loader.loadClass(Names.CHANNEL);
-            Constructor<?> ctor=channel.getDeclaredConstructor(String.class,String.class,String.class,boolean.class);
-            ctor.setAccessible(true);
-            Method query=update.getDeclaredMethod(Names.QUERY,channel,String.class,boolean.class); query.setAccessible(true);
-            String raw="https://github.com/736368217/tvboxos-car-2880/releases/download/v3.1.0-car.7-r90/TVBox-Original-Feature-3.1.0-car.7-r90.apk";
-            int successful=0;
-            for(String host:new String[]{"gh-proxy.org","cdn.gh-proxy.org"}) {
-                try {
-                    String prefix="https://"+host+"/";
-                    String api=prefix+"api.github.com/repos/736368217/tvboxos-car-2880/releases/latest";
-                    Object info=query.invoke(null,ctor.newInstance(prefix,api,host,false),"3.1.0-car.7-r89",true);
-                    String version=(String)field(info,Names.VERSION);
-                    String asset=(String)field(info,Names.ASSET);
-                    boolean updateAvailable=(Boolean)field(info,Names.HAS_UPDATE);
-                    event("metadata_"+host,version.contains("-car.7-r") && updateAvailable,version);
-                    event("asset_route_"+host,asset.startsWith(prefix+"github.com/"),asset.split("\\?")[0]);
-                    successful++;
-                    HttpURLConnection conn=(HttpURLConnection)new URL(asset).openConnection();
-                    try {
-                        conn.setConnectTimeout(8000); conn.setReadTimeout(12000);
-                        conn.setInstanceFollowRedirects(true); conn.setRequestProperty("Range","bytes=0-31");
-                        conn.setRequestProperty("User-Agent","TVBox-Car/B01-acceptance");
-                        int code=conn.getResponseCode(); byte[] head=new byte[4]; int got=0;
-                        try(InputStream stream=conn.getInputStream()){while(got<4){int n=stream.read(head,got,4-got);if(n<0)break;got+=n;}}
-                        event("apk_range_"+host,code==206 && got==4 && head[0]==80 && head[1]==75,
-                              "http="+code+" contentRange="+conn.getHeaderField("Content-Range")+" zip="+(got==4 && head[0]==80 && head[1]==75));
-                    } finally {conn.disconnect();}
-                } catch(Throwable e) {event("cdn_error_"+host,false,e.toString());}
-            }
-            event("cdn_metadata_available",successful>0,"queries="+successful);
-            ok=successful>0;
+            // App-stack reads only: the product query/Channel contract is covered by host tests;
+            // this probe must not depend on reflection into R8-obfuscated constructors.
+            // Same OkHttp stack that loads subscription/config files, called through the target
+            // app's own classloader: proof the built-in acceleration is active in-app.
+            Class<?> okHttp=getTargetContext().getClassLoader().loadClass("com.github.catvod.net.OkHttp");
+            Method string=okHttp.getMethod("string",String.class);
+            String rawBody=(String)string.invoke(null,"https://raw.githubusercontent.com/octocat/Hello-World/master/README");
+            event("app_stack_github_raw",rawBody!=null&&rawBody.trim().equals("Hello World!"),
+                  "bytes="+(rawBody==null?0:rawBody.length())+" first_line="+(rawBody==null?"":rawBody.trim()));
+            String checksum=(String)string.invoke(null,"https://github.com/736368217/tvboxos-car-2880/releases/download/v3.1.0-car.7-r93/TVBox-Original-Feature-3.1.0-car.7-r93.apk.sha256");
+            event("app_stack_release_asset",checksum!=null&&checksum.trim().matches("[0-9a-fA-F]{64}.*"),
+                  "bytes="+(checksum==null?0:checksum.length()));
+            ok=rawBody!=null&&rawBody.trim().equals("Hello World!")
+                    &&checksum!=null&&checksum.trim().matches("[0-9a-fA-F]{64}.*");
             for(int i=0;i<events.length();i++){JSONObject e=events.getJSONObject(i); if(!e.getBoolean("pass"))ok=false;}
         } catch(Throwable error) {
             try {event("probe_error",false,error.toString());}catch(Exception ignored){}

@@ -22,6 +22,38 @@ public final class PythonHttp {
     private PythonHttp() {
     }
 
+    /** Shared catalogue/health for Python requests, including native streaming downloads. */
+    public static String githubCandidates(String method, String url, String headersJson) {
+        try {
+            Request.Builder builder = new Request.Builder().url(url).method(method.toUpperCase(Locale.ROOT), null);
+            JSONObject headers = new JSONObject(headersJson);
+            Iterator<String> keys = headers.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                builder.header(key, headers.optString(key));
+            }
+            if (com.github.tvbox.osc.util.GitHubCdnInterceptor.eligible(builder.build())) {
+                return new JSONArray(com.github.tvbox.osc.util.GitHubCdn.shared().candidates(url)).toString();
+            }
+        } catch (Exception invalid) { /* Not a public read request. */ }
+        return new JSONArray(java.util.Collections.singletonList(url)).toString();
+    }
+
+    public static void githubResult(String original, String candidate, int status, boolean retired) {
+        String origin = com.github.tvbox.osc.util.GitHubCdn.canonical(original);
+        okhttp3.HttpUrl url = okhttp3.HttpUrl.parse(candidate);
+        if (origin == null || url == null || com.github.tvbox.osc.util.GitHubCdn.node(url.host()) == null) return;
+        com.github.tvbox.osc.util.GitHubCdn policy = com.github.tvbox.osc.util.GitHubCdn.shared();
+        if (!retired && status >= 200 && status < 400) policy.success(url.host(), origin);
+        else policy.failure(url.host(), origin, status, retired);
+    }
+
+    public static boolean githubRedirectAllowed(String candidate, String target) {
+        okhttp3.HttpUrl from = okhttp3.HttpUrl.parse(candidate), to = okhttp3.HttpUrl.parse(target);
+        return from != null && to != null && to.isHttps()
+                && com.github.tvbox.osc.util.GitHubCdn.allowedRedirect(to.host(), from.host());
+    }
+
     public static String request(String method,
                                  String url,
                                  String headersJson,

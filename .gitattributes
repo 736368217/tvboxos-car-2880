@@ -11,3 +11,6 @@
 /car/reports/r93-release/** -text whitespace=cr-at-eol
 /car/reports/r93-release/**/*.log -diff
 /car/reports/r93-release/**/*.err -diff
+/car/reports/r94-github/** -text whitespace=cr-at-eol
+/car/reports/r94-github/**/*.log -diff
+/car/reports/r94-github/**/*.err -diff

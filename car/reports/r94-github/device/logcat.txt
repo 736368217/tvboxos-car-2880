@@ -1,0 +1,9 @@
+﻿
+11-23 11:19:09.894  3497  3572 I AppUpdate: r2 manifest ok local=3.1.0-car.7-r94 remote=3.1.0-car.7-r93 hasUpdate=false
+ size=64934774 sha256=57174374E823…
+11-23 11:19:09.900  3497  3572 I AppUpdate: check ok channel=R2 force=true local=3.1.0-car.7-r94 remote=3.1.0-car.7-r93
+ hasUpdate=false sha256=57174374E823…
+11-23 11:19:10.361  3497  3511 I GitHubCdn: ok node=v4.gh-proxy.org origin=raw.githubusercontent.com http=200
+11-23 11:19:10.725  3497  3511 I GitHubCdn: ok node=v4.gh-proxy.org origin=github.com http=200
+
+

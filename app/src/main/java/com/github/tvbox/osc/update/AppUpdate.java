@@ -211,7 +211,7 @@ public final class AppUpdate {
         final Context appContext = context.getApplicationContext();
         POOL.execute(() -> {
             String local = localVersion(appContext);
-            String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
+            String mirror = ""; // Shared health-aware catalogue, no custom/visible setting.
             List<String> failures = new ArrayList<>();
 
             // R2 is authoritative. A successful current-version response also completes the check.
@@ -553,7 +553,7 @@ public final class AppUpdate {
             File partial = new File(target.getAbsolutePath() + ".part");
             String raw = info.apkUrlRaw != null ? info.apkUrlRaw : info.apkUrl;
             String preferred = prefixOf(info.apkUrl, info.apkUrlRaw);
-            String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
+            String mirror = "";
             String[] candidates = isOfficialUrl(raw)
                     ? new String[]{info.apkUrl != null ? info.apkUrl : raw}
                     : UpdateVersion.downloadCandidates(raw, preferred, mirror);
@@ -847,7 +847,7 @@ public final class AppUpdate {
             String best = null;
             if (raw != null) {
                 String preferred = prefixOf(info.apkUrl, info.apkUrlRaw);
-                String mirror = Hawk.get(HawkConfig.UPDATE_MIRROR, "");
+                String mirror = ""; // No user-facing mirror preference; shared built-ins only.
                 String[] candidates = isOfficialUrl(raw)
                         ? new String[]{info.apkUrl != null ? info.apkUrl : raw}
                         : UpdateVersion.downloadCandidates(raw, preferred, mirror);

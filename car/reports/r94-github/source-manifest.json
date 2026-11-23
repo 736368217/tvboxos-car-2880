@@ -1,0 +1,13 @@
+{
+  "app/src/main/java/com/github/tvbox/osc/util/GitHubCdn.java": "2854e19645fdd8fc441f4f3430128c04d6c2a35ad95657e1f13e9826335b9687",
+  "app/src/main/java/com/github/tvbox/osc/util/GitHubCdnInterceptor.java": "2d59b69075feeaafebd8001b85738d459d6998d20de0bbb08dcfcb6ccdd735c6",
+  "app/src/main/java/com/github/tvbox/osc/util/OkGoHelper.java": "43e16ff73f7413d05404161205f0682c6041195ac25d665281fd0417bb1199ba",
+  "app/src/main/java/com/github/tvbox/osc/util/PlainHttp.java": "cb408d7bcaaeb9d248701380f20c842ad82681655d0e2c7a4a9515e4ed88f666",
+  "app/src/main/java/com/github/catvod/net/OkHttp.java": "ee1f88e4e03d92fdaab23ffafc4e16ba1f4441eeefe63f58de5feea7a518ba78",
+  "app/src/main/java/com/github/tvbox/osc/util/parser/JsonParallel.java": "2109c1cc6c2b41325ad55eb6e53ca2e71d0c1409554fadb22ff9ba4788e1f4a1",
+  "app/src/main/java/com/github/tvbox/osc/update/UpdateVersion.java": "68c79a0ec11f65c259dc3153ed3feea87ae2f69163527bbd31e4b31ce4cb22b8",
+  "app/src/python/java/com/undcover/freedom/pyramid/PythonHttp.java": "a0b7523c2f28bbdef1c8402a81c32fd1b2aadb1c85eec57ac8e4c0c35ac33c54",
+  "pyramid/src/python/tvbox_http.py": "eff2f0ef152f0349f45ed5d823cb18b866dbe5db3dd7fabd79703dde9828f4b8",
+  "app/build.gradle": "6d57bec478c5e0683fcf069d25ecd2063cc402b971580452ee2c402e6d9c30d0",
+  "app/build/outputs/mapping/pythonRelease/mapping.txt": "829fe919eca63a2ecd64a4e6cd5a024dc14256d7f5f76f65a0bfb42876d1bb19"
+}

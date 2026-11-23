@@ -170,78 +170,22 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
             return applyPrefix(prefix, url);
         }
     }
-    /** CDN URL catalogue: https://lancelotrar.github.io/cdn-url/ (verified 2026-11-20). */
-    public static final String[] BUILT_IN_MIRRORS = {
-            "https://gh-proxy.org/", "https://cdn.gh-proxy.org/",
-            "https://v4.gh-proxy.org/", "https://gh-proxy.com/"
-    };
+    /** Same catalogue as subscription/Spider traffic; transports perform health-aware failover. */
+    public static final String[] BUILT_IN_MIRRORS = com.github.tvbox.osc.util.GitHubCdn.prefixes();
 
-    private static boolean isBuiltInMirror(String prefix) {
-        for (String builtIn : BUILT_IN_MIRRORS) if (builtIn.equalsIgnoreCase(prefix)) return true;
-        return false;
-    }
-
-    // 下载候选地址：把同一个资产 URL 按通道前缀展开，preferredPrefix 排最前。
-    //
-    // 为什么需要：查询 API 能通不代表下载能通。实测 api.github.com 正常返回，
-    // 但 github.com/.../releases/download/... 会超时 —— 两者是被单独处理的域名。
-    // 所以下载失败要能自动换镜像重试，而不是直接报错。
+    // Keep one logical source. Expanding mirrors here would cause nested retries in the common
+    // interceptor, defeat node quarantine and distort the existing download/progress checks.
     public static String[] downloadCandidates(String rawUrl, String preferredPrefix, String userMirror) {
-        if (rawUrl == null || rawUrl.length() == 0) return new String[0];
-        // GitHub acceleration must never wrap the R2 primary or unrelated origins.
-        try {
-            if (!"github.com".equalsIgnoreCase(java.net.URI.create(rawUrl).getHost())) {
-                return new String[]{rawUrl};
-            }
-        } catch (IllegalArgumentException invalid) {
-            return new String[0];
-        }
-        List<String> ordered = new ArrayList<>();
-        String preferred = preferredPrefix == null ? "" : preferredPrefix;
-        addCandidate(ordered, applyPrefix(preferred, rawUrl));
-        if (preferred.length() > 0) addCandidate(ordered, rawUrl);
-        String mirror = userMirror == null ? "" : userMirror.trim();
-        if (mirror.length() > 0) {
-            if (!mirror.endsWith("/")) mirror = mirror + "/";
-            if (!mirror.equals(preferred)) addCandidate(ordered, applyPrefix(mirror, rawUrl));
-        }
-        for (String prefix : BUILT_IN_MIRRORS) {
-            if (prefix.equals(preferred)) continue;
-            addCandidate(ordered, applyPrefix(prefix, rawUrl));
-        }
-        return ordered.toArray(new String[0]);
-    }
-
-    private static void addCandidate(List<String> ordered, String url) {
-        if (url == null || url.length() == 0) return;
-        if (!ordered.contains(url)) ordered.add(url);
+        if (rawUrl == null || rawUrl.isEmpty()) return new String[0];
+        try { java.net.URI.create(rawUrl); } catch (IllegalArgumentException invalid) { return new String[0]; }
+        String canonical = com.github.tvbox.osc.util.GitHubCdn.canonical(rawUrl);
+        return new String[]{canonical == null ? rawUrl : canonical};
     }
 
     public static Channel[] channels(String owner, String repo, String userMirror) {
         String api = "https://api.github.com/repos/" + owner + "/" + repo + "/releases/latest";
-        List<Channel> out = new ArrayList<>();
-        String mirror = userMirror == null ? "" : userMirror.trim();
-        if (mirror.length() > 0) {
-            if (!mirror.endsWith("/")) mirror = mirror + "/";
-            out.add(new Channel(mirror, applyPrefix(mirror, api), "自定义"));
-        }
-        out.add(new Channel("", api, "直连"));
-        for (String prefix : BUILT_IN_MIRRORS) {
-            String url = applyPrefix(prefix, api);
-            boolean duplicate = false;
-            for (Channel existing : out) {
-                if (existing.apiUrl.equals(url)) duplicate = true;
-            }
-            if (!duplicate) out.add(new Channel(prefix, url, prefix.replace("https://", "").replace("/", "")));
-        }
-        // The catalogue's built-ins support assets; our metadata probes also verified these APIs.
-        // Do not advertise their releases/latest HTML pages: observed 301s lead to an unsupported page.
-        String web = webLatestUrl(owner, repo);
-        if (mirror.length() > 0 && !isBuiltInMirror(mirror)) {
-            out.add(new Channel(mirror, applyPrefix(mirror, web), "自定义web", true));
-        }
-        out.add(new Channel("", web, "直连web", true));
-        return out.toArray(new Channel[0]);
+        return new Channel[]{new Channel("", api, "GitHub（内置加速）"),
+                new Channel("", webLatestUrl(owner, repo), "直连web", true)};
     }
 
     /**
@@ -314,24 +258,15 @@ public final class UpdateVersion implements Comparable<UpdateVersion> {
     }
 
     public static String applyPrefix(String prefix, String url) {
-        if (url == null) return null;
-        if (prefix == null || prefix.trim().length() == 0) return url;
-        String normalized = prefix.trim();
-        if (!normalized.endsWith("/")) normalized += "/";
-        if (url.startsWith(normalized)) return url;
-        if (!url.startsWith("https://") && !url.startsWith("http://")) return url;
-        // cdn-url's gh-proxy.org family uses /github.com/..., not /https://github.com/....
-        String host;
+        if (url == null || prefix == null || prefix.trim().isEmpty()) return url;
+        String origin = com.github.tvbox.osc.util.GitHubCdn.canonical(url);
+        if (origin == null) return url;
         try {
-            host = java.net.URI.create(normalized).getHost();
-        } catch (IllegalArgumentException invalid) {
-            return url;
-        }
-        if ("gh-proxy.org".equalsIgnoreCase(host) || "cdn.gh-proxy.org".equalsIgnoreCase(host)
-                || "v4.gh-proxy.org".equalsIgnoreCase(host)) {
-            return normalized + url.substring(url.indexOf("://") + 3);
-        }
-        return normalized + url;
+            java.net.URI service = java.net.URI.create(prefix.trim());
+            com.github.tvbox.osc.util.GitHubCdn.Node node =
+                    com.github.tvbox.osc.util.GitHubCdn.node(service.getHost());
+            return node == null ? url : node.apply(origin);
+        } catch (IllegalArgumentException invalid) { return url; }
     }
 
     /**

@@ -1,0 +1,158 @@
+{
+  "apk-gate.json": {
+    "bytes": 189,
+    "sha256": "7faea5a45b1cace13d80d8d82c138c116f4198e99302f91e0daef0d9395b9d85"
+  },
+  "build.log": {
+    "bytes": 67500,
+    "sha256": "2f99ce2f5794cb597d7081eef361e5ae1e860b92194a4991bd1f0738ebe4ab47"
+  },
+  "device/01-home.png": {
+    "bytes": 502252,
+    "sha256": "b76bff03c29c6ba2aa21d80725830c38eca5f97f290f5eaaa725fb81e35135b6"
+  },
+  "device/02-update.png": {
+    "bytes": 262481,
+    "sha256": "eb0fbaba257eadaefc13119ca522744cee9714bc7c70df13c50013e723ddb70e"
+  },
+  "device/logcat.txt": {
+    "bytes": 538,
+    "sha256": "669d75af0a1f31dc388b19741873b115ac2bd0f59221f58566c85f5269ab3491"
+  },
+  "device/result.json": {
+    "bytes": 596,
+    "sha256": "422db935e8381ba2d656b8b6e3cfbe20a9a5c74cb47bc29fe583634d6fce3ac3"
+  },
+  "host/AudioDynamicsHostTest.log": {
+    "bytes": 671,
+    "sha256": "ede25d8d497c0a25216fcd546b5b46591bb5b1cef8e8d59a006375f8f8998aca"
+  },
+  "host/AudioGainProcessorHostTest.log": {
+    "bytes": 86,
+    "sha256": "e07b84cdc68484d45c11d99ff6739313111df542ad8b40fe265d1dfd67e83c3f"
+  },
+  "host/AudioOriginalHostTest.log": {
+    "bytes": 91,
+    "sha256": "17b340c1cee7da51a6258bf3eff1240181288c3496a83bc660fc1af1e1ac369e"
+  },
+  "host/AudioVolumeRoutingHostTest.log": {
+    "bytes": 100,
+    "sha256": "0abe8ab7fcc1b632c1200577acbd3ed62f617a1a231e68f27ee0fbaf6fd4b825"
+  },
+  "host/BackBarPolicyHostTest.log": {
+    "bytes": 93,
+    "sha256": "6920725364d004ee7abd53f1f12316bd5881f2061d5eb6551a652443972ddf30"
+  },
+  "host/BackDisplayMetricsHostTest.log": {
+    "bytes": 98,
+    "sha256": "d0db44d8603a63587fb87640379ebeda04d4b3d2930295305103afd519453cf8"
+  },
+  "host/BackNavPolicyHostTest.log": {
+    "bytes": 94,
+    "sha256": "3235bfd4978ccfeb4f003fc83ab9489382cff0b5465e51cb401bb7e4414cfe95"
+  },
+  "host/Car6PostProcessTest.log": {
+    "bytes": 185,
+    "sha256": "38c10df70df29fbac0e4dda38b81f0bc435b48e4dc93f5863f01863c00ee4fac"
+  },
+  "host/Car7RuntimeConfigTest.log": {
+    "bytes": 181,
+    "sha256": "a52f134c9ca62661ff3a7bfcf2343204ef8f4420b35f4375420d7417c867598d"
+  },
+  "host/CoverFormatHostTest.log": {
+    "bytes": 89,
+    "sha256": "e2cbdad273cae80ed31569a3a4f8b4ab59c6dccfa09f57ff40383525fbcab396"
+  },
+  "host/CoverKeyHostTest.log": {
+    "bytes": 88,
+    "sha256": "c5bddb028f4c4e0aad39a44922259722513757b7805bbac889098a92ff6f7c2b"
+  },
+  "host/EdgeBackPolicyHostTest.log": {
+    "bytes": 94,
+    "sha256": "0c054c2d23e957a655955948ecb740fd8afd04b3a537549cafc113574e40de86"
+  },
+  "host/FixedGainHostTest.log": {
+    "bytes": 87,
+    "sha256": "75a60b5041a45a8417d37111bc35583584c902f0114f1ef18a87449c307c3ebc"
+  },
+  "host/GestureAxisHostTest.log": {
+    "bytes": 91,
+    "sha256": "70856994cc17c8a8d8d638fb14a8f41149b009e4a84e36dc6ab82af353e3c380"
+  },
+  "host/GitHubCdnHostTest.log": {
+    "bytes": 87,
+    "sha256": "7ebf4a9d22e72f615941c397bc9f81bc1c5e1c6b2d116de67475d9758d4b1c6c"
+  },
+  "host/javac.log": {
+    "bytes": 878,
+    "sha256": "40e6717045493ad0f4e02c4bfa72e2e286c66d4ccf1635ce6d8bafbc1bd20999"
+  },
+  "host/OfficialManifestHostTest.log": {
+    "bytes": 96,
+    "sha256": "b7f8f86b8d653504c1edd3acf7e31e6af9f9b9fbd0efd04dd66aa778f9822c03"
+  },
+  "host/PlaybackRegressionHostTest.log": {
+    "bytes": 98,
+    "sha256": "6a71c7b6c91ffb0bb80573f3fc59cc3e4dbb5a43fc6e3512a3bb79de6be5f0f2"
+  },
+  "host/PlaybackSessionPolicyHostTest.log": {
+    "bytes": 98,
+    "sha256": "e8cf069ac305a14deeab9edf8540437c2adee38cd0afe524737e53ff2cee7876"
+  },
+  "host/R2ManifestHostTest.log": {
+    "bytes": 90,
+    "sha256": "a2aba78a2c968fbfda8dce95d3cfb615f8dcb29425ee564178ee8882dced0ed9"
+  },
+  "host/result.json": {
+    "bytes": 4241,
+    "sha256": "78cf2e685c3935bf177dd0927572979517ada3e9bbccf6f1cd792580cecc203a"
+  },
+  "host/run_audio_focus_host_test.log": {
+    "bytes": 148,
+    "sha256": "ac19f02bfeaf08dca24968cf35b43c68113d590c766394188333d185ac4ed849"
+  },
+  "host/run_github_cdn_host_test.log": {
+    "bytes": 156,
+    "sha256": "d43cd788d7b632c04167a3f40835d92e62e205379a5b35c4cc0061025ad1da8e"
+  },
+  "host/run_playback_session_host_test.log": {
+    "bytes": 154,
+    "sha256": "35358b9bff9a6a29b7dc3453a20a10eba64e631077585bc5be35695430cf9143"
+  },
+  "host/UpdateVersionHostTest.log": {
+    "bytes": 93,
+    "sha256": "8973f0f08448a4333e78dbb3f54779074430cb2b4b33a83fce29bb26ada2f34c"
+  },
+  "host/VideoEnhancePresetTest.log": {
+    "bytes": 157,
+    "sha256": "70c6c8a8c6d7d6dcaa7bd896f8c69932ad1be25cc14a484e4230c899ee2788be"
+  },
+  "host/VolumeBoostMathHostTest.log": {
+    "bytes": 95,
+    "sha256": "dd7b2432f836bb342576b281559ae68951f3b198dfb11ed5e25634e551b4bae0"
+  },
+  "host/VolumeFocusRegressionHostTest.log": {
+    "bytes": 101,
+    "sha256": "7e1c42a969f4cc44b050eeaf9266093367eef174bceac978fcf773aec6286774"
+  },
+  "host/VolumeLimitHostTest.log": {
+    "bytes": 91,
+    "sha256": "74f3fa399e4f22121c8df2f175192a3246ca12efa50a8d649f3f64a749569e83"
+  },
+  "index.html": {
+    "bytes": 2095,
+    "sha256": "a222cb5f7454b92fd0780b6589a421000ee75dd7cff507e3ecba8027d75e6b23"
+  },
+  "lint.json": {
+    "bytes": 71,
+    "sha256": "9ca8d2fa1ee28c106eb389c7f597756231ba87ff0860a7bd0ac8abdbbfa090aa"
+  },
+  "signature.txt": {
+    "bytes": 1820,
+    "sha256": "6140309981db4065bcc0767d43cc2b7dd1b092e8032b1b12dc1142791960027b"
+  },
+  "source-manifest.json": {
+    "bytes": 1420,
+    "sha256": "07bf01954a1288f9af3ffe28a3dc69d7fdea731293e7872fe970456d584cf693"
+  }
+}

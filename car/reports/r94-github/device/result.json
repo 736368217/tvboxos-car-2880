@@ -1,0 +1,30 @@
+{
+  "pass": true,
+  "events": [
+    {
+      "name": "target_version",
+      "pass": true,
+      "detail": "3.1.0-car.7-r94"
+    },
+    {
+      "name": "manual_check_clicked",
+      "pass": true,
+      "detail": "native settings view"
+    },
+    {
+      "name": "r2_current_version_completes",
+      "pass": true,
+      "detail": "latest-version dialog visible"
+    },
+    {
+      "name": "app_stack_github_raw",
+      "pass": true,
+      "detail": "bytes=13 first_line=Hello World!"
+    },
+    {
+      "name": "app_stack_release_asset",
+      "pass": true,
+      "detail": "bytes=110"
+    }
+  ]
+}

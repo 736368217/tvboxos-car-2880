@@ -95,6 +95,8 @@ public final class PlainHttp {
 
     private static OkHttpClient build(boolean followRedirects) {
         return new OkHttpClient.Builder()
+                .addInterceptor(new GitHubCdnInterceptor())
+                .addNetworkInterceptor(new GitHubCdnInterceptor.Guard())
                 .dns(new TimeoutDns(Dns.SYSTEM, DNS_TIMEOUT_MS))
                 .connectTimeout(8, java.util.concurrent.TimeUnit.SECONDS)
                 .readTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
@@ -106,6 +108,8 @@ public final class PlainHttp {
 
     private static OkHttpClient buildWithDohFallback(boolean followRedirects) {
         return new OkHttpClient.Builder()
+                .addInterceptor(new GitHubCdnInterceptor())
+                .addNetworkInterceptor(new GitHubCdnInterceptor.Guard())
                 .dns(new DohFallbackDns(Dns.SYSTEM, DNS_TIMEOUT_MS))
                 .connectTimeout(8, java.util.concurrent.TimeUnit.SECONDS)
                 .readTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
