@@ -85,6 +85,12 @@ public final class GitHubCdn {
                 return "https://gist.githubusercontent.com" + path + "/raw" + query;
             }
             if (!"github.com".equals(host) || p.length < 5 || !validRepo(p[1], p[2])) return null;
+            // Media playlists/segments are streamed by the player: rerouting them can break
+            // Range/byte offsets, so they always stay direct.
+            String lower = path.toLowerCase(Locale.ROOT);
+            for (String media : new String[]{".m3u8", ".mpd", ".ts", ".m4s", ".mp4", ".mkv", ".key"}) {
+                if (lower.endsWith(media)) return null;
+            }
             if ("blob".equals(p[3]) || "raw".equals(p[3])) {
                 if (p.length < 6) return null;
                 return "https://raw.githubusercontent.com/" + p[1] + "/" + p[2]
@@ -160,16 +166,18 @@ public final class GitHubCdn {
     public List<String> candidates(String input) {
         String origin = canonical(input);
         if (origin == null) return Collections.singletonList(input);
-        String preferred = store.get(KEY + "preferred:" + kind(origin));
         List<String> out = new ArrayList<>();
+        // Direct first: on a working network (or with a proxy) this is the fastest path and keeps
+        // pre-acceleration behaviour. Mirrors are only a rescue route when direct fails.
+        out.add(origin);
+        String preferred = store.get(KEY + "preferred:" + kind(origin));
         Node first = node(preferred);
         if (first != null && available(first.host, origin)) out.add(first.apply(origin));
         for (Node n : NODES) {
-            if (out.size() >= MAX_MIRROR_ATTEMPTS) break;
+            if (out.size() > MAX_MIRROR_ATTEMPTS) break;
             if (n == first || !available(n.host, origin)) continue;
             out.add(n.apply(origin));
         }
-        out.add(origin); // Always retain a direct, unwrapped escape route.
         return out;
     }
     /** Expired/retired nodes stay out for six hours, then a single request may re-qualify them. */

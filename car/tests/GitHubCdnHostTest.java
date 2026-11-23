@@ -32,9 +32,9 @@ public final class GitHubCdnHostTest {
         GitHubCdn policy = new GitHubCdn(store, () -> now[0]);
         List<String> first = policy.candidates(raw);
         eq(first.size(), 4, "at most three nodes plus direct");
-        eq(first.get(3), raw, "unwrapped direct escape route");
+        eq(first.get(0), raw, "direct route is tried first");
         policy.success("gh-proxy.com", raw);
-        check(policy.candidates(raw).get(0).startsWith("https://gh-proxy.com/"), "success sticky");
+        check(policy.candidates(raw).get(1).startsWith("https://gh-proxy.com/"), "successful mirror is the first rescue");
         policy.failure("gh-proxy.com", raw, 404, false);
         check(policy.available("gh-proxy.com", raw), "resource 404 doesn't blacklist service");
         policy.failure("gh-proxy.com", raw, 0, false);

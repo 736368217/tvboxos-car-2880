@@ -203,6 +203,8 @@ public class ApiConfig {
                 }
                 clearApiLinesIfUnmatched(apiUrl);
                 parseJson(apiUrl, json);
+                // 缓存先秒开；远端内容变了才改写缓存，下次启动自动用新版，绝不打断本次会话。
+                refreshConfigCache(apiUrl);
                 callback.success();
                 return;
             } catch (Throwable th) {
@@ -251,6 +253,43 @@ public class ApiConfig {
                     }
                 }
                 callback.error("拉取配置失败\n" + error);
+            }
+        });
+    }
+
+    /**
+     * 缓存命中后比对远端：内容变化才落盘，供下一次启动读取。
+     * 不改写 Hawk、不重新解析站源，因此不会打断当前会话；API 集合（多线路）留给下次启动按原逻辑换线。
+     */
+    public void refreshConfigCache(String apiUrl) {
+        if (TextUtils.isEmpty(apiUrl)) return;
+        final File cache = new File(App.getInstance().getFilesDir().getAbsolutePath() + "/" + MD5.encode(apiUrl));
+        String configUrl = configUrl(apiUrl);
+        final String configKey = TempKey;
+        fetchConfigAsync(apiUrl, configUrl, configKey, new ConfigFetchCallback() {
+            @Override
+            public void success(String json) {
+                try {
+                    if (!parseApiCollection(json).isEmpty()) {
+                        LOG.i("echo-config cache refresh skipped: api collection");
+                        return;
+                    }
+                    String cached = cache.exists() ? readConfigFile(cache).trim() : "";
+                    if (cached.equals(json.trim())) {
+                        LOG.i("echo-config cache unchanged");
+                        return;
+                    }
+                    FileUtils.saveCache(cache, json);
+                    LOG.i("echo-config cache refreshed");
+                } catch (Throwable th) {
+                    LOG.e("echo-config cache refresh failed: " + th.getMessage());
+                }
+            }
+
+            @Override
+            public void error(String error) {
+                // 离线时保持旧缓存可用，这里只记录，不弹任何提示。
+                LOG.i("echo-config cache refresh skipped: " + error);
             }
         });
     }

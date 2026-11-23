@@ -1,0 +1,24 @@
+{
+  "result": "R95_DEVICE_PASS",
+  "versionName": "3.1.0-car.7-r95",
+  "versionCode": 67,
+  "apkSha256": "d97db2e06108ed0abbc3e1b37340da3f0c46d28f890f8873d4dd5475445b87b5",
+  "apkBytes": 65028982,
+  "device": {
+    "serial": "127.0.0.1:16416",
+    "model": "SM-G9900",
+    "sdk": "35",
+    "screen": "Physical size: 1620x2880",
+    "installedIdentity": [
+      "versionCode=67 minSdk=32 targetSdk=28",
+      "versionName=3.1.0-car.7-r95"
+    ]
+  },
+  "checks": {
+    "configCacheFirst": "echo-config cache unchanged in logcat within 3 s of start",
+    "edgeBandVisible": "columns 0-13 of the mid band measure (57,63,73) after an edge swipe",
+    "versionGate": "ModelSettingFragment.refreshCheckUpdateSummary gates on UpdateVersion.hasUpdate",
+    "playback": "not re-tested end to end: the sandbox subscription is a douban/python aggregation whose per-item source search times out, so no playable stream exists here"
+  },
+  "hostLogs": 28
+}

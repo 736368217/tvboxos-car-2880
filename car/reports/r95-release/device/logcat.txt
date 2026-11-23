@@ -1,0 +1,95 @@
+11-23 22:22:01.059 I/InAppBack( 2817): edge_back page=HomeActivity mode=EDGE_GESTURE action=down raw=0 x=378 y=758 hitPx=50 state=IDLE inward=0 visual=0 velocity=0 result=NONE
+11-23 22:22:01.094 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:01.094 I/InAppBack( 2817): attach DetailActivity enabled=true mode=edge created=true op=0
+11-23 22:22:01.095 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:01.111 I/InAppBack( 2817): attach DetailActivity enabled=true mode=edge created=false op=0
+11-23 22:22:01.111 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:01.112 I/InAppBack( 2817): attach DetailActivity enabled=true mode=edge created=false op=0
+11-23 22:22:01.113 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:01.118 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/apples.py
+11-23 22:22:01.126 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:01.133 I/ActivityTaskManager(  833): Displayed com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.DetailActivity for user 0: +59ms
+11-23 22:22:03.427 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/hongguo.py
+11-23 22:22:07.711 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/guazi.py
+11-23 22:22:11.254 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/juzong.py
+11-23 22:22:13.725 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/huavod.py
+11-23 22:22:14.725 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/ruyishipin.py
+11-23 22:22:17.357 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/pianku4k.py
+11-23 22:22:18.439 I/InAppBack( 2817): attach HomeActivity enabled=true mode=edge created=false op=0
+11-23 22:22:18.439 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:18.440 I/InAppBack( 2817): attach HomeActivity enabled=true mode=edge created=false op=0
+11-23 22:22:18.440 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:18.978 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/pufferfish.py
+11-23 22:22:18.978 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/wbbb.py
+11-23 22:22:18.979 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/kkys.py
+11-23 22:22:18.979 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/bubuzhuiju.py
+11-23 22:22:18.980 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/dsystv.py
+11-23 22:22:18.981 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/ysttv.py
+11-23 22:22:18.981 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/xlys.py
+11-23 22:22:18.981 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/8kvod.py
+11-23 22:22:18.982 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/ppnix.py
+11-23 22:22:18.983 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/libvio.py
+11-23 22:22:20.512 I/InAppBack( 2817): edge_back page=HomeActivity mode=EDGE_GESTURE action=down raw=0 x=2196 y=105 hitPx=50 state=IDLE inward=0 visual=0 velocity=0 result=NONE
+11-23 22:22:23.442 I/AppUpdate( 2817): auto check skipped (throttled or disabled)
+11-23 22:22:41.857 I/InAppBack( 2817): attach HomeActivity enabled=true mode=edge created=false op=0
+11-23 22:22:41.858 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:41.861 I/InAppBack( 2817): attach HomeActivity enabled=true mode=edge created=false op=0
+11-23 22:22:41.863 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:45.930 I/InAppBack( 2817): edge_back page=HomeActivity mode=EDGE_GESTURE action=down raw=0 x=2259 y=395 hitPx=50 state=IDLE inward=0 visual=0 velocity=0 result=NONE
+11-23 22:22:45.959 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:45.959 I/InAppBack( 2817): attach DetailActivity enabled=true mode=edge created=true op=0
+11-23 22:22:45.959 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:45.972 I/InAppBack( 2817): attach DetailActivity enabled=true mode=edge created=false op=0
+11-23 22:22:45.973 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:45.973 I/InAppBack( 2817): attach DetailActivity enabled=true mode=edge created=false op=0
+11-23 22:22:45.973 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:45.978 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/8kvod.py
+11-23 22:22:45.991 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:22:45.999 I/ActivityTaskManager(  833): Displayed com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.DetailActivity for user 0: +60ms
+11-23 22:22:48.102 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/ppnix.py
+11-23 22:22:49.295 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/libvio.py
+11-23 22:22:50.731 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/wbbb.py
+11-23 22:22:52.548 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/kkys.py
+11-23 22:22:54.241 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/pianku4k.py
+11-23 22:22:56.734 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/pufferfish.py
+11-23 22:22:57.833 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/bubuzhuiju.py
+11-23 22:23:00.470 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/ysttv.py
+11-23 22:23:01.527 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/dsystv.py
+11-23 22:23:02.635 I/TVBox-runtime( 2817): echo-getSpider url: https://clun.top/py/xlys.py
+11-23 22:23:24.596 I/InAppBack( 2817): attach HomeActivity enabled=true mode=edge created=false op=0
+11-23 22:23:24.596 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:23:24.618 I/InAppBack( 2817): attach HomeActivity enabled=true mode=edge created=false op=0
+11-23 22:23:24.618 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:23:25.673 I/InAppBack( 2817): attach HomeActivity enabled=true mode=edge created=false op=0
+11-23 22:23:25.673 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:23:25.675 I/InAppBack( 2817): attach HomeActivity enabled=true mode=edge created=false op=0
+11-23 22:23:25.676 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:23:30.677 I/AppUpdate( 2817): auto check skipped (throttled or disabled)
+11-23 22:23:49.233 I/InAppBack( 2817): edge_back page=HomeActivity mode=EDGE_GESTURE action=down raw=0 x=1440 y=800 hitPx=50 state=IDLE inward=0 visual=0 velocity=0 result=NONE
+11-23 22:23:49.291 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:23:49.291 I/InAppBack( 2817): attach DetailActivity enabled=true mode=edge created=true op=0
+11-23 22:23:49.292 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:23:49.321 I/InAppBack( 2817): attach DetailActivity enabled=true mode=edge created=false op=0
+11-23 22:23:49.321 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:23:49.326 I/InAppBack( 2817): attach DetailActivity enabled=true mode=edge created=false op=0
+11-23 22:23:49.326 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:23:49.352 I/InAppBack( 2817): geom screen=2880x1620 xdpi=160.0 ydpi=160.0 densityDpi=160 dpiTrusted=true/true effPpi=160x160 estSize=457x257mm hit=50px(8.0mm,1.75%) visual=126px(20.0mm,4.37%) trigger=113px(18.0mm,3.94%) leafHalf=178px(28.3mm,11.00%) slop=13px bar=25x239px barHit=63x302px guide=6px mode=EDGE_GESTURE side=LEFT
+11-23 22:23:49.361 I/ActivityTaskManager(  833): Displayed com.github.tvbox.osc.jun/com.github.tvbox.osc.ui.activity.DetailActivity for user 0: +117ms
+11-23 22:24:04.807 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=down raw=0 x=2 y=810 hitPx=50 state=ARMED inward=0 visual=0 velocity=0 result=CONSUME
+11-23 22:24:04.820 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=3 y=810 hitPx=50 state=ARMED inward=1 visual=0 velocity=152 result=CONSUME
+11-23 22:24:04.837 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=4 y=810 hitPx=50 state=ARMED inward=2 visual=0 velocity=151 result=CONSUME
+11-23 22:24:04.854 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=6 y=810 hitPx=50 state=ARMED inward=4 visual=0 velocity=152 result=CONSUME
+11-23 22:24:04.870 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=9 y=810 hitPx=50 state=ARMED inward=7 visual=0 velocity=151 result=CONSUME
+11-23 22:24:04.888 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=11 y=810 hitPx=50 state=ARMED inward=9 visual=0 velocity=151 result=CONSUME
+11-23 22:24:04.904 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=14 y=810 hitPx=50 state=DRAGGING inward=12 visual=12 velocity=152 result=CONSUME
+11-23 22:24:04.920 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=17 y=810 hitPx=50 state=DRAGGING inward=15 visual=15 velocity=151 result=CONSUME
+11-23 22:24:04.937 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=19 y=810 hitPx=50 state=DRAGGING inward=17 visual=17 velocity=152 result=CONSUME
+11-23 22:24:04.953 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=21 y=810 hitPx=50 state=DRAGGING inward=19 visual=19 velocity=151 result=CONSUME
+11-23 22:24:04.971 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=24 y=810 hitPx=50 state=DRAGGING inward=22 visual=22 velocity=151 result=CONSUME
+11-23 22:24:04.987 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=27 y=810 hitPx=50 state=DRAGGING inward=25 visual=25 velocity=152 result=CONSUME
+11-23 22:24:05.003 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=29 y=810 hitPx=50 state=DRAGGING inward=27 visual=27 velocity=151 result=CONSUME
+11-23 22:24:05.020 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=31 y=810 hitPx=50 state=DRAGGING inward=29 visual=29 velocity=152 result=CONSUME
+11-23 22:24:05.037 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=34 y=810 hitPx=50 state=DRAGGING inward=32 visual=32 velocity=151 result=CONSUME
+11-23 22:24:05.054 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=37 y=810 hitPx=50 state=DRAGGING inward=35 visual=35 velocity=152 result=CONSUME
+11-23 22:24:05.070 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=move raw=2 x=39 y=810 hitPx=50 state=DRAGGING inward=37 visual=37 velocity=151 result=CONSUME
+11-23 22:24:05.072 I/InAppBack( 2817): edge_back page=DetailActivity mode=EDGE_GESTURE action=up raw=1 x=40 y=810 hitPx=50 state=CANCEL inward=37 visual=0 velocity=151 result=NONE

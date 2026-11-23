@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.content.Context;
+import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -30,6 +32,8 @@ import java.util.Locale;
 @Keep
 public final class InAppBackButton {
     private static final String HOST_TAG = "tvbox.car.back.host";
+    /** carclash 车机版包名；其无障碍服务 com.github.kr328.clash.car/.car.EdgeBackService 即应用内返回。 */
+    private static final String CAR_CLASH_PACKAGE = "com.github.kr328.clash.car";
     private static final int ATTACH = 0, WAKE = 1, RELEASE = 2, REFRESH = 3;
     private static WeakReference<Application> application = new WeakReference<>(null);
 
@@ -103,7 +107,8 @@ public final class InAppBackButton {
             return;
         }
         installLifecycle(activity.getApplication());
-        if (!isEnabled() || activity instanceof IgnoreInAppBack) {
+        if (!isEnabled() || activity instanceof IgnoreInAppBack || carClashEdgeBackActive(activity)) {
+            // carclash owns its own edge panel when its accessibility service is on: never stack two.
             release(activity);
             return;
         }
@@ -240,9 +245,30 @@ public final class InAppBackButton {
     }
 
     public static boolean isEnabled() { return bool(HawkConfig.IN_APP_BACK, true); }
-    /** 方案 A 只允许 edge/bar；旧 floating/both/swipe 全部迁移到默认 edge。 */
+    /**
+     * carclash：「应用内返回」开关存在其私有 prefs（car_ui/edge_back_enabled），跨应用读不到，
+     * 因此以它的无障碍服务是否启用作为近似判定。启用时不重复绘制第二个返回组件。
+     */
+    public static boolean carClashEdgeBackActive(Context context) {
+        if (context == null) return false;
+        try {
+            String enabled = Settings.Secure.getString(context.getContentResolver(),
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            if (enabled == null || enabled.length() == 0) return false;
+            for (String item : enabled.split(":")) {
+                String name = item == null ? "" : item.trim();
+                if (name.startsWith(CAR_CLASH_PACKAGE + "/") && name.contains("EdgeBackService")) {
+                    return true;
+                }
+            }
+        } catch (RuntimeException error) {
+            return false;
+        }
+        return false;
+    }
     public static String getMode() {
-        return mode(text(HawkConfig.BACK_MODE, ""));
+        // r95 起只保留 carclash 风格边缘手势；旧的「返回杠」偏好一律按边缘手势处理。
+        return HawkConfig.BACK_MODE_EDGE;
     }
     public static String getSide() { return side(text(HawkConfig.BACK_SIDE, HawkConfig.BACK_SIDE_LEFT)); }
     public static boolean isLarge() { return bool(HawkConfig.BACK_LARGE, false); }
@@ -301,11 +327,7 @@ public final class InAppBackButton {
         return value == 0 || value == 4 || value == 6 || value == 8 ? value : 4;
     }
 
-    /** 方案 A：旧 floating / both / swipe / 空值统一迁移到新边缘手势；bar 保留为备用。 */
     private static String mode(String raw) {
-        String value = raw == null ? "" : raw.toLowerCase(Locale.ROOT);
-        if (HawkConfig.BACK_MODE_BAR.equals(value) || "back_bar".equals(value)
-                || "bar_backup".equals(value) || "4".equals(value)) return HawkConfig.BACK_MODE_BAR;
         return HawkConfig.BACK_MODE_EDGE;
     }
 

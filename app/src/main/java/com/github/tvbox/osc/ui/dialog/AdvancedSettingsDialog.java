@@ -24,8 +24,11 @@ import androidx.annotation.NonNull;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.car.InAppBackButton;
+import com.github.tvbox.osc.api.ApiConfig;
+import com.github.tvbox.osc.event.RefreshEvent;
 import com.github.tvbox.osc.ui.activity.AudioDiagnosticActivity;
 import com.github.tvbox.osc.util.HawkConfig;
+import org.greenrobot.eventbus.EventBus;
 import com.orhanobut.hawk.Hawk;
 
 /** A bounded native settings panel: one category, a few controls, no nested sheets. */
@@ -169,11 +172,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 getContext().startActivity(new Intent(getContext(), AudioDiagnosticActivity.class));
             });
         } else if (category == 1) {
-            heading("返回方式", "边缘手势与返回杠二选一");
+            boolean clash = InAppBackButton.carClashEdgeBackActive(getContext());
+            heading("返回方式", "carclash 风格边缘手势；carclash 应用内返回开启时本应用自动不显示");
             LinearLayout modes = new LinearLayout(getContext());
-            String[] names = {"边缘手势", "返回杠", "关闭"};
-            String mode = InAppBackButton.getMode();
-            int selected = !InAppBackButton.isEnabled() ? 2 : HawkConfig.BACK_MODE_BAR.equals(mode) ? 1 : 0;
+            String[] names = {"边缘手势", "关闭"};
+            int selected = InAppBackButton.isEnabled() ? 0 : 1;
             for (int i = 0; i < names.length; i++) {
                 final int index = i;
                 TextView choice = button(names[i]);
@@ -181,8 +184,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 choice.setTextColor(i == selected ? ACCENT : WHITE);
                 choice.setOnClickListener(v -> {
                     if (!acceptClick()) return;
-                    if (index != 2) InAppBackButton.setMode(owner, index == 1 ? HawkConfig.BACK_MODE_BAR : HawkConfig.BACK_MODE_EDGE);
-                    InAppBackButton.setEnabled(owner, index != 2);
+                    InAppBackButton.setEnabled(owner, index == 0);
                     changed();
                 });
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, px(112), 1);
@@ -192,8 +194,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
             LinearLayout.LayoutParams modeParams = new LinearLayout.LayoutParams(-1, -2);
             modeParams.bottomMargin = px(32);
             content.addView(modes, modeParams);
+            row("carclash 应用内返回", "开启时本应用不再叠加第二个返回组件", clash ? "接管中" : "未检测到", null);
             String side = InAppBackButton.getSide();
-            row("触发位置", "从屏幕边缘向内滑动；返回杠轻点返回", HawkConfig.BACK_SIDE_RIGHT.equals(side) ? "右侧" : "左侧", () -> {
+            row("触发位置", "从屏幕边缘向内滑动", HawkConfig.BACK_SIDE_RIGHT.equals(side) ? "右侧" : "左侧", () -> {
                 InAppBackButton.setSide(owner, HawkConfig.BACK_SIDE_RIGHT.equals(side) ? HawkConfig.BACK_SIDE_LEFT : HawkConfig.BACK_SIDE_RIGHT);
                 changed();
             });
@@ -208,6 +211,22 @@ public class AdvancedSettingsDialog extends BaseDialog {
             row("亮度手势", "在播放页左侧上下滑动调整窗口亮度", brightness ? "已开启" : "跟随系统", () -> {
                 Hawk.put(HawkConfig.BRIGHTNESS_GESTURE, !brightness);
                 changed();
+            });
+            row("订阅缓存", "首页先用上次缓存秒开；这里立即强制拉取一次并刷新首页", "立即更新", () -> {
+                if (owner == null) return;
+                Toast.makeText(getContext(), "正在更新订阅…", Toast.LENGTH_SHORT).show();
+                ApiConfig.get().loadConfig(false, new ApiConfig.LoadConfigCallback() {
+                    @Override public void notice(String msg) { }
+
+                    @Override public void success() {
+                        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_HOME_SOURCE_CHANGE, 0));
+                        Toast.makeText(getContext(), "订阅已更新", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override public void error(String msg) {
+                        Toast.makeText(getContext(), "更新失败：" + msg, Toast.LENGTH_SHORT).show();
+                    }
+                }, owner);
             });
             row("诊断信息", "复制版本与功能开关，便于反馈", "复制", () -> {
                 ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);

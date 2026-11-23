@@ -35,7 +35,7 @@ public final class GitHubCdnInterceptor implements Interceptor {
     private final GitHubCdn policy;
     private static boolean initialized;
     private static final String TAG = "GitHubCdn";
-    private static final int CONNECT_MS = 4000, READ_MS = 8000;
+    private static final int CONNECT_MS = 2500, READ_MS = 5000, DIRECT_CONNECT_MS = 6000;
 
     public GitHubCdnInterceptor() { this(GitHubCdn.shared()); }
     public GitHubCdnInterceptor(GitHubCdn policy) { this.policy = policy; }
@@ -92,8 +92,12 @@ public final class GitHubCdnInterceptor implements Interceptor {
             if (mirror) request = request.newBuilder().header("Cache-Control", "no-cache").build();
             Response response = null;
             try {
-                Chain transport = mirror ? chain.withConnectTimeout(bound(chain.connectTimeoutMillis(), CONNECT_MS), TimeUnit.MILLISECONDS)
-                        .withReadTimeout(bound(chain.readTimeoutMillis(), READ_MS), TimeUnit.MILLISECONDS) : chain;
+                // Mirrors get a short budget because a dead node must not stall playback; the direct
+                // attempt only bounds CONNECT (a blocked host fails fast, downloads keep full read timeout).
+                Chain transport = mirror
+                        ? chain.withConnectTimeout(bound(chain.connectTimeoutMillis(), CONNECT_MS), TimeUnit.MILLISECONDS)
+                                .withReadTimeout(bound(chain.readTimeoutMillis(), READ_MS), TimeUnit.MILLISECONDS)
+                        : chain.withConnectTimeout(bound(chain.connectTimeoutMillis(), DIRECT_CONNECT_MS), TimeUnit.MILLISECONDS);
                 response = transport.proceed(request);
                 if (mirror) {
                     String redirect = response.header("Location");
@@ -133,7 +137,11 @@ public final class GitHubCdnInterceptor implements Interceptor {
             } catch (IOException error) {
                 if (response != null) response.close();
                 if (chain.call().isCanceled() || Thread.currentThread().isInterrupted()) throw error;
-                if (!mirror) throw error;
+                if (!mirror) {
+                    // Direct failed (blocked network): keep the error and fall through to mirrors.
+                    failure = error;
+                    continue;
+                }
                 if (!callerDeadline(error)) policy.failure(host, origin, 0, retired(error));
                 log("disabled node=" + host + " reason=" + error.getClass().getSimpleName());
                 failure = error;

@@ -157,7 +157,7 @@ public class HomeActivity extends BaseActivity {
         return true;
     }
 
-    boolean useCacheConfig = false;
+    boolean useCacheConfig = true;
 
     @Override
     protected void init() {
@@ -166,11 +166,13 @@ public class HomeActivity extends BaseActivity {
         ControlManager.get().startServer();
         initView();
         initViewModel();
-        useCacheConfig = false;
+        // Cache-first: the parsed subscription is shown immediately; a background refresh only
+        // replaces it when the remote file actually changed.
+        useCacheConfig = true;
         Intent intent = getIntent();
         if (intent != null && intent.getExtras() != null) {
             Bundle bundle = intent.getExtras();
-            useCacheConfig = bundle.getBoolean("useCache", false);
+            useCacheConfig = bundle.getBoolean("useCache", true);
         }
         initData();
         scheduleUpdateCheck();

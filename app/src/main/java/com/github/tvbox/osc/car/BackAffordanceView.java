@@ -79,35 +79,41 @@ final class BackAffordanceView extends View {
     }
 
     private void drawEdge(Canvas canvas) {
-        float guide = metrics.guidePx * .55f;
-        float h = Math.min(metrics.barHeightPx * .56f, metrics.heightPx * .12f);
+        // carclash-style edge panel: a narrow resting band plus a full-height sheet that follows
+        // the drag (36dp band, 45dp trigger, 180dp peak, width = drag x 0.6).
+        float guide = Math.max(3f, metrics.guidePx * .55f);
+        float band = Math.min(metrics.guidePx * 2.2f, metrics.widthPx * .04f);
         float middle = metrics.heightPx / 2f;
-        fill.setColor(0x808E9AA7);
+        float reach = Math.min(metrics.barHeightPx * 1.2f, metrics.heightPx * .28f);
+        fill.setColor(0x668E9AA7);
         if (side != EdgeBackPolicy.Side.RIGHT) {
-            rect.set(0f, middle - h / 2f, guide, middle + h / 2f);
-            canvas.drawRoundRect(rect, guide, guide, fill);
+            rect.set(0f, middle - reach / 2f, band, middle + reach / 2f);
+            canvas.drawRoundRect(rect, band, band, fill);
         }
         if (side != EdgeBackPolicy.Side.LEFT) {
-            rect.set(metrics.widthPx - guide, middle - h / 2f, metrics.widthPx, middle + h / 2f);
-            canvas.drawRoundRect(rect, guide, guide, fill);
+            rect.set(metrics.widthPx - band, middle - reach / 2f, metrics.widthPx, middle + reach / 2f);
+            canvas.drawRoundRect(rect, band, band, fill);
         }
         if (visualWidth <= .5f) return;
+        boolean left = pullFromLeft;
         float progress = Math.min(1f, visualWidth / Math.max(1f, metrics.triggerPx));
-        float w = Math.min(metrics.visualPx * .62f, metrics.hitPx * 1.6f);
-        float height = w * 1.35f;
-        float margin = Math.max(3f, guide * 2f);
-        float travel = margin + Math.min(visualWidth * .32f, metrics.visualPx * .32f);
-        float left = pullFromLeft ? travel - w * (1f - progress) :
-                metrics.widthPx - travel - w * progress;
-        float y = Math.max(height / 2f + margin, Math.min(metrics.heightPx - height / 2f - margin, pullY));
-        rect.set(left, y - height / 2f, left + w, y + height / 2f);
-        fill.setColor(SURFACE);
-        stroke.setColor(progress >= 1f ? ACCENT : 0xA8798798);
-        stroke.setStrokeWidth(Math.max(1.5f, metrics.guidePx * .35f));
-        canvas.drawRoundRect(rect, w * .42f, w * .42f, fill);
-        canvas.drawRoundRect(rect, w * .42f, w * .42f, stroke);
-        drawArrow(canvas, rect.centerX(), y, w * .14f, w * .22f, !pullFromLeft,
-                Math.max(2.5f, metrics.guidePx * .6f));
+        float peak = Math.min(metrics.visualPx, metrics.widthPx * .18f);
+        float width = Math.max(peak * .18f, Math.min(peak, visualWidth * .6f));
+        float margin = Math.max(4f, guide);
+        float top = margin, bottom = metrics.heightPx - margin;
+        float edgeX = left ? 0f : metrics.widthPx;
+        float outer = left ? width : metrics.widthPx - width;
+        rect.set(left ? edgeX : outer, top, left ? outer : edgeX, bottom);
+        fill.setColor(0xE62A3138);
+        stroke.setColor(progress >= 1f ? ACCENT : 0x997F8D9D);
+        stroke.setStrokeWidth(Math.max(1.5f, guide * .5f));
+        float radius = Math.min(width * .3f, metrics.guidePx * 3f);
+        canvas.drawRoundRect(rect, radius, radius, fill);
+        canvas.drawRoundRect(rect, radius, radius, stroke);
+        float cx = left ? outer - width * .32f : metrics.widthPx - width + width * .32f;
+        float cy = Math.max(top + width * .4f, Math.min(bottom - width * .4f, pullY));
+        float size = Math.min(width * .22f, metrics.guidePx * 1.6f);
+        drawArrow(canvas, cx, cy, size * .8f, size, !left, Math.max(3f, size * .45f));
     }
 
     private void drawArrow(Canvas canvas, float cx, float cy, float reach, float span,

@@ -1137,21 +1137,24 @@ public class ModelSettingFragment extends BaseLazyFragment {
         String back;
         if (!InAppBackButton.isEnabled()) {
             back = "返回关闭";
+        } else if (InAppBackButton.carClashEdgeBackActive(getContext())) {
+            back = "carclash 接管";
         } else {
-            String mode = InAppBackButton.getMode();
-            back = HawkConfig.BACK_MODE_BAR.equals(mode) ? "旧返回杠" : "新边缘返回";
+            back = "carclash 边缘返回";
         }
         String brightness = Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false) ? "亮度开" : "亮度关";
         tvAdvancedSummary.setText(back + " · " + brightness);
     }
 
-    /** 「检查更新」行：显示当前版本，或上次检查到的新版本。 */
+    /** 「检查更新」行：只有远端确实比本机新时才提示，缓存标志过期不会再误报。 */
     private void refreshCheckUpdateSummary() {
         if (tvCheckUpdateSummary == null) return;
         String local = com.github.tvbox.osc.update.AppUpdate.localVersion(mActivity);
         String tag = Hawk.get(HawkConfig.UPDATE_LAST_TAG, "");
-        boolean ahead = Hawk.get(HawkConfig.UPDATE_HAS_UPDATE, false);
-        if (ahead && tag != null && tag.length() > 0) {
+        boolean ahead = Hawk.get(HawkConfig.UPDATE_HAS_UPDATE, false)
+                && tag != null && tag.length() > 0
+                && com.github.tvbox.osc.update.UpdateVersion.hasUpdate(local, tag);
+        if (ahead) {
             tvCheckUpdateSummary.setText("有新版本 " + tag.replace("v", ""));
         } else {
             tvCheckUpdateSummary.setText(local);

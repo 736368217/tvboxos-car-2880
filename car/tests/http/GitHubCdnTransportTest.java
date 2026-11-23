@@ -44,8 +44,9 @@ public final class GitHubCdnTransportTest {
         byte[] bytes = new byte[]{'P','K',3,4,0,1,2,3};
         GitHubCdn policy = fresh();
         FakeChain chain = new FakeChain(request, (r, i) -> {
-            if (i == 0) throw new SSLPeerUnverifiedException("expired certificate");
-            if (i == 1) return response(r, 200, "text/html", "<html>domain for sale</html>".getBytes());
+            if (i == 0) throw new SSLPeerUnverifiedException("direct route blocked on this network");
+            if (i == 1) throw new SSLPeerUnverifiedException("expired certificate");
+            if (i == 2) return response(r, 200, "text/html", "<html>domain for sale</html>".getBytes());
             return response(r, 206, "application/octet-stream", bytes).newBuilder().header("Set-Cookie", "evil=1").build();
         });
         try (Response got = new GitHubCdnInterceptor(policy).intercept(chain)) {
@@ -53,7 +54,7 @@ public final class GitHubCdnTransportTest {
             check(got.request().url().toString().equals(raw), "original URL retained for relative paths");
             check(got.code() == 206 && got.header("Set-Cookie") == null, "Range status retained; proxy cookies removed");
         }
-        check(chain.requests.size() == 3, "bounded attempts stop at first valid response");
+        check(chain.requests.size() == 4, "direct attempt plus bounded mirror attempts");
         check(!policy.available("v4.gh-proxy.org", raw) && !policy.available("gh-proxy.com", raw), "expired and parked nodes leave rotation");
         for (Request r : chain.requests) {
             check("bytes=0-3".equals(r.header("Range")) && r.tag().equals("subscription"), "range and cancellation tag preserved");
@@ -61,7 +62,8 @@ public final class GitHubCdnTransportTest {
         check(chain.connect <= 4000 && chain.read <= 8000, "per node headers/connection deadline");
         FakeChain again = new FakeChain(request, (r, i) -> response(r, 200, "text/plain", "ok".getBytes()));
         new GitHubCdnInterceptor(policy).intercept(again).close();
-        check(again.requests.size() == 1 && again.requests.get(0).url().host().equals("gh-proxy.org"), "disabled hosts not retried next call");
+        check(again.requests.size() == 1 && again.requests.get(0).url().host().equals("raw.githubusercontent.com"),
+                "healthy direct wins and disabled hosts are not retried");
         for (Request bypass : new Request[]{request.newBuilder().header("Authorization", "private-token").build(),
                 request.newBuilder().header("Cookie", "session=secret").build(),
                 request.newBuilder().post(RequestBody.create(null, "write")).build(),
@@ -80,7 +82,8 @@ public final class GitHubCdnTransportTest {
             return response(r, 404, "text/plain", "source missing".getBytes());
         });
         try (Response got = new GitHubCdnInterceptor(fresh()).intercept(fallback)) {
-            check(got.code() == 404 && fallback.requests.size() == 4, "all proxy 404s fall back to original response");
+            check(got.code() == 404 && fallback.requests.size() == 1,
+                    "a direct 404 is returned as-is without consulting mirrors");
         }
         OkHttpClient.Builder b = new OkHttpClient.Builder();
         GitHubCdnInterceptor.install(b); GitHubCdnInterceptor.install(b);

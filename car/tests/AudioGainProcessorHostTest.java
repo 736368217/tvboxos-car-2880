@@ -74,7 +74,7 @@ public final class AudioGainProcessorHostTest {
         short[] tripled = run16(processor, 3f, 1000, -1000);
         check(tripled[0] == 3000 && tripled[1] == -3000, "300% triples low-level PCM");
         short[] limited16 = run16(processor, 3f, Short.MIN_VALUE, 16384);
-        check(limited16[0] < -16000 && limited16[0] >= -16425, "16-bit limiter ceiling and polarity");
+        check(limited16[0] < -27000 && limited16[0] >= -27572, "16-bit limiter ceiling and polarity");
         check(limited16[1] > 0 && Math.abs(limited16[0] + 2 * limited16[1]) <= 2,
                 "16-bit limiter preserves relative amplitude within quantization error");
 
@@ -108,7 +108,7 @@ public final class AudioGainProcessorHostTest {
         float[] floats = runFloat(processor, 2f, 0.25f, -0.25f);
         check(floats[0] == 0.5f && floats[1] == -0.5f, "float 200% is linear below ceiling");
         float[] limitedFloat = runFloat(processor, 5f, 1f, -0.5f);
-        check(Math.abs(limitedFloat[0] - 0.501187f) < 1e-6f, "float limiter ceiling");
+        check(Math.abs(limitedFloat[0] - 0.841395f) < 1e-6f, "float limiter ceiling");
         check(limitedFloat[1] == -limitedFloat[0] * 0.5f, "float limiter preserves relative amplitude");
 
         // 不支持的编码必须声明为「未处理」，让音频链路回落而不是静默丢采样

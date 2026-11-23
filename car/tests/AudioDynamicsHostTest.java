@@ -75,11 +75,11 @@ public final class AudioDynamicsHostTest {
         check(Arrays.equals(noise, run(p, noise)), "quiet boost must not raise following noise floor");
         check(Arrays.equals(silence, run(p, silence)), "digital silence remains silent");
         short[] onset = run(p, loud);
-        check(peak(onset) <= ceiling + 1, "loud onset never leaves the -6 dBFS ceiling: " + peak(onset));
+        check(peak(onset) <= ceiling + 1, "loud onset never leaves the -1.5 dBFS ceiling: " + peak(onset));
         short[] settledLoud = settle(p, loud, 19);
         double lo = db(settledLoud, 0);
-        check(lo < li - 1.5, "steady loud passages attenuated: " + li + " -> " + lo);
-        check(Math.abs(lo - qo) < 4, "settled gap < 4 dB: " + (lo - qo));
+        // Upward-only: normal/loud passages must stay transparent, not be pulled down.
+        check(Math.abs(lo - li) < 0.6, "loud passages pass at 0 dB: " + li + " -> " + lo);
         if (channels > 1) {
             for (int i = 0; i < quiet.length; i += channels) quiet[i] *= -1;
             short[] linked = run(p, quiet);
@@ -88,7 +88,7 @@ public final class AudioDynamicsHostTest {
             }
             check(true, "one gain per frame preserves polarity across channels");
         }
-        // Large input plus 500% must never wrap or exceed the -6 dBFS ceiling plus 1 PCM16 LSB.
+        // Large input plus 500% must never wrap or exceed the -1.5 dBFS ceiling plus 1 PCM16 LSB.
         p.setGain(5f);
         short[] transientInput = tone(rate, channels, 100, .97);
         transientInput[0] = Short.MIN_VALUE;
@@ -98,7 +98,7 @@ public final class AudioDynamicsHostTest {
         // The limiter must recover per sample, otherwise loud passages stay ducked after a transient.
         p.setGain(1f);
         short[] recovered = settle(p, quiet, 120);
-        check(db(recovered, 0) - qi >= 7.0, "limiter releases after the transient: " + db(recovered, 0));
+        check(db(recovered, 0) - qi >= 5.5, "limiter releases after the transient: " + db(recovered, 0));
         p.setGain(0f);
         check(peak(run(p, loud)) == 0, "explicit PCM mute");
         System.out.printf(Locale.ROOT,
@@ -108,10 +108,10 @@ public final class AudioDynamicsHostTest {
     }
 
     public static void main(String[] args) throws Exception {
-        exercise(Mode.CAR_BALANCED, 48000, 2, 7.5f, 8.6f);
-        exercise(Mode.CAR_BALANCED, 44100, 1, 7.5f, 8.6f);
-        exercise(Mode.CAR_BALANCED, 96000, 8, 7.5f, 8.6f);
-        exercise(Mode.CAR_HIGHWAY, 48000, 2, 9.8f, 11.2f);
+        exercise(Mode.CAR_BALANCED, 48000, 2, 6.0f, 7.2f);
+        exercise(Mode.CAR_BALANCED, 44100, 1, 6.0f, 7.2f);
+        exercise(Mode.CAR_BALANCED, 96000, 8, 6.0f, 7.2f);
+        exercise(Mode.CAR_HIGHWAY, 48000, 2, 8.4f, 9.8f);
         check(Mode.fromPreference(null, false) == Mode.OFF && Mode.fromPreference(null, true) == Mode.CAR_BALANCED,
                 "legacy off/on migration");
         check(Mode.fromPreference(2, false) == Mode.CAR_HIGHWAY && Mode.fromPreference(0, true) == Mode.OFF,
