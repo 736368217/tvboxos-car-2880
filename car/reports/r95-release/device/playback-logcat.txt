@@ -1,0 +1,34 @@
+11-23 22:35:53.369 I/ExoPlayerImpl( 3972): Init 7110dbc [ExoPlayerLib/2.19.1] [r9q, SM-G9900, Samsung, 35]
+11-23 22:35:53.469 I/OMXStore(  779): makeComponentInstance(OMX.qcom.video.decoder.avc) in android.hardwar process
+11-23 22:35:53.475 I/MediaCodec( 3972): [OMX.qcom.video.decoder.avc] setting surface generation to 4067329
+11-23 22:35:53.485 I/OMXStore(  779): makeComponentInstance(OMX.google.aac.decoder) in android.hardwar process
+11-23 22:35:53.507 I/CarAudioGain( 3972): queue n=1 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.0 outPeak=0.0 rmsRatio=0.0
+11-23 22:35:53.510 D/MediaCodec( 3972): [OMX.qcom.video.decoder.avc] setting dataspace on output surface to 0x104
+11-23 22:35:54.526 I/CarAudioGain( 3972): queue n=56 mode=CAR_BALANCED user=1.0 gain=1.0564454 frames=1024 channels=2 inPeak=0.06311035 outPeak=0.06665039 rmsRatio=1.0535226468214334
+11-23 22:35:55.526 I/CarAudioGain( 3972): queue n=103 mode=CAR_BALANCED user=1.0 gain=1.2949371 frames=1024 channels=2 inPeak=0.063201904 outPeak=0.08157349 rmsRatio=1.2927839484715389
+11-23 22:35:56.533 I/CarAudioGain( 3972): queue n=150 mode=CAR_BALANCED user=1.0 gain=1.3289297 frames=1024 channels=2 inPeak=0.12594604 outPeak=0.16833496 rmsRatio=1.3329068939456097
+11-23 22:35:57.538 I/CarAudioGain( 3972): queue n=197 mode=CAR_BALANCED user=1.0 gain=1.2163674 frames=1024 channels=2 inPeak=0.12597656 outPeak=0.15325928 rmsRatio=1.2165323712611897
+11-23 22:35:58.543 I/CarAudioGain( 3972): queue n=244 mode=CAR_BALANCED user=1.0 gain=1.0367341 frames=1024 channels=2 inPeak=0.25131226 outPeak=0.26419067 rmsRatio=1.0440737713376382
+11-23 22:35:59.544 I/CarAudioGain( 3972): queue n=291 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.25146484 outPeak=0.25146484 rmsRatio=1.0
+11-23 22:36:00.549 I/CarAudioGain( 3972): queue n=338 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.5012512 outPeak=0.5012512 rmsRatio=1.0
+11-23 22:36:01.550 I/CarAudioGain( 3972): queue n=385 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.5013733 outPeak=0.5013733 rmsRatio=1.0
+11-23 22:36:02.561 I/CarAudioGain( 3972): queue n=432 mode=CAR_BALANCED user=1.0 gain=0.9998196 frames=1024 channels=2 inPeak=0.84158325 outPeak=0.84140015 rmsRatio=0.9997992474436765
+11-23 22:36:03.564 I/CarAudioGain( 3972): queue n=479 mode=CAR_BALANCED user=1.0 gain=0.999793 frames=1024 channels=2 inPeak=0.84158325 outPeak=0.84140015 rmsRatio=0.9998497528106667
+11-23 22:36:04.564 I/CarAudioGain( 3972): queue n=526 mode=CAR_BALANCED user=1.0 gain=0.99988556 frames=1024 channels=2 inPeak=0.0395813 outPeak=0.0395813 rmsRatio=1.0
+11-23 22:36:05.585 I/CarAudioGain( 3972): queue n=573 mode=CAR_BALANCED user=1.0 gain=1.0405035 frames=1024 channels=2 inPeak=0.039733887 outPeak=0.0413208 rmsRatio=1.0349648361521377
+11-23 22:36:06.588 I/CarAudioGain( 3972): queue n=620 mode=CAR_BALANCED user=1.0 gain=1.0576401 frames=1024 channels=2 inPeak=0.5012207 outPeak=0.5359497 rmsRatio=1.0695336865459593
+11-23 22:36:07.333 I/ExoPlayerImpl( 3972): Init 86a0eb0 [ExoPlayerLib/2.19.1] [r9q, SM-G9900, Samsung, 35]
+11-23 22:36:07.842 I/MediaCodec( 3972): [OMX.qcom.video.decoder.avc] setting surface generation to 4067330
+11-23 22:36:07.843 I/CarAudioGain( 3972): queue n=653 mode=CAR_BALANCED user=1.0 gain=0.99988556 frames=1024 channels=2 inPeak=0.50109863 outPeak=0.5010376 rmsRatio=0.999884353355365
+11-23 22:36:07.843 I/ExoPlayerImpl( 3972): Release 7110dbc [ExoPlayerLib/2.19.1] [r9q, SM-G9900, Samsung, 35] [goog.exo.core, goog.exo.exoplayer, goog.exo.decoder, goog.exo.datasource, goog.exo.extractor, goog.exo.ffmpeg, goog.exo.hls]
+11-23 22:36:07.845 I/MediaCodec( 3972): [OMX.qcom.video.decoder.avc] setting surface generation to 4067331
+11-23 22:36:08.104 I/OMXStore(  779): makeComponentInstance(OMX.qcom.video.decoder.avc) in android.hardwar process
+11-23 22:36:08.105 I/MediaCodec( 3972): [OMX.qcom.video.decoder.avc] setting surface generation to 4067332
+11-23 22:36:08.115 I/OMXStore(  779): makeComponentInstance(OMX.google.aac.decoder) in android.hardwar process
+11-23 22:36:08.132 I/CarAudioGain( 3972): queue n=1 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.0 outPeak=0.0 rmsRatio=0.0
+11-23 22:36:08.229 D/MediaCodec( 3972): [OMX.qcom.video.decoder.avc] setting dataspace on output surface to 0x104
+11-23 22:36:12.028 I/CarAudioGain( 3972): queue n=13 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.0027770996 outPeak=0.0027770996 rmsRatio=1.0
+11-23 22:36:13.041 I/CarAudioGain( 3972): queue n=54 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.0047302246 outPeak=0.0047302246 rmsRatio=1.0
+11-23 22:36:14.046 I/CarAudioGain( 3972): queue n=97 mode=CAR_BALANCED user=1.0 gain=1.6401819 frames=1024 channels=2 inPeak=0.0069274902 outPeak=0.01071167 rmsRatio=1.292214418175163
+11-23 22:36:15.062 I/CarAudioGain( 3972): queue n=140 mode=CAR_BALANCED user=1.0 gain=2.660725 frames=1024 channels=2 inPeak=0.0078125 outPeak=0.013397217 rmsRatio=1.5813074784567371
+11-23 22:36:16.132 I/CarAudioGain( 3972): queue n=179 mode=CAR_BALANCED user=1.0 gain=2.660725 frames=1024 channels=2 inPeak=0.009429932 outPeak=0.020812988 rmsRatio=2.2698254047942146

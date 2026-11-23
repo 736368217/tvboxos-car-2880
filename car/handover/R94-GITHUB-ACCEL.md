@@ -1,4 +1,4 @@
-# r94 内置 GitHub 加速
+﻿# r94 内置 GitHub 加速
 
 2026-11-23：`3.1.0-car.7-r94` / versionCode 66 把 [cdn-url 服务目录](https://lancelotrar.github.io/cdn-url/) 的公开节点内置进 App，让订阅、Jar/JS、封面图与更新下载在 GitHub 直连不稳时仍能取到内容。纯内置，没有设置项。
 

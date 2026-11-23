@@ -67,13 +67,17 @@ r94 是「镜像优先 + 所有 GitHub URL 改写」，实测代价是：直连�
 | 签名 | `2feb63c5…44fa9c`（覆盖安装契约不变） |
 | MuMu 安装 | `versionCode=67 / versionName=3.1.0-car.7-r95` |
 | 返回组件像素 | 边缘滑入后中段第 0–13 列实测 `(57,63,73)` = `0x668E9AA7` 叠在深底上的窄带 |
+| 设备播放（本机 HTTP mp4） | 用应用自带 `RemoteServer` 的 `/push/` 推 `http://10.0.2.2:8080/clip.mp4`（r93 诊断片）：`MediaCodec OMX.qcom.video.decoder.avc` 配置输出 surface，音频按实时速率推进 |
+| 设备播放（远端 HTTPS HLS） | 推 `https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8`：音频持续出帧，轻声段 `gain=2.660725`（正好 BALANCED 的 +8.5 dB 上限），响段 `gain≈0.9998` 直通 |
+| 设备音频行为 | 21 帧采样：增益区间 `0.9998–2.6607`、`outPeak` 最大 `0.8414`（= `-1.5 dBFS`），未出现负增益 |
+| 订阅缓存启动 | 冷启动首页内容约 6.6 s 可见，`echo-config cache unchanged` 在启动后约 2 s 出现 |
 
-**未在本轮覆盖**：真车/真机播放链路没有端到端复测——沙箱里只有 `clun.top/box.json` 这类豆瓣聚合配置，
-单条目跨源搜索会超时，取不到可播流。用户自己的 123 订阅能否直连播放需要真机复测，若仍失败，抓
-`GitHubCdn` / `PyLoader` / `getSpider` 日志再定位。
+**边界**：MuMu 的 `screencap` 抓不到视频叠加层（连续两帧像素零差异），所以“不是黑屏”只能靠 `MediaCodec`
+配置了输出 surface + 音轨实时推进来证明，不能当作像素级验收。真车听感、以及用户自己的 123 订阅能否直连播放仍需真机复测；
+若直连仍失败，抓 `GitHubCdn` / `PyLoader` / `getSpider` 日志再定位。
 
 ## 7. 证据
 
-`car/reports/r95-release/`：`device/result.json`、`device/home-r95.png`、`device/edge-r95.png`、
+`car/reports/r95-release/`：`device/result.json`、`device/playback-result.json`、`device/playback-logcat.txt`、
 `device/logcat.txt`、`host/*.log`、`build/apk-gate.json`、`build/build-tail.log`；
 发布回读记录在 `car/reports/r95-release-verification.json`。

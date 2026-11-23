@@ -1,0 +1,20 @@
+{
+  "sources": {
+    "localHttpMp4": "http://10.0.2.2:8080/clip.mp4 (host-served app/src/main/assets/audio-diagnostic.mp4)",
+    "remoteHttpsHls": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+  },
+  "pushedVia": "app RemoteServer GET /push/<url-encoded url> (port 9978, adb forward tcp:19978)",
+  "audioFrames": 21,
+  "gainRange": [
+    0.999793,
+    2.660725
+  ],
+  "maxOutPeak": 0.84140015,
+  "observation": "loud 1 kHz segment (inPeak 0.84137 = -1.5 dBFS) plays at gain ~0.9999, i.e. 0 dB passthrough; quiet passages climb to the 2.6607 (+8.5 dB) BALANCED cap; outPeak never exceeds 0.8414",
+  "videoLayer": "MediaCodec OMX.qcom.video.decoder.avc configured an output surface; MuMu screencap does not capture that overlay, so frame-level pixel proof is unavailable on this host",
+  "homeCacheLaunch": {
+    "homeContentMs": 6588,
+    "activityDisplayedMs": 776,
+    "log": "11-23 22:35:43.050 echo-config cache unchanged"
+  }
+}
