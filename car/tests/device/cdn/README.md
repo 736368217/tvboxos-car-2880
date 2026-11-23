@@ -14,7 +14,7 @@ python -B car/tests/device/cdn/build.py --sdk $env:ANDROID_HOME --java-home $env
 am instrument -w -r com.tvbox.car.cdntest/com.tvbox.car.cdntest.CdnProbe
 ```
 
-检查目标版本、设置页 R2 的“已是最新”结果、更新器实际 `query` 方法经 CDN 获取的 Release 版本及资产 URL、资产 Range 206 与 ZIP 文件头。测试以 r89 为查询方版本，从线上 r90 或更新的 Release 验证更新判断；不会下载并安装旧产品包。
+检查目标版本、设置页 R2 的“已是最新”结果，以及 App 自身网络栈（`com.github.catvod.net.OkHttp`，与订阅/配置同一 client）能否读到 GitHub Raw 文件与 Release 资产；`UpdateVersion`/`AppUpdate.query` 的通道与资产契约由主机测试覆盖，不在本包里反射 R8 混淆后的构造器。
 
 结果写到目标应用 external-files 的 `b01-cdn-qa/result.json`，截图在同目录。必须检查逐条 `events[].pass` 和 `INSTRUMENTATION_RESULT: result=B01_CDN_PASS`；shell 退出 0 不等于断言通过。
 
