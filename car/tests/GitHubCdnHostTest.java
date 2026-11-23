@@ -49,8 +49,7 @@ public final class GitHubCdnHostTest {
         check(restarted.available("v4.gh-proxy.org", raw), "retired node may re-qualify after the 6h window");
         restarted.success("v4.gh-proxy.org", raw);
         check(restarted.available("v4.gh-proxy.org", raw), "a good answer re-admits the node");
-        eq(GitHubCdn.canonical("https://github.com/o/r/releases/latest"),
-                "https://github.com/o/r/releases/latest", "release probe page routed");
+        eq(GitHubCdn.canonical("https://github.com/o/r/releases/latest"), null, "release HTML page stays direct-only");
         check(GitHubCdn.allowedRedirect("media.githubusercontent.com", "gh-proxy.org"), "LFS media redirect allowed");
         check(GitHubCdn.allowedRedirect("github-releases.githubusercontent.com", "gh-proxy.org"), "release object redirect allowed");
         String api = "https://api.github.com/repos/o/r/releases/latest";
