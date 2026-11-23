@@ -1,0 +1,63 @@
+{
+  "version": "3.1.0-car.7-r95",
+  "versionCode": 67,
+  "localSha256": "d97db2e06108ed0abbc3e1b37340da3f0c46d28f890f8873d4dd5475445b87b5",
+  "localBytes": 65028982,
+  "checks": {
+    "r2Version": true,
+    "r2VersionCode": true,
+    "r2Sha256": true,
+    "r2Size": true,
+    "r2AssetLength": true,
+    "r2HistorySha": true,
+    "githubTag": true,
+    "githubAssetSize": true,
+    "githubAssetDigest": true,
+    "previousReleaseIntact": true
+  },
+  "latest": {
+    "version": "3.1.0-car.7-r95",
+    "versionCode": 67,
+    "apk": "tvboxos-car-2880/TVBox_release-python-r95.apk",
+    "size": 65028982,
+    "sha256": "d97db2e06108ed0abbc3e1b37340da3f0c46d28f890f8873d4dd5475445b87b5",
+    "publishedAt": "2026-11-23T14:25:28Z",
+    "notes": "音频 v3：只抬轻声不压正常声，天花板回到 -1.5 dBFS，正常/高潮段 0 dB 直通\n网络：GitHub 直连优先，镜像只作救援，播放清单与分片不再改写\n订阅：先用上次缓存秒开，后台比对更新，设置里可立即更新\n设置页版本提示只在远端确实更新时出现\n返回组件统一为 carclash 边缘样式，carclash 开启应用内返回时本应用自动不显示",
+    "headStatus": 200,
+    "headLength": 65028982
+  },
+  "history": {
+    "version": "3.1.0-car.7-r95",
+    "versionCode": 67,
+    "apk": "tvboxos-car-2880/TVBox_release-python-r95.apk",
+    "size": 65028982,
+    "sha256": "d97db2e06108ed0abbc3e1b37340da3f0c46d28f890f8873d4dd5475445b87b5",
+    "publishedAt": "2026-11-23T14:25:28Z",
+    "notes": "音频 v3：只抬轻声不压正常声，天花板回到 -1.5 dBFS，正常/高潮段 0 dB 直通\n网络：GitHub 直连优先，镜像只作救援，播放清单与分片不再改写\n订阅：先用上次缓存秒开，后台比对更新，设置里可立即更新\n设置页版本提示只在远端确实更新时出现\n返回组件统一为 carclash 边缘样式，carclash 开启应用内返回时本应用自动不显示"
+  },
+  "github": {
+    "tag": "v3.1.0-car.7-r95",
+    "assets": [
+      {
+        "name": "TVBox-Original-Feature-3.1.0-car.7-r95.apk",
+        "size": 65028982,
+        "digest": "sha256:d97db2e06108ed0abbc3e1b37340da3f0c46d28f890f8873d4dd5475445b87b5"
+      }
+    ],
+    "targetCommitish": "main"
+  },
+  "previous": {
+    "tag": "v3.1.0-car.7-r94",
+    "assets": [
+      {
+        "name": "TVBox-Original-Feature-3.1.0-car.7-r94.apk",
+        "size": 64947062
+      },
+      {
+        "name": "TVBox-Original-Feature-3.1.0-car.7-r94.apk.sha256",
+        "size": 110
+      }
+    ]
+  },
+  "result": "R95_PUBLICATION_PASS"
+}

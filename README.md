@@ -55,3 +55,5 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 - `car/reports/main-72e38f61-full-test.html` 是 r90 / `72e38f61` 的历史测试报告；其中 12 变体和低 API 风险是收敛前的结果，不是当前验收要求。
 
 2026-11-23：当前已发布 **3.1.0-car.7-r94 / versionCode 66**，源码 `98293be4`（CI 在等价测试修正 `515519fd` 上通过，产品代码未变）。r94 把 cdn-url 公开节点内置进公共网络层：订阅、Jar/JS、封面与更新下载在 GitHub 直连不稳时自动换节点，失效域名运行时停用并在 6 小时后自动复测；没有设置项，R2 与带凭据请求不参与。整包 SHA `4243288a…`、资产摘要、原证书与 notes 已回读一致。详见[内置加速说明](car/handover/R94-GITHUB-ACCEL.md)与[版本回读](car/reports/r94-github-verification.json)。真车网络行为仍待实测。
+
+2026-11-23：当前已发布 **3.1.0-car.7-r95 / versionCode 67**，源码 `aea620d7`（CI 45194003592 通过）。r95 三件事：① 音频 v3 只抬轻声不压正常声，天花板回到 `-1.5 dBFS`，正常/高潮段 0 dB 直通；② 网络改直连优先、镜像只作救援，播放清单与分片不再被改写；③ 订阅缓存优先秒开，后台比对更新，设置里可立即强制更新；设置页版本提示只在远端确实更新时出现；返回组件统一为 carclash 边缘样式，并与其无障碍服务互斥。整包 SHA `d97db2e0…`、资产摘要、原证书与 notes 已回读一致。详见[说明](car/handover/R95-AUDIO-V3-NETWORK.md)与[版本回读](car/reports/r95-release-verification.json)。真车播放与听感仍待实测（沙箱订阅取不到可播流，本轮未端到端复测播放链路）。
