@@ -54,4 +54,4 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 - [原始交付档案](DELIVERY-ORIGINAL-APP.md)及旧版本交接、报告只证明其对应版本，不作为当前构建/发布手册；现役行为按本 README 指向的说明和证据核对。
 - `car/reports/main-72e38f61-full-test.html` 是 r90 / `72e38f61` 的历史测试报告；其中 12 变体和低 API 风险是收敛前的结果，不是当前验收要求。
 
-2026-11-23：当前已发布 **3.1.0-car.7-r93 / versionCode 65**（源码 `5f826398`）；**3.1.0-car.7-r94 / versionCode 66** 已通过主机 28 个入口、Python 8 项测试与设备验收，正在做主备发布。r94 把 cdn-url 公开节点内置到公共网络层：订阅、Jar/JS、封面与更新下载在 GitHub 直连不稳时自动换节点，失效域名运行时停用并自动复测；没有设置项，R2 与带凭据请求不参与。详见[内置加速说明](car/handover/R94-GITHUB-ACCEL.md)与[版本回读](car/reports/r94-github-verification.json)。真车网络行为仍待实测。
+2026-11-23：当前已发布 **3.1.0-car.7-r94 / versionCode 66**，源码 `98293be4`（CI 在等价测试修正 `515519fd` 上通过，产品代码未变）。r94 把 cdn-url 公开节点内置进公共网络层：订阅、Jar/JS、封面与更新下载在 GitHub 直连不稳时自动换节点，失效域名运行时停用并在 6 小时后自动复测；没有设置项，R2 与带凭据请求不参与。整包 SHA `4243288a…`、资产摘要、原证书与 notes 已回读一致。详见[内置加速说明](car/handover/R94-GITHUB-ACCEL.md)与[版本回读](car/reports/r94-github-verification.json)。真车网络行为仍待实测。

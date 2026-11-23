@@ -1,0 +1,75 @@
+{
+  "verifiedAt": "2026-11-23T11:23:22.510907+08:00",
+  "version": "3.1.0-car.7-r94",
+  "versionCode": 66,
+  "sourceCommit": "98293be4a78f55628cc234a8ebc62f80bfe5ad81",
+  "publishedArtifact": {
+    "name": "TVBox-Original-Feature-3.1.0-car.7-r94.apk",
+    "sha256": "4243288a632bf03ca1bb7d702a2fa47357b2521d6ad1a7da350c3269410f04e4",
+    "bytes": 64947062,
+    "package": "com.github.tvbox.osc.jun",
+    "certificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "mappingSha256": "829fe919eca63a2ecd64a4e6cd5a024dc14256d7f5f76f65a0bfb42876d1bb19",
+    "minSdk": 32,
+    "abi": [
+      "arm64-v8a"
+    ]
+  },
+  "r2": {
+    "verified": true,
+    "manifestUrl": "https://dl.736.de5.net/tvboxos-car-2880/latest.json",
+    "apkUrl": "https://dl.736.de5.net/tvboxos-car-2880/TVBox-Original-Feature-3.1.0-car.7-r94.apk",
+    "publishedAt": "2026-11-23T03:20:47Z",
+    "manifestMatches": true,
+    "historyMatches": true,
+    "fullApkDownloaded": true,
+    "downloadedBytes": 64947062,
+    "sha256Matches": true,
+    "healthUsable": true
+  },
+  "github": {
+    "verified": true,
+    "tag": "v3.1.0-car.7-r94",
+    "targetCommit": "98293be4a78f55628cc234a8ebc62f80bfe5ad81",
+    "releaseUrl": "https://github.com/736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r94",
+    "publishedAt": "2026-11-23T03:22:00Z",
+    "isDraft": false,
+    "isPrerelease": false,
+    "latest": true,
+    "assetCount": 2,
+    "assetDigestsMatch": true,
+    "sidecarReadbackMatches": true,
+    "notesMatch": true
+  },
+  "signature": {
+    "verificationMinSdk": 32,
+    "v3Verified": true,
+    "certificateSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c",
+    "matchesEstablishedCertificate": true
+  },
+  "previousRelease": {
+    "tag": "v3.1.0-car.7-r93",
+    "githubArtifactDigestUnchanged": true,
+    "r2HistoryUnchanged": true
+  },
+  "ci": [
+    {
+      "conclusion": "",
+      "databaseId": 45105407807,
+      "headSha": "98293be4a78f55628cc234a8ebc62f80bfe5ad81",
+      "status": "in_progress",
+      "workflowName": "B01 car regression"
+    }
+  ],
+  "productCodeChangedSinceVerified": false,
+  "verificationScope": {
+    "readOnlyRemoteChecks": true,
+    "touchedProductCode": false,
+    "reinstalledDevice": false
+  },
+  "limitations": [
+    "MuMu API 35 with ARM translation is not B01 API 32 OEM network behaviour.",
+    "Public mirror availability and latency change over time; the runtime catalogue handles that, but no single measurement guarantees future capacity.",
+    "Requests carrying credentials or using non-GET methods intentionally bypass all mirrors."
+  ]
+}

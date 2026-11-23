@@ -1,0 +1,9 @@
+{
+    "version":  "3.1.0-car.7-r94",
+    "versionCode":  66,
+    "apk":  "tvboxos-car-2880/TVBox-Original-Feature-3.1.0-car.7-r94.apk",
+    "size":  64947062,
+    "sha256":  "4243288a632bf03ca1bb7d702a2fa47357b2521d6ad1a7da350c3269410f04e4",
+    "publishedAt":  "2026-11-23T03:20:47Z",
+    "notes":  "- 内置 cdn-url 公开节点：订阅、Jar/JS、封面与更新下载在 GitHub 直连不稳时自动换节点，无需任何设置。\n- 失效域名运行时停用并自动复测（证书/主机名异常 6 小时），单个文件 404 不会误伤整个服务。\n- 只加速公开读取：R2 主通道、带凭据请求与非 GET 请求一律直连。\n- 设备实测 App 网络栈可正常读取 GitHub Raw 与 Release 资产，R2 更新检查未受影响。\n"
+}

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "version": "3.1.0-car.7-r94",
   "versionCode": 66,
-  "published": false,
-  "status": "VERIFIED_READY_TO_PUBLISH",
+  "published": true,
+  "status": "PUBLISHED_VERIFIED",
   "artifact": {
     "name": "TVBox-Original-Feature-3.1.0-car.7-r94.apk",
     "sha256": "4243288a632bf03ca1bb7d702a2fa47357b2521d6ad1a7da350c3269410f04e4",
@@ -105,13 +105,33 @@
     "ownerInstallUntouched": true
   },
   "publication": {
-    "sourceCommit": null,
+    "sourceCommit": "98293be4a78f55628cc234a8ebc62f80bfe5ad81",
+    "verifiedAt": "2026-11-23T11:23:22.510907+08:00",
+    "evidence": "r94-github/publication/post-release-verification.json",
     "r2": {
-      "verified": false
+      "verified": true,
+      "manifestUrl": "https://dl.736.de5.net/tvboxos-car-2880/latest.json",
+      "apkUrl": "https://dl.736.de5.net/tvboxos-car-2880/TVBox-Original-Feature-3.1.0-car.7-r94.apk",
+      "fullApkDownloaded": true,
+      "sha256Matches": true
     },
     "github": {
-      "verified": false
-    }
+      "verified": true,
+      "tag": "v3.1.0-car.7-r94",
+      "releaseUrl": "https://github.com/736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r94",
+      "latest": true,
+      "assetCount": 2,
+      "assetDigestsMatch": true
+    },
+    "ci": {
+      "result": "PASS",
+      "runId": 45105810297,
+      "validatedCommit": "515519fd3345c1bdc019c06e0afeea98d7adfacb",
+      "productCodeUnchanged": true,
+      "evidence": "r94-github/publication/ci-verification.json"
+    },
+    "signatureMatchesEstablishedCertificate": true,
+    "previousR93Unchanged": true
   },
   "limitations": [
     "MuMu API 35 with ARM translation is not B01 API 32 OEM network behaviour.",
