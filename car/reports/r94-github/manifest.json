@@ -104,8 +104,8 @@
     "sha256": "a2aba78a2c968fbfda8dce95d3cfb615f8dcb29425ee564178ee8882dced0ed9"
   },
   "host/result.json": {
-    "bytes": 4241,
-    "sha256": "78cf2e685c3935bf177dd0927572979517ada3e9bbccf6f1cd792580cecc203a"
+    "bytes": 4244,
+    "sha256": "a0f21d846a91f609f8419a37f4ac17552040d2d4aec056d25f618762d112f0a5"
   },
   "host/run_audio_focus_host_test.log": {
     "bytes": 148,
