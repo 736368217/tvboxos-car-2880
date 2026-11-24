@@ -15,6 +15,7 @@
 - `car/tests`、`car/ci` 是可复跑验收入口；设备操作遵循 `car/handover/MUMU-VERIFICATION-SPEC.md`。
 - MuMu 验收不能冒充真车测试。真实 B01 的 OEM 行为、车机网络和听感需实际设备证据。
 - 上游只做选择性合并，保留 B01 的返回、生命周期、PCM 增益、历史与更新实现。
+- 音频调参分两层：车机声学参数查 `car/handover/B01-AUDIO-CHAIN-AND-EQ.md`，App 只做动态（`CarAudioDynamicsEngine`）；两边不要同时加正增益。
 - 历史报告保留对应版本和 SHA，不覆盖为本轮“已通过”；版本档案不构成现行支持承诺。
 - 不覆盖或清理已有未提交/未跟踪工作。临时文件写会话 scratch，项目输出放对应目录。
 - 用户已约定：每轮更新验收通过后默认提交、推送 main，并发布到 R2 主通道与 GitHub 备用 Release，再回读验证；不再逐次等待发布指令。只有用户明确暂停或门禁失败才停止，并说明原因。

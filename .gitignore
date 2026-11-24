@@ -117,3 +117,4 @@ output-metadata.json
 !/car/handover/R95-AUDIO-V3-NETWORK.md
 !/car/reports/r95-release/**/*.log
 !/car/reports/r95-release/**/*.txt
+!/car/handover/B01-AUDIO-CHAIN-AND-EQ.md
