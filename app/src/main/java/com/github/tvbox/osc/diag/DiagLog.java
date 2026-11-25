@@ -78,8 +78,8 @@ public final class DiagLog {
     private static final int MAX_PARTS = 4;
     /** 单批原始日志上限；gzip 后远小于服务端 512 KiB 硬限。 */
     private static final int MAX_RAW_LOG_BYTES = 400 * 1024;
-    private static final long UPLOAD_INTERVAL_MS = 120_000L;
-    private static final long START_DELAY_MS = 20_000L;
+    private static final long UPLOAD_INTERVAL_MS = 60_000L;
+    private static final long START_DELAY_MS = 5_000L;
     private static final long RETRY_INTERVAL_MS = 30_000L;
     private static final long TICK_INTERVAL_MS = 30_000L;
 

@@ -48,8 +48,9 @@ public class PlayerHelper {
             e.printStackTrace();
         }
         if(forcePlayerType>=0)playerType = forcePlayerType;
-        // r96：用户曾在 IJk 线路上要求 >100% 音量 → 记住的偏好在起播时兑现，改用 EXO 的 PCM 增益。
-        if (playerType == 1 && Hawk.get(HawkConfig.PREFER_VOLUME_BOOST_EXO, false)) playerType = 2;
+        // r97：B01 写死 EXO（PCM 增益 + 动态处理只在 EXO 生效），站源配置里的 pl=1 一律忽略；
+        // pl>=10 是「调外部播放器」，不属于内置引擎切换，保持原样。
+        if (playerType < 10) playerType = 2;
         IJKCode codec = ApiConfig.get().getIJKCodec(ijkCode);
         PlayerFactory playerFactory;
         if (playerType == 1) {
@@ -217,14 +218,10 @@ public class PlayerHelper {
         }
     }
 
+    /** r97：B01 只保留 EXO，选择器里也就只有这一项（IJk 没有 PCM 增益，>`100%` 音量不可用）。 */
     public static ArrayList<Integer> getExistPlayerTypes() {
-        HashMap<Integer, Boolean> playersExistInfo = getPlayersExistInfo();
         ArrayList<Integer> existPlayers = new ArrayList<>();
-        for(Integer playerType : playersExistInfo.keySet()) {
-            if (playersExistInfo.get(playerType)) {
-                existPlayers.add(playerType);
-            }
-        }
+        existPlayers.add(2);
         return existPlayers;
     }
 

@@ -81,6 +81,8 @@ public class App extends MultiDexApplication {
                 if (started == 0 && !activity.isChangingConfigurations()) {
                     com.github.tvbox.osc.cache.PlaybackSession.background(activity);
                     com.github.tvbox.osc.diag.DiagLog.event("app_background");
+                    // 切后台立刻补传一次：不依赖用户去点「立即上传」。
+                    com.github.tvbox.osc.diag.DiagLog.uploadNow();
                 }
             }
             @Override public void onActivityResumed(Activity activity) { }
@@ -96,11 +98,9 @@ public class App extends MultiDexApplication {
         Hawk.init(this).build();
         Hawk.put(HawkConfig.DEBUG_OPEN, false);
         Hawk.put(HawkConfig.PLAYER_IS_LIVE, false);
-        if (!Hawk.contains(HawkConfig.PLAY_TYPE)) {
-            Hawk.put(HawkConfig.PLAY_TYPE, 2);
-        } else if (Hawk.get(HawkConfig.PLAY_TYPE, 2) == 0) {
-            Hawk.put(HawkConfig.PLAY_TYPE, 2);
-        }
+        // r97：B01 只保留 EXO。IJk 没有 PCM 增益、>100% 音量还要切换引擎，直接写死不再给选择。
+        Hawk.put(HawkConfig.PLAY_TYPE, 2);
+        Hawk.put(HawkConfig.LIVE_PLAY_TYPE, 2);
     }
 
     public static App getInstance() {
