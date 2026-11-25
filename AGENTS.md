@@ -22,4 +22,4 @@
 
 ## 当前状态
 
-2026-11-23：当前已发布 **3.1.0-car.7-r95 / versionCode 67**（源码 `aea620d7`，CI 45194003592，APK SHA `d97db2e0…`）：音频 v3 只上行提升、天花板回 `-1.5 dBFS`、正常段 0 dB 直通；网络直连优先、镜像仅救援、播放清单/分片不改写；订阅缓存优先秒开 + 后台比对 + 设置内立即更新；版本提示仅在远端真更新时出现；返回组件只留 carclash 边缘样式，并与 carclash 的 EdgeBackService 互斥。设备侧已用 `/push/` 接口实测本机 HTTP mp4 与远端 HTTPS HLS 播放（增益 0.9998→2.6607、outPeak≤0.8414），真车听感与用户自己的 123 订阅仍待实测。r93 / vc65、r94 / vc66 为版本档案，证据见 README 与 `car/handover/R95-AUDIO-V3-NETWORK.md`。
+2026-11-25：当前已发布 **3.1.0-car.7-r96 / versionCode 68**（源码 `1e822a3a`，APK SHA `ab3ba879…`）：诊断日志改传 `dl.736.de5.net/logs/tvboxos-car-2880/`（旧 dl.z736.vip 通道已停用，实测装机 70 s 内云端出现对象）；音量 >100% 不再重建播放器（记住偏好、下次起播用 EXO）；解析/起播超时各 8 s；返回组件按 carclash `EdgeSwipeView` 原样移植，carclash 接管检测改为按 `EdgeBackService` 类名匹配任意包。设备侧已复测云端上传；面板拖拽取证与车上实际包名待下一份日志。详见 `car/handover/R96-FIXES.md`。
