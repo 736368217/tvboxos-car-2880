@@ -194,7 +194,7 @@ final class InAppBackHostLayout extends FrameLayout {
             case MotionEvent.ACTION_MOVE:
                 if (!capturing) return super.dispatchTouchEvent(event);
                 result = policy.move(event.getPointerId(0), event.getX(0), event.getY(0), t);
-                affordance.setGesture(policy.visualWidth(), policy.pullY(), policy.pullingLeft());
+                affordance.setGesture(policy.maxInward(), policy.pullY(), policy.pullingLeft());
                 log("move", event.getX(0), event.getY(0), result, action);
                 return true; // 捕获后完整手势流必须消费，不能把半段 MOVE 漏给内容 View
             case MotionEvent.ACTION_UP:

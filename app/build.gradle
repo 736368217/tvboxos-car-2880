@@ -7,9 +7,13 @@ android {
         applicationId 'com.github.tvbox.osc.jun'
         targetSdkVersion 28
         // 命名规则：<上游白盒基准版本>-car.7-<我方迭代号>
-        versionCode 67
-        versionName '3.1.0-car.7-r95'
-        // r95: gentle upward-only audio, direct-first network, cache-first subscription, carclash back.
+        versionCode 68
+        versionName '3.1.0-car.7-r96'
+        // r96: cloud diagnostics upload, volume-boost without engine restart, faster line failover,
+        // faithful carclash edge-back port, carclash state detection.
+        // 诊断上传令牌只在构建机上从 car/ci/upload-token.txt 注入，仓库与源码里不含明文。
+        def uploadTokenFile = rootProject.file('car/ci/upload-token.txt')
+        buildConfigField "String", "UPLOAD_TOKEN", "\"${uploadTokenFile.exists() ? uploadTokenFile.text.trim() : ''}\""
         multiDexEnabled true
         //设置room的Schema的位置
         javaCompileOptions {

@@ -246,8 +246,15 @@ public final class InAppBackButton {
 
     public static boolean isEnabled() { return bool(HawkConfig.IN_APP_BACK, true); }
     /**
-     * carclash：「应用内返回」开关存在其私有 prefs（car_ui/edge_back_enabled），跨应用读不到，
-     * 因此以它的无障碍服务是否启用作为近似判定。启用时不重复绘制第二个返回组件。
+     * carclash 的应用内返回是否在接管。
+     *
+     * <p>为什么不能只认包名：carclash 的 `applicationId` 由构建配置决定（源码里是
+     * `custom.application.id`，缺省 `com.github.metacubex.clash`），写死 `com.github.kr328.clash.car`
+     * 在装到车机上后永远匹配不到——这就是「明明开了却显示未打开」的原因。这里改为按
+     * **服务类名** `EdgeBackService` 匹配任意包，且同时接受 flat / short 两种组件写法。
+     *
+     * <p>已知近似：carclash 允许无障碍服务常驻、再用私有 `car_ui/edge_back_enabled` 开关手势，
+     * 那个开关跨应用读不到。因此本判定是「carclash 的返回服务已启用」，偏保守（宁可我们让位）。
      */
     public static boolean carClashEdgeBackActive(Context context) {
         if (context == null) return false;
@@ -257,7 +264,10 @@ public final class InAppBackButton {
             if (enabled == null || enabled.length() == 0) return false;
             for (String item : enabled.split(":")) {
                 String name = item == null ? "" : item.trim();
-                if (name.startsWith(CAR_CLASH_PACKAGE + "/") && name.contains("EdgeBackService")) {
+                if (name.length() == 0) continue;
+                int slash = name.indexOf('/');
+                String service = slash < 0 ? name : name.substring(slash + 1);
+                if (service.endsWith("EdgeBackService") || service.endsWith(".car.EdgeBackService")) {
                     return true;
                 }
             }
@@ -265,6 +275,26 @@ public final class InAppBackButton {
             return false;
         }
         return false;
+    }
+
+    /** 诊断上传用：一句话说明 carclash 接管状态，附带原始组件名便于核对包名。 */
+    public static String carClashBackSummary(Context context) {
+        try {
+            String enabled = Settings.Secure.getString(context.getContentResolver(),
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            boolean active = carClashEdgeBackActive(context);
+            String raw = enabled == null ? "" : enabled;
+            int index = raw.indexOf("EdgeBackService");
+            String component = "-";
+            if (index >= 0) {
+                int start = raw.lastIndexOf(':', index) + 1;
+                int end = raw.indexOf(':', index);
+                component = raw.substring(start, end < 0 ? raw.length() : end);
+            }
+            return active + " component=" + component;
+        } catch (RuntimeException error) {
+            return "unknown";
+        }
     }
     public static String getMode() {
         // r95 起只保留 carclash 风格边缘手势；旧的「返回杠」偏好一律按边缘手势处理。

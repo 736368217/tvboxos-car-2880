@@ -118,3 +118,4 @@ output-metadata.json
 !/car/reports/r95-release/**/*.log
 !/car/reports/r95-release/**/*.txt
 !/car/handover/B01-AUDIO-CHAIN-AND-EQ.md
+/car/ci/upload-token.txt

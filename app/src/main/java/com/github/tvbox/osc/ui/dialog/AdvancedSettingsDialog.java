@@ -228,6 +228,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                     }
                 }, owner);
             });
+            row("诊断日志上传", "上传到发布通道的 logs/ 目录，便于远程诊断", "立即上传", () -> {
+                com.github.tvbox.osc.diag.DiagLog.event("diag_upload_manual");
+                com.github.tvbox.osc.diag.DiagLog.uploadNow();
+                Toast.makeText(getContext(), com.github.tvbox.osc.diag.DiagLog.status(), Toast.LENGTH_LONG).show();
+            });
             row("诊断信息", "复制版本与功能开关，便于反馈", "复制", () -> {
                 ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
                 if (clipboard != null) clipboard.setPrimaryClip(ClipData.newPlainText("TVBox 诊断",

@@ -139,8 +139,10 @@ public class PlayFragment extends BaseLazyFragment {
     private static final int MSG_PARSE_TIMEOUT = 100;
     private static final int MSG_RESOLVE_PLAY_URL_TIMEOUT = 101;
     private static final int MSG_SWITCH_LINE_PLAY_TIMEOUT = 102;
-    private static final long RESOLVE_PLAY_URL_TIMEOUT_MS = 15 * 1000L;
-    private static final long SWITCH_LINE_PLAY_TIMEOUT_MS = 20 * 1000L;
+    // r96：实车「直连打开要等 30 秒以上才正常」= 两个超时串联（15s 解析 + 20s 起播）在等死线路。
+    // 缩短到 8s 后，失败线路很快让位给下一条，首帧等待不再被单条坏线路吃满。
+    private static final long RESOLVE_PLAY_URL_TIMEOUT_MS = 8 * 1000L;
+    private static final long SWITCH_LINE_PLAY_TIMEOUT_MS = 8 * 1000L;
     private MyVideoView mVideoView;
     private TextView mPlayLoadTip;
     private ImageView mPlayLoadErr;
@@ -1762,47 +1764,27 @@ public class PlayFragment extends BaseLazyFragment {
     private java.util.Set<String> triedLineFlags = new java.util.HashSet<>();  // 记录已尝试过的线路
     private boolean volumeBoostSwitchInProgress;
     private float pendingVolumeBoostAfterSwitch = -1f;
+    private boolean volumeBoostHintShown;
+    /**
+     * r96：>100% 音量不再中途重建播放器。
+     *
+     * <p>旧实现在这里做 IJK→EXO 引擎切换：release() 后重新 goPlayUrl()，表现为卡顿数秒、
+     * 从头重新缓冲（实车反馈「调音量把影片调重播了」）。音量手势不该打断播放，所以现在只
+     * 记下「下次起播用 EXO」，本次保持当前引擎与 100%，等用户主动重开该集时生效。
+     */
     private boolean requestExoForVolumeBoost(float requestedGain) {
-        if (volumeBoostSwitchInProgress) return true;
-        if (mVideoView == null || mController == null || mVodPlayerCfg == null
-                || mHandler == null || TextUtils.isEmpty(webPlayUrl)
-                || !(mVideoView.getMediaPlayer() instanceof IjkMediaPlayer)) return false;
-        final String url = webPlayUrl;
-        final HashMap<String, String> headers = webHeaderMap == null ? null : new HashMap<>(webHeaderMap);
-        volumeBoostSwitchInProgress = true;
-        pendingVolumeBoostAfterSwitch = Math.max(1f,
-                com.github.tvbox.osc.car.VolumeBoostMath.clampGain(requestedGain));
-        mHandler.post(() -> switchToExoForVolumeBoost(url, headers));
-        return true;
-    }
-    private void switchToExoForVolumeBoost(String url, HashMap<String, String> headers) {
-        if (!isAdded() || mVideoView == null || mVodPlayerCfg == null) {
-            volumeBoostSwitchInProgress = false;
-            pendingVolumeBoostAfterSwitch = -1f;
-            return;
+        if (mVideoView == null || mVodPlayerCfg == null) return false;
+        com.orhanobut.hawk.Hawk.put(com.github.tvbox.osc.util.HawkConfig.PREFER_VOLUME_BOOST_EXO, true);
+        if (!volumeBoostHintShown && mActivity != null) {
+            volumeBoostHintShown = true;
+            Toast.makeText(mActivity,
+                    "当前线路用 IJk：已记住，下次起播自动用 EXO 才能超过 100%",
+                    Toast.LENGTH_LONG).show();
         }
-        long position = Math.max(0L, mVideoView.getCurrentPosition());
-        if (position > 0 && !TextUtils.isEmpty(progressKey)) CacheManager.save(MD5.string2MD5(progressKey), position);
-        try {
-            mVodPlayerCfg.put("pl", 2);
-            if (mVodInfo != null) mVodInfo.playerCfg = mVodPlayerCfg.toString();
-            mController.setPlayerConfig(mVodPlayerCfg);
-            EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_REFRESH, mVodPlayerCfg));
-        } catch (JSONException error) {
-            volumeBoostSwitchInProgress = false;
-            pendingVolumeBoostAfterSwitch = -1f;
-            return;
-        }
-        LOG.i("volume_boost_switch ijk->exo target=" + Math.round(pendingVolumeBoostAfterSwitch * 100)
-                + "% position=" + position);
-        hasAutoSwitchedPlayer = false;
-        autoRetryCount = 0;
-        allowSwitchPlayer = true;
-        triedLineFlags.clear();
-        stopParse();
-        initParseLoadFound();
-        mVideoView.release();
-        goPlayUrl(url, headers);
+        LOG.i("volume_boost_deferred requested=" + Math.round(requestedGain * 100) + "% next_start=exo");
+        com.github.tvbox.osc.diag.DiagLog.event("volume_boost_deferred target="
+                + Math.round(requestedGain * 100) + "% engine_now=ijk");
+        return false;
     }
     private void restoreAutoSwitchedPlayer() {
         if (autoSwitchedPlayerType < 0) return;

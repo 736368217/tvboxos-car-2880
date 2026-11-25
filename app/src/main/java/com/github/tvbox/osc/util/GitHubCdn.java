@@ -50,6 +50,14 @@ public final class GitHubCdn {
 
     public GitHubCdn(Store store, Clock clock) { this.store = store; this.clock = clock; }
     public static GitHubCdn shared() { return SHARED; }
+
+    /** One-line health summary for the diagnostics upload: catalogue size plus the remembered node. */
+    public String describe() {
+        String preferred = store.get(KEY + "preferred:file");
+        if (preferred == null || preferred.length() == 0) preferred = store.get(KEY + "preferred:api");
+        return "nodes=" + NODES.length + " preferred="
+                + (preferred == null || preferred.length() == 0 ? "-" : preferred);
+    }
     public void useStore(Store persistent) { if (persistent != null) store = persistent; }
 
     /** Exact-host admission, with original query/path encoding kept intact. */

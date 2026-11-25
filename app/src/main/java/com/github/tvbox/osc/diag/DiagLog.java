@@ -36,10 +36,10 @@ import java.util.zip.GZIPOutputStream;
 /**
  * 车机诊断日志客户端 —— canonical v2（app-diagnostics，product=tvbox）。
  *
- * <p>协议：{@code POST https://dl.z736.vip/app-diagnostics/v2/upload}，
- * {@code Content-Type: application/json} + {@code Content-Encoding: gzip}，
- * {@code Authorization: Bearer <upload-only token>}。请求体是 JSON 信封，正文放
- * {@code rawLog}。旧 {@code /tvbox-logs/upload} 由服务端兼容路由转发，本客户端不再使用。</p>
+ * <p>协议：{@code PUT https://dl.736.de5.net/tvboxos-car-2880/logs/<device>-<batch>.json.gz}，
+ * {@code Content-Type: application/gzip} + {@code X-Upload-Token: <只写令牌>}。正文是 gzip 过的
+ * JSON 信封（{@code rawLog} 放原文），落盘即可回读。旧的 {@code dl.z736.vip} 诊断接口已于
+ * 2026-11-12 停用，本客户端不再连它。</p>
  *
  * <p>平台侧约定的可靠性要求，逐条落实：</p>
  * <ul>
@@ -67,11 +67,12 @@ public final class DiagLog {
 
     public static final String TAG = "DiagLog";
 
-    private static final String UPLOAD_URL = "https://dl.z736.vip/app-diagnostics/v2/upload";
+    /** R2 发布通道复用同一域名：日志对象放在 <project>/logs/ 下，与 APK 共用只写令牌。 */
+    private static final String R2_BASE = "https://dl.736.de5.net/";
     private static final String PRODUCT = "tvbox";
-    private static final String CLIENT_VERSION = "diag-v2-r70";
-    /** tvbox 作用域的 upload-only token（只能上传，不能读）。read token 不在这里。 */
-    private static final String UPLOAD_TOKEN = "yi2yX6BYTr7byTbJcHG0i3a0uqmFhN_U";
+    private static final String CLIENT_VERSION = "diag-r2-r96";
+    /** 只写令牌，构建期由 car/ci/upload-token.txt 注入；仓库与源码里没有明文。 */
+    private static final String UPLOAD_TOKEN = com.github.tvbox.osc.BuildConfig.UPLOAD_TOKEN;
 
     private static final long PART_BYTES = 256L * 1024L;
     private static final int MAX_PARTS = 4;
@@ -563,77 +564,35 @@ public final class DiagLog {
             return;
         }
         HttpURLConnection connection = null;
+        String objectKey = "logs/tvboxos-car-2880/" + deviceId + "-" + batch + ".json.gz";
         try {
-            URL url = new URL(UPLOAD_URL);
+            URL url = new URL(R2_BASE + objectKey);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod("PUT");
             connection.setConnectTimeout(10_000);
             connection.setReadTimeout(20_000);
             connection.setDoOutput(true);
             connection.setFixedLengthStreamingMode(body.length);
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Content-Encoding", "gzip");
-            connection.setRequestProperty("Authorization", "Bearer " + UPLOAD_TOKEN);
+            // 对象原样存 gzip：R2 不解压，回读时本地 gunzip 即可。
+            connection.setRequestProperty("Content-Type", "application/gzip");
+            connection.setRequestProperty("X-Upload-Token", UPLOAD_TOKEN);
             try (OutputStream out = connection.getOutputStream()) {
                 out.write(body);
             }
             int code = connection.getResponseCode();
-            String responseText;
-            try {
-                InputStream stream = code >= 200 && code < 300
-                        ? connection.getInputStream() : connection.getErrorStream();
-                responseText = stream == null ? "" : readAll(stream);
-            } catch (Throwable error) {
-                responseText = "";
-            }
             if (code != 200) {
                 Log.w(TAG, "upload rejected code=" + code + " batch kept=" + batch);
                 return;  // pending 保留，下次原样重发
             }
-            JSONObject result = new JSONObject(responseText);
-            boolean accepted = result.optBoolean("accepted", false);
-            boolean duplicate = result.optBoolean("duplicate", false);
-            String id = result.optString("id", "");
-            String rProduct = result.optString("product", "");
-            String rDevice = result.optString("device", "");
-            String rCursor = result.optString("cursor", "");
-            String rBatch = result.optString("batch", "");
-            long bytes = result.optLong("bytes", 0L);
-            String recordedId = meta.optString("lastId", "");
-            if (id.length() > 0 && !recordedId.equals(id)) {
-                // 记下见过的 id，供 duplicate 场景做「同 id」比对；失败重试仍复用同一批。
-                try {
-                    meta.put("lastId", id);
-                    persist(pendingMeta(), meta.toString().getBytes(UTF8));
-                } catch (Throwable ignored) {
-                }
-            }
-            boolean ok = accepted
-                    && id.length() > 0
-                    && PRODUCT.equals(rProduct)
-                    && deviceId.equals(rDevice)
-                    && sentCursor.equals(rCursor)
-                    && bytes > 0
-                    && (rBatch.isEmpty() || batch.equals(rBatch));
-            if (ok && duplicate && !recordedId.isEmpty() && !recordedId.equals(id)) {
-                ok = false;  // duplicate 但 id 不一致：不推进，继续原样重试
-            }
-            if (!ok) {
-                Log.w(TAG, "upload response rejected accepted=" + accepted
-                        + " id=" + (id.length() > 0) + " product=" + PRODUCT.equals(rProduct)
-                        + " device=" + deviceId.equals(rDevice) + " cursor=" + sentCursor.equals(rCursor)
-                        + " bytes=" + bytes + " batch kept=" + batch);
-                return;
-            }
-            // 严格判据全过（含 duplicate=true）：推进游标、清 pending。
+            // R2 不回业务字段：200 即落盘，推进游标并清 pending。
             cursor = nextCursor;
             saveCursor(nextCursor);
             clearPending();
             lastUploadMs = System.currentTimeMillis();
-            writeMarker("upload ok v2 batch=" + batch + " duplicate=" + duplicate
-                    + " bytes=" + bytes + " cursor=" + nextCursor);
-            // 这一批读满说明还有积压：下一个 tick 立即续传，不等 2 分钟。
-            if (bytes >= MAX_RAW_LOG_BYTES / 2) drainNow = true;
+            writeMarker("upload ok r2 key=" + objectKey + " bytes=" + body.length
+                    + " cursor=" + nextCursor);
+            // 这一批读满说明还有积压：下一个 tick 立即续传。
+            if (body.length >= MAX_RAW_LOG_BYTES / 2) drainNow = true;
         } catch (Throwable error) {
             Log.w(TAG, "upload failed: " + error.getClass().getSimpleName()
                     + " batch kept=" + batch);

@@ -48,6 +48,8 @@ public class PlayerHelper {
             e.printStackTrace();
         }
         if(forcePlayerType>=0)playerType = forcePlayerType;
+        // r96：用户曾在 IJk 线路上要求 >100% 音量 → 记住的偏好在起播时兑现，改用 EXO 的 PCM 增益。
+        if (playerType == 1 && Hawk.get(HawkConfig.PREFER_VOLUME_BOOST_EXO, false)) playerType = 2;
         IJKCode codec = ApiConfig.get().getIJKCodec(ijkCode);
         PlayerFactory playerFactory;
         if (playerType == 1) {

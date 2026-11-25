@@ -108,6 +108,8 @@ public class HawkConfig {
     public static final String VIDEO_SR_TIER = "video_sr_tier"; // 0 off, 1 SGSR, 2 FSR, 3 anime
     public static final String VIDEO_MEMC_TIER = "video_memc_tier"; // 0 off, 1 oversample, 2 cubic, 3 safe-flow
     public static final String VOLUME_GAIN = "app_volume_gain"; // 0-500, default 100 (app-level gain, not system volume)
+    /** 用户要求过 >100% 音量：下次起播强制 EXO，避免再为调音量中途重建播放器。 */
+    public static final String PREFER_VOLUME_BOOST_EXO = "prefer_volume_boost_exo";
     public static final String AUDIO_ENHANCEMENT = "audio_enhancement"; // default true; false is Original sound
     public static final String AUDIO_DRC_MODE = "audio_drc_mode"; // 0 off, 1 balanced, 2 highway
     public static final String SOURCE_LEVEL_MATCH = "source_level_match"; // legacy DRC preference
