@@ -47,5 +47,7 @@ IJk 没有 PCM 增益：>100% 音量不可用、动态处理（`CarAudioDynamics
 | 自动上传 | 未点按钮即产生 3 个新批次对象 |
 | R2 / GitHub | `latest.json` 与 Release 资产均为 `5a237f72…` |
 
+**残留（下一轮随构建清掉，不是现役行为）**：`HawkConfig.PREFER_VOLUME_BOOST_EXO`、`PlayFragment.requestExoForVolumeBoost()`、`MyVideoView.requestVolumeBoost()` 已无调用路径——EXO 下 `supportsVolumeBoost()` 恒为 true，`BaseController` 的 `!canBoostVolume()` 分支进不去。
+
 **证据边界**：本轮仍没有车机实拍；面板拖拽外观、carclash 实际包名要等车上运行后的上传日志
 （`back: … carClash=…`）确认。

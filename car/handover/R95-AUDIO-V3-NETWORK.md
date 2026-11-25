@@ -64,6 +64,8 @@ r94 是「镜像优先 + 所有 GitHub URL 改写」，实测代价是：直连�
 
 ## 5. 返回组件：只保留 carclash 样式，且与其互斥
 
+> **r96 起已改为直接移植 carclash `EdgeSwipeView`**：静止时不再画窄带（只有透明触摸带），拖动时是纯黑贝塞尔透镜 + 双箭头。本节下面描述的是 r95 的自绘版本，保留作版本档案；现役画法见 [R96-FIXES.md](R96-FIXES.md) §4。
+
 - `BackAffordanceView.drawEdge()` 按 carclash `EdgeBack.kt` 的几何重画：静止窄带 + 全高圆角半透明面板、
   chevron 指示、宽度随拖动 `×0.6`、`trigger` 后高亮描边（对应 `BAND_DP=36 / TRIGGER_DP=45 / PEAK_DP=180 / PANEL_SCALE=0.60`）。
 - 设置「返回方式」只剩 `边缘手势 / 关闭` 两个选项；`InAppBackButton.getMode()` 固定返回 `BACK_MODE_EDGE`，旧的「返回杠」偏好按边缘手势处理。

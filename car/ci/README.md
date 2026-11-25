@@ -33,4 +33,10 @@ JDK/SDK/Gradle 缓存位置从 `JAVA_HOME`、`ANDROID_HOME`、`GRADLE_USER_HOME`
 - `.github/workflows/test.yml`：本仓库 main 代码变化时复用上述检查，不再克隆上游和批量打包。
 - `.github/workflows/upstream-watch.yml`：上游变化提醒和只读预演；接收哪些改动由 B01 需求决定。
 
+## 诊断日志
+
+车机日志由 App 自动上传，不需要司机操作：启动 5 s 首传、每 60 s 一次、切后台立即补传，对象落在 `https://dl.736.de5.net/logs/tvboxos-car-2880/<device>-<batch>.json.gz`（gzip 的 JSON，`rawLog` 是正文）。上传令牌由构建期从 `car/ci/upload-token.txt`（已 gitignore）注入，仓库里没有明文。
+
+取回：`curl -H "X-Upload-Token: <令牌>" https://dl.736.de5.net/_ls` 列出对象后直接 GET，再 `gunzip` 即得到可读日志。设置页的「诊断日志上传」按钮只是额外手段。
+
 R2 是主分发通道，入口为 `tools/publish_r2.ps1`。按项目既定授权，更新验收通过后默认提交、推送并完成 R2/GitHub 同包发布与摘要回读；不再逐次等待指令。CI artifact 上传本身不代表 R2 或车机已更新。

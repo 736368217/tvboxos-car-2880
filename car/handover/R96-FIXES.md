@@ -24,6 +24,8 @@
 
 ## 2. 音量从 <100% 调到 >100% 会卡顿并「重播」
 
+> **r97 起已由「写死 EXO」取代**：`PREFER_VOLUME_BOOST_EXO` 与「下次起播换引擎」的过渡逻辑已不再生效 （EXO 恒支持 PCM 增益，切换路径根本不会走到）。本节保留为 r96 档案，现役行为见 [R97-FIXES.md](R97-FIXES.md) §2。
+
 原因：`BaseController.slideToChangeVolume` 在非 PCM 引擎（IJk）上遇到 >100% 时调用
 `requestVolumeBoost` → `PlayFragment` 做 IJK→EXO 引擎切换 → `mVideoView.release()` +
 `goPlayUrl()`，必然卡数秒并从头重新缓冲。
