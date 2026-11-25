@@ -22,4 +22,4 @@
 
 ## 当前状态
 
-2026-11-25：当前已发布 **3.1.0-car.7-r96 / versionCode 68**（源码 `1e822a3a`，APK SHA `ab3ba879…`）：诊断日志改传 `dl.736.de5.net/logs/tvboxos-car-2880/`（旧 dl.z736.vip 通道已停用，实测装机 70 s 内云端出现对象）；音量 >100% 不再重建播放器（记住偏好、下次起播用 EXO）；解析/起播超时各 8 s；返回组件按 carclash `EdgeSwipeView` 原样移植，carclash 接管检测改为按 `EdgeBackService` 类名匹配任意包。设备侧已复测云端上传；面板拖拽取证与车上实际包名待下一份日志。详见 `car/handover/R96-FIXES.md`。
+2026-11-25：当前已发布 **3.1.0-car.7-r97 / versionCode 69**（源码 `b50a2dab`，APK SHA `5a237f72…`）：诊断日志全自动上传（启动 5 s 首传、每 60 s 一次、切后台立即补传，设置里的按钮只是额外手段），走 `dl.736.de5.net/logs/tvboxos-car-2880/`；播放器**写死 EXO**（`PLAY_TYPE`/`LIVE_PLAY_TYPE`=2，站源 `pl<10` 一律改写，设置只剩 EXO），不再有引擎切换。设备侧已验证：仅 `ExoPlayerImpl` 播放、未点按钮即出现多个上传批次。详见 `car/handover/R97-FIXES.md`。
