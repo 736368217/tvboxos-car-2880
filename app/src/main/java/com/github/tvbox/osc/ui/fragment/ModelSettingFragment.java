@@ -47,6 +47,8 @@ import com.github.tvbox.osc.util.HistoryHelper;
 import com.github.tvbox.osc.util.LOG;
 import com.github.tvbox.osc.util.OkGoHelper;
 import com.github.tvbox.osc.util.PlayerHelper;
+import com.github.tvbox.osc.enhance.TvEnhance;
+import com.github.tvbox.osc.ui.dialog.VideoEnhanceDialog;
 import com.github.tvbox.osc.util.VideoEnhanceHelper;
 import com.github.tvbox.osc.viewmodel.SourceViewModel;
 import com.lzy.okgo.OkGo;
@@ -109,6 +111,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvVideoSr;
     private TextView tvVideoMemc;
     private TextView tvCheckUpdate;
+    private TextView tvAudioFx;
+    private TextView tvEnhance;
 
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
@@ -180,6 +184,10 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvVideoSr.setText(VideoEnhanceHelper.srName());
         tvVideoMemc.setText(VideoEnhanceHelper.memcName());
         tvCheckUpdate.setText("v" + TvUpdate.localVersionName(mActivity));
+        tvAudioFx = findViewById(R.id.tvAudioFx);
+        tvEnhance = findViewById(R.id.tvEnhance);
+        tvAudioFx.setText(TvEnhance.audioName());
+        tvEnhance.setText(TvEnhance.summary());
         tvIjkCachePlay.setText(Hawk.get(HawkConfig.IJK_CACHE_PLAY, false) ? "开启" : "关闭");
         tvHomeDefaultShow = findViewById(R.id.tvHomeText);
         tvHomeDefaultShow.setText(Hawk.get(HawkConfig.DEFAULT_LOAD_LIVE, false) ? "直播" : "点播");
@@ -730,6 +738,59 @@ public class ModelSettingFragment extends BaseLazyFragment {
                         return oldItem.intValue() == newItem.intValue();
                     }
                 }, tiers, defaultPos);
+                dialog.show();
+            }
+        });
+        findViewById(R.id.llAudioFx).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                final int count = Math.max(1, TvEnhance.audioModeCount());
+                ArrayList<Integer> modes = new ArrayList<>();
+                for (int i = 0; i < count; i++) modes.add(i);
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("请选择音效（当前播放立即生效）");
+                dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        TvEnhance.setAudioMode(value);
+                        TvEnhance.setAudioEnhancementEnabled(true);
+                        tvAudioFx.setText(TvEnhance.audioName());
+                        tvEnhance.setText(TvEnhance.summary());
+                        dialog.dismiss();
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return TvEnhance.audioNameOf(val);
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, modes, TvEnhance.audioMode());
+                dialog.show();
+            }
+        });
+        findViewById(R.id.llEnhance).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                VideoEnhanceDialog dialog = new VideoEnhanceDialog(mActivity);
+                // 弹窗里改完再关：回到设置页时把两行文字同步成最新值
+                dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface d) {
+                        tvAudioFx.setText(TvEnhance.audioName());
+                        tvEnhance.setText(TvEnhance.summary());
+                    }
+                });
                 dialog.show();
             }
         });

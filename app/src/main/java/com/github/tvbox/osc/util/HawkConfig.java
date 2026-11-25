@@ -70,5 +70,8 @@ public class HawkConfig {
     public static final String VIDEO_ENHANCE = "video_enhance";
     public static final String VIDEO_SR_TIER = "video_sr_tier";
     public static final String VIDEO_MEMC_TIER = "video_memc_tier";
+    // ---- 音效：均衡器预设 + 原声/增强对比 ----
+    public static final String HIFI_AUDIO = "hifi_audio";
+    public static final String AUDIO_ENHANCEMENT = "audio_enhancement";
     public static boolean hotVodDelete;
 }

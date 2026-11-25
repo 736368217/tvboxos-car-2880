@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 播放增强：每行是一个 focusable 条目，方向键上下换行、左右改值、确认键循环 -->
+    <LinearLayout
+        android:layout_width="@dimen/vs_720"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/shape_dialog_bg_main"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/vs_30"
+        android:paddingTop="@dimen/vs_20"
+        android:paddingRight="@dimen/vs_30"
+        android:paddingBottom="@dimen/vs_24">
+
+        <TextView
+            android:id="@+id/tvEnhanceTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="播放增强"
+            android:textColor="@color/color_CC000000"
+            android:textSize="@dimen/ts_26"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvEnhanceHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_6"
+            android:gravity="center"
+            android:text="上下选行 · 左右改值 · 返回关闭"
+            android:textColor="@color/color_CC000000"
+            android:textSize="@dimen/ts_18" />
+
+        <LinearLayout
+            android:id="@+id/rowFilter"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/vs_60"
+            android:layout_marginTop="@dimen/vs_14"
+            android:background="@drawable/shape_setting_model_focus"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/vs_20"
+            android:paddingRight="@dimen/vs_20">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="画面滤镜"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/vs_12"
+                android:layout_marginLeft="@dimen/vs_12"
+                android:text="◀ ▶"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_20" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rowSr"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/vs_60"
+            android:layout_marginTop="@dimen/vs_8"
+            android:background="@drawable/shape_setting_model_focus"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/vs_20"
+            android:paddingRight="@dimen/vs_20">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="超分辨率"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvSr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/vs_12"
+                android:layout_marginLeft="@dimen/vs_12"
+                android:text="◀ ▶"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_20" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rowMemc"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/vs_60"
+            android:layout_marginTop="@dimen/vs_8"
+            android:background="@drawable/shape_setting_model_focus"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/vs_20"
+            android:paddingRight="@dimen/vs_20">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="运动补帧"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvMemc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/vs_12"
+                android:layout_marginLeft="@dimen/vs_12"
+                android:text="◀ ▶"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_20" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rowAudio"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/vs_60"
+            android:layout_marginTop="@dimen/vs_8"
+            android:background="@drawable/shape_setting_model_focus"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/vs_20"
+            android:paddingRight="@dimen/vs_20">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="音效"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvAudio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/vs_12"
+                android:layout_marginLeft="@dimen/vs_12"
+                android:text="◀ ▶"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_20" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rowCompare"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/vs_60"
+            android:layout_marginTop="@dimen/vs_8"
+            android:background="@drawable/shape_setting_model_focus"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/vs_20"
+            android:paddingRight="@dimen/vs_20">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="音效对比"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvCompare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_24" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/vs_12"
+                android:layout_marginLeft="@dimen/vs_12"
+                android:text="◀ ▶"
+                android:textColor="@color/color_CC000000"
+                android:textSize="@dimen/ts_20" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvEnhanceFooter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vs_12"
+            android:gravity="center"
+            android:textColor="@color/color_CC000000"
+            android:textSize="@dimen/ts_18" />
+    </LinearLayout>
+</FrameLayout>

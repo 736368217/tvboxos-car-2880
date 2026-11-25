@@ -261,6 +261,18 @@ public class ControlWrapper implements MediaPlayerControl, IVideoController {
         setLocked(!isLocked());
     }
 
+    /**
+     * 当前播放引擎的音频会话 id（音效链挂载用）。
+     *
+     * <p>只有真实实现 {@code VideoView} 的引擎才有会话；这里用 instanceof 判断，
+     * 不去改 {@code MediaPlayerControl} 接口，避免影响其它实现类。</p>
+     */
+    public int getAudioSessionId() {
+        if (mPlayerControl instanceof xyz.doikki.videoplayer.player.VideoView) {
+            return ((xyz.doikki.videoplayer.player.VideoView) mPlayerControl).getAudioSessionId();
+        }
+        return 0;
+    }
 
     /**
      * 切换显示/隐藏状态

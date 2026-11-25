@@ -243,6 +243,19 @@
                 android:textSize="@dimen/ts_19" />
 
             <TextView
+                android:id="@+id/play_enhance"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/vs_5"
+                android:layout_marginRight="@dimen/vs_5"
+                android:background="@drawable/button_dialog_main"
+                android:focusable="true"
+                android:text="增强"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_19" />
+
+            <TextView
                 android:id="@+id/play_next"
                 android:singleLine="true"
                 android:layout_width="wrap_content"

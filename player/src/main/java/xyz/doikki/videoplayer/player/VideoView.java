@@ -724,6 +724,13 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
         if (mMediaPlayer != null) {
             mMediaPlayer.setVolume(v1, v2);
         }
+        }
+
+    /**
+     * 当前播放引擎的音频会话 id，供音效链挂载；引擎不支持时返回 0。
+     */
+    public int getAudioSessionId() {
+        return mMediaPlayer == null ? 0 : mMediaPlayer.getAudioSessionId();
     }
 
     /**

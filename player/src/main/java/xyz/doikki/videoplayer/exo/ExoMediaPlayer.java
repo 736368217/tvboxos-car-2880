@@ -217,6 +217,13 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
     @Override
     public int getBufferedPercentage() {
         return mInternalPlayer == null ? 0 : mInternalPlayer.getBufferedPercentage();
+
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        // 音效链要挂到引擎真实的音频会话上；没有会话时返回 0，避免误挂到 -1。
+        return mInternalPlayer == null ? 0 : mInternalPlayer.getAudioSessionId();
     }
 
     @Override

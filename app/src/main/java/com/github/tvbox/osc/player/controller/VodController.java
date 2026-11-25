@@ -48,6 +48,8 @@ import com.github.tvbox.osc.util.DanmuHelper;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.LOG;
 import com.github.tvbox.osc.util.M3u8;
+import com.github.tvbox.osc.enhance.TvEnhance;
+import com.github.tvbox.osc.ui.dialog.VideoEnhanceDialog;
 import com.github.tvbox.osc.util.PlayerHelper;
 import com.github.tvbox.osc.util.ScreenUtils;
 import com.github.tvbox.osc.util.SubtitleHelper;
@@ -262,6 +264,8 @@ public class VodController extends BaseController {
     LinearLayout tv_screen_display; //增加屏显布局
     TextView mCastBtn;
     TextView net_play_speed;
+    /** 播放页「增强」入口：滤镜 / 超分 / 补帧 / 音效 / 音效对比。 */
+    private TextView mEnhanceBtn;
     private boolean hasDanmu = false;
     private boolean showParse;
 
@@ -340,6 +344,16 @@ public class VodController extends BaseController {
         mTopRoot1 = findViewById(R.id.tv_top_l_container);
         mTopRoot2 = findViewById(R.id.tv_top_r_container);
         mPlayBtnGroup = findViewById(R.id.play_btn_group);
+        mEnhanceBtn = findViewById(R.id.play_enhance);
+        if (mEnhanceBtn != null) {
+            mEnhanceBtn.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    FastClickCheckUtil.check(view);
+                    showEnhanceDialog();
+                }
+            });
+        }
         tv_screen_display = findViewById(R.id.tv_screen_display);
         net_play_speed = findViewById(R.id.net_play_speed);
         mParseRoot = findViewById(R.id.parse_root);
@@ -1510,6 +1524,7 @@ public class VodController extends BaseController {
             case VideoView.STATE_PLAYING:
                 initLandscapePortraitBtnInfo();
                 startProgress();
+                attachAudioEffects();
                 break;
             case VideoView.STATE_PAUSED:
                 mTopRoot1.setVisibility(GONE);
@@ -2165,6 +2180,38 @@ public class VodController extends BaseController {
 
         private static int dp(Context context, float value) {
             return (int) (value * context.getResources().getDisplayMetrics().density + 0.5f);
+        }
+    }
+
+    /**
+     * 把已保存的音效挂到当前音频会话。
+     *
+     * <p>每次进入 STATE_PLAYING 调一次：换集或换播放引擎后会话 id 会变，
+     * {@code AudioEffectController.apply()} 内部对「同会话同档位」做了幂等短路，
+     * 所以重复调用不会重建效果链。</p>
+     */
+    private void attachAudioEffects() {
+        try {
+            TvEnhance.applyAudio(mControlWrapper == null ? 0 : mControlWrapper.getAudioSessionId());
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /** 打开播放增强弹窗（弹窗自己接管方向键）；音效改动立即挂到当前会话。 */
+    private void showEnhanceDialog() {
+        try {
+            new VideoEnhanceDialog(getContext(), new VideoEnhanceDialog.SessionProvider() {
+                @Override
+                public int sessionId() {
+                    try {
+                        return mControlWrapper == null ? 0 : mControlWrapper.getAudioSessionId();
+                    } catch (Throwable ignored) {
+                        return 0;
+                    }
+                }
+            }).show();
+        } catch (Throwable th) {
+            LOG.i("echo-enhance dialog error: " + th);
         }
     }
 }

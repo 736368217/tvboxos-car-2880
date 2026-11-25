@@ -162,6 +162,15 @@ public abstract class AbstractPlayer {
     public abstract void setLooping(boolean isLooping);
 
     /**
+     * 当前音频会话 id；不暴露会话的引擎返回 0。
+     *
+     * <p>音效（均衡器/低音增强等 {@code AudioEffect}）必须挂在这个 id 上才能生效，
+     * 所以由各实现按引擎能力覆写。</p>
+     */
+    public int getAudioSessionId() {
+        return 0;
+    }
+    /**
      * 设置其他播放配置
      */
     public abstract void setOptions();
