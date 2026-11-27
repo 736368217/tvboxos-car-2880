@@ -121,3 +121,7 @@ output-metadata.json
 /car/ci/upload-token.txt
 !/car/handover/R96-FIXES.md
 !/car/handover/R97-FIXES.md
+!/car/handover/R98-AUDIO-V4.md
+!/car/reports/r98-release/**/*.log
+!/car/reports/r98-release/**/*.txt
+!/car/reports/r98-release/**/*.json

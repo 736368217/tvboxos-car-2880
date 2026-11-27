@@ -1,0 +1,39 @@
+{
+  "result": "R98_PUBLICATION_PASS",
+  "sourceCommit": "d0011635156b8171b5aa648a4e4788c9a5a5f86f",
+  "version": "3.1.0-car.7-r98",
+  "versionCode": 70,
+  "sha256": "11192da8942982483975c9ab03460c611387394ad9967187f7507aeda4b2e662",
+  "size": 65020790,
+  "r2": {
+    "latest": "https://dl.736.de5.net/tvboxos-car-2880/latest.json",
+    "versionMatches": true,
+    "versionCodeMatches": true,
+    "shaMatches": true,
+    "sizeMatches": true,
+    "headStatus": 200,
+    "headLength": 65020790
+  },
+  "github": {
+    "release": "https://github.com/736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r98",
+    "tag": "v3.1.0-car.7-r98",
+    "targetCommit": "main",
+    "assetSize": 65020790,
+    "assetDigest": "sha256:11192da8942982483975c9ab03460c611387394ad9967187f7507aeda4b2e662"
+  },
+  "mergedPullRequests": {
+    "1": "19318d5129f3c03e0898cf205460e5e8d73daeaf",
+    "2": "d0011635156b8171b5aa648a4e4788c9a5a5f86f"
+  },
+  "checks": {
+    "hostSuite": "ALL_HOST_TESTS_PASS",
+    "cdnSuite": "GitHubCdnTransportTest PASS checks=19 + Python 8 tests OK",
+    "b01Apk": "B01_APK_PASS",
+    "deviceBaseSha": "matches local signed APK",
+    "deviceDisplay": "PASS",
+    "devicePlayback": "EXO local MP4 + remote HLS PASS",
+    "deviceAutoUpload": "PASS",
+    "deviceCarclashDetection": "PASS",
+    "smallPreviewInteraction": "PARTIAL: fixture detail search timed out with candidates=0"
+  }
+}

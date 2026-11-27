@@ -32,3 +32,20 @@
 
 - 配套更新 `car/tests/AudioDynamicsHostTest.java`（覆盖 v4 抬升窗口、500 ms 停顿保持、5.6 s 持续底噪平滑回落、高潮柔和下行、250 Hz 侧链低频抑制、通道联动、500% 限幅与恢复）。
 - 车机侧 `音效aaaa` 保持不变，App 内建议默认增益 `100%`，高速看宽动态番剧优先用 `高速压缩`。
+
+## 4. 合并后 r98 设备验收边界（2026-11-27）
+
+- 最终合并提交：`d0011635156b8171b5aa648a4e4788c9a5a5f86f`（PR #1 音频 v4 + PR #2 小窗控件）。
+- 最终安装包 `base.apk` SHA-256：`11192da8942982483975c9ab03460c611387394ad9967187f7507aeda4b2e662`；
+  本地签名包与设备 SHA 一致，`versionCode=70` / `versionName=3.1.0-car.7-r98`。
+- MuMu B01 显示基线：物理 `1620×2880`、density `160`、无 override、横向逻辑 frame `2880×1620`、rotation lock `1`。
+- 设备播放：本地 HTTP MP4 与远端 HTTPS HLS 都进入 `DetailActivity`，`ExoPlayerImpl` 初始化，
+  `OMX.qcom.video.decoder.avc` 配置输出 surface，`CarAudioGain` 连续出帧；两帧本地播放截图变化率 `0.0021472`。
+- 设备动态：r98 `CAR_BALANCED` 日志同时出现上行 `gain≈3.35` 与下行 `gain≈0.67`，主机 `AudioDynamicsHostTest` 为 `checks=71`。
+- 诊断上传：未点击按钮，R2 `logs/tvboxos-car-2880/` 产生多个新批次；最新 r98 批次已下载并解压回读。
+- carclash：设备 `ENABLED_ACCESSIBILITY_SERVICES` 原文命中
+  `com.carclash.hybrid/com.github.kr328.clash.car.EdgeBackService`，设置页显示“carclash 接管中”。
+
+小窗交互本身未完成：测试订阅 `clun.top/box.json` 的详情跨源搜索超时并返回 `candidates=0`，
+无法进入一个有实际详情数据的小窗页面点击验证；这条限制也记录在
+`car/reports/r98-release/result.json`，没有把静态代码合并误报成小窗视觉通过。

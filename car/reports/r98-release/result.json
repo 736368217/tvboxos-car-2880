@@ -1,0 +1,37 @@
+﻿{
+    "result":  "R98_FULL_ACCEPTANCE_WITH_BOUNDARY",
+    "sourceCommit":  "d0011635156b8171b5aa648a4e4788c9a5a5f86f",
+    "version":  "3.1.0-car.7-r98",
+    "versionCode":  70,
+    "localApkSha256":  "11192da8942982483975c9ab03460c611387394ad9967187f7507aeda4b2e662",
+    "installedBaseSha256":  "11192da8942982483975c9ab03460c611387394ad9967187f7507aeda4b2e662",
+    "checks":  {
+                   "display":  "PASS: physical 1620x2880, physical density 160, no override, rotation lock 1, logical frame 2880x1620",
+                   "install":  "PASS: package versionCode=70/versionName=r98; installed base SHA equals local signed APK",
+                   "homeCache":  "PASS: cached homepage visible; echo-config cache unchanged observed",
+                   "update":  "PASS: R2 reported remote r97 older than local r98, hasUpdate=false",
+                   "settings":  "PASS: settings row EXO（固定）; manual subscription update and diagnostic upload rows visible",
+                   "backDetection":  "PASS: settings showed carclash 接管中; secure setting was com.carclash.hybrid/com.github.kr328.clash.car.EdgeBackService",
+                   "localPlayback":  "PASS: DetailActivity; ExoPlayerImpl Init; OMX.qcom.video.decoder.avc output surface; CarAudioGain frames; two screenshots changed 0.0021472 ratio",
+                   "remoteHls":  "PASS: DetailActivity; ExoPlayerImpl/MediaCodec/CarAudioGain continuous; gain reached 3.3496542",
+                   "audioV4":  "PASS: host checks=71; device gain showed upward and downward control, ceiling evidence from host r98",
+                   "autoUpload":  "PASS: new R2 log batches appeared without tapping manual upload; latest r98 log downloaded and decoded",
+                   "crash":  "PASS for app: no app FATAL/AndroidRuntime; separate uiautomator helper SIGSEGV observed and excluded",
+                   "preview":  "PARTIAL: merged PR code compiled and DetailActivity reached; aggregate subscription detail timed out with candidates=0, so interactive small-preview overlay tap could not be exercised with this fixture"
+               },
+    "evidenceFiles":  [
+                          "device/home.png",
+                          "device/settings.xml",
+                          "device/advanced-other.xml",
+                          "device/back-tab.xml",
+                          "device/edge.png",
+                          "device/play-local-a.png",
+                          "device/play-local-b.png",
+                          "device/detail-timeout.png",
+                          "device/playback-filtered.log",
+                          "device/latest-upload.json.gz",
+                          "b01-gate.json",
+                          "host/host-suite.log",
+                          "host/cdn-suite.log"
+                      ]
+}

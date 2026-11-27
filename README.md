@@ -57,6 +57,6 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 
 2026-11-23：r94 / versionCode 66 已由 r95 取代，保留作版本档案（源码 `98293be4`，CI 在等价测试修正 `515519fd` 上通过，产品代码未变）。r94 首次把 cdn-url 公开节点内置进公共网络层，失效域名运行时停用并在 6 小时后复测；**节点顺序与媒体路径规则已由 r95 改写，看现役行为请看下一段**。整包 SHA `4243288a…`。详见[内置加速说明](car/handover/R94-GITHUB-ACCEL.md)与[版本回读](car/reports/r94-github-verification.json)。
 
-2026-11-23：r95 / versionCode 67 已由 r97 取代，保留作版本档案（源码 `aea620d7`，CI 45194003592）。音频 v3 的参数与结论仍然有效（天花板 `-1.5 dBFS`、仅上行提升、`350/2000 ms` 包络），网络直连优先的规则也仍是现役；**返回组件的画法与引擎选择已被 r96/r97 改写**，看现役行为请看最后一段。
+2026-11-23：r95 / versionCode 67 已由 r97 取代，保留作版本档案（源码 `aea620d7`，CI 45194003592）。音频 v3 的参数与结论仍有效；现役音频已由 r98 升级为 v4 双向柔和动态，见 `car/handover/R98-AUDIO-V4.md`。
 
-2026-11-25：当前已发布 **3.1.0-car.7-r97 / versionCode 69**，源码 `b50a2dab`（APK SHA `5a237f72…`）。r96→r97 把两件运维命门定死：① 诊断日志**全自动**上传（启动 5 s 首传、每 60 s 一次、切后台立即补传），落到 `dl.736.de5.net/logs/tvboxos-car-2880/`，旧的 `dl.z736.vip` 通道已停用；② 播放器**写死 EXO**（`PLAY_TYPE`/`LIVE_PLAY_TYPE`=2，站源 `pl<10` 一律改写，设置只剩 EXO），不再有引擎切换，调音量不会重建播放器。返回组件按 carclash `EdgeSwipeView` 原样移植，carclash 接管按服务类名判定。详见 [R96](car/handover/R96-FIXES.md) / [R97](car/handover/R97-FIXES.md) 说明。真车听感与你自己的 123 订阅仍待实测。
+2026-11-27：当前已发布 **3.1.0-car.7-r98 / versionCode 70**（合并 PR #1/#2 后的 main，合并提交 `d0011635`，APK SHA `11192da8…`）：音频 v4 侧链高通、句间保持、双向软控；详情页小窗进入时收起所有控制栏/顶部状态/返回箭头；全自动诊断日志仍走 `dl.736.de5.net/logs/tvboxos-car-2880/`。完整 MuMu 证据见 [r98 报告](car/reports/r98-release/result.json) 和 [r98 说明](car/handover/R98-AUDIO-V4.md)。设备已验证安装 SHA、显示基线、EXO 本地 MP4/远端 HLS 播放、音频动态、自动日志、设置页和 carclash 接管检测；小窗交互因测试订阅详情跨源搜索超时（candidates=0）未完成。

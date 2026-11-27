@@ -1,0 +1,80 @@
+﻿== local HTTP MP4 ==
+11-27 22:38:20.382 D/J4A     ( 2068): J4ALoader: OK: 'android.media.MediaCodec$BufferInfo' loaded
+11-27 22:38:20.383 D/J4A     ( 2068): J4ALoader: OK: 'android.media.MediaCodec' loaded
+11-27 22:38:24.951 I/ExoPlayerImpl( 2068): Init b926695 [ExoPlayerLib/2.19.1] [r9q, SM-G9900, Samsung, 35]
+11-27 22:38:25.131 I/MediaCodec( 2068): [OMX.qcom.video.decoder.avc] setting surface generation to 2117633
+11-27 22:38:25.183 I/CarAudioGain( 2068): queue n=1 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.0 outPeak=0.0 rmsRatio=0.0
+11-27 22:38:25.185 D/MediaCodec( 2068): [OMX.qcom.video.decoder.avc] setting dataspace on output surface to 0x104
+11-27 22:38:26.196 I/CarAudioGain( 2068): queue n=55 mode=CAR_BALANCED user=1.0 gain=1.1712492 frames=1024 channels=2 inPeak=0.063201904 outPeak=0.07369995 rmsRatio=1.1614239883260422
+11-27 22:38:27.197 I/CarAudioGain( 2068): queue n=102 mode=CAR_BALANCED user=1.0 gain=1.83779 frames=1024 channels=2 inPeak=0.06323242 outPeak=0.11618042 rmsRatio=1.8333726016135992
+11-27 22:38:28.203 I/CarAudioGain( 2068): queue n=149 mode=CAR_BALANCED user=1.0 gain=1.7439094 frames=1024 channels=2 inPeak=0.12597656 outPeak=0.22302246 rmsRatio=1.7577660343799784
+11-27 22:38:29.236 I/CarAudioGain( 2068): queue n=197 mode=CAR_BALANCED user=1.0 gain=1.4569391 frames=1024 channels=2 inPeak=0.12597656 outPeak=0.18356323 rmsRatio=1.4570554155717743
+11-27 22:38:30.236 I/CarAudioGain( 2068): queue n=244 mode=CAR_BALANCED user=1.0 gain=1.1777648 frames=1024 channels=2 inPeak=0.25131226 outPeak=0.30136108 rmsRatio=1.1885686562146653
+11-27 22:38:31.240 I/CarAudioGain( 2068): queue n=291 mode=CAR_BALANCED user=1.0 gain=0.9722314 frames=1024 channels=2 inPeak=0.25146484 outPeak=0.24453735 rmsRatio=0.9723683859900955
+11-27 22:38:32.240 I/CarAudioGain( 2068): queue n=338 mode=CAR_BALANCED user=1.0 gain=0.82251257 frames=1024 channels=2 inPeak=0.5012512 outPeak=0.4172058 rmsRatio=0.8277327866500777
+11-27 22:38:33.254 I/CarAudioGain( 2068): queue n=385 mode=CAR_BALANCED user=1.0 gain=0.71237767 frames=1024 channels=2 inPeak=0.5013733 outPeak=0.3572693 rmsRatio=0.7125154660557295
+11-27 22:38:34.273 I/CarAudioGain( 2068): queue n=433 mode=CAR_BALANCED user=1.0 gain=0.6683439 frames=1024 channels=2 inPeak=0.8413696 outPeak=0.5623169 rmsRatio=0.6683428736355937
+11-27 22:38:35.289 I/CarAudioGain( 2068): queue n=480 mode=CAR_BALANCED user=1.0 gain=0.6683439 frames=1024 channels=2 inPeak=0.84158325 outPeak=0.5624695 rmsRatio=0.6683431839195066
+11-27 22:38:36.296 I/CarAudioGain( 2068): queue n=527 mode=CAR_BALANCED user=1.0 gain=0.8883595 frames=1024 channels=2 inPeak=0.039733887 outPeak=0.034820557 rmsRatio=0.8740821754621644
+11-27 22:38:37.301 I/CarAudioGain( 2068): queue n=574 mode=CAR_BALANCED user=1.0 gain=2.6873603 frames=1024 channels=2 inPeak=0.039764404 outPeak=0.10601807 rmsRatio=2.6711627689472035
+11-27 22:38:38.319 I/CarAudioGain( 2068): queue n=622 mode=CAR_BALANCED user=1.0 gain=1.4286785 frames=1024 channels=2 inPeak=0.5 outPeak=0.73043823 rmsRatio=1.4508156470936355
+11-27 22:38:39.333 I/CarAudioGain( 2068): queue n=669 mode=CAR_BALANCED user=1.0 gain=0.9498425 frames=1024 channels=2 inPeak=0.49969482 outPeak=0.4746399 rmsRatio=0.949854702380714
+11-27 22:38:40.349 I/CarAudioGain( 2068): queue n=717 mode=CAR_BALANCED user=1.0 gain=1.2358748 frames=1024 channels=2 inPeak=0.25115967 outPeak=0.30969238 rmsRatio=1.2267390287150308
+11-27 22:38:41.361 I/CarAudioGain( 2068): queue n=764 mode=CAR_BALANCED user=1.0 gain=1.3365283 frames=1024 channels=2 inPeak=0.25134277 outPeak=0.3381958 rmsRatio=1.342053915550331
+11-27 22:38:42.388 I/CarAudioGain( 2068): queue n=812 mode=CAR_BALANCED user=1.0 gain=1.0181471 frames=1024 channels=2 inPeak=0.25131226 outPeak=0.2566223 rmsRatio=1.0197232323393535
+
+== remote HTTPS HLS ==
+11-27 22:38:20.382 D/J4A     ( 2068): J4ALoader: OK: 'android.media.MediaCodec$BufferInfo' loaded
+11-27 22:38:20.383 D/J4A     ( 2068): J4ALoader: OK: 'android.media.MediaCodec' loaded
+11-27 22:38:24.951 I/ExoPlayerImpl( 2068): Init b926695 [ExoPlayerLib/2.19.1] [r9q, SM-G9900, Samsung, 35]
+11-27 22:38:25.131 I/MediaCodec( 2068): [OMX.qcom.video.decoder.avc] setting surface generation to 2117633
+11-27 22:38:25.183 I/CarAudioGain( 2068): queue n=1 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.0 outPeak=0.0 rmsRatio=0.0
+11-27 22:38:25.185 D/MediaCodec( 2068): [OMX.qcom.video.decoder.avc] setting dataspace on output surface to 0x104
+11-27 22:38:26.196 I/CarAudioGain( 2068): queue n=55 mode=CAR_BALANCED user=1.0 gain=1.1712492 frames=1024 channels=2 inPeak=0.063201904 outPeak=0.07369995 rmsRatio=1.1614239883260422
+11-27 22:38:27.197 I/CarAudioGain( 2068): queue n=102 mode=CAR_BALANCED user=1.0 gain=1.83779 frames=1024 channels=2 inPeak=0.06323242 outPeak=0.11618042 rmsRatio=1.8333726016135992
+11-27 22:38:28.203 I/CarAudioGain( 2068): queue n=149 mode=CAR_BALANCED user=1.0 gain=1.7439094 frames=1024 channels=2 inPeak=0.12597656 outPeak=0.22302246 rmsRatio=1.7577660343799784
+11-27 22:38:29.236 I/CarAudioGain( 2068): queue n=197 mode=CAR_BALANCED user=1.0 gain=1.4569391 frames=1024 channels=2 inPeak=0.12597656 outPeak=0.18356323 rmsRatio=1.4570554155717743
+11-27 22:38:30.236 I/CarAudioGain( 2068): queue n=244 mode=CAR_BALANCED user=1.0 gain=1.1777648 frames=1024 channels=2 inPeak=0.25131226 outPeak=0.30136108 rmsRatio=1.1885686562146653
+11-27 22:38:31.240 I/CarAudioGain( 2068): queue n=291 mode=CAR_BALANCED user=1.0 gain=0.9722314 frames=1024 channels=2 inPeak=0.25146484 outPeak=0.24453735 rmsRatio=0.9723683859900955
+11-27 22:38:32.240 I/CarAudioGain( 2068): queue n=338 mode=CAR_BALANCED user=1.0 gain=0.82251257 frames=1024 channels=2 inPeak=0.5012512 outPeak=0.4172058 rmsRatio=0.8277327866500777
+11-27 22:38:33.254 I/CarAudioGain( 2068): queue n=385 mode=CAR_BALANCED user=1.0 gain=0.71237767 frames=1024 channels=2 inPeak=0.5013733 outPeak=0.3572693 rmsRatio=0.7125154660557295
+11-27 22:38:34.273 I/CarAudioGain( 2068): queue n=433 mode=CAR_BALANCED user=1.0 gain=0.6683439 frames=1024 channels=2 inPeak=0.8413696 outPeak=0.5623169 rmsRatio=0.6683428736355937
+11-27 22:38:35.289 I/CarAudioGain( 2068): queue n=480 mode=CAR_BALANCED user=1.0 gain=0.6683439 frames=1024 channels=2 inPeak=0.84158325 outPeak=0.5624695 rmsRatio=0.6683431839195066
+11-27 22:38:36.296 I/CarAudioGain( 2068): queue n=527 mode=CAR_BALANCED user=1.0 gain=0.8883595 frames=1024 channels=2 inPeak=0.039733887 outPeak=0.034820557 rmsRatio=0.8740821754621644
+11-27 22:38:37.301 I/CarAudioGain( 2068): queue n=574 mode=CAR_BALANCED user=1.0 gain=2.6873603 frames=1024 channels=2 inPeak=0.039764404 outPeak=0.10601807 rmsRatio=2.6711627689472035
+11-27 22:38:38.319 I/CarAudioGain( 2068): queue n=622 mode=CAR_BALANCED user=1.0 gain=1.4286785 frames=1024 channels=2 inPeak=0.5 outPeak=0.73043823 rmsRatio=1.4508156470936355
+11-27 22:38:39.333 I/CarAudioGain( 2068): queue n=669 mode=CAR_BALANCED user=1.0 gain=0.9498425 frames=1024 channels=2 inPeak=0.49969482 outPeak=0.4746399 rmsRatio=0.949854702380714
+11-27 22:38:40.349 I/CarAudioGain( 2068): queue n=717 mode=CAR_BALANCED user=1.0 gain=1.2358748 frames=1024 channels=2 inPeak=0.25115967 outPeak=0.30969238 rmsRatio=1.2267390287150308
+11-27 22:38:41.361 I/CarAudioGain( 2068): queue n=764 mode=CAR_BALANCED user=1.0 gain=1.3365283 frames=1024 channels=2 inPeak=0.25134277 outPeak=0.3381958 rmsRatio=1.342053915550331
+11-27 22:38:42.388 I/CarAudioGain( 2068): queue n=812 mode=CAR_BALANCED user=1.0 gain=1.0181471 frames=1024 channels=2 inPeak=0.25131226 outPeak=0.2566223 rmsRatio=1.0197232323393535
+11-27 22:38:43.412 I/CarAudioGain( 2068): queue n=860 mode=CAR_BALANCED user=1.0 gain=0.9640226 frames=1024 channels=2 inPeak=0.2514038 outPeak=0.2423706 rmsRatio=0.9641932866538652
+11-27 22:38:43.486 I/ExoPlayerImpl( 2068): Init eba20c [ExoPlayerLib/2.19.1] [r9q, SM-G9900, Samsung, 35]
+11-27 22:38:43.977 I/MediaCodec( 2068): [OMX.qcom.video.decoder.avc] setting surface generation to 2117634
+11-27 22:38:43.977 I/ExoPlayerImpl( 2068): Release b926695 [ExoPlayerLib/2.19.1] [r9q, SM-G9900, Samsung, 35] [goog.exo.core, goog.exo.exoplayer, goog.exo.decoder, goog.exo.datasource, goog.exo.extractor, goog.exo.ffmpeg, goog.exo.hls]
+11-27 22:38:43.979 I/MediaCodec( 2068): [OMX.qcom.video.decoder.avc] setting surface generation to 2117635
+11-27 22:38:44.089 I/MediaCodec( 2068): [OMX.qcom.video.decoder.avc] setting surface generation to 2117636
+11-27 22:38:44.183 D/MediaCodec( 2068): [OMX.qcom.video.decoder.avc] setting dataspace on output surface to 0x104
+11-27 22:38:44.288 I/CarAudioGain( 2068): queue n=1 mode=CAR_BALANCED user=1.0 gain=1.0 frames=1024 channels=2 inPeak=0.0058288574 outPeak=0.0058288574 rmsRatio=1.0
+11-27 22:38:45.409 I/CarAudioGain( 2068): queue n=13 mode=CAR_BALANCED user=1.0 gain=1.7723106 frames=1024 channels=2 inPeak=0.015991211 outPeak=0.027252197 rmsRatio=1.7133021544481037
+11-27 22:38:46.409 I/CarAudioGain( 2068): queue n=57 mode=CAR_BALANCED user=1.0 gain=1.8145885 frames=1024 channels=2 inPeak=0.0038146973 outPeak=0.0069274902 rmsRatio=1.8147088132468938
+11-27 22:38:47.422 I/CarAudioGain( 2068): queue n=100 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.025146484 outPeak=0.084228516 rmsRatio=3.3496663882041915
+11-27 22:38:48.443 I/CarAudioGain( 2068): queue n=144 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.022888184 outPeak=0.076660156 rmsRatio=3.3496981616169075
+11-27 22:38:49.444 I/CarAudioGain( 2068): queue n=187 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.005340576 outPeak=0.0178833 rmsRatio=3.3495304514435817
+11-27 22:38:50.458 I/CarAudioGain( 2068): queue n=230 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.0010375977 outPeak=0.003479004 rmsRatio=3.347424408714288
+11-27 22:38:51.478 I/CarAudioGain( 2068): queue n=274 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=9.1552734E-4 outPeak=0.0030517578 rmsRatio=3.343883292190823
+11-27 22:38:52.490 I/CarAudioGain( 2068): queue n=318 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.008728027 outPeak=0.02923584 rmsRatio=3.349641993781189
+11-27 22:38:53.506 I/CarAudioGain( 2068): queue n=362 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.019439697 outPeak=0.06512451 rmsRatio=3.349655357904851
+11-27 22:38:54.538 I/CarAudioGain( 2068): queue n=406 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.014556885 outPeak=0.04876709 rmsRatio=3.349685087081384
+11-27 22:38:55.541 I/CarAudioGain( 2068): queue n=449 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.014190674 outPeak=0.047546387 rmsRatio=3.349720233770951
+11-27 22:38:56.561 I/CarAudioGain( 2068): queue n=493 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.022644043 outPeak=0.07583618 rmsRatio=3.3496557276656973
+11-27 22:38:57.568 I/CarAudioGain( 2068): queue n=536 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.024108887 outPeak=0.08074951 rmsRatio=3.3496555004361768
+11-27 22:38:58.573 I/CarAudioGain( 2068): queue n=579 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.015960693 outPeak=0.053466797 rmsRatio=3.3496300863380886
+11-27 22:38:59.617 I/CarAudioGain( 2068): queue n=624 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.023956299 outPeak=0.08023071 rmsRatio=3.3496713382589296
+11-27 22:39:00.623 I/CarAudioGain( 2068): queue n=668 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.033996582 outPeak=0.1138916 rmsRatio=3.3496725876355335
+11-27 22:39:01.625 I/CarAudioGain( 2068): queue n=711 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.017974854 outPeak=0.06021118 rmsRatio=3.349649987795067
+11-27 22:39:02.636 I/CarAudioGain( 2068): queue n=754 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.013885498 outPeak=0.04650879 rmsRatio=3.3496636837038487
+11-27 22:39:03.640 I/CarAudioGain( 2068): queue n=797 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.012542725 outPeak=0.042022705 rmsRatio=3.349722720292768
+11-27 22:39:04.658 I/CarAudioGain( 2068): queue n=841 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.012237549 outPeak=0.040985107 rmsRatio=3.3496271020484505
+11-27 22:39:05.668 I/CarAudioGain( 2068): queue n=884 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.016845703 outPeak=0.056427002 rmsRatio=3.3496702197577384
+11-27 22:39:06.718 I/CarAudioGain( 2068): queue n=929 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.019927979 outPeak=0.06674194 rmsRatio=3.3496600369027094
+11-27 22:39:07.721 I/CarAudioGain( 2068): queue n=973 mode=CAR_BALANCED user=1.0 gain=3.3496542 frames=1024 channels=2 inPeak=0.01159668 outPeak=0.038848877 rmsRatio=3.3496439364019936
