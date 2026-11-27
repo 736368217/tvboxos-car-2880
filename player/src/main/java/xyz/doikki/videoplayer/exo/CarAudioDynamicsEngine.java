@@ -1,35 +1,50 @@
 package xyz.doikki.videoplayer.exo;
 
+import java.util.Arrays;
+
 /**
- * Per-sink, channel-linked gentle upward-only compression and smooth per-sample peak limiting.
+ * Per-sink, channel-linked gentle two-sided car dynamics processor and smooth per-sample peak
+ * limiter.
  *
- * <p>v3 on-car calibration (B01 hardware DSP measured linear: 0.4% THD at -1.5 dBFS):
+ * <p>v4 on-car driving calibration (r98, based on real B01 driving recordings + r97 R2 telemetry
+ * with head-unit EQ {@code 音效aaaa}):
  * <ol>
- *   <li>No infinity-ratio AGC and no negative makeup: RMS at or above the threshold passes at
- *       0 dB, so dialogue, OP and loud passages keep the original dynamics.</li>
- *   <li>Quiet passages are lifted with a gentle slope (0.55 / 0.65) and music-grade envelope
- *       (350 ms attack, 2000 ms release) instead of a 150 ms brick wall.</li>
- *   <li>Ceiling back to the measured lossless -1.5 dBFS, guarded per sample with the 80 ms
- *       limiter, so no block-boundary steps appear.</li>
+ *   <li>250 Hz first-order sidechain high-pass filter (detection only, audio path untouched) keeps
+ *       low-frequency wind/BGM rumble from under-estimating vocal quietness.</li>
+ *   <li>1500 ms noise-gate hold prevents short dialogue pauses from snapping gain back to unity
+ *       (eliminating the v3 "quiet start of next sentence" dropout), while sustained silence or
+ *       noise floor smoothly releases back to unity.</li>
+ *   <li>Faster musical envelope (250/800 ms balanced, 200/600 ms highway) tracks dialogue entries
+ *       without pumping.</li>
+ *   <li>Gentle two-sided curve: stronger upward lift for whisper dialogue above highway road noise
+ *       (+10.5 / +13.5 dB cap) paired with soft downward control (-3.5 / -5.0 dB cap) to tame
+ *       sudden screams and rock OPs without flattening natural crest factor.</li>
+ *   <li>Ceiling stays at the measured lossless -1.5 dBFS, guarded per sample with the 80 ms
+ *       limiter.</li>
  * </ol>
  */
 public final class CarAudioDynamicsEngine {
     public enum Mode {
-        ORIGINAL(-1, "原始声音", -18.0f, 0.0f, 0.0f),
-        OFF(0, "关闭", -18.0f, 0.0f, 0.0f),
-        CAR_BALANCED(1, "车载均衡", -18.0f, 0.55f, 8.5f),
-        CAR_HIGHWAY(2, "高速压缩", -16.0f, 0.65f, 11.5f);
+        ORIGINAL(-1, "原始声音", -16.0f, 0.0f, 0.0f, 0.0f, 0.0f, 250f, 800f),
+        OFF(0, "关闭", -16.0f, 0.0f, 0.0f, 0.0f, 0.0f, 250f, 800f),
+        CAR_BALANCED(1, "车载均衡", -16.0f, 0.60f, 10.5f, 0.45f, 3.5f, 250f, 800f),
+        CAR_HIGHWAY(2, "高速压缩", -14.0f, 0.68f, 13.5f, 0.55f, 5.0f, 200f, 600f);
 
         public final int id;
         public final String label;
-        final float upThresholdDb, upSlope, maxBoostDb;
+        final float thresholdDb, upSlope, maxBoostDb, downSlope, maxCutDb, attackMs, releaseMs;
 
-        Mode(int id, String label, float upThresholdDb, float upSlope, float maxBoostDb) {
+        Mode(int id, String label, float thresholdDb, float upSlope, float maxBoostDb,
+                float downSlope, float maxCutDb, float attackMs, float releaseMs) {
             this.id = id;
             this.label = label;
-            this.upThresholdDb = upThresholdDb;
+            this.thresholdDb = thresholdDb;
             this.upSlope = upSlope;
             this.maxBoostDb = maxBoostDb;
+            this.downSlope = downSlope;
+            this.maxCutDb = maxCutDb;
+            this.attackMs = attackMs;
+            this.releaseMs = releaseMs;
         }
 
         /** The saved DRC preset is independent of the master Original/Enhanced toggle. */
@@ -50,21 +65,30 @@ public final class CarAudioDynamicsEngine {
         }
     }
 
-    /** Measured on the B01: -1.5 dBFS with 0.4% THD, i.e. the lossless ceiling. */
+    /** Measured on the B01: -1.5 dBFS with 0.2-0.4% THD, i.e. the lossless ceiling. */
     public static final float SAMPLE_PEAK_CEILING = 0.841395f;
     private static final float GATE_DB = -52f;
-    private static final float ENV_ATTACK_MS = 350f;
-    private static final float ENV_RELEASE_MS = 2000f;
+    private static final float GATE_HOLD_MS = 1500f;
+    private static final float GATE_RELEASE_MS = 600f;
+    private static final float SIDECHAIN_HPF_HZ = 250f;
     private static final float LIMITER_RELEASE_SEC = 0.080f;
 
-    private float envDb, lastGain, limiterGain;
+    private float envDb, lastGain, limiterGain, lastGainDb, gateHoldRemainingMs;
+    private boolean gateOpen;
+    private float[] scPrevX = new float[0];
+    private float[] scPrevY = new float[0];
 
     CarAudioDynamicsEngine() { reset(); }
 
     void reset() {
-        envDb = -18f;
+        envDb = -16f;
         lastGain = 1f;
         limiterGain = 1f;
+        lastGainDb = 0f;
+        gateHoldRemainingMs = 0f;
+        gateOpen = false;
+        Arrays.fill(scPrevX, 0f);
+        Arrays.fill(scPrevY, 0f);
     }
 
     /** Renderer-thread only. Process up to 10 ms, using one gain for every channel of a frame. */
@@ -72,7 +96,7 @@ public final class CarAudioDynamicsEngine {
         if (frames <= 0 || channels <= 0) return lastGain;
         int count = frames * channels;
         if (userGain <= 0.0001f) {
-            java.util.Arrays.fill(pcm, 0, count, 0f);
+            Arrays.fill(pcm, 0, count, 0f);
             lastGain = 0f;
             limiterGain = 1f;
             return 0f;
@@ -101,22 +125,60 @@ public final class CarAudioDynamicsEngine {
         }
 
         int safeRate = Math.max(8000, rate);
-        double energy = 0;
-        for (int i = 0; i < count; i++) energy += (double) pcm[i] * pcm[i];
-        float rmsDb = (float) (10d * Math.log10(Math.max(1e-12, energy / count)));
-        float ms = frames * 1000f / safeRate;
-        float start = lastGain, end = userGain;
-        float boostDb = 0f;
-        if (rmsDb > GATE_DB) {
-            envDb = follow(envDb, rmsDb, ms, rmsDb > envDb ? ENV_ATTACK_MS : ENV_RELEASE_MS);
-            // Upward only: anything at or above the threshold stays at exactly 0 dB.
-            boostDb = Math.max(0f, Math.min(mode.maxBoostDb, (mode.upThresholdDb - envDb) * mode.upSlope));
-        } else {
-            // Don't carry a quiet boost into the noise floor or into digital silence.
-            start = Math.min(lastGain, userGain);
+        if (scPrevX.length != channels) {
+            scPrevX = new float[channels];
+            scPrevY = new float[channels];
         }
-        // Below the noise gate there is nothing to lift: leaving it untouched keeps hiss silent.
-        end = userGain * dbToLinear(boostDb);
+        // First-order 250 Hz high-pass on the sidechain only (audio path remains full-range).
+        float hpfAlpha = 1f / (1f + 2f * (float) Math.PI * SIDECHAIN_HPF_HZ / safeRate);
+        double scEnergy = 0;
+        for (int frame = 0; frame < frames; frame++) {
+            int base = frame * channels;
+            for (int ch = 0; ch < channels; ch++) {
+                float x = pcm[base + ch];
+                float y = hpfAlpha * (scPrevY[ch] + x - scPrevX[ch]);
+                scPrevX[ch] = x;
+                scPrevY[ch] = y;
+                scEnergy += (double) y * y;
+            }
+        }
+        float rmsDb = (float) (10d * Math.log10(Math.max(1e-12, scEnergy / count)));
+        float ms = frames * 1000f / safeRate;
+        float start = lastGain;
+        float gainDb;
+        if (rmsDb > GATE_DB) {
+            if (!gateOpen) {
+                envDb = mode.thresholdDb;
+                gateOpen = true;
+            }
+            gateHoldRemainingMs = GATE_HOLD_MS;
+            envDb = follow(envDb, rmsDb, ms, rmsDb > envDb ? mode.attackMs : mode.releaseMs);
+            float deltaDb = mode.thresholdDb - envDb;
+            if (deltaDb >= 0f) {
+                gainDb = Math.min(mode.maxBoostDb, deltaDb * mode.upSlope);
+            } else {
+                gainDb = Math.max(-mode.maxCutDb, deltaDb * mode.downSlope);
+            }
+            lastGainDb = gainDb;
+        } else if (gateOpen && gateHoldRemainingMs > 0f) {
+            // Short dialogue pause: hold the current gain so the next line does not drop out.
+            gateHoldRemainingMs = Math.max(0f, gateHoldRemainingMs - ms);
+            gainDb = lastGainDb;
+        } else if (gateOpen) {
+            // Sustained silence / noise floor beyond hold: smoothly release back to unity.
+            lastGainDb = follow(lastGainDb, 0f, ms, GATE_RELEASE_MS);
+            if (Math.abs(lastGainDb) < 0.05f) {
+                lastGainDb = 0f;
+                gateOpen = false;
+                envDb = mode.thresholdDb;
+            }
+            gainDb = lastGainDb;
+        } else {
+            // Cold below gate: leave noise floor untouched at unity.
+            gainDb = 0f;
+            lastGainDb = 0f;
+        }
+        float end = userGain * dbToLinear(gainDb);
 
         // Per-sample limiter: attack inside the offending sample, 80 ms smooth release.
         float release = (float) Math.exp(-1d / (safeRate * LIMITER_RELEASE_SEC));
