@@ -1,7 +1,7 @@
 # 零跑 B01 实车音频链路与车机音效档案
 
 本文件记录**车机侧**的事实与参数，回答「App 该做什么、车机该做什么」。App 侧的动态处理见
-[R95-AUDIO-V3-NETWORK.md](R95-AUDIO-V3-NETWORK.md)；两者是分工关系，不是两套并行方案。
+[R98-AUDIO-V4.md](R98-AUDIO-V4.md)（v3 历史见 [R95-AUDIO-V3-NETWORK.md](R95-AUDIO-V3-NETWORK.md)）；两者是分工关系，不是两套并行方案。
 
 数据来源：用户实车采集包（`car_evidence_20261111` / `car_evidence_20261112/E-20261112`，
 SA8295P / Android 12 / build 4040）与实车录入的硬件音效档案（2026-11-24）。
