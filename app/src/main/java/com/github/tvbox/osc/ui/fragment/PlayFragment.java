@@ -293,7 +293,7 @@ public class PlayFragment extends BaseLazyFragment {
         mController.mLyricView.setTextSize(previewMode ? 16 : 24);
         mController.setCanChangePosition(true);
         mController.setEnableInNormal(true);
-        mController.setGestureEnabled(true);
+        mController.setPreviewMode(previewMode);
         ProgressManager progressManager = new ProgressManager() {
             @Override
             public void saveProgress(String url, long progress) {

@@ -111,6 +111,10 @@ public class VodController extends BaseController {
             public void callback(Message msg) {
                 switch (msg.what) {
                     case 1000: { // seek 刷新
+                        if (previewMode) {
+                            hideAllOverlaysForPreview();
+                            break;
+                        }
                         mProgressRoot.setVisibility(VISIBLE);
                         break;
                     }
@@ -119,6 +123,10 @@ public class VodController extends BaseController {
                         break;
                     }
                     case 1002: { // 显示底部菜单
+                        if (previewMode) {
+                            hideAllOverlaysForPreview();
+                            break;
+                        }
                         updateDanmuSearchUiBtn();
                         updateAudioButtons();
                         hidePauseRoot();
@@ -139,6 +147,10 @@ public class VodController extends BaseController {
                         break;
                     }
                     case 1003: { // 隐藏底部菜单
+                        if (previewMode) {
+                            hideAllOverlaysForPreview();
+                            break;
+                        }
                         mBottomRoot.setVisibility(GONE);
                         mTopRoot1.setVisibility(GONE);
                         mPlayLoadNetSpeedRightTop.setVisibility(GONE);
@@ -212,7 +224,7 @@ public class VodController extends BaseController {
     }
 
     private void showPortraitEpisodeTitle() {
-        if (isBottomVisible()) return;
+        if (previewMode || isBottomVisible()) return;
         mHandler.removeCallbacks(portraitEpisodeTitleRunnable);
         mTopRoot1.setVisibility(VISIBLE);
         mHandler.postDelayed(portraitEpisodeTitleRunnable, PORTRAIT_EPISODE_TITLE_SHOW_MS);
@@ -357,11 +369,54 @@ public class VodController extends BaseController {
 
     public void setPreviewMode(boolean previewMode) {
         this.previewMode = previewMode;
-        mHandler.removeCallbacks(lockRunnable);
-        if (mLockView != null) {
-            mLockView.setVisibility(INVISIBLE);
+        setGestureEnabled(!previewMode);
+        setDoubleTapTogglePlayEnabled(!previewMode);
+        if (previewMode) {
+            hideAllOverlaysForPreview();
+        } else {
+            mHandler.removeCallbacks(lockRunnable);
+            if (mLockView != null) {
+                mLockView.setVisibility(INVISIBLE);
+            }
+            if (!isBottomVisible()) {
+                int disPlay = Hawk.get(HawkConfig.SCREEN_DISPLAY, GONE);
+                if (mTopRoot2 != null) mTopRoot2.setVisibility(disPlay);
+                if (tv_screen_display != null) tv_screen_display.setVisibility(disPlay);
+                if (seekTime != null) seekTime.setVisibility(disPlay);
+                if (net_play_speed != null) net_play_speed.setVisibility(disPlay);
+                if (mPlayPauseTime != null) mPlayPauseTime.setVisibility(disPlay);
+            }
         }
         applyDiagnosticsVisibility();
+    }
+
+    /**
+     * 详情页小窗预览模式下禁止显示任何控制栏、顶部状态栏、返回箭头与暂停遮罩，
+     * 避免控件占满小窗画面。退出全屏或任意控制触发都会经由此处彻底收起。
+     */
+    private void hideAllOverlaysForPreview() {
+        if (myHandle != null && myRunnable != null) myHandle.removeCallbacks(myRunnable);
+        if (mHandler != null) {
+            mHandler.removeMessages(1000);
+            mHandler.removeMessages(1002);
+            mHandler.removeMessages(1003);
+            mHandler.removeCallbacks(lockRunnable);
+            mHandler.removeCallbacks(portraitEpisodeTitleRunnable);
+        }
+        if (mBottomRoot != null) mBottomRoot.setVisibility(GONE);
+        if (mTopRoot1 != null) mTopRoot1.setVisibility(GONE);
+        if (mTopRoot2 != null) mTopRoot2.setVisibility(GONE);
+        if (mPlayLoadNetSpeedRightTop != null) mPlayLoadNetSpeedRightTop.setVisibility(GONE);
+        if (mSysUsageRightTop != null) mSysUsageRightTop.setVisibility(GONE);
+        if (mPlayPauseTime != null) mPlayPauseTime.setVisibility(GONE);
+        if (net_play_speed != null) net_play_speed.setVisibility(GONE);
+        if (tv_screen_display != null) tv_screen_display.setVisibility(GONE);
+        if (seekTime != null) seekTime.setVisibility(GONE);
+        if (mProgressRoot != null) mProgressRoot.setVisibility(GONE);
+        if (mPlayTitle != null) mPlayTitle.setVisibility(GONE);
+        if (backBtn != null) backBtn.setVisibility(INVISIBLE);
+        if (mLockView != null) mLockView.setVisibility(INVISIBLE);
+        hidePauseRoot();
     }
 
     /**
@@ -1675,6 +1730,10 @@ public class VodController extends BaseController {
     private boolean skipEnd = true;
 
     private void keepSeekBarActive() {
+        if (previewMode) {
+            hideAllOverlaysForPreview();
+            return;
+        }
         if (myHandle != null && myRunnable != null) {
             myHandle.removeCallbacks(myRunnable);
             myHandle.postDelayed(myRunnable, myHandleSeconds);
@@ -1879,6 +1938,10 @@ public class VodController extends BaseController {
                 startProgress();
                 break;
             case VideoView.STATE_PAUSED:
+                if (previewMode) {
+                    hideAllOverlaysForPreview();
+                    break;
+                }
                 mTopRoot1.setVisibility(GONE);
 //                mTopRoot2.setVisibility(GONE);
                 mPlayLoadNetSpeedRightTop.setVisibility(GONE);
@@ -1913,12 +1976,20 @@ public class VodController extends BaseController {
     }
 
     void showBottom() {
+        if (previewMode) {
+            hideAllOverlaysForPreview();
+            return;
+        }
         mHandler.removeMessages(1003);
         mHandler.sendEmptyMessage(1002);
         mNextBtn.requestFocus();
     }
 
     void showUpBottom() {
+        if (previewMode) {
+            hideAllOverlaysForPreview();
+            return;
+        }
         mHandler.removeMessages(1003);
         mHandler.sendEmptyMessage(1002);
         mPlayerTimeStartBtn.requestFocus();
@@ -2104,9 +2175,11 @@ public class VodController extends BaseController {
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-        // 详情页小窗：单击直接放大，不弹控制条（小窗里控制条太小，没法用）。
-        if (previewMode && previewTapListener != null) {
-            previewTapListener.onPreviewTap();
+        // 详情页小窗：单击直接放大，永不弹控制条（小窗里控制条会遮挡画面）。
+        if (previewMode) {
+            if (previewTapListener != null) {
+                previewTapListener.onPreviewTap();
+            }
             return true;
         }
         myHandle.removeCallbacks(myRunnable);
