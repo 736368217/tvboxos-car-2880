@@ -39,7 +39,6 @@ public final class CarEnhance {
     private static java.lang.ref.WeakReference<MyVideoView> audioOwner = new java.lang.ref.WeakReference<>(null);
     private static float lastAppliedGain = Float.NaN;
     private static float lastAppliedFactor = Float.NaN;
-    private static int lastAppliedMode = Integer.MIN_VALUE;
     private static int lastAppliedSession = Integer.MIN_VALUE;
     private static Mode lastAppliedProcessing;
     private static boolean lastAppliedPcm;
@@ -93,7 +92,23 @@ public final class CarEnhance {
     }
 
     public static Mode audioProcessingMode() {
-        return audioEnhancementEnabled() ? audioDrcMode() : Mode.ORIGINAL;
+        if (!audioEnhancementEnabled()) return Mode.ORIGINAL;
+        Mode mode = audioDrcMode();
+        return mode == Mode.OFF ? Mode.ORIGINAL : mode;
+    }
+    /** Persist the user-facing three-mode choice and immediately update the active EXO sink. */
+    public static void setAudioProcessingMode(Mode mode) {
+        Mode selected = mode == Mode.CAR_BALANCED || mode == Mode.CAR_HIGHWAY ? mode : Mode.ORIGINAL;
+        if (selected == Mode.ORIGINAL) {
+            audioEnhancement = false;
+            Hawk.put(HawkConfig.AUDIO_ENHANCEMENT, false);
+        } else {
+            audioEnhancement = true;
+            drcPreset = selected;
+            Hawk.put(HawkConfig.AUDIO_ENHANCEMENT, true);
+            Hawk.put(HawkConfig.AUDIO_DRC_MODE, selected.id);
+        }
+        applyAudio(activeVideo.get(), true);
     }
 
     public static void applyAudio(MyVideoView view) {
@@ -111,13 +126,10 @@ public final class CarEnhance {
         float gain = view.getAppAudioGain();
         float factor = view.getAudioVolumeFactor();
         Mode processing = audioProcessingMode();
-        boolean enhanced = processing != Mode.ORIGINAL;
-        int mode = enhanced ? audioMode() : AudioEffectController.MODE_OFF;
         int session = view.getAudioSessionId();
         boolean pcm = view.usesPcmGain();
-        int boost = !enhanced || pcm ? 0 : VolumeBoostMath.millibel(gain, factor);
         boolean sameView = audioOwner.get() == view;
-        boolean policyChanged = processing != lastAppliedProcessing || mode != lastAppliedMode;
+        boolean policyChanged = processing != lastAppliedProcessing;
         if (!force && Math.abs(gain - lastAppliedGain) < 1e-4f
                 && Math.abs(factor - lastAppliedFactor) < 1e-4f
                 && !policyChanged && session == lastAppliedSession && pcm == lastAppliedPcm && sameView) {
@@ -125,20 +137,16 @@ public final class CarEnhance {
         }
         lastAppliedGain = gain;
         lastAppliedFactor = factor;
-        lastAppliedMode = mode;
         lastAppliedProcessing = processing;
         lastAppliedSession = session;
         lastAppliedPcm = pcm;
         if (!sameView) audioOwner = new java.lang.ref.WeakReference<>(view);
         view.syncAudioVolume(processing);
-        // Mode OFF + boost 0 releases all four effects and also cancels their pending fade.
-        AudioEffectController.apply(mode, session, boost);
         if (!policyChanged && Math.abs(gain - lastLoggedGain) < 0.20f) return;
         lastLoggedGain = gain;
-        Log.i("CarAudio", "runtime_apply processing=" + processing + " mode=" + mode
+        Log.i("CarAudio", "runtime_apply processing=" + processing
                 + " session=" + session + " gain=" + gain + " factor=" + factor
-                + " path=" + (pcm ? "pcm" : "native") + " boostMb=" + boost
-                + " enabled=" + AudioEffectController.isActive()
+                + " path=" + (pcm ? "pcm" : "native")
                 + " state=" + view.getCurrentPlayState()
                 + " player=" + System.identityHashCode(view.getMediaPlayer())
                 + " pcmStored=" + view.getPcmGain()
@@ -173,7 +181,12 @@ public final class CarEnhance {
     // ------------------------------------------------------------------ video
 
     public static int videoMode() {
-        return VideoEnhancePreset.modeFromPrefValue(Hawk.get(HawkConfig.VIDEO_ENHANCE, 0));
+        return supportedFilter(VideoEnhancePreset.modeFromPrefValue(Hawk.get(HawkConfig.VIDEO_ENHANCE, 0)));
+    }
+
+    private static int supportedFilter(int mode) {
+        return mode == VideoEnhancePreset.ANIME_DARK || mode == VideoEnhancePreset.ANIME_DAY
+                ? mode : VideoEnhancePreset.ORIGINAL;
     }
 
     public static boolean videoEnhanceEnabled() {
@@ -181,12 +194,12 @@ public final class CarEnhance {
     }
 
     public static void setVideoMode(int mode) {
-        Hawk.put(HawkConfig.VIDEO_ENHANCE, VideoEnhancePreset.forMode(mode).id);
+        Hawk.put(HawkConfig.VIDEO_ENHANCE, supportedFilter(mode));
         refreshActiveVideo();
 
     }
     public static void setVideoEnhanceEnabled(boolean enabled) {
-        setVideoMode(enabled ? VideoEnhancePreset.VIVID_COLOR : VideoEnhancePreset.ORIGINAL);
+        setVideoMode(enabled ? VideoEnhancePreset.ANIME_DARK : VideoEnhancePreset.ORIGINAL);
     }
 
     /** 兼容旧调用：开=1 档基线，关=0 档。 */

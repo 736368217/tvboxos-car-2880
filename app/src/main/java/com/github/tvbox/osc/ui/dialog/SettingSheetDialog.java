@@ -49,6 +49,7 @@ class SettingSheetDialog extends BaseDialog {
                 .inflate(R.layout.item_dialog_setting_row, rows, false);
         ((TextView) row.findViewById(R.id.name)).setText(name);
         TextView valueView = row.findViewById(R.id.value);
+        valueView.setText(value);
         if (click != null) {
             row.setOnClickListener(v -> {
                 long dt = android.os.SystemClock.uptimeMillis() - shownAtMs;
@@ -65,6 +66,10 @@ class SettingSheetDialog extends BaseDialog {
         }
         rows.addView(row);
         return valueView;
+    }
+    /** Compatibility overload for advanced settings that carry a descriptive subtitle. */
+    protected TextView addRow(String name, String description, String value, View.OnClickListener click) {
+        return addRow(name, value, click);
     }
 
     /**

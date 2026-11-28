@@ -32,8 +32,7 @@ import java.util.Locale;
 @Keep
 public final class InAppBackButton {
     private static final String HOST_TAG = "tvbox.car.back.host";
-    /** carclash 车机版包名；其无障碍服务 com.github.kr328.clash.car/.car.EdgeBackService 即应用内返回。 */
-    private static final String CAR_CLASH_PACKAGE = "com.github.kr328.clash.car";
+    private static final String CAR_CLASH_SERVICE = "com.github.kr328.clash.car.EdgeBackService";
     private static final int ATTACH = 0, WAKE = 1, RELEASE = 2, REFRESH = 3;
     private static WeakReference<Application> application = new WeakReference<>(null);
 
@@ -108,7 +107,7 @@ public final class InAppBackButton {
         }
         installLifecycle(activity.getApplication());
         if (!isEnabled() || activity instanceof IgnoreInAppBack || carClashEdgeBackActive(activity)) {
-            // carclash owns its own edge panel when its accessibility service is on: never stack two.
+            // Only a confirmed enabled CarClash gesture takes precedence.
             release(activity);
             return;
         }
@@ -245,56 +244,72 @@ public final class InAppBackButton {
     }
 
     public static boolean isEnabled() { return bool(HawkConfig.IN_APP_BACK, true); }
+
+    public static final int CAR_CLASH_BACK_DISABLED = 0;
+    public static final int CAR_CLASH_BACK_ENABLED = 1;
+    public static final int CAR_CLASH_BACK_UNKNOWN = -1;
+    private static final String CAR_CLASH_STATUS_METHOD = "edgeBackState";
+
     /**
-     * carclash 的应用内返回是否在接管。
+     * carclash 的无障碍服务开关与应用内 edge_back_enabled 是两个独立状态。
      *
-     * <p>为什么不能只认包名：carclash 的 `applicationId` 由构建配置决定（源码里是
-     * `custom.application.id`，缺省 `com.github.metacubex.clash`），写死 `com.github.kr328.clash.car`
-     * 在装到车机上后永远匹配不到——这就是「明明开了却显示未打开」的原因。这里改为按
-     * **服务类名** `EdgeBackService` 匹配任意包，且同时接受 flat / short 两种组件写法。
-     *
-     * <p>已知近似：carclash 允许无障碍服务常驻、再用私有 `car_ui/edge_back_enabled` 开关手势，
-     * 那个开关跨应用读不到。因此本判定是「carclash 的返回服务已启用」，偏保守（宁可我们让位）。
+     * <p>精确状态需要 carclash 提供一个只读、受保护的 status Provider：
+     * authority 为 {@code <applicationId>.edgeback}，call method 为
+     * {@code edgeBackState}，仅接受返回 Bundle 中的 Boolean {@code enabled}。
+     * Provider 不存在、不可读或返回格式不完整时返回 UNKNOWN。
+     * 绝不把 ENABLED_ACCESSIBILITY_SERVICES 当成手势已开启。</p>
      */
-    public static boolean carClashEdgeBackActive(Context context) {
-        if (context == null) return false;
+    public static int carClashBackState(Context context) {
+        if (context == null) return CAR_CLASH_BACK_UNKNOWN;
+        android.content.ComponentName service = carClashEdgeBackService(context);
+        if (service == null) return CAR_CLASH_BACK_DISABLED;
+        String packageName = service.getPackageName();
         try {
-            String enabled = Settings.Secure.getString(context.getContentResolver(),
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-            if (enabled == null || enabled.length() == 0) return false;
-            for (String item : enabled.split(":")) {
-                String name = item == null ? "" : item.trim();
-                if (name.length() == 0) continue;
-                int slash = name.indexOf('/');
-                String service = slash < 0 ? name : name.substring(slash + 1);
-                if (service.endsWith("EdgeBackService") || service.endsWith(".car.EdgeBackService")) {
-                    return true;
-                }
+            String authority = packageName + ".edgeback";
+            android.content.pm.ProviderInfo provider = context.getPackageManager().resolveContentProvider(authority, 0);
+            if (provider == null || !provider.exported || !packageName.equals(provider.packageName)
+                    || !"com.github.kr328.clash.car.EdgeBackStatusProvider".equals(provider.name)) {
+                return CAR_CLASH_BACK_UNKNOWN;
             }
-        } catch (RuntimeException error) {
-            return false;
+            android.net.Uri uri = android.net.Uri.parse("content://" + authority);
+            Bundle result = context.getContentResolver().call(uri, CAR_CLASH_STATUS_METHOD, null, null);
+            Object enabled = result == null ? null : result.get("enabled");
+            if (enabled instanceof Boolean) {
+                return (Boolean) enabled ? CAR_CLASH_BACK_ENABLED : CAR_CLASH_BACK_DISABLED;
+            }
+        } catch (RuntimeException ignored) {
+            // Provider is optional until carclash ships the explicit read-only contract.
         }
-        return false;
+        return CAR_CLASH_BACK_UNKNOWN;
     }
 
-    /** 诊断上传用：一句话说明 carclash 接管状态，附带原始组件名便于核对包名。 */
-    public static String carClashBackSummary(Context context) {
+    /** True only when the explicit carclash IPC contract reports enabled. */
+    public static boolean carClashEdgeBackActive(Context context) {
+        return carClashBackState(context) == CAR_CLASH_BACK_ENABLED;
+    }
+
+    private static android.content.ComponentName carClashEdgeBackService(Context context) {
         try {
             String enabled = Settings.Secure.getString(context.getContentResolver(),
                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-            boolean active = carClashEdgeBackActive(context);
-            String raw = enabled == null ? "" : enabled;
-            int index = raw.indexOf("EdgeBackService");
-            String component = "-";
-            if (index >= 0) {
-                int start = raw.lastIndexOf(':', index) + 1;
-                int end = raw.indexOf(':', index);
-                component = raw.substring(start, end < 0 ? raw.length() : end);
+            if (enabled == null) return null;
+            for (String item : enabled.split(":")) {
+                android.content.ComponentName component = android.content.ComponentName.unflattenFromString(item.trim());
+                if (component != null && CAR_CLASH_SERVICE.equals(component.getClassName())) return component;
             }
-            return active + " component=" + component;
-        } catch (RuntimeException error) {
-            return "unknown";
+        } catch (RuntimeException ignored) {
         }
+        return null;
+    }
+
+    /** 诊断上传与设置页使用的三态说明，避免把服务启用误报成手势接管。 */
+    public static String carClashBackSummary(Context context) {
+        int state = carClashBackState(context);
+        if (state == CAR_CLASH_BACK_ENABLED) return "接管中";
+        if (state == CAR_CLASH_BACK_DISABLED) {
+            return carClashEdgeBackService(context) == null ? "未检测到" : "应用内关闭";
+        }
+        return "无法读取";
     }
     public static String getMode() {
         // r95 起只保留 carclash 风格边缘手势；旧的「返回杠」偏好一律按边缘手势处理。

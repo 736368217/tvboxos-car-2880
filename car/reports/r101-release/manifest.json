@@ -1,0 +1,66 @@
+{
+    "version":  "3.1.0-car.7-r101",
+    "versionCode":  73,
+    "apkSha256":  "4997522893e761f21f9394c85d2eac9a6cea2f6dc96ead03da7d350736ef495f",
+    "playbackAssertions":  88,
+    "coldAssertions":  9,
+    "appFatal":  0,
+    "legacyCarClash":  "unavailable",
+    "files":  [
+                  {
+                      "path":  "display.txt",
+                      "bytes":  811,
+                      "sha256":  "40a119568d4fa9b74665424f90e91d21de8c81bc93b7ccbca9149b85e147d210"
+                  },
+                  {
+                      "path":  "installed.sha",
+                      "bytes":  65,
+                      "sha256":  "ffdd9e2dd1c804aef807898cf828e074904ab57daeff82cfef320b2d42be66f9"
+                  },
+                  {
+                      "path":  "owner-before.sha",
+                      "bytes":  65,
+                      "sha256":  "f347c5fbad58f204673203c8663515b572f2a60e25d39bd039d63c291ab320d7"
+                  },
+                  {
+                      "path":  "owner-after.sha",
+                      "bytes":  65,
+                      "sha256":  "f347c5fbad58f204673203c8663515b572f2a60e25d39bd039d63c291ab320d7"
+                  },
+                  {
+                      "path":  "ui1-report.txt",
+                      "bytes":  2682,
+                      "sha256":  "81293740bf9deb7ceb7c28c34b18fbfa182c11b05aa6d5e63b19f65167434f0f"
+                  },
+                  {
+                      "path":  "ui1-06-advanced-settings.png",
+                      "bytes":  466872,
+                      "sha256":  "98bd84e37d215d8458f50710c607e6c167743045217bf84246a9e56ec54e184d"
+                  },
+                  {
+                      "path":  "ui1-14-audio-original.png",
+                      "bytes":  143037,
+                      "sha256":  "489dcb7ca1fa502dabfc18ad4f605ca853c8397861a34c03df4d2e8d394c05fc"
+                  },
+                  {
+                      "path":  "ui1-14-audio-highway.png",
+                      "bytes":  141948,
+                      "sha256":  "049d5cd2ce34952f1753ba0c1a8576bec2ff31719e1e7a69337e5d82d8320d8d"
+                  },
+                  {
+                      "path":  "ui1-15-playback-controls.png",
+                      "bytes":  124070,
+                      "sha256":  "66d1f7ab1ab038531f1542ad1c640fbdebe1671502595b0a58abce2075e87821"
+                  },
+                  {
+                      "path":  "ui1-16-video-filter.png",
+                      "bytes":  158645,
+                      "sha256":  "32f4ee1c5a2b338f7cf18b234c739cf43edf520a7b9e2028ac98ca1cf53b51d1"
+                  },
+                  {
+                      "path":  "cold-report.txt",
+                      "bytes":  359,
+                      "sha256":  "fe1e41b8fa6c33e1b1d3210281df78046452aeb8a09b0ed5a2795a8a20e0e0ca"
+                  }
+              ]
+}

@@ -104,6 +104,7 @@ public final class Acceptance extends Instrumentation {
             SystemClock.sleep(5000);
             shot("01-home");
             if (audioFixture) {
+                showSettings(home);
                 runAudioFixture(home, config, result);
                 return;
             }
@@ -258,16 +259,18 @@ public final class Acceptance extends Instrumentation {
         return p.getBoolean("active", false) && !p.getBoolean("user_exit", false);
     }
     private void showSettings(Activity a) throws Exception {
-        main(() -> {
-            settings = (Dialog)type("com.github.tvbox.osc.ui.dialog.AdvancedSettingsDialog").getConstructor(Context.class, Runnable.class).newInstance(a, null);
-            settings.show();
-        });
-        SystemClock.sleep(500); shot("06-settings-sound");
-        main(() -> findText(settings.getWindow().getDecorView(), "返回操作").performClick());
-        SystemClock.sleep(500); shot("07-settings-back");
-        main(() -> findText(settings.getWindow().getDecorView(), "其他").performClick());
-        SystemClock.sleep(500); shot("08-settings-other");
-        main(() -> settings.dismiss());
+        tapView(a.findViewById(id("tvSetting")));
+        await("settings_page", () -> current != null && current.getClass().getSimpleName().equals("SettingActivity"), 10000);
+        Activity page = current;
+        assertTrue("settings_has_no_danmu", page.findViewById(id("danmuOpen")) == null && page.findViewById(id("danmuApi")) == null);
+        tapView(page.findViewById(id("llAdvancedSettings")));
+        await("advanced_uses_sheet_rows", () -> node("增强音量") != null
+                && node("车载均衡") != null && node("本应用返回") != null && node("关闭") != null, 10000);
+        shot("06-advanced-settings");
+        tapNode("关闭");
+        await("advanced_close_returns_to_settings", () -> node("检查更新") != null, 10000);
+        sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+        await("settings_returns_home", () -> current == a, 10000);
     }
     private String allText(View view) {
         StringBuilder value=new StringBuilder();
@@ -398,58 +401,53 @@ public final class Acceptance extends Instrumentation {
             main(() -> compareBox[0] = detail.findViewById(compareId));
             View compare = compareBox[0];
             await("audio_compare_visible", () -> shown(compare), 10000);
-            await("audio_enhanced_label", () -> "增强音量".equals(textOf(compare)), 10000);
-            shot("13-audio-enhanced");
             int playerBefore = playerIdentity(detail);
             long positionBefore = currentPosition(detail);
-            tapView(compare);
-            await("audio_original_label", () -> "原始声音".equals(textOf(compare)), 10000);
-            await("audio_original_processor_bypass", () -> "ORIGINAL".equals(processorMode(detail)), 10000);
+            selectAudioMode(compare, "原始声音", "original");
+            assertAudioPipeline(detail, video, "ORIGINAL", "episode_1_original");
             assertTrue("original_preference_saved", Boolean.FALSE.equals(prefValue("audio_enhancement", Boolean.TRUE)));
-            assertTrue("original_keeps_saved_volume", Math.abs(appGain(detail) - 3f) < .001f);
-            assertTrue("original_retains_drc_preset", ((Number)prefValue("audio_drc_mode", Integer.valueOf(-1))).intValue() == 1);
-            assertTrue("original_retains_effect_preset", ((Number)prefValue("hifi_audio", Integer.valueOf(-1))).intValue() == 1);
-            assertTrue("original_releases_android_effects", Boolean.FALSE.equals(
-                    call(type("com.github.tvbox.osc.car.AudioEffectController"), "isActive")));
-            assertTrue("original_pcm_processor_still_running", pcmQueueCount(detail) > 0);
-            shot("14-audio-original");
-            tapView(compare);
-            await("audio_enhanced_restored", () -> "增强音量".equals(textOf(compare))
-                    && "CAR_BALANCED".equals(processorMode(detail)), 10000);
-            assertTrue("enhancement_preference_restored", Boolean.TRUE.equals(prefValue("audio_enhancement", Boolean.FALSE)));
-            assertAudioPipeline(detail, videoView(detail), "CAR_BALANCED", "episode_1_reenabled");
-            SystemClock.sleep(900);
-            assertTrue("A_B_A_keeps_same_exoplayer", playerIdentity(detail) == playerBefore);
-            assertTrue("A_B_A_play_position_continues", currentPosition(detail) >= positionBefore + 500);
-            shot("15-audio-reenabled");
+            selectAudioMode(compare, "高速压缩", "highway");
+            assertAudioPipeline(detail, video, "CAR_HIGHWAY", "episode_1_highway");
+            selectAudioMode(compare, "车载均衡", "balanced");
+            assertAudioPipeline(detail, video, "CAR_BALANCED", "episode_1_balanced");
+            await("audio_position_advances", () -> currentPosition(detail) >= positionBefore + 500, 10000);
+            assertTrue("audio_switch_keeps_player", playerIdentity(detail) == playerBefore);
 
-            int nextId = getTargetContext().getResources().getIdentifier("play_next", "id", getTargetContext().getPackageName());
-            final View[] nextBox = new View[1];
-            main(() -> { call(controller, "showBottom"); nextBox[0] = detail.findViewById(nextId); });
-            View next = nextBox[0];
-            await("episode_navigation_visible", () -> shown(next), 10000);
+            main(() -> call(controller, "showBottom"));
+            View previous = detail.findViewById(id("play_pre"));
+            View next = detail.findViewById(id("play_next"));
+            await("episode_controls_visible", () -> shown(previous) && shown(next), 10000);
+            main(() -> {
+                assertTrue("previous_before_next", previous.getLeft() < next.getLeft());
+                assertTrue("subtitle_retained", detail.findViewById(id("zimu_select")) != null);
+                for (String removed : new String[]{"play_car_audio", "play_player", "danmu_setting", "danmu_search_ui", "danmaku"}) {
+                    int removedId = id(removed);
+                    assertTrue("removed_" + removed, removedId == 0 || detail.findViewById(removedId) == null);
+                }
+            });
+            shot("15-playback-controls");
+            View filter = detail.findViewById(id("play_car_video"));
+            tapView(filter);
+            await("three_filter_options", () -> node("原画 · 保留原始画面") != null
+                    && node("动漫·暗光 · 夜间与常规番剧") != null
+                    && node("动漫·日间 · 强光下提亮暗部") != null, 10000);
+            shot("16-video-filter");
+            tapNode("动漫·日间 · 强光下提亮暗部");
+            await("filter_day_saved", () -> Integer.valueOf(9).equals(prefValue("video_enhance", -1)), 10000);
+            main(() -> call(controller, "showBottom"));
             tapView(next);
             await("episode_2_selected", () -> currentIndex(detail) == 1, 30000);
             await("episode_2_running", () -> Boolean.TRUE.equals(call(videoView(detail), "isPlaying"))
                     && currentPosition(detail) > 1000, 30000);
             assertAudioPipeline(detail, videoView(detail), "CAR_BALANCED", "episode_2_reapplied");
-            note("episode_2_position=" + currentPosition(detail));
             main(() -> call(controller, "showBottom"));
-            await("episode_2_audio_button", () -> shown(compare) && "增强音量".equals(textOf(compare)), 10000);
-            tapView(compare);
-            await("episode_2_original", () -> "原始声音".equals(textOf(compare)), 10000);
-            assertTrue("episode_2_original_mode_is_bypass", "ORIGINAL".equals(processorMode(detail)));
-            shot("16-episode-2-original");
-            tapView(compare);
-            await("episode_2_enhanced", () -> "增强音量".equals(textOf(compare))
-                    && "CAR_BALANCED".equals(processorMode(detail)), 10000);
-            assertTrue("episode_2_drc_preference_retained", ((Number)prefValue("audio_drc_mode", Integer.valueOf(-1))).intValue() == 1);
-            assertTrue("episode_2_app_gain_retained", Math.abs(appGain(detail) - 3f) < .001f);
-            await("episode_2_progress_before_background", () -> currentPosition(detail) > 5000, 15000);
+            tapView(previous);
+            await("previous_returns_episode_1", () -> currentIndex(detail) == 0, 30000);
+            await("episode_1_running_again", () -> Boolean.TRUE.equals(call(videoView(detail), "isPlaying"))
+                    && currentPosition(detail) > 1000, 30000);
             main(() -> call(controller, "showBottom"));
-            await("cold_original_button_visible", () -> shown(compare), 5000);
-            tapView(compare);
-            await("cold_arm_original", () -> "ORIGINAL".equals(processorMode(detail)), 5000);
+            selectAudioMode(compare, "原始声音", "cold-arm");
+            await("cold_arm_position", () -> currentPosition(detail) > 5000, 20000);
             shot("17-cold-arm-original");
             getTargetContext().startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -468,6 +466,38 @@ public final class Acceptance extends Instrumentation {
         } finally {
             if (audioServer != null) { audioServer.close(); audioServer = null; }
         }
+    }
+
+    private int id(String name) {
+        return getTargetContext().getResources().getIdentifier(name, "id", getTargetContext().getPackageName());
+    }
+
+    private void selectAudioMode(View button, String label, String evidence) throws Exception {
+        await("audio_button_" + evidence, () -> shown(button), 10000);
+        tapView(button);
+        await("three_audio_options_" + evidence, () -> node("原始声音") != null
+                && node("车载均衡") != null && node("高速压缩") != null, 10000);
+        shot("14-audio-" + evidence);
+        tapNode(label);
+        await("selected_" + evidence, () -> label.equals(textOf(button)), 10000);
+    }
+
+    private android.view.accessibility.AccessibilityNodeInfo node(String label) {
+        android.view.accessibility.AccessibilityNodeInfo root = getUiAutomation().getRootInActiveWindow();
+        if (root == null) return null;
+        for (android.view.accessibility.AccessibilityNodeInfo match : root.findAccessibilityNodeInfosByText(label)) {
+            String text = String.valueOf(match.getText());
+            if (match.isVisibleToUser() && (label.equals(text) || ("✓ " + label).equals(text))) return match;
+        }
+        return null;
+    }
+
+    private void tapNode(String label) throws Exception {
+        android.view.accessibility.AccessibilityNodeInfo target = node(label);
+        if (target == null) throw new AssertionError("No visible option " + label);
+        android.graphics.Rect bounds = new android.graphics.Rect();
+        target.getBoundsInScreen(bounds);
+        tapPoint(new int[]{bounds.centerX(), bounds.centerY()});
     }
 
     private void assertAudioPipeline(Activity detail, Object view, String expectedMode, String label) throws Exception {

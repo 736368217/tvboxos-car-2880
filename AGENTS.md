@@ -22,4 +22,4 @@
 
 ## 当前状态
 
-2026-11-28：当前已发布 **3.1.0-car.7-r99 / versionCode 71**（日志接口公开索引更新，源码待本轮发布）：保留 `latest.json`，新增按日期 `dates/YYYY-MM-DD.json`，每批提供公开完整 `records/*.json` 和原始 `.json.gz` 下载。r99 在设备上验证 r98 以来的自动上传链路，日期索引已回填 207 个历史批次。完整接口规则见 `car/handover/R99-ONLINE-LOG-INDEX.md`。
+2026-11-28：当前源码版本为 **3.1.0-car.7-r101 / versionCode 73**，播放页、高级设置与 CarClash 状态口径见 `car/handover/R101-PLAYBACK-SETTINGS.md`。r99 的公开诊断日志契约继续适用，参见 `car/handover/R99-ONLINE-LOG-INDEX.md`。

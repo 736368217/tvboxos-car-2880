@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.DiffUtil;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.car.InAppBackButton;
 import com.github.tvbox.osc.api.ApiConfig;
-import com.github.tvbox.osc.api.DanmakuApi;
 import com.github.tvbox.osc.base.BaseActivity;
 import com.github.tvbox.osc.base.BaseLazyFragment;
 import com.github.tvbox.osc.bean.IJKCode;
@@ -34,11 +33,9 @@ import com.github.tvbox.osc.ui.dialog.AboutDialog;
 import com.github.tvbox.osc.ui.dialog.ApiDialog;
 import com.github.tvbox.osc.ui.dialog.ApiHistoryDialog;
 import com.github.tvbox.osc.ui.dialog.BackupDialog;
-import com.github.tvbox.osc.ui.dialog.DanmuApiDialog;
 import com.github.tvbox.osc.ui.dialog.SearchRemoteTvDialog;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
 import com.github.tvbox.osc.ui.dialog.XWalkInitDialog;
-import com.github.tvbox.osc.util.DanmuHelper;
 import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.HawkConfig;
@@ -103,8 +100,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvHomeDefaultShow;
     private ApiDialog apiDialog;
     private boolean selectLocalLive;
-    private TextView tvDanmuOpenText;
-    private TextView tvDanmuApiText;
 
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
@@ -125,10 +120,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvFastSearchText.setText(Hawk.get(HawkConfig.FAST_SEARCH_MODE, true) ? "开启" : "关闭");
         tvm3u8AdText = findViewById(R.id.m3u8AdText);
         tvm3u8AdText.setText(Hawk.get(HawkConfig.M3U8_PURIFY, false) ? "开启" : "关闭");
-        tvDanmuOpenText = findViewById(R.id.danmuOpenText);
-        tvDanmuOpenText.setText(DanmuHelper.isOpen() ? "开启" : "关闭");
-        tvDanmuApiText = findViewById(R.id.danmuApiText);
-        refreshDanmuApiText();
         tvAutoSwitchLineText = findViewById(R.id.autoSwitchLineText);
         tvAutoSwitchLineText.setText(Hawk.get(HawkConfig.AUTO_SWITCH_LINE, true) ? "开启" : "关闭");
         tvRecStyleText = findViewById(R.id.showRecStyleText);
@@ -768,30 +759,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 tvm3u8AdText.setText(!is_purify ? "开启" : "关闭");
             }
         });
-        findViewById(R.id.danmuOpen).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                boolean open = !DanmuHelper.isOpen();
-                DanmuHelper.setOpen(open);
-                tvDanmuOpenText.setText(open ? "开启" : "关闭");
-                EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_SET_DANMU_SETTINGS, open));
-            }
-        });
-        findViewById(R.id.danmuApi).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                DanmuApiDialog dialog = new DanmuApiDialog(mActivity);
-                dialog.setOnListener(new DanmuApiDialog.OnListener() {
-                    @Override
-                    public void onChange(String api) {
-                        refreshDanmuApiText();
-                    }
-                });
-                dialog.show();
-            }
-        });
         findViewById(R.id.autoSwitchLine).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -889,20 +856,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvApiLine.setText(lineName);
     }
 
-    private void refreshDanmuApiText() {
-        if (tvDanmuApiText == null) return;
-        if (DanmakuApi.isUseDefault()) {
-            tvDanmuApiText.setText("默认");
-            return;
-        }
-        String custom = Hawk.get(HawkConfig.DANMU_API, "");
-        if (!custom.isEmpty()) {
-            tvDanmuApiText.setText("自定义");
-            return;
-        }
-        String config = ApiConfig.get().getDanmaku();
-        tvDanmuApiText.setText(config.isEmpty() ? "默认" : "接口");
-    }
 
     private void updateApiRowWeight(boolean showLine) {
         if (llApi == null) return;
@@ -1137,10 +1090,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
         String back;
         if (!InAppBackButton.isEnabled()) {
             back = "返回关闭";
-        } else if (InAppBackButton.carClashEdgeBackActive(getContext())) {
-            back = "carclash 接管";
         } else {
-            back = "carclash 边缘返回";
+            back = "carclash " + InAppBackButton.carClashBackSummary(getContext());
         }
         String brightness = Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false) ? "亮度开" : "亮度关";
         tvAdvancedSummary.setText(back + " · " + brightness);

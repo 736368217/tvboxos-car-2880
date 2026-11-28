@@ -4,274 +4,124 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.github.tvbox.osc.R;
+import com.github.tvbox.osc.BuildConfig;
 import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.car.InAppBackButton;
+import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.event.RefreshEvent;
 import com.github.tvbox.osc.ui.activity.AudioDiagnosticActivity;
 import com.github.tvbox.osc.util.HawkConfig;
-import org.greenrobot.eventbus.EventBus;
 import com.orhanobut.hawk.Hawk;
 
-/** A bounded native settings panel: one category, a few controls, no nested sheets. */
-public class AdvancedSettingsDialog extends BaseDialog {
-    private static final int WHITE = 0xFFF1F5F9;
-    private static final int MUTED = 0xFFA8B5C5;
-    private static final int ACCENT = 0xFF8BCBE2;
+import org.greenrobot.eventbus.EventBus;
+
+import xyz.doikki.videoplayer.exo.CarAudioDynamicsEngine.Mode;
+
+/** Advanced settings using the same sheet and option rows as the original app dialogs. */
+public class AdvancedSettingsDialog extends SettingSheetDialog {
     private final Runnable onChanged;
-    private final Activity owner;
-    private final float scale;
-    private final int panelWidth, panelHeight;
-    private final LinearLayout content;
-    private final TextView[] tabs = new TextView[3];
-    private int category;
-    private long lastClick;
 
     public AdvancedSettingsDialog(@NonNull Context context, Runnable onChanged) {
-        super(context);
+        super(context, "高级设置");
         this.onChanged = onChanged;
-        Context candidate = context;
-        while (candidate instanceof ContextWrapper && !(candidate instanceof Activity)) {
-            candidate = ((ContextWrapper) candidate).getBaseContext();
-        }
-        owner = candidate instanceof Activity ? (Activity) candidate : null;
-        DisplayMetrics dm = new DisplayMetrics();
-        if (owner != null) owner.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        else dm.setTo(context.getResources().getDisplayMetrics());
-        scale = Math.min(dm.widthPixels / 2880f, dm.heightPixels / 1620f);
-        panelWidth = px(2160);
-        panelHeight = px(1180);
-        LinearLayout panel = new LinearLayout(context);
-        panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(px(52), px(36), px(52), px(36));
-        panel.setBackgroundResource(R.drawable.shape_danmu_setting_bg);
-        setContentView(panel, new ViewGroup.LayoutParams(panelWidth, panelHeight));
-
-        LinearLayout header = new LinearLayout(context);
-        header.setGravity(Gravity.CENTER_VERTICAL);
-        TextView title = text("高级设置", 54, WHITE, true);
-        header.addView(title, new LinearLayout.LayoutParams(0, px(90), 1));
-        TextView close = button("完成");
-        close.setOnClickListener(v -> dismiss());
-        header.addView(close, new LinearLayout.LayoutParams(px(210), px(82)));
-        panel.addView(header);
-        View rule = new View(context);
-        rule.setBackgroundColor(0x33475569);
-        LinearLayout.LayoutParams ruleParams = new LinearLayout.LayoutParams(-1, px(2));
-        ruleParams.setMargins(0, px(22), 0, px(32));
-        panel.addView(rule, ruleParams);
-
-        LinearLayout body = new LinearLayout(context);
-        LinearLayout nav = new LinearLayout(context);
-        nav.setOrientation(LinearLayout.VERTICAL);
-        String[] labels = {"播放与声音", "返回操作", "其他"};
-        for (int i = 0; i < labels.length; i++) {
-            final int index = i;
-            tabs[i] = button(labels[i]);
-            tabs[i].setGravity(Gravity.CENTER_VERTICAL);
-            tabs[i].setPadding(px(24), 0, px(24), 0);
-            tabs[i].setOnClickListener(v -> { category = index; render(); });
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, px(112));
-            lp.bottomMargin = px(16);
-            nav.addView(tabs[i], lp);
-        }
-        body.addView(nav, new LinearLayout.LayoutParams(px(370), -1));
-        ScrollView scroll = new ScrollView(context);
-        scroll.setFillViewport(true);
-        content = new LinearLayout(context);
-        content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(px(48), 0, 0, 0);
-        scroll.addView(content, new ScrollView.LayoutParams(-1, -2));
-        body.addView(scroll, new LinearLayout.LayoutParams(0, -1, 1));
-        panel.addView(body, new LinearLayout.LayoutParams(-1, 0, 1));
-        setCanceledOnTouchOutside(true);
         render();
-    }
-
-    @Override public void show() {
-        super.show();
-        if (getWindow() != null) getWindow().setLayout(panelWidth, panelHeight);
-    }
-
-    private int px(float value) { return Math.max(1, Math.round(value * scale)); }
-
-    private TextView text(String value, float size, int color, boolean bold) {
-        TextView view = new TextView(getContext());
-        view.setText(value);
-        view.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(size));
-        view.setTextColor(color);
-        view.setGravity(Gravity.CENTER_VERTICAL);
-        if (bold) view.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        return view;
-    }
-
-    private GradientDrawable selectedBackground() {
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0xFF243D50);
-        bg.setCornerRadius(px(16));
-        bg.setStroke(px(2), ACCENT);
-        return bg;
-    }
-
-    private TextView button(String name) {
-        TextView view = text(name, 36, WHITE, false);
-        view.setGravity(Gravity.CENTER);
-        view.setFocusable(true);
-        view.setClickable(true);
-        view.setBackgroundResource(R.drawable.button_danmu_setting);
-        return view;
-    }
-
-    private boolean acceptClick() {
-        long now = android.os.SystemClock.uptimeMillis();
-        if (now - lastClick < 350) return false;
-        lastClick = now;
-        return true;
-    }
-
-    private void changed() {
-        render();
-        if (onChanged != null) onChanged.run();
     }
 
     private void render() {
-        for (int i = 0; i < tabs.length; i++) {
-            if (i == category) tabs[i].setBackground(selectedBackground());
-            else tabs[i].setBackgroundResource(R.drawable.button_danmu_setting);
-            tabs[i].setTextColor(i == category ? ACCENT : WHITE);
-        }
-        content.removeAllViews();
-        if (category == 0) {
-            boolean enhanced = CarEnhance.audioEnhancementEnabled();
-            heading("声音", enhanced ? "当前：增强音量" : "当前：原始声音 · 播放栏可切换");
-            row("动态音量", "仅 EXO；点击切换关闭、车载均衡、高速压缩", CarEnhance.audioDrcMode().label, () -> {
-                CarEnhance.cycleAudioDrcMode();
-                changed();
-            });
-            row("应用内音量", enhanced ? "播放时在右侧上下滑动，每档 5%" : "切回增强音量后使用保存值",
-                    Math.round(CarEnhance.appGain() * 100) + "%", null);
-            row("音量测试片（临时）", "内置 20 秒诊断剪辑，走本机 EXO 音频链路", "播放", () -> {
-                getContext().startActivity(new Intent(getContext(), AudioDiagnosticActivity.class));
-            });
-        } else if (category == 1) {
-            boolean clash = InAppBackButton.carClashEdgeBackActive(getContext());
-            heading("返回方式", "carclash 风格边缘手势；carclash 应用内返回开启时本应用自动不显示");
-            LinearLayout modes = new LinearLayout(getContext());
-            String[] names = {"边缘手势", "关闭"};
-            int selected = InAppBackButton.isEnabled() ? 0 : 1;
-            for (int i = 0; i < names.length; i++) {
-                final int index = i;
-                TextView choice = button(names[i]);
-                if (i == selected) choice.setBackground(selectedBackground());
-                choice.setTextColor(i == selected ? ACCENT : WHITE);
-                choice.setOnClickListener(v -> {
-                    if (!acceptClick()) return;
-                    InAppBackButton.setEnabled(owner, index == 0);
-                    changed();
-                });
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, px(112), 1);
-                if (i > 0) lp.leftMargin = px(16);
-                modes.addView(choice, lp);
+        clearRows();
+        final Activity owner = ownerActivity();
+
+        addRow("增强音量", "原始声音、车载均衡或高速压缩", CarEnhance.audioProcessingMode().label, v ->
+                new AudioModeDialog(getContext(), CarEnhance.audioProcessingMode(), mode -> {
+                    CarEnhance.setAudioProcessingMode(mode);
+                    notifyChanged();
+                    render();
+                }).show());
+
+        addRow("应用内音量", "播放页左右区域上下滑动调整，不修改系统音量",
+                Math.round(CarEnhance.appGain() * 100) + "%", null);
+
+        addRow("音量测试片", "使用当前 EXO 音频处理档位播放内置诊断片", "播放", v -> {
+            if (owner != null) owner.startActivity(new Intent(owner, AudioDiagnosticActivity.class));
+        });
+
+        String backState = InAppBackButton.isEnabled() ? "已开启" : "已关闭";
+        addRow("本应用返回", "边缘手势返回组件", backState, v -> {
+            InAppBackButton.setEnabled(owner, !InAppBackButton.isEnabled());
+            notifyChanged();
+            render();
+        });
+
+        addRow("carclash 返回状态", "只有 carclash 提供只读状态接口后才能精确判断",
+                InAppBackButton.carClashBackSummary(getContext()), null);
+
+        String side = InAppBackButton.getSide();
+        addRow("触发位置", "从屏幕边缘向内滑动", HawkConfig.BACK_SIDE_RIGHT.equals(side) ? "右侧" : "左侧", v -> {
+            InAppBackButton.setSide(owner, HawkConfig.BACK_SIDE_RIGHT.equals(side)
+                    ? HawkConfig.BACK_SIDE_LEFT : HawkConfig.BACK_SIDE_RIGHT);
+            notifyChanged();
+            render();
+        });
+
+        int seconds = InAppBackButton.getHideSeconds();
+        addRow("提示自动隐藏", "隐藏后仍可从边缘发起手势", seconds == 0 ? "常驻" : seconds + " 秒", v -> {
+            InAppBackButton.setHideSeconds(owner, seconds == 4 ? 6 : seconds == 6 ? 8 : seconds == 8 ? 0 : 4);
+            notifyChanged();
+            render();
+        });
+
+        boolean brightness = Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false);
+        addRow("亮度手势", "播放页左侧上下滑动调整窗口亮度", brightness ? "已开启" : "跟随系统", v -> {
+            Hawk.put(HawkConfig.BRIGHTNESS_GESTURE, !brightness);
+            notifyChanged();
+            render();
+        });
+
+        addRow("订阅缓存", "首页优先使用缓存；这里立即拉取并刷新首页", "立即更新", v -> {
+            if (owner == null) return;
+            Toast.makeText(getContext(), "正在更新订阅…", Toast.LENGTH_SHORT).show();
+            ApiConfig.get().loadConfig(false, new ApiConfig.LoadConfigCallback() {
+                @Override public void notice(String msg) { }
+
+                @Override public void success() {
+                    EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_HOME_SOURCE_CHANGE, 0));
+                    Toast.makeText(getContext(), "订阅已更新", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override public void error(String msg) {
+                    Toast.makeText(getContext(), "更新失败：" + msg, Toast.LENGTH_SHORT).show();
+                }
+            }, owner);
+        });
+
+        addRow("诊断日志上传", "上传当前诊断批次到发布通道", "立即上传", v -> {
+            com.github.tvbox.osc.diag.DiagLog.event("diag_upload_manual");
+            com.github.tvbox.osc.diag.DiagLog.uploadNow();
+            Toast.makeText(getContext(), com.github.tvbox.osc.diag.DiagLog.status(), Toast.LENGTH_LONG).show();
+        });
+
+        addRow("诊断信息", "复制版本与当前功能状态", "复制", v -> {
+            ClipboardManager clipboard = (ClipboardManager) getContext()
+                    .getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null) {
+                clipboard.setPrimaryClip(ClipData.newPlainText("TVBox 诊断",
+                        "TVBox " + BuildConfig.VERSION_NAME
+                                + "\nvolume=" + Math.round(CarEnhance.appGain() * 100) + "%"
+                                + "\naudio=" + CarEnhance.audioProcessingMode().label
+                                + "\nback=" + InAppBackButton.getMode()
+                                + "\ncarclash=" + InAppBackButton.carClashBackSummary(getContext())));
             }
-            LinearLayout.LayoutParams modeParams = new LinearLayout.LayoutParams(-1, -2);
-            modeParams.bottomMargin = px(32);
-            content.addView(modes, modeParams);
-            row("carclash 应用内返回", "开启时本应用不再叠加第二个返回组件", clash ? "接管中" : "未检测到", null);
-            String side = InAppBackButton.getSide();
-            row("触发位置", "从屏幕边缘向内滑动", HawkConfig.BACK_SIDE_RIGHT.equals(side) ? "右侧" : "左侧", () -> {
-                InAppBackButton.setSide(owner, HawkConfig.BACK_SIDE_RIGHT.equals(side) ? HawkConfig.BACK_SIDE_LEFT : HawkConfig.BACK_SIDE_RIGHT);
-                changed();
-            });
-            int seconds = InAppBackButton.getHideSeconds();
-            row("提示自动隐藏", "隐藏后仍可从边缘发起手势", seconds == 0 ? "常驻" : seconds + " 秒", () -> {
-                InAppBackButton.setHideSeconds(owner, seconds == 4 ? 6 : seconds == 6 ? 8 : seconds == 8 ? 0 : 4);
-                changed();
-            });
-        } else {
-            heading("其他", "手势偏好与本地诊断");
-            boolean brightness = Hawk.get(HawkConfig.BRIGHTNESS_GESTURE, false);
-            row("亮度手势", "在播放页左侧上下滑动调整窗口亮度", brightness ? "已开启" : "跟随系统", () -> {
-                Hawk.put(HawkConfig.BRIGHTNESS_GESTURE, !brightness);
-                changed();
-            });
-            row("订阅缓存", "首页先用上次缓存秒开；这里立即强制拉取一次并刷新首页", "立即更新", () -> {
-                if (owner == null) return;
-                Toast.makeText(getContext(), "正在更新订阅…", Toast.LENGTH_SHORT).show();
-                ApiConfig.get().loadConfig(false, new ApiConfig.LoadConfigCallback() {
-                    @Override public void notice(String msg) { }
-
-                    @Override public void success() {
-                        EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_HOME_SOURCE_CHANGE, 0));
-                        Toast.makeText(getContext(), "订阅已更新", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override public void error(String msg) {
-                        Toast.makeText(getContext(), "更新失败：" + msg, Toast.LENGTH_SHORT).show();
-                    }
-                }, owner);
-            });
-            row("诊断日志上传", "上传到发布通道的 logs/ 目录，便于远程诊断", "立即上传", () -> {
-                com.github.tvbox.osc.diag.DiagLog.event("diag_upload_manual");
-                com.github.tvbox.osc.diag.DiagLog.uploadNow();
-                Toast.makeText(getContext(), com.github.tvbox.osc.diag.DiagLog.status(), Toast.LENGTH_LONG).show();
-            });
-            row("诊断信息", "复制版本与功能开关，便于反馈", "复制", () -> {
-                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                if (clipboard != null) clipboard.setPrimaryClip(ClipData.newPlainText("TVBox 诊断",
-                        "TVBox " + com.github.tvbox.osc.BuildConfig.VERSION_NAME
-                        + "\nvolume=" + Math.round(CarEnhance.appGain() * 100)
-                        + "% processing=" + CarEnhance.audioProcessingMode().id
-                        + " back=" + InAppBackButton.getMode()));
-                Toast.makeText(getContext(), "诊断信息已复制", Toast.LENGTH_SHORT).show();
-            });
-        }
+            Toast.makeText(getContext(), "诊断信息已复制", Toast.LENGTH_SHORT).show();
+        });
     }
 
-    private void heading(String title, String subtitle) {
-        content.addView(text(title, 44, WHITE, true), new LinearLayout.LayoutParams(-1, px(66)));
-        TextView note = text(subtitle, 30, MUTED, false);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, px(62));
-        lp.bottomMargin = px(26);
-        content.addView(note, lp);
-    }
-
-    private void row(String title, String subtitle, String value, Runnable action) {
-        LinearLayout row = new LinearLayout(getContext());
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(px(28), px(18), px(28), px(18));
-        row.setBackgroundResource(R.drawable.shape_setting_model_focus);
-        LinearLayout labels = new LinearLayout(getContext());
-        labels.setOrientation(LinearLayout.VERTICAL);
-        labels.addView(text(title, 38, WHITE, true), new LinearLayout.LayoutParams(-1, px(62)));
-        labels.addView(text(subtitle, 28, MUTED, false), new LinearLayout.LayoutParams(-1, px(52)));
-        row.addView(labels, new LinearLayout.LayoutParams(0, -2, 1));
-        TextView state = text(value, 34, action == null ? MUTED : ACCENT, false);
-        state.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
-        row.addView(state, new LinearLayout.LayoutParams(px(210), px(100)));
-        row.setFocusable(action != null);
-        row.setClickable(action != null);
-        if (action != null) row.setOnClickListener(v -> { if (acceptClick()) action.run(); });
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, px(164));
-        lp.bottomMargin = px(20);
-        content.addView(row, lp);
+    private void notifyChanged() {
+        if (onChanged != null) onChanged.run();
     }
 }

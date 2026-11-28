@@ -36,7 +36,6 @@ import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.bean.IJKCode;
 import com.github.tvbox.osc.bean.ParseBean;
 import com.github.tvbox.osc.bean.SourceBean;
-import com.github.tvbox.osc.car.AudioEffectController;
 import com.github.tvbox.osc.car.CarEnhance;
 import com.github.tvbox.osc.server.ControlManager;
 import com.github.tvbox.osc.server.RemoteServer;
@@ -45,6 +44,7 @@ import com.google.android.exoplayer2.ui.SubtitleView;
 import com.github.tvbox.osc.ui.adapter.ParseAdapter;
 import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
+import com.github.tvbox.osc.ui.dialog.AudioModeDialog;
 import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.DanmuHelper;
 import com.github.tvbox.osc.util.HawkConfig;
@@ -89,6 +89,7 @@ import xyz.doikki.videoplayer.controller.MediaPlayerControl;
 import xyz.doikki.videoplayer.player.VideoView;
 import xyz.doikki.videoplayer.render.VideoEnhancePreset;
 import xyz.doikki.videoplayer.render.VideoEnhanceTiers;
+import xyz.doikki.videoplayer.exo.CarAudioDynamicsEngine.Mode;
 
 import static xyz.doikki.videoplayer.util.PlayerUtils.stringForTime;
 import static xyz.doikki.videoplayer.util.PlayerUtils.safeTimeMs;
@@ -127,7 +128,6 @@ public class VodController extends BaseController {
                             hideAllOverlaysForPreview();
                             break;
                         }
-                        updateDanmuSearchUiBtn();
                         updateAudioButtons();
                         hidePauseRoot();
                         mPlayTitle.setVisibility(GONE);
@@ -254,8 +254,7 @@ public class VodController extends BaseController {
     TextView mNextBtn;
     TextView mPreBtn;
     TextView mPlayerScaleBtn;
-    public TextView mPlayerSpeedBtn;
-    TextView mPlayerBtn;
+    TextView mPlayerSpeedBtn;
     TextView mPlayerIJKBtn;
     TextView mPlayerRetry;
     TextView mPlayrefresh;
@@ -272,8 +271,6 @@ public class VodController extends BaseController {
     TextView mZimuBtn;
     TextView mAudioTrackBtn;
     TextView mVideoTrackBtn;
-    TextView mDanmuSettingBtn;
-    TextView mDanmuSearchUiBtn;
     public TextView mLandscapePortraitBtn;
     private View backBtn;//返回键
     private boolean isClickBackBtn;
@@ -283,11 +280,10 @@ public class VodController extends BaseController {
     TextView mCastBtn;
     TextView net_play_speed;
     private MyVideoView mCarVideoView;
-    private TextView mCarVideoBtn, mCarSrBtn, mCarInterpBtn, mCarAudioBtn;
+    private TextView mCarVideoBtn, mCarSrBtn, mCarInterpBtn;
     private TextView mAudioCompareBtn;
     private TextView mVideoFrameRate;
     private boolean mFpsTickerRunning;
-    private boolean hasDanmu = false;
     private boolean showParse;
 
     LockRunnable lockRunnable = new LockRunnable();
@@ -456,16 +452,17 @@ public class VodController extends BaseController {
         updateAudioButtons();
         updateFrameRateDisplay();
     }
-
     private void updateAudioButtons() {
-        boolean enhanced = CarEnhance.audioEnhancementEnabled();
         if (mAudioCompareBtn != null) {
-            mAudioCompareBtn.setText(enhanced ? R.string.play_audio_enhanced : R.string.play_audio_original);
+            mAudioCompareBtn.setText(CarEnhance.audioProcessingMode().label);
         }
-        if (mCarAudioBtn != null) {
-            boolean effects = enhanced && CarEnhance.audioMode() != AudioEffectController.MODE_OFF;
-            mCarAudioBtn.setText(effects ? "音效开" : "音效关");
-        }
+    }
+
+    private void showAudioModeDialog() {
+        new AudioModeDialog(mActivity, CarEnhance.audioProcessingMode(), mode -> {
+            CarEnhance.setAudioProcessingMode(mode);
+            updateAudioButtons();
+        }).show();
     }
 
     private void updateFrameRateDisplay() {
@@ -561,23 +558,38 @@ public class VodController extends BaseController {
         dialog.show();
     }
 
-    /** 滤镜：预设列表（原画/臻彩/…），选中即生效。 */
+    /** 滤镜只开放原画、动漫暗光和动漫日间三档。 */
     private void showCarVideoDialog() {
+        final int[] filterModes = {
+                VideoEnhancePreset.ORIGINAL,
+                VideoEnhancePreset.ANIME_DARK,
+                VideoEnhancePreset.ANIME_DAY
+        };
         final SelectDialog<String> dialog = new SelectDialog<>(mActivity);
         dialog.setTip("滤镜");
         List<String> options = new ArrayList<>();
-        for (VideoEnhancePreset preset : VideoEnhancePreset.all()) {
+        for (int mode : filterModes) {
+            VideoEnhancePreset preset = VideoEnhancePreset.forMode(mode);
             options.add(preset.name + " · " + preset.description);
+        }
+        int currentMode = CarEnhance.videoMode();
+        int current = 0;
+        for (int i = 0; i < filterModes.length; i++) {
+            if (filterModes[i] == currentMode) {
+                current = i;
+                break;
+            }
         }
         dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
             @Override
             public void click(String value, int pos) {
-                CarEnhance.setVideoMode(pos);
+                int mode = filterModes[Math.max(0, Math.min(pos, filterModes.length - 1))];
+                CarEnhance.setVideoMode(mode);
                 CarEnhance.applyVideo(mCarVideoView);
                 updateCarEnhanceButtons();
                 String state = mCarVideoView == null ? "已保存 · 下次播放生效"
-                        : mCarVideoView.isHdrVideo() && pos != 0 ? "HDR 视频 · 调色旁路"
-                        : "画面预设已应用";
+                        : mCarVideoView.isHdrVideo() && mode != VideoEnhancePreset.ORIGINAL
+                        ? "HDR 视频 · 调色旁路" : "画面预设已应用";
                 CarEnhance.toast(getContext(), state);
                 dialog.dismiss();
             }
@@ -586,39 +598,10 @@ public class VodController extends BaseController {
             public String getDisplay(String value) {
                 return value;
             }
-        }, SelectDialogAdapter.stringDiff, options, CarEnhance.videoMode());
+        }, SelectDialogAdapter.stringDiff, options, current);
         dialog.show();
     }
 
-    /** 音效：9 个预设，选中即挂到当前播放器的音轨上。 */
-    private void showCarAudioDialog() {
-        final SelectDialog<String> dialog = new SelectDialog<>(mActivity);
-        dialog.setTip("音效");
-        List<String> options = new ArrayList<>();
-        for (int mode = 0; mode < AudioEffectController.MODE_COUNT; mode++) {
-            options.add(AudioEffectController.name(mode));
-        }
-        dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<String>() {
-            @Override
-            public void click(String value, int pos) {
-                CarEnhance.setAudioMode(pos);
-                CarEnhance.applyAudio(mCarVideoView);
-                updateCarEnhanceButtons();
-                String state = pos == 0 ? "音效已关闭"
-                        : mCarVideoView == null ? "已保存 · 下次播放生效"
-                        : !CarEnhance.audioEnhancementEnabled() ? "已保存 · 切回增强音量后生效"
-                        : AudioEffectController.isActive() ? "音效已应用" : "设备未接受该音效 · 已跳过";
-                CarEnhance.toast(getContext(), state);
-                dialog.dismiss();
-            }
-
-            @Override
-            public String getDisplay(String value) {
-                return value;
-            }
-        }, SelectDialogAdapter.stringDiff, options, CarEnhance.audioMode());
-        dialog.show();
-    }
 
     private void showSystemStats() {
         if (getContext() == null) return;
@@ -728,7 +711,6 @@ public class VodController extends BaseController {
         mPreBtn = findViewById(R.id.play_pre);
         mPlayerScaleBtn = findViewById(R.id.play_scale);
         mPlayerSpeedBtn = findViewById(R.id.play_speed);
-        mPlayerBtn = findViewById(R.id.play_player);
         mPlayerIJKBtn = findViewById(R.id.play_ijk);
         mPlayerTimeStartEndText = findViewById(R.id.play_time_start_end_text);
         mPlayerTimeStartBtn = findViewById(R.id.play_time_start);
@@ -741,12 +723,8 @@ public class VodController extends BaseController {
         mCarVideoBtn = findViewById(R.id.play_car_video);
         mCarSrBtn = findViewById(R.id.play_car_sr);
         mCarInterpBtn = findViewById(R.id.play_car_interp);
-        mCarAudioBtn = findViewById(R.id.play_car_audio);
         mAudioCompareBtn = findViewById(R.id.play_audio_compare);
-        mAudioCompareBtn.setOnClickListener(v -> {
-            CarEnhance.toggleAudioEnhancement(mCarVideoView);
-            updateAudioButtons();
-        });
+        mAudioCompareBtn.setOnClickListener(v -> showAudioModeDialog());
         mCarVideoBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -768,13 +746,6 @@ public class VodController extends BaseController {
                 showTierDialog(false);
             }
         });
-        mCarAudioBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                showCarAudioDialog();
-            }
-        });
         updateCarEnhanceButtons();
         mSubtitleView = findViewById(R.id.subtitle_view);
         mLyricView = findViewById(R.id.lyric_view);
@@ -782,15 +753,11 @@ public class VodController extends BaseController {
         mZimuBtn = findViewById(R.id.zimu_select);
         mAudioTrackBtn = findViewById(R.id.audio_track_select);
         mVideoTrackBtn = findViewById(R.id.video_track_select);
-        mDanmuSettingBtn = findViewById(R.id.danmu_setting);
-        mDanmuSearchUiBtn = findViewById(R.id.danmu_search_ui);
         mLandscapePortraitBtn = findViewById(R.id.landscape_portrait);
         backBtn = findViewById(R.id.tv_back);
         seekTime = findViewById(R.id.tv_seek_time);
         mScreenDisplay = findViewById(R.id.screen_display);
         mCastBtn = findViewById(R.id.play_cast);
-        updateDanmuBtn();
-        updateDanmuSearchUiBtn();
         backBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1081,99 +1048,6 @@ public class VodController extends BaseController {
                 return true;
             }
         });
-        mPlayerBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                myHandle.removeCallbacks(myRunnable);
-                myHandle.postDelayed(myRunnable, myHandleSeconds);
-                try {
-                    int playerType = mPlayerConfig.getInt("pl");
-                    ArrayList<Integer> exsitPlayerTypes = PlayerHelper.getExistPlayerTypes();
-                    int playerTypeIdx = 0;
-                    int playerTypeSize = exsitPlayerTypes.size();
-                    for(int i = 0; i<playerTypeSize; i++) {
-                        if (playerType == exsitPlayerTypes.get(i)) {
-                            if (i == playerTypeSize - 1) {
-                                playerTypeIdx = 0;
-                            } else {
-                                playerTypeIdx = i + 1;
-                            }
-                        }
-                    }
-                    playerType = exsitPlayerTypes.get(playerTypeIdx);
-                    mPlayerConfig.put("pl", playerType);
-                    updatePlayerCfgView();
-                    listener.updatePlayerCfg();
-                    listener.replay(false);
-                    listener.setAllowSwitchPlayer(false);
-                    hideBottom();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        setOnTvLongClickListener(mPlayerBtn, new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                myHandle.removeCallbacks(myRunnable);
-                myHandle.postDelayed(myRunnable, myHandleSeconds);
-                FastClickCheckUtil.check(view);
-                try {
-                    int playerType = mPlayerConfig.getInt("pl");
-                    int defaultPos = 0;
-                    ArrayList<Integer> players = PlayerHelper.getExistPlayerTypes();
-                    ArrayList<Integer> renders = new ArrayList<>();
-                    for(int p = 0; p<players.size(); p++) {
-                        renders.add(p);
-                        if (players.get(p) == playerType) {
-                            defaultPos = p;
-                        }
-                    }
-                    SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
-                    dialog.setTip("请选择播放器");
-                    dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<Integer>() {
-                        @Override
-                        public void click(Integer value, int pos) {
-                            try {
-                                dialog.cancel();
-                                int thisPlayType = players.get(pos);
-                                if (thisPlayType != playerType) {
-                                    mPlayerConfig.put("pl", thisPlayType);
-                                    updatePlayerCfgView();
-                                    listener.updatePlayerCfg();
-                                    listener.replay(false);
-                                    listener.setAllowSwitchPlayer(false);
-                                    hideBottom();
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public String getDisplay(Integer val) {
-                            Integer playerType = players.get(val);
-                            return PlayerHelper.getPlayerName(playerType);
-                        }
-                    }, new DiffUtil.ItemCallback<Integer>() {
-                        @Override
-                        public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                            return oldItem.intValue() == newItem.intValue();
-                        }
-
-                        @Override
-                        public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
-                            return oldItem.intValue() == newItem.intValue();
-                        }
-                    }, renders, defaultPos);
-                    dialog.show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                return true;
-            }
-        });
         mPlayerIJKBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1318,38 +1192,6 @@ public class VodController extends BaseController {
                 hideBottom();
             }
         });
-        mDanmuSettingBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FastClickCheckUtil.check(view);
-                listener.showDanmuSetting();
-            }
-        });
-        setOnTvLongClickListener(mDanmuSettingBtn, new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                FastClickCheckUtil.check(view);
-                boolean opened = listener.toggleDanmu();
-                hideBottom();
-                Toast.makeText(getContext(), opened ? "弹幕已开启" : "弹幕已临时关闭", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-        mDanmuSearchUiBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.searchDanmuUi(false);
-                hideBottom();
-            }
-        });
-        setOnTvLongClickListener(mDanmuSearchUiBtn, new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                listener.searchDanmuUi(true);
-                hideBottom();
-                return true;
-            }
-        });
         mLandscapePortraitBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1390,8 +1232,10 @@ public class VodController extends BaseController {
         } else {
             mCastBtn.setVisibility(VISIBLE);
         }
-        mScreenDisplay.setNextFocusRightId(R.id.play_next);
-        mNextBtn.setNextFocusLeftId(R.id.screen_display);
+        mScreenDisplay.setNextFocusRightId(R.id.play_pre);
+        mPreBtn.setNextFocusLeftId(R.id.screen_display);
+        mPreBtn.setNextFocusRightId(R.id.play_next);
+        mNextBtn.setNextFocusLeftId(R.id.play_pre);
     }
 
     private void showScaleDialog() {
@@ -1535,8 +1379,6 @@ public class VodController extends BaseController {
             mZimuBtn.setVisibility(GONE);
             mAudioTrackBtn.setVisibility(GONE);
             mVideoTrackBtn.setVisibility(GONE);
-            mDanmuSettingBtn.setVisibility(GONE);
-            mDanmuSearchUiBtn.setVisibility(GONE);
             mScreenDisplay.setVisibility(GONE);
             return;
         }
@@ -1552,8 +1394,6 @@ public class VodController extends BaseController {
         mScreenDisplay.setVisibility(VISIBLE);
         mCastBtn.setVisibility(Build.VERSION.SDK_INT < 30 ? GONE : VISIBLE);
         if (mPlayerConfig != null) updatePlayerCfgView();
-        updateDanmuBtn();
-        updateDanmuSearchUiBtn();
     }
 
     void setLandscapePortrait() {
@@ -1599,7 +1439,6 @@ public class VodController extends BaseController {
     void updatePlayerCfgView() {
         try {
             int playerType = mPlayerConfig.getInt("pl");
-            mPlayerBtn.setText(getPlayerShortName(playerType));
             mPlayerScaleBtn.setText(PlayerHelper.getScaleName(mPlayerConfig.getInt("sc")));
             mPlayerIJKBtn.setText(getCodecShortName(mPlayerConfig.getString("ijk")));
             mPlayerIJKBtn.setVisibility(playerType == 1 ? VISIBLE : GONE);
@@ -1616,10 +1455,6 @@ public class VodController extends BaseController {
         }
     }
 
-    private String getPlayerShortName(int playerType) {
-        String playerName = PlayerHelper.getPlayerName(playerType);
-        return playerName;
-    }
 
     private String getCodecShortName(String codecName) {
         if ("硬解码".equals(codecName)) {
@@ -1645,43 +1480,10 @@ public class VodController extends BaseController {
         mHandler.removeMessages(1004);
         mHandler.sendEmptyMessageDelayed(1004, 100);
     }
-
+    /** Compatibility no-op: the B01 build has no danmu UI or loader. */
     public void setHasDanmu(boolean hasDanmu) {
-        this.hasDanmu = hasDanmu;
-        updateDanmuBtn();
     }
 
-    public void updateDanmuBtn() {
-        if (mDanmuSettingBtn == null) return;
-        mDanmuSettingBtn.setVisibility(DanmuHelper.isOpen() ? VISIBLE : GONE);
-        updatePlayLabelVisibility();
-    }
-
-    public void updateDanmuSearchUiBtn() {
-        if (mDanmuSearchUiBtn == null) return;
-        boolean hasDanmuSearchUi = ApiConfig.get().hasDanmuSearchUi();
-        mDanmuSearchUiBtn.setVisibility(hasDanmuSearchUi ? VISIBLE : GONE);
-        updatePlayLabelVisibility();
-    }
-
-    private void updatePlayLabelVisibility() {
-        if (mPlayLabel == null || mPlayBtnGroup == null) return;
-        boolean isDanmuMenuVisible = false;
-        boolean isScreenDisplayNext = false;
-        for (int i = 0; i < mPlayBtnGroup.getChildCount(); i++) {
-            View child = mPlayBtnGroup.getChildAt(i);
-            if (child.getVisibility() != VISIBLE) continue;
-            if (child == mDanmuSettingBtn) {
-                isDanmuMenuVisible = true;
-                continue;
-            }
-            if (isDanmuMenuVisible) {
-                isScreenDisplayNext = child == mScreenDisplay;
-                break;
-            }
-        }
-        mPlayLabel.setVisibility(isDanmuMenuVisible && !isScreenDisplayNext ? GONE : VISIBLE);
-    }
 
     public interface VodControlListener {
         void playNext(boolean rmProgress);
@@ -1706,11 +1508,6 @@ public class VodController extends BaseController {
 
         void selectVideoTrack();
 
-        void showDanmuSetting();
-
-        boolean toggleDanmu();
-
-        void searchDanmuUi(boolean longClick);
 
         void startPlayUrl(String url, HashMap<String, String> headers);
 

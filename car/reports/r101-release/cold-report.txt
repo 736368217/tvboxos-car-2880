@@ -1,0 +1,12 @@
+OK cold_restored_detail
+cold_intent_full=true has_extra=true actual=true
+OK cold_restored_fullscreen
+OK cold_position_restored
+cold_position expected=5209 actual=5240
+OK cold_original_mode_retained
+OK cold_master_preference_retained
+OK cold_saved_gain_retained
+OK cold_restored_playback_advances
+OK screen_11-cold-restored
+OK cold_exit_home
+COLD_RESTORE_PASS

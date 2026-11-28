@@ -34,7 +34,7 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 主机测试和 B01 Release 构建是日常门禁。不要再运行 12 变体矩阵，也不要为上游未纳入的设备兼容问题扩大本项目范围。Lint 的现存非阻断配置仍需审阅实际结果，命令退出 0 不表示零告警。
 
 设备验收要求见 [MuMu 与真车规范](car/handover/MUMU-VERIFICATION-SPEC.md)。MuMu API 35 只是功能代理环境；真车 API 32 的安装、OEM 窗口/后台策略和主观听感，只有实际车机证据才能确认。
-播放栏可直接切换「增强音量 / 原始声音」；原声绕过 App 音频增强，切回恢复保存设置。用法、处理边界与版本验证入口见 [音量 A/B 说明](car/handover/R92-AUDIO-AB.md)。
+播放栏的增强音量提供「原始声音 / 车载均衡 / 高速压缩」，滤镜提供「原画 / 动漫暗光 / 动漫日间」。详见 [r101 播放与设置](car/handover/R101-PLAYBACK-SETTINGS.md)。
 
 ## 应用内更新
 
@@ -60,4 +60,6 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 
 2026-11-23：r95 / versionCode 67 已由 r97 取代，保留作版本档案（源码 `aea620d7`，CI 45194003592）。音频 v3 的参数与结论仍有效；现役音频已由 r98 升级为 v4 双向柔和动态，见 `car/handover/R98-AUDIO-V4.md`。
 
-2026-11-27：当前已发布 **3.1.0-car.7-r98 / versionCode 70**（合并 PR #1/#2 后的 main，合并提交 `d0011635`，APK SHA `11192da8…`）：音频 v4 侧链高通、句间保持、双向软控；详情页小窗进入时收起所有控制栏/顶部状态/返回箭头；全自动诊断日志仍走 `dl.736.de5.net/logs/tvboxos-car-2880/`。完整 MuMu 证据见 [r98 报告](car/reports/r98-release/result.json) 和 [r98 说明](car/handover/R98-AUDIO-V4.md)。设备已验证安装 SHA、显示基线、EXO 本地 MP4/远端 HLS 播放、音频动态、自动日志、设置页和 carclash 接管检测；小窗交互因测试订阅详情跨源搜索超时（candidates=0）未完成。
+2026-11-27：**3.1.0-car.7-r98 / versionCode 70** 历史档案（合并 PR #1/#2 后的 main，合并提交 `d0011635`，APK SHA `11192da8…`）：音频 v4 侧链高通、句间保持、双向软控；详情页小窗进入时收起所有控制栏/顶部状态/返回箭头；全自动诊断日志仍走 `dl.736.de5.net/logs/tvboxos-car-2880/`。完整 MuMu 证据见 [r98 报告](car/reports/r98-release/result.json) 和 [r98 说明](car/handover/R98-AUDIO-V4.md)。设备已验证安装 SHA、显示基线、EXO 本地 MP4/远端 HLS 播放、音频动态、自动日志、设置页和 carclash 接管检测；小窗交互因测试订阅详情跨源搜索超时（candidates=0）未完成。
+
+2026-11-28：**3.1.0-car.7-r101 / versionCode 73** 纳入 PR #3 音频 v5，简化播放栏与高级设置。MuMu 双集与冷启动通过 97 项断言。见 [r101 说明与验收](car/handover/R101-PLAYBACK-SETTINGS.md)。

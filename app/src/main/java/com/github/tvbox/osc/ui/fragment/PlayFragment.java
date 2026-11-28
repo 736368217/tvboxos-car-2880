@@ -44,7 +44,6 @@ import com.github.catvod.crawler.Spider;
 import com.google.gson.JsonObject;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
-import com.github.tvbox.osc.api.DanmakuApi;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.base.BaseLazyFragment;
 import com.github.tvbox.osc.bean.ParseBean;
@@ -61,14 +60,11 @@ import com.github.tvbox.osc.player.MusicPlaybackService;
 import com.github.tvbox.osc.player.TrackInfo;
 import com.github.tvbox.osc.player.TrackInfoBean;
 import com.github.tvbox.osc.player.controller.VodController;
-import com.github.tvbox.osc.player.danmu.DanmuLoadController;
 import com.github.tvbox.osc.server.ControlManager;
 import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter;
 import com.github.tvbox.osc.ui.activity.DetailActivity;
 import com.github.tvbox.osc.ui.dialog.CastDeviceDialog;
-import com.github.tvbox.osc.ui.dialog.DanmuSettingDialog;
 import com.github.tvbox.osc.ui.dialog.EpisodeDialog;
-import com.github.tvbox.osc.ui.dialog.SearchDanmuDialog;
 import com.github.tvbox.osc.ui.dialog.SearchSubtitleDialog;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
 import com.github.tvbox.osc.ui.dialog.SubtitleDialog;
@@ -128,7 +124,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import me.jessyan.autosize.AutoSize;
-import master.flame.danmaku.ui.widget.DanmakuView;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkTimedText;
 import xyz.doikki.videoplayer.player.AbstractPlayer;
@@ -165,8 +160,6 @@ public class PlayFragment extends BaseLazyFragment {
     private String playLyric;
     private String lyricCacheKey;
     private String playArtwork;
-    private DanmakuView mDanmuView;
-    private DanmuLoadController danmuLoadController;
     private final List<Cue> exoCues = new ArrayList<>();
     private boolean exoInternalSubtitle;
 
@@ -182,51 +175,13 @@ public class PlayFragment extends BaseLazyFragment {
         if (event.type == RefreshEvent.TYPE_SUBTITLE_SIZE_CHANGE) {
             mController.mSubtitleView.setTextSize((int) event.obj);
         }
-        if (event.type == RefreshEvent.TYPE_SET_DANMU_SETTINGS) {
-            setDanmuViewSettings(event.obj instanceof Boolean && (Boolean) event.obj);
-        } else if (event.type == RefreshEvent.TYPE_DANMU_REFRESH) {
-            checkDanmu(event.obj instanceof String ? (String) event.obj : "");
-        }
     }
 
     @Override
     protected void init() {
         initView();
-        initDanmuView();
         initViewModel();
         initData();
-    }
-
-    private void initDanmuView() {
-        mDanmuView = findViewById(R.id.danmaku);
-        danmuLoadController = new DanmuLoadController(mVideoView, mController, mDanmuView);
-    }
-
-    private void setDanmuViewSettings(boolean reload) {
-        if (danmuLoadController != null) danmuLoadController.applySettings(reload);
-    }
-
-    private void checkDanmu(String danmu) {
-        checkDanmu(danmu, null);
-    }
-
-    private void checkDanmu(String danmu, DanmuLoadController.LoadCallback callback) {
-        if (danmuLoadController != null) {
-            VodInfo.VodSeries series = mVodInfo == null ? null : getCurrentSeries(mVodInfo.playFlag, mVodInfo.playIndex);
-            danmuLoadController.check(danmu, mVodInfo == null ? "" : mVodInfo.name, series == null ? "" : series.name, callback);
-        }
-    }
-
-    private void startDanmuIfReady() {
-        if (danmuLoadController != null) danmuLoadController.startIfReady();
-    }
-
-    private void resetDanmuState() {
-        if (danmuLoadController != null) danmuLoadController.reset();
-    }
-
-    private void reloadDanmuForPlayback() {
-        if (danmuLoadController != null) danmuLoadController.reloadForPlayback();
     }
 
     public long getSavedProgress(String url) {
@@ -352,45 +307,11 @@ public class PlayFragment extends BaseLazyFragment {
                     }
                 }
                 if (!switchingPlayback) updateMusicSession();
-                startDanmuIfReady();
             }
         });
         mController.setListener(new VodController.VodControlListener() {
             @Override
-            public void showDanmuSetting() {
-                DanmuSettingDialog dialog = new DanmuSettingDialog(requireContext());
-                dialog.setDanmuSearchListener(new DanmuSettingDialog.DanmuSearchListener() {
-                    @Override
-                    public void openSearchDanmuDialog() {
-                        SearchDanmuDialog searchDanmuDialog = new SearchDanmuDialog(requireContext());
-                        searchDanmuDialog.setDanmuLoader(new SearchDanmuDialog.DanmuLoader() {
-                            @Override
-                            public void loadDanmu(String danmu) {
-                                if (!isAdded()) return;
-                                checkDanmu(danmu);
-                            }
-                        });
-                        VodInfo.VodSeries series = mVodInfo == null ? null : getCurrentSeries(mVodInfo.playFlag, mVodInfo.playIndex);
-                        searchDanmuDialog.setEpisode(series == null ? "" : series.name);
-                        searchDanmuDialog.setSearchWord(mVodInfo == null ? "" : mVodInfo.name);
-                        searchDanmuDialog.show();
-                    }
-                });
-                dialog.show();
-            }
 
-            @Override
-            public boolean toggleDanmu() {
-                return danmuLoadController != null && danmuLoadController.toggle();
-            }
-
-            @Override
-            public void searchDanmuUi(boolean longClick) {
-                VodInfo.VodSeries series = mVodInfo == null ? null : getCurrentSeries(mVodInfo.playFlag, mVodInfo.playIndex);
-                ApiConfig.get().searchDanmuUi(mVodInfo == null ? "" : mVodInfo.name, series == null ? "" : series.name, longClick);
-            }
-
-            @Override
             public void playNext(boolean rmProgress) {
                 String preProgressKey = progressKey;
                 PlayFragment.this.playNext(rmProgress);
@@ -430,7 +351,6 @@ public class PlayFragment extends BaseLazyFragment {
                 if(replay){
                     play(true);
                 }else {
-                    reloadDanmuForPlayback();
                     if(webPlayUrl!=null && !webPlayUrl.isEmpty()) {
                         stopParse();
                         initParseLoadFound();
@@ -470,7 +390,6 @@ public class PlayFragment extends BaseLazyFragment {
             public void prepared() {
                 initSubtitleView();
                 if (mVideoView != null) mVideoView.prepared();
-                startDanmuIfReady();
             }
             @Override
             public void startPlayUrl(String url, HashMap<String, String> headers) {
@@ -1270,8 +1189,6 @@ public class PlayFragment extends BaseLazyFragment {
                             handleResolvePlayUrlFailed(msg);
                             return;
                         }
-                        String danmaku = info.optString("danmaku", "").trim();
-                        final String danmuProgressKey = progressKey;
                         HashMap<String, String> headers = null;
                         webUserAgent = null;
                         webHeaderMap = null;
@@ -1287,16 +1204,6 @@ public class PlayFragment extends BaseLazyFragment {
                         } else {
                             mController.showParse(false);
                             playUrl(playUrl + url, headers);
-                        }
-                        if (TextUtils.isEmpty(danmaku)) {
-                            checkDanmu("");
-                            searchDanmu("");
-                        } else {
-                            checkDanmu(danmaku, () -> {
-                                if (TextUtils.equals(danmuProgressKey, progressKey)) {
-                                    searchDanmu("");
-                                }
-                            });
                         }
                     } catch (Throwable th) {
                         handleResolvePlayUrlFailed("获取播放信息错误");
@@ -1346,24 +1253,6 @@ public class PlayFragment extends BaseLazyFragment {
         }
     }
 
-    private void searchDanmu(String danmaku) {
-        if (!TextUtils.isEmpty(danmaku) || !DanmakuApi.canSearch() || mVodInfo == null) return;
-        VodInfo.VodSeries series = getCurrentSeries(mVodInfo.playFlag, mVodInfo.playIndex);
-        String key = progressKey;
-        DanmakuApi.search(mVodInfo.name, series == null ? "" : series.name, new DanmakuApi.SearchCallback() {
-            @Override
-            public void onFound(String url) {
-                if (!TextUtils.equals(key, progressKey)) return;
-                checkDanmu(url);
-            }
-
-            @Override
-            public void onNotFound() {
-                if (!TextUtils.equals(key, progressKey)) return;
-                checkDanmu("");
-            }
-        });
-    }
 
     boolean isStalePlayResult(JSONObject info) {
         if (mVodInfo == null || mVodInfo.seriesMap == null || TextUtils.isEmpty(progressKey)) return false;
@@ -1672,10 +1561,6 @@ public class PlayFragment extends BaseLazyFragment {
         ApiConfig.get().setCurrentPlaySourceKey("");
         cancelPlayTimeout();
         EventBus.getDefault().unregister(this);
-        if (danmuLoadController != null) {
-            danmuLoadController.destroy();
-            danmuLoadController = null;
-        }
         if (mVideoView != null) {
             mVideoView.release();
             mVideoView = null;
@@ -2088,7 +1973,6 @@ public class PlayFragment extends BaseLazyFragment {
         allowSwitchPlayer=true;
         hasAutoSwitchedPlayer=false;
         mController.stopOther();
-        resetDanmuState();
         clearLyricView();
         mVideoView.clearArtwork();
         if(mVideoView!=null) {
@@ -2369,7 +2253,6 @@ public class PlayFragment extends BaseLazyFragment {
             mVideoView.release();
         }
         mController.stopOther();
-        resetDanmuState();
         webPlayUrl = null;
         webHeaderMap = null;
         initParseLoadFound();
