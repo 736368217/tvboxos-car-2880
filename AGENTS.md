@@ -22,4 +22,4 @@
 
 ## 当前状态
 
-2026-11-28：当前源码版本为 **3.1.0-car.7-r101 / versionCode 73**，播放页、高级设置与 CarClash 状态口径见 `car/handover/R101-PLAYBACK-SETTINGS.md`。r99 的公开诊断日志契约继续适用，参见 `car/handover/R99-ONLINE-LOG-INDEX.md`。
+2026-11-28：当前已发布 **3.1.0-car.7-r101 / versionCode 73**，R2 和 GitHub 资产均已整包回读验签。播放页、高级设置与 CarClash 状态见 `car/handover/R101-PLAYBACK-SETTINGS.md`。r99 的公开诊断日志契约继续适用，参见 `car/handover/R99-ONLINE-LOG-INDEX.md`。

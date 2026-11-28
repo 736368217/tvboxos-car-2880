@@ -1,0 +1,31 @@
+{
+  "version": "3.1.0-car.7-r101",
+  "versionCode": 73,
+  "sourceCommit": "c1826ea4959699463628785876595c888f5a65ea",
+  "tagCommit": "c1826ea4959699463628785876595c888f5a65ea",
+  "verifiedAt": "2026-11-28T09:38:08.6617107Z",
+  "r2": {
+    "healthy": true,
+    "latestMatchesHistory": true,
+    "publishedAt": "2026-11-28T09:29:26Z",
+    "manifestUrl": "https://dl.736.de5.net/tvboxos-car-2880/latest.json",
+    "apkUrl": "https://dl.736.de5.net/tvboxos-car-2880/TVBox-Original-Feature-3.1.0-car.7-r101.apk",
+    "download": {
+      "bytes": 64820086,
+      "sha256": "4997522893e761f21f9394c85d2eac9a6cea2f6dc96ead03da7d350736ef495f",
+      "signerSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c"
+    }
+  },
+  "github": {
+    "releaseUrl": "https://github.com/736368217/tvboxos-car-2880/releases/tag/v3.1.0-car.7-r101",
+    "publishedAt": "2026-11-28T09:32:39Z",
+    "latest": true,
+    "assetDigest": "sha256:4997522893e761f21f9394c85d2eac9a6cea2f6dc96ead03da7d350736ef495f",
+    "download": {
+      "bytes": 64820086,
+      "sha256": "4997522893e761f21f9394c85d2eac9a6cea2f6dc96ead03da7d350736ef495f",
+      "signerSha256": "2feb63c511cd725795cadc8fa890f9cbc754fe59c0bbfe0787ac33f94f44fa9c"
+    }
+  },
+  "r99BaselineSha256": "9ad2f780485325734aa799bd4fcaf1f1d951e2fa45d57108d26428981db1b24a"
+}

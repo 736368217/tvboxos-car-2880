@@ -62,4 +62,4 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 
 2026-11-27：**3.1.0-car.7-r98 / versionCode 70** 历史档案（合并 PR #1/#2 后的 main，合并提交 `d0011635`，APK SHA `11192da8…`）：音频 v4 侧链高通、句间保持、双向软控；详情页小窗进入时收起所有控制栏/顶部状态/返回箭头；全自动诊断日志仍走 `dl.736.de5.net/logs/tvboxos-car-2880/`。完整 MuMu 证据见 [r98 报告](car/reports/r98-release/result.json) 和 [r98 说明](car/handover/R98-AUDIO-V4.md)。设备已验证安装 SHA、显示基线、EXO 本地 MP4/远端 HLS 播放、音频动态、自动日志、设置页和 carclash 接管检测；小窗交互因测试订阅详情跨源搜索超时（candidates=0）未完成。
 
-2026-11-28：**3.1.0-car.7-r101 / versionCode 73** 纳入 PR #3 音频 v5，简化播放栏与高级设置。MuMu 双集与冷启动通过 97 项断言。见 [r101 说明与验收](car/handover/R101-PLAYBACK-SETTINGS.md)。
+2026-11-28：已发布 **3.1.0-car.7-r101 / versionCode 73**，纳入 PR #3 音频 v5，简化播放栏与高级设置。MuMu 双集与冷启动通过 97 项断言。R2 主通道和 GitHub 备用资产的整包摘要与签名一致。见 [r101 说明与验收](car/handover/R101-PLAYBACK-SETTINGS.md)和[发布回读记录](car/reports/r101-release-verification.json)。
