@@ -125,3 +125,5 @@ output-metadata.json
 !/car/reports/r98-release/**/*.log
 !/car/reports/r98-release/**/*.txt
 !/car/reports/r98-release/**/*.json
+!/car/handover/ONLINE-LOG-READING-FOR-WEB-AI.md
+!/car/handover/R99-ONLINE-LOG-INDEX.md

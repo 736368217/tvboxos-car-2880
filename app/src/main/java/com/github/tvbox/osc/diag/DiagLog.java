@@ -8,6 +8,7 @@ import android.os.Build;
 import android.util.Log;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -32,13 +34,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.GZIPInputStream;
 
 /**
  * 车机诊断日志客户端 —— canonical v2（app-diagnostics，product=tvbox）。
  *
- * <p>协议：{@code PUT https://dl.736.de5.net/tvboxos-car-2880/logs/<device>-<batch>.json.gz}，
+ * 协议：{@code PUT https://dl.736.de5.net/logs/tvboxos-car-2880/<device>-<batch>.json.gz}，
  * {@code Content-Type: application/gzip} + {@code X-Upload-Token: <只写令牌>}。正文是 gzip 过的
- * JSON 信封（{@code rawLog} 放原文），落盘即可回读。旧的 {@code dl.z736.vip} 诊断接口已于
+ * JSON 信封（{@code rawLog} 放原文），落盘即可回读；每次成功后还会更新公开的、未压缩的
+ * {@code https://dl.736.de5.net/logs/tvboxos-car-2880/latest.json}，网页端 AI 直接 GET 即可读取
+ * 最新 {@code rawLog}，不需要令牌、不需要列目录、不需要解压。旧的 {@code dl.z736.vip} 诊断接口已于
  * 2026-11-12 停用，本客户端不再连它。</p>
  *
  * <p>平台侧约定的可靠性要求，逐条落实：</p>
@@ -67,12 +72,13 @@ public final class DiagLog {
 
     public static final String TAG = "DiagLog";
 
-    /** R2 发布通道复用同一域名：日志对象放在 <project>/logs/ 下，与 APK 共用只写令牌。 */
+    /** R2 发布通道复用同一域名：历史批次与公开索引都放在日志前缀下。 */
     private static final String R2_BASE = "https://dl.736.de5.net/";
     private static final String PRODUCT = "tvbox";
-    private static final String CLIENT_VERSION = "diag-r2-r96";
+    private static final String CLIENT_VERSION = "diag-public-r99";
     /** 只写令牌，构建期由 car/ci/upload-token.txt 注入；仓库与源码里没有明文。 */
     private static final String UPLOAD_TOKEN = com.github.tvbox.osc.BuildConfig.UPLOAD_TOKEN;
+    private static final String LATEST_OBJECT = "logs/tvboxos-car-2880/latest.json";
 
     private static final long PART_BYTES = 256L * 1024L;
     private static final int MAX_PARTS = 4;
@@ -358,12 +364,124 @@ public final class DiagLog {
     private static byte[] gzip(byte[] data) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (GZIPOutputStream gzip = new GZIPOutputStream(out)) {
+
             gzip.write(data);
         }
         return out.toByteArray();
     }
+    /** Publish a complete readable record, merge the date index, then update latest.json. */
+    private static boolean publishLatestIndex(byte[] body, String objectKey) {
+        try {
+            JSONObject latest = new JSONObject(readAll(new GZIPInputStream(new ByteArrayInputStream(body))));
+            byte[] raw = latest.optString("rawLog", "").getBytes(UTF8);
+            String batch = latest.optString("batch", "");
+            String device = latest.optString("device", deviceId);
+            String date = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+            String recordKey = "logs/tvboxos-car-2880/records/" + device + "-" + batch + ".json";
+            String dateKey = "logs/tvboxos-car-2880/dates/" + date + ".json";
+
+            latest.put("schema", "tvbox-online-log-v1");
+            latest.put("publishedAt", System.currentTimeMillis());
+            latest.put("date", date);
+            latest.put("sourceJson", R2_BASE + recordKey);
+            latest.put("sourceGzip", R2_BASE + objectKey);
+            latest.put("sourceGzipBytes", body.length);
+            latest.put("sourceGzipSha256Prefix", sha256Hex(body));
+            latest.put("rawLogBytes", raw.length);
+            latest.put("dateIndex", R2_BASE + dateKey);
+            latest.put("latestUrl", R2_BASE + LATEST_OBJECT);
+
+            byte[] record = latest.toString().getBytes(UTF8);
+            boolean recordOk = putPublicObject(recordKey, record, "application/json; charset=utf-8");
+            boolean dateOk = mergeDateIndex(dateKey, latest, recordKey, objectKey, record.length);
+            boolean latestOk = putPublicObject(LATEST_OBJECT, record, "application/json; charset=utf-8");
+            return recordOk && dateOk && latestOk;
+        } catch (Throwable error) {
+            Log.w(TAG, "public log index exception=" + error.getClass().getSimpleName());
+            return false;
+        }
+    }
+
 
     /** 从 {@code from} 位置往后数 {@code count} 字节，算出新的 {@code part:offset} 游标。 */
+    private static boolean putPublicObject(String objectKey, byte[] data, String contentType) {
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(R2_BASE + objectKey);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setConnectTimeout(10_000);
+            connection.setReadTimeout(20_000);
+            connection.setDoOutput(true);
+            connection.setFixedLengthStreamingMode(data.length);
+            connection.setRequestProperty("Content-Type", contentType);
+            connection.setRequestProperty("Cache-Control", "no-cache");
+            connection.setRequestProperty("X-Upload-Token", UPLOAD_TOKEN);
+            try (OutputStream out = connection.getOutputStream()) {
+                out.write(data);
+            }
+            return connection.getResponseCode() == 200;
+        } catch (Throwable error) {
+            Log.w(TAG, "public object exception=" + error.getClass().getSimpleName());
+            return false;
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+    }
+    private static boolean mergeDateIndex(String dateKey, JSONObject latest,
+                                           String recordKey, String gzipKey, int recordBytes)
+            throws org.json.JSONException {
+        JSONArray records = new JSONArray();
+        HttpURLConnection connection = null;
+        try {
+            URL readUrl = new URL(R2_BASE + dateKey);
+            connection = (HttpURLConnection) readUrl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(10_000);
+            connection.setReadTimeout(20_000);
+            connection.setRequestProperty("Cache-Control", "no-cache");
+            int code = connection.getResponseCode();
+            if (code == 200) {
+                JSONObject old = new JSONObject(readAll(connection.getInputStream()));
+                records = old.optJSONArray("records");
+                if (records == null) records = new JSONArray();
+            } else if (code != 404) {
+                return false;
+            }
+        } catch (Throwable error) {
+            // A missing first index is normal; a malformed public index starts a clean index.
+            records = new JSONArray();
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+
+        String batch = latest.optString("batch", "");
+        for (int i = records.length() - 1; i >= 0; i--) {
+            if (batch.equals(records.optJSONObject(i).optString("batch", ""))) {
+                records.remove(i);
+            }
+        }
+        JSONObject item = new JSONObject();
+        item.put("batch", batch);
+        item.put("device", latest.optString("device", ""));
+        item.put("appVersion", latest.optString("appVersion", ""));
+        item.put("publishedAt", latest.optLong("publishedAt", System.currentTimeMillis()));
+        item.put("rawLogBytes", latest.optInt("rawLogBytes", 0));
+        item.put("recordBytes", recordBytes);
+        item.put("json", R2_BASE + recordKey);
+        item.put("gzip", R2_BASE + gzipKey);
+        records.put(item);
+
+        JSONObject index = new JSONObject();
+        index.put("schema", "tvbox-online-date-v1");
+        index.put("date", latest.optString("date", ""));
+        index.put("updatedAt", System.currentTimeMillis());
+        index.put("count", records.length());
+        index.put("records", records);
+        return putPublicObject(dateKey, index.toString().getBytes(UTF8),
+                "application/json; charset=utf-8");
+    }
+
     private static String advanceCursor(String from, int count) {
         try {
             int basePart = Integer.parseInt(from.substring(0, from.indexOf(':')));
@@ -583,6 +701,10 @@ public final class DiagLog {
             if (code != 200) {
                 Log.w(TAG, "upload rejected code=" + code + " batch kept=" + batch);
                 return;  // pending 保留，下次原样重发
+            }
+            // 批次已经落盘成功后，更新无令牌公开索引；失败只影响索引，不回滚已上传批次。
+            if (!publishLatestIndex(body, objectKey)) {
+                Log.w(TAG, "latest index update failed key=" + objectKey);
             }
             // R2 不回业务字段：200 即落盘，推进游标并清 pending。
             cursor = nextCursor;

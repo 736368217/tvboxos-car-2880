@@ -51,6 +51,7 @@ Linux 使用 `./gradlew`。依赖已缓存时可加 `--offline`。主机脚本�
 - 当前项目定位、构建和更新行为以本 README 为入口；Agent 边界见 [AGENTS.md](AGENTS.md)。
 - [签名与 CI](car/ci/README.md)：共享测试证书、B01 单包校验和工作流。
 - [B01 实车音频链路与车机音效档案](car/handover/B01-AUDIO-CHAIN-AND-EQ.md)：ADSP 处理顺序、0–32 格音量曲线、扫频峰谷，以及 `音效aaaa` 的分声道增益/10 段 EQ 与微调速查表；车机调声学，App 只调动态。
+- [网页端 AI 在线日志接口](car/handover/ONLINE-LOG-READING-FOR-WEB-AI.md) 与 [r99 公开完整日志索引](car/handover/R99-ONLINE-LOG-INDEX.md)：`latest.json` 看最新，`dates/YYYY-MM-DD.json` 列出当天全部批次，清单里的 `json` 可直接查看完整 `rawLog`，`gzip` 可下载原始压缩包；所有查看/下载入口公开 GET，不需要令牌、`_ls` 或解压。
 - [上游跟进](car/handover/UPSTREAM-SYNC.md)：只选择对 B01 有用的改动，不全量继承设备矩阵。
 - [原始交付档案](DELIVERY-ORIGINAL-APP.md)及旧版本交接、报告只证明其对应版本，不作为当前构建/发布手册；现役行为按本 README 指向的说明和证据核对。
 - `car/reports/main-72e38f61-full-test.html` 是 r90 / `72e38f61` 的历史测试报告；其中 12 变体和低 API 风险是收敛前的结果，不是当前验收要求。

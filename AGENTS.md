@@ -22,4 +22,4 @@
 
 ## 当前状态
 
-2026-11-27：当前已发布 **3.1.0-car.7-r98 / versionCode 70**（合并 PR #1/#2 后的 main，合并提交 `d0011635`，APK SHA `11192da8…`）：音频 v4 侧链高通/句间保持/双向软控；详情页小窗进入时收起所有控制栏、顶部状态与返回箭头；诊断日志全自动上传到 `dl.736.de5.net/logs/tvboxos-car-2880/`。设备已验证 base.apk SHA、B01 显示基线、EXO 本地 MP4/远端 HLS、CarAudioGain 动态、设置页 EXO 固定、自动日志和 carclash EdgeBackService 接管检测。小窗交互因测试订阅详情跨源搜索 candidates=0 未完成。证据见 `car/reports/r98-release/result.json` 与 `car/handover/R98-AUDIO-V4.md`。
+2026-11-28：当前已发布 **3.1.0-car.7-r99 / versionCode 71**（日志接口公开索引更新，源码待本轮发布）：保留 `latest.json`，新增按日期 `dates/YYYY-MM-DD.json`，每批提供公开完整 `records/*.json` 和原始 `.json.gz` 下载。r99 在设备上验证 r98 以来的自动上传链路，日期索引已回填 207 个历史批次。完整接口规则见 `car/handover/R99-ONLINE-LOG-INDEX.md`。

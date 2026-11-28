@@ -35,8 +35,29 @@ JDK/SDK/Gradle 缓存位置从 `JAVA_HOME`、`ANDROID_HOME`、`GRADLE_USER_HOME`
 
 ## 诊断日志
 
-车机日志由 App 自动上传，不需要司机操作：启动 5 s 首传、每 60 s 一次、切后台立即补传，对象落在 `https://dl.736.de5.net/logs/tvboxos-car-2880/<device>-<batch>.json.gz`（gzip 的 JSON，`rawLog` 是正文）。上传令牌由构建期从 `car/ci/upload-token.txt`（已 gitignore）注入，仓库里没有明文。
+车机日志由 App 自动上传，不需要司机操作：启动 5 s 首传、每 60 s 一次、切后台立即补传。网页端 AI 和其他人可直接使用以下公开入口：
 
-取回：`curl -H "X-Upload-Token: <令牌>" https://dl.736.de5.net/_ls` 列出对象后直接 GET，再 `gunzip` 即得到可读日志。设置页的「诊断日志上传」按钮只是额外手段。
+| 目的 | URL |
+| :--- | :--- |
+| 最新批次 | `https://dl.736.de5.net/logs/tvboxos-car-2880/latest.json` |
+| 某日批次清单 | `https://dl.736.de5.net/logs/tvboxos-car-2880/dates/YYYY-MM-DD.json` |
+| 单批可读 JSON | 日期清单的 `json` 字段 |
+| 单批压缩下载 | 日期清单的 `gzip` 字段 |
+
+公开 JSON 完整包含 `rawLog`；公开 `.json.gz` 是同一批次的原始压缩包。读取这些公开对象不需要令牌、`_ls` 或解压。上传令牌只用于 App 写入对象，构建期从 `car/ci/upload-token.txt` 注入，不能放进网页、截图、日志或提交。完整接口说明见 [ONLINE-LOG-READING-FOR-WEB-AI.md](../handover/ONLINE-LOG-READING-FOR-WEB-AI.md)。
+
+人工只读历史目录仍可用上传令牌调用 `_ls`，但网页端 AI 不应依赖它。
+
+R2 是主分发通道，入口为 `tools/publish_r2.ps1`。按项目既定授权，更新验收通过后默认提交、推送并完成 R2/GitHub 同包发布与摘要回读；不再逐次等待指令。CI artifact 上传本身不代表 R2 或车机已更新。
+
+只读批次历史才使用上传令牌调用 `_ls`。令牌由构建期从 `car/ci/upload-token.txt`（已 gitignore）注入，不能放入网页请求、截图、日志或提交。完整网页端 AI 读取规则见 [ONLINE-LOG-READING-FOR-WEB-AI.md](../handover/ONLINE-LOG-READING-FOR-WEB-AI.md)。
+
+取回最新日志的人工命令：
+
+```powershell
+Invoke-RestMethod -Uri 'https://dl.736.de5.net/logs/tvboxos-car-2880/latest.json' -Headers @{ 'Cache-Control' = 'no-cache' }
+```
+
+
 
 R2 是主分发通道，入口为 `tools/publish_r2.ps1`。按项目既定授权，更新验收通过后默认提交、推送并完成 R2/GitHub 同包发布与摘要回读；不再逐次等待指令。CI artifact 上传本身不代表 R2 或车机已更新。
