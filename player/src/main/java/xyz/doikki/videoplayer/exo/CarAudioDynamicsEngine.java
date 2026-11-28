@@ -3,48 +3,58 @@ package xyz.doikki.videoplayer.exo;
 import java.util.Arrays;
 
 /**
- * Per-sink, channel-linked gentle two-sided car dynamics processor and smooth per-sample peak
+ * Per-sink, channel-linked two-stage car audio dynamics processor and smooth per-sample peak
  * limiter.
  *
- * <p>v4 on-car driving calibration (r98, based on real B01 driving recordings + r97 R2 telemetry
- * with head-unit EQ {@code 音效aaaa}):
+ * <p>v5 source-adaptive loudness leveling + gentle car DRC (r100, calibrated across three full
+ * real-car anime episodes with an 18.7 dB spread against streaming music: {@code 乱马} -32.2 dBFS,
+ * {@code 穹顶} -28.4 dBFS, {@code 暗部少女的共栖} -24.4 dBFS vs. pop music -13.5 dBFS):
  * <ol>
- *   <li>250 Hz first-order sidechain high-pass filter (detection only, audio path untouched) keeps
- *       low-frequency wind/BGM rumble from under-estimating vocal quietness.</li>
- *   <li>1500 ms noise-gate hold prevents short dialogue pauses from snapping gain back to unity
- *       (eliminating the v3 "quiet start of next sentence" dropout), while sustained silence or
- *       noise floor smoothly releases back to unity.</li>
- *   <li>Faster musical envelope (250/800 ms balanced, 200/600 ms highway) tracks dialogue entries
- *       without pumping.</li>
- *   <li>Gentle two-sided curve: stronger upward lift for whisper dialogue above highway road noise
- *       (+10.5 / +13.5 dB cap) paired with soft downward control (-3.5 / -5.0 dB cap) to tame
- *       sudden screams and rock OPs without flattening natural crest factor.</li>
- *   <li>Ceiling stays at the measured lossless -1.5 dBFS, guarded per sample with the 80 ms
- *       limiter.</li>
+ *   <li><b>250 Hz first-order sidechain high-pass</b> (detection only, audio path untouched) keeps
+ *       low-frequency rumble/BGM from misleading vocal loudness estimation.</li>
+ *   <li><b>Stage 1 — Slow source-adaptive program leveler</b>: tracks long-term active loudness
+ *       above -46 dBFS (800 ms bootstrap for the first 3 s of a new video, then 6000 ms slow
+ *       tracking) and applies automatic makeup (+16.0 / +17.5 dB boost cap, -6.0 dB cut cap) so
+ *       quiet anime masters, cinematic dramas, and loud music all converge within ~1.6 dB at
+ *       {@code userGain=1.0} without touching the car volume knob.</li>
+ *   <li><b>Stage 2 — Relative gentle two-sided DRC</b>: operates around the normalized target
+ *       baseline with musical envelopes (200/750 ms balanced, 160/600 ms highway) to lift whispers
+ *       (+6.0 / +7.0 dB) and softly tame sudden screams/OPs (-5.0 / -6.0 dB) while preserving
+ *       12-14 dB natural crest factor.</li>
+ *   <li><b>1500 ms noise-gate hold</b> prevents short dialogue pauses from dropping out, while
+ *       sustained silence or noise floor smoothly releases back to unity (600 ms).</li>
+ *   <li><b>Lossless -1.5 dBFS ceiling</b> guarded per sample with the 80 ms peak limiter.</li>
  * </ol>
  */
 public final class CarAudioDynamicsEngine {
     public enum Mode {
-        ORIGINAL(-1, "原始声音", -16.0f, 0.0f, 0.0f, 0.0f, 0.0f, 250f, 800f),
-        OFF(0, "关闭", -16.0f, 0.0f, 0.0f, 0.0f, 0.0f, 250f, 800f),
-        CAR_BALANCED(1, "车载均衡", -16.0f, 0.60f, 10.5f, 0.45f, 3.5f, 250f, 800f),
-        CAR_HIGHWAY(2, "高速压缩", -14.0f, 0.68f, 13.5f, 0.55f, 5.0f, 200f, 600f);
+        ORIGINAL(-1, "原始声音", -18.5f, 0f, 0f, 0f, 0f, 0f, 0f, 200f, 750f, 0f),
+        OFF(0, "关闭", -18.5f, 0f, 0f, 0f, 0f, 0f, 0f, 200f, 750f, 0f),
+        CAR_BALANCED(1, "车载均衡", -18.5f, 16.0f, 6.0f, 0.50f, 6.0f, 0.50f, 5.0f, 200f, 750f, 19.0f),
+        CAR_HIGHWAY(2, "高速压缩", -16.5f, 17.5f, 6.0f, 0.58f, 7.0f, 0.58f, 6.0f, 160f, 600f, 21.0f);
 
         public final int id;
         public final String label;
-        final float thresholdDb, upSlope, maxBoostDb, downSlope, maxCutDb, attackMs, releaseMs;
+        final float targetProgramDb, maxProgramBoostDb, maxProgramCutDb;
+        final float upSlope, maxLocalBoostDb, downSlope, maxLocalCutDb;
+        final float attackMs, releaseMs, maxTotalBoostDb;
 
-        Mode(int id, String label, float thresholdDb, float upSlope, float maxBoostDb,
-                float downSlope, float maxCutDb, float attackMs, float releaseMs) {
+        Mode(int id, String label,
+                float targetProgramDb, float maxProgramBoostDb, float maxProgramCutDb,
+                float upSlope, float maxLocalBoostDb, float downSlope, float maxLocalCutDb,
+                float attackMs, float releaseMs, float maxTotalBoostDb) {
             this.id = id;
             this.label = label;
-            this.thresholdDb = thresholdDb;
+            this.targetProgramDb = targetProgramDb;
+            this.maxProgramBoostDb = maxProgramBoostDb;
+            this.maxProgramCutDb = maxProgramCutDb;
             this.upSlope = upSlope;
-            this.maxBoostDb = maxBoostDb;
+            this.maxLocalBoostDb = maxLocalBoostDb;
             this.downSlope = downSlope;
-            this.maxCutDb = maxCutDb;
+            this.maxLocalCutDb = maxLocalCutDb;
             this.attackMs = attackMs;
             this.releaseMs = releaseMs;
+            this.maxTotalBoostDb = maxTotalBoostDb;
         }
 
         /** The saved DRC preset is independent of the master Original/Enhanced toggle. */
@@ -68,12 +78,16 @@ public final class CarAudioDynamicsEngine {
     /** Measured on the B01: -1.5 dBFS with 0.2-0.4% THD, i.e. the lossless ceiling. */
     public static final float SAMPLE_PEAK_CEILING = 0.841395f;
     private static final float GATE_DB = -52f;
+    private static final float PROGRAM_GATE_DB = -46f;
+    private static final float PROGRAM_BOOTSTRAP_MS = 3000f;
+    private static final float PROGRAM_FAST_MS = 800f;
+    private static final float PROGRAM_SLOW_MS = 6000f;
     private static final float GATE_HOLD_MS = 1500f;
     private static final float GATE_RELEASE_MS = 600f;
     private static final float SIDECHAIN_HPF_HZ = 250f;
     private static final float LIMITER_RELEASE_SEC = 0.080f;
 
-    private float envDb, lastGain, limiterGain, lastGainDb, gateHoldRemainingMs;
+    private float envDb, programDb, programActiveMs, lastGain, limiterGain, lastGainDb, gateHoldRemainingMs;
     private boolean gateOpen;
     private float[] scPrevX = new float[0];
     private float[] scPrevY = new float[0];
@@ -81,7 +95,9 @@ public final class CarAudioDynamicsEngine {
     CarAudioDynamicsEngine() { reset(); }
 
     void reset() {
-        envDb = -16f;
+        envDb = -18.5f;
+        programDb = -18.5f;
+        programActiveMs = 0f;
         lastGain = 1f;
         limiterGain = 1f;
         lastGainDb = 0f;
@@ -148,17 +164,34 @@ public final class CarAudioDynamicsEngine {
         float gainDb;
         if (rmsDb > GATE_DB) {
             if (!gateOpen) {
-                envDb = mode.thresholdDb;
+                envDb = programActiveMs == 0f ? rmsDb : programDb;
                 gateOpen = true;
             }
             gateHoldRemainingMs = GATE_HOLD_MS;
-            envDb = follow(envDb, rmsDb, ms, rmsDb > envDb ? mode.attackMs : mode.releaseMs);
-            float deltaDb = mode.thresholdDb - envDb;
-            if (deltaDb >= 0f) {
-                gainDb = Math.min(mode.maxBoostDb, deltaDb * mode.upSlope);
-            } else {
-                gainDb = Math.max(-mode.maxCutDb, deltaDb * mode.downSlope);
+
+            // Stage 1: Slow source-adaptive program loudness tracker (active speech/music only).
+            if (rmsDb > PROGRAM_GATE_DB) {
+                if (programActiveMs == 0f) {
+                    programDb = rmsDb;
+                } else {
+                    float progTc = programActiveMs < PROGRAM_BOOTSTRAP_MS ? PROGRAM_FAST_MS : PROGRAM_SLOW_MS;
+                    programDb = follow(programDb, rmsDb, ms, progTc);
+                }
+                programActiveMs += ms;
             }
+            float programMakeupDb = Math.max(-mode.maxProgramCutDb,
+                    Math.min(mode.maxProgramBoostDb, mode.targetProgramDb - programDb));
+
+            // Stage 2: Musical local two-sided dynamics relative to the normalized baseline.
+            envDb = follow(envDb, rmsDb, ms, rmsDb > envDb ? mode.attackMs : mode.releaseMs);
+            float normEnvDb = envDb + programMakeupDb;
+            float deltaDb = mode.targetProgramDb - normEnvDb;
+            float localDb = deltaDb >= 0f
+                    ? Math.min(mode.maxLocalBoostDb, deltaDb * mode.upSlope)
+                    : Math.max(-mode.maxLocalCutDb, deltaDb * mode.downSlope);
+
+            float minTotalDb = -(mode.maxProgramCutDb + mode.maxLocalCutDb);
+            gainDb = Math.max(minTotalDb, Math.min(mode.maxTotalBoostDb, programMakeupDb + localDb));
             lastGainDb = gainDb;
         } else if (gateOpen && gateHoldRemainingMs > 0f) {
             // Short dialogue pause: hold the current gain so the next line does not drop out.
@@ -170,7 +203,7 @@ public final class CarAudioDynamicsEngine {
             if (Math.abs(lastGainDb) < 0.05f) {
                 lastGainDb = 0f;
                 gateOpen = false;
-                envDb = mode.thresholdDb;
+                envDb = programDb;
             }
             gainDb = lastGainDb;
         } else {
